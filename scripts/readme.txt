@@ -1,0 +1,1 @@
+Scripts for manual configuration instead of chef
