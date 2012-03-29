@@ -1,11 +1,19 @@
-EC2Dream - Build and Manage EC2 Servers Version 3.1 -  March 2012 
+EC2Dream - Build and Manage EC2 Servers Version 3.2 -  April 2012 
 -----------------------------------------------------------------
 
-EC2Dream is a Graphical tool for system administration of Amazon AWS and Eucalyptus servers. 
+EC2Dream is a Visual tool for system administration of Amazon AWS, Eucalyptus, OpenStack Clouds and local servers. 
 
 This version runs on Windows, Linux and Mac OSX clients. It is written in Ruby using the FXRuby graphics library. 
 
-**Support for Chef**
+Support for OpenStack
+   Partial Support for OpenStack. simulating Security Groups until OpenStack 2.0 API is available. 
+   Servers started in the TryStack console are accessible and the Chef support will would work. 
+
+Support for LOcal Servers
+   Servers running in local virtualized environments like VMWare Player are supported and the Chef 
+   integration with work. Ideal for testing chef cookbooks. 
+
+Support for Chef
    The first tool offering one click testing of chef cookbooks via chef solo 
    Support for Hosted Chef. Can pass chef runlist in userdata at startup
  

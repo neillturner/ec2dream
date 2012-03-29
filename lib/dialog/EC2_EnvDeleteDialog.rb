@@ -47,7 +47,12 @@ class EC2_EnvDeleteDialog < FXDialogBox
      if answer == MBOX_CLICKED_YES
         d = @ec2_main.settings.get_system('REPOSITORY_LOCATION')+"/"+@delete_env
         puts "deleting "+d
-        FileUtils.rm_rf d
+        begin 
+           FileUtils.rm_r d
+        rescue 
+           error_message("Delete Environment Failed","Delete Environment Failed. Quit EC2Dream and try again")
+           return
+        end         
         if File.exists?(d)
            error_message("Delete Environment Failed","Delete Environment Failed. Quit EC2Dream and try again")
         end   

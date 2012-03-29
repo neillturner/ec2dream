@@ -77,21 +77,30 @@ class EC2_EBSCreateDialog < FXDialogBox
     create = FXButton.new(frame1, "   &Create   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     FXLabel.new(frame1, "" )
     create.connect(SEL_COMMAND) do |sender, sel, data|
+       @created = false
+       size_error = false
        if size.text == nil or size.text == ""
          error_message("Error","Size not specified")
        else
-         ebs_size = Integer(size.text) 
-         if ebs_capacity == "TiB"
-           ebs_size = ebs_size * 1000
+         begin
+            ebs_size = Integer(size.text)
+         rescue 
+             error_message("Error","Size invalid")
+             size_error = true 
          end
-         sa = (ebs_snap).split("/") 
-         if sa.size>1
-	    ebs_snap = sa[1].rstrip
-  	 end
-         create_ebs(ebs_snap, ebs_size, ebs_zone, resource_tags)
-         if @created == true
-           self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
-         end
+         if !size_error
+            if ebs_capacity == "TiB"
+              ebs_size = ebs_size * 1000
+            end
+            sa = (ebs_snap).split("/") 
+            if sa.size>1
+	       ebs_snap = sa[1].rstrip
+  	    end
+            create_ebs(ebs_snap, ebs_size, ebs_zone, resource_tags)
+            if @created == true
+              self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+            end
+         end  
        end  
     end
   end 
@@ -105,15 +114,15 @@ class EC2_EBSCreateDialog < FXDialogBox
        vol = r[:aws_id] 
       rescue
         error_message("Create Volume Failed",$!.to_s)
-        return
       end
-      begin 
-       if tags != nil and tags != ""
-          tags.assign(vol)
-       end   
-      rescue
-        error_message("Create Tags Failed",$!.to_s)
-        return
+      if @created 
+         begin 
+           if tags != nil and tags != ""
+              tags.assign(vol)
+           end   
+         rescue
+           error_message("Create Tags Failed",$!.to_s)
+         end
       end
      end
   end 

@@ -30,14 +30,13 @@ class EC2_EnvCreateDialog < FXDialogBox
     @ec2 = nil
     @env = ""
     @created = false
-    @ec2_platform = "Amazon"
+    @ec2_platform = "amazon"
     super(owner, "Create Environment", :opts => DECOR_ALL, :width => 600, :height => 250)
 
     mainFrame = FXVerticalFrame.new(self,LAYOUT_SIDE_TOP|LAYOUT_FILL_X|LAYOUT_FILL_Y|PACK_UNIFORM_WIDTH)
 
     topFrame = FXVerticalFrame.new(mainFrame,LAYOUT_FILL_X|LAYOUT_FILL_Y|PACK_UNIFORM_WIDTH)
 
-    # Switcher
     @tabbook = FXTabBook.new(topFrame,:opts => LAYOUT_FILL_X|LAYOUT_FILL_Y|PACK_UNIFORM_WIDTH)
 
     @amazontab = FXTabItem.new(@tabbook, "&Amazon EC2", nil)
@@ -93,15 +92,40 @@ class EC2_EnvCreateDialog < FXDialogBox
         end
 
     }
+    @openstacktab = FXTabItem.new(@tabbook, "&OpenStack", nil)
+    @openstackframe = FXHorizontalFrame.new(@tabbook )
+
+    frame3 = FXMatrix.new(@openstackframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
+
+    openstack_env = textBox("Environment Name",frame3)
+    @openstack_access_key = textBox("OpenStack User Name",frame3)
+    
+    FXLabel.new(frame3, "OpenStack Password" )
+    @openstack_secret_access_key = FXTextField.new(frame3, 40, nil, 0, :opts => TEXTFIELD_PASSWD|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+    FXLabel.new(frame3, "" )
+    
+    FXLabel.new(frame3, "OpenStack URL (Default Trystack)" )
+    @openstack_url = FXTextField.new(frame3, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+    @openstack_url.text = "https://nova-api.trystack.org:5443"
+
+ 
     
     amazon_env.connect(SEL_CHANGED) {
       euca_env.text = amazon_env.text
+      openstack_env.text = amazon_env.text
       @new_env = amazon_env.text
     }
     
     euca_env.connect(SEL_CHANGED) {
       amazon_env.text = euca_env.text
+      openstack_env.text = euca_env.text
       @new_env = euca_env.text
+    }
+    
+    openstack_env.connect(SEL_CHANGED) {
+      amazon_env.text = openstack_env.text
+      euca_env.text = openstack_env.text
+      @new_env = openstack_env.text
     }
 
     bottomFrame = FXVerticalFrame.new(mainFrame,LAYOUT_SIDE_BOTTOM|LAYOUT_FILL_X|LAYOUT_FILL_Y)
@@ -155,9 +179,14 @@ class EC2_EnvCreateDialog < FXDialogBox
             @ec2_url.text = $1
           end
         end
-	  @ec2_platform = "Eucalyptus"
+	  @ec2_platform = "eucalyptus"
         eucarc.close
-    end       
+    end 
+    if @openstack_access_key.text != ""
+       @ec2_platform = "openstack"
+       Dir.mkdir("#{d}/ops_secgrp")
+       File.open("#{d}/ops_secgrp/default.properties", 'w') {|f| f.write("default") }
+    end
       
     Dir.mkdir(d+"/launch")
     save_env
@@ -182,15 +211,27 @@ class EC2_EnvCreateDialog < FXDialogBox
            settings.save_system
            settings.load
 	   settings.put("EC2_PLATFORM",@ec2_platform)
-           if @amazon_access_key.text != nil 
-              settings.put("AMAZON_ACCESS_KEY_ID",@amazon_access_key.text)
-           end
-           if @amazon_secret_access_key.text != nil 
-              settings.put("AMAZON_SECRET_ACCESS_KEY",@amazon_secret_access_key.text)
-           end
-           if @ec2_url.text != nil 
-  	    settings.put("EC2_URL",@ec2_url.text)
-  	   end
+	   if @ec2_platform == "openstack"
+              if @openstack_access_key.text != nil 
+                 settings.put("AMAZON_ACCESS_KEY_ID",@openstack_access_key.text)
+              end
+              if @openstack_secret_access_key.text != nil 
+                 settings.put("AMAZON_SECRET_ACCESS_KEY",@openstack_secret_access_key.text)
+              end
+              if @openstack_url.text != nil 
+  	       settings.put("EC2_URL",@openstack_url.text)
+  	      end	   
+	   else
+              if @amazon_access_key.text != nil 
+                 settings.put("AMAZON_ACCESS_KEY_ID",@amazon_access_key.text)
+              end
+              if @amazon_secret_access_key.text != nil 
+                 settings.put("AMAZON_SECRET_ACCESS_KEY",@amazon_secret_access_key.text)
+              end
+              if @ec2_url.text != nil 
+  	       settings.put("EC2_URL",@ec2_url.text)
+  	      end
+  	   end   
   	   settings.put('CLOUD_ADMIN_URL',"http://aws.amazon.com/ec2/")
   	   settings.put('CHEF_REPOSITORY',"#{ENV['EC2DREAM_HOME']}/chef/chef-repo")
            settings.save

@@ -22,23 +22,20 @@
 
 Gem::Specification.new do |spec|
   spec.name = 'ec2dream'
-  spec.rubyforge_project = 'ec2dream'
-  spec.version = '3.1.0'
+  spec.version = '3.2.0'
   spec.authors = ['Neill Turner']
   spec.email = 'neillwturner@gmail.com'
   spec.executables = ["ec2dream"]
   spec.homepage = 'http://ec2dream.blogspot.com'
-  spec.summary = 'EC2Dream is an graphic system admin tool to build and manage cloud servers.'
-  spec.has_rdoc = true
-  spec.rdoc_options = ['--main', 'README.txt', '--title', '']
-  spec.extra_rdoc_files = ['README.txt']
+  spec.summary = 'Build and Manage Cloud Servers with a Graphical User interface.'
   spec.require_path = 'lib'
   spec.add_dependency('fxruby')
   spec.add_dependency('right_aws_ec2dream')
   spec.add_dependency('tzinfo')
   spec.add_dependency('rubyzip')
   spec.add_dependency('gchartrb')
-  spec.add_dependency('pocketknife_ec2dream')
+  spec.add_dependency('pocketknife_ec2dream', '>= 0.1.5')
+  spec.add_dependency('fog', '>= 1.1.2')
 
   spec.description = <<-EOF
 == DESCRIPTION:
@@ -55,6 +52,7 @@ EOF
     candidates = candidates + Dir.glob("{chef}/**/*")
     candidates = candidates +  Dir.glob("{launchrdp}/*")
     candidates = candidates +  Dir.glob("{putty}/*")
+    candidates = candidates +  Dir.glob("{stacks}/*")
     candidates = candidates +  Dir.glob("{tar}/*")
     candidates = candidates +  Dir.glob("{WinSCP}/*")
   spec.files = candidates.sort

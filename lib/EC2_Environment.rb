@@ -4,6 +4,7 @@ require 'fox16'
 require 'right_aws'
 require 'net/http'
 require 'resolv'
+require 'fog'
 require 'EC2_Settings'
 require 'dialog/EC2_EnvDialog'
 require 'dialog/EC2_EnvCreateDialog'
@@ -188,24 +189,14 @@ class EC2_Environment < FXImageFrame
 	    enable_if_env_set(sender)
 	end	
 	        
-	@about = @ec2_main.makeIcon("help_about.png")
-	@about.create
-	@about_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_RIGHT)
-	@about_button.icon = @about
-	@about_button.tipText = " About EC2Dream "
-	@about_button.connect(SEL_COMMAND) do |sender, sel, data|
-           FXMessageBox.information(page1,MBOX_OK,"About EC2Dream","     EC2Dream Version 3.1 BETA\n\n     Copyright Neill Turner 2012\n\n     http://ec2dream.blogspot.com\n\n     Released under the Apache GPL License")
-        end
-        @about_button.connect(SEL_UPDATE) do |sender, sel, data|
-	      disable_if_env_loading(sender)
-	end        
+        
         @help = @ec2_main.makeIcon("help.png")
 	@help.create
 	@help_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_RIGHT)
 	@help_button.icon = @help
 	@help_button.tipText = " Help "
 	@help_button.connect(SEL_COMMAND) do |sender, sel, data|
-	    browser("http://ec2dream.webs.com")
+	    browser("http://ec2dream.github.com")
 	end
         @help_button.connect(SEL_UPDATE) do |sender, sel, data|
 	     disable_if_env_loading(sender)
@@ -307,9 +298,11 @@ class EC2_Environment < FXImageFrame
           puts "Auto Loaded? "+@auto
        end
        if @env != nil and @env.length>0 and @auto == "true"
-         load_env
+          @treeCache = @ec2_main.treeCache
+          @treeCache.load_empty
+          load_env
        else
-         load_empty_env
+          load_empty_env
        end
   end     
     
@@ -332,8 +325,6 @@ class EC2_Environment < FXImageFrame
            show_repository_loc
            @treeCache = @ec2_main.treeCache
            @treeCache.load(@env)
-           @stacks = @ec2_main.stacks
-           #@stacks.load           
            @ec2_main.app.forceRefresh
   end     
      
@@ -363,8 +354,6 @@ class EC2_Environment < FXImageFrame
         @ec2_main.notes.clear
         @treeCache = @ec2_main.treeCache
         @treeCache.load_empty
-        @stacks = @ec2_main.stacks
-        #@stacks.load        
         @ec2_main.app.forceRefresh
   end
  
@@ -378,18 +367,45 @@ class EC2_Environment < FXImageFrame
      return @ec2
    else
     settings = @ec2_main.settings
-    begin 
-      if settings.get('EC2_URL') != nil and settings.get('EC2_URL').length>0
-         puts "EC2_URL set to #{ENV['EC2_URL']}"
-         @ec2 = RightAws::Ec2.new(settings.get('AMAZON_ACCESS_KEY_ID'),settings.get('AMAZON_SECRET_ACCESS_KEY'), :endpoint_url => settings.get('EC2_URL'), :multi_thread => true)
-      else 
-         @ec2 = RightAws::Ec2.new(settings.get('AMAZON_ACCESS_KEY_ID'), settings.get('AMAZON_SECRET_ACCESS_KEY'), :multi_thread => true)
-      end
-    rescue
-      set_connection_failed
-      puts "***Error on connection to EC2 - check your keys in environment.connection"
-      puts "conn failed #{@ec2_failed}"
-    end
+    if settings.get("EC2_PLATFORM") == "openstack"
+       begin
+          @ec2 = Fog::Compute.new({:provider => 'OpenStack',
+            :openstack_auth_url => settings.get('EC2_URL'), 
+            :openstack_api_key => settings.get('AMAZON_SECRET_ACCESS_KEY'),  
+            :openstack_username => settings.get('AMAZON_ACCESS_KEY_ID')})            
+       rescue
+         set_connection_failed
+         puts "***Error on connection to OpenStack - check your keys in environment.connection"
+         puts "conn failed #{@ec2_failed}"
+       end      
+    elsif settings.get("EC2_PLATFORM") == "eucalyptus"
+       begin
+         if settings.get('EC2_URL') != nil and settings.get('EC2_URL').length>0
+            puts "EC2_URL set to #{ENV['EC2_URL']}"
+            @ec2 = RightAws::Ec2.new(settings.get('AMAZON_ACCESS_KEY_ID'),settings.get('AMAZON_SECRET_ACCESS_KEY'), {:endpoint_url => settings.get('EC2_URL'), :multi_thread => true, :eucalyptus => true})
+         else 
+            @ec2 = RightAws::Ec2.new(settings.get('AMAZON_ACCESS_KEY_ID'), settings.get('AMAZON_SECRET_ACCESS_KEY'), {:multi_thread => true, :eucalyptus => true})
+         end
+       rescue
+          set_connection_failed
+          puts "***Error on connection to EC2 - check your keys in environment.connection"
+          puts "conn failed #{@ec2_failed}"
+       end
+    else
+    :eucalyptus
+       begin
+         if settings.get('EC2_URL') != nil and settings.get('EC2_URL').length>0
+            puts "EC2_URL set to #{ENV['EC2_URL']}"
+            @ec2 = RightAws::Ec2.new(settings.get('AMAZON_ACCESS_KEY_ID'),settings.get('AMAZON_SECRET_ACCESS_KEY'), :endpoint_url => settings.get('EC2_URL'), :multi_thread => true)
+         else 
+            @ec2 = RightAws::Ec2.new(settings.get('AMAZON_ACCESS_KEY_ID'), settings.get('AMAZON_SECRET_ACCESS_KEY'), :multi_thread => true)
+         end
+       rescue
+         set_connection_failed
+         puts "***Error on connection to EC2 - check your keys in environment.connection"
+         puts "conn failed #{@ec2_failed}"
+       end
+    end   
     return @ec2  
    end
   end
@@ -429,34 +445,34 @@ class EC2_Environment < FXImageFrame
       @s3 = nil 
   end
   
-  def as_connection
-          puts "environment.as_connection"
-          if @as != nil
-            return @as
-          else
-            settings = @ec2_main.settings
-            if settings.get('EC2_PLATFORM') != nil and settings.get('EC2_PLATFORM').downcase == "amazon" 
-              begin
-                if settings.get('EC2_URL') != nil and settings.get('EC2_URL').length>0
-                  as_url = settings.get('EC2_URL')
-                  as_url = as_url.gsub("ec2.","")
-                  as_url = as_url.gsub("https://","https://autoscaling.")
-                  puts "Connecting to #{as_url}"  
-                  @as = RightAws::AsInterface.new(settings.get('AMAZON_ACCESS_KEY_ID'), settings.get('AMAZON_SECRET_ACCESS_KEY'),  :endpoint_url => as_url, :multi_thread => true)             
-                else
-                  @as = RightAws::AsInterface.new(settings.get('AMAZON_ACCESS_KEY_ID'), settings.get('AMAZON_SECRET_ACCESS_KEY'), :multi_thread => true)
-                end   
-              rescue
-                @as = nil 
-                puts "***Error on connection to ELB - check your keys"
-                error_message(@ec2_main.tabBook,"Auto Scaling Connection Error",$!.to_s+" - check your EC2 Access Settings")
-              end
-              return @as  
-            else
-              @as = nil 
-              puts "***No Auto Scaling unless Amazon platform"
-            end 
-         end
+ def as_connection
+           puts "environment.as_connection"
+           if @as != nil
+             return @as
+           else
+             settings = @ec2_main.settings
+             if settings.get('EC2_PLATFORM') != nil and settings.get('EC2_PLATFORM').downcase == "amazon" 
+               begin
+                 if settings.get('EC2_URL') != nil and settings.get('EC2_URL').length>0
+                   as_url = settings.get('EC2_URL')
+                   as_url = as_url.gsub("ec2.","")
+                   as_url = as_url.gsub("https://","https://autoscaling.")
+                   puts "Connecting to #{as_url}"  
+                   @as = RightAws::AsInterface.new(settings.get('AMAZON_ACCESS_KEY_ID'), settings.get('AMAZON_SECRET_ACCESS_KEY'),  :endpoint_url => as_url, :multi_thread => true)             
+                 else
+                   @as = RightAws::AsInterface.new(settings.get('AMAZON_ACCESS_KEY_ID'), settings.get('AMAZON_SECRET_ACCESS_KEY'), :multi_thread => true)
+                 end   
+               rescue
+                 @as = nil 
+                 puts "***Error on connection to ELB - check your keys"
+                 error_message(@ec2_main.tabBook,"Auto Scaling Connection Error",$!.to_s+" - check your EC2 Access Settings")
+               end
+               return @as  
+             else
+               @as = nil 
+               puts "***No Auto Scaling unless Amazon platform"
+             end 
+          end
   end
   
     def reset_as_connection
@@ -515,7 +531,7 @@ class EC2_Environment < FXImageFrame
           return @elb
         else
           settings = @ec2_main.settings
-          if settings.get('EC2_PLATFORM') != nil and settings.get('EC2_PLATFORM').downcase == "amazon" 
+          if settings.get('EC2_PLATFORM') != nil and settings.get('EC2_PLATFORM') == "amazon" 
             begin
               if settings.get('EC2_URL') != nil and settings.get('EC2_URL').length>0
                 elb_url = settings.get('EC2_URL')
@@ -542,6 +558,49 @@ class EC2_Environment < FXImageFrame
   def reset_elb_connection
       @elb = nil 
   end 
+ 
+ 
+def cf_connection
+          puts "environment.cf_connection"
+          if @cf != nil
+            return @cf
+          else
+            settings = @ec2_main.settings
+            if settings.get('EC2_PLATFORM') != nil and settings.get('EC2_PLATFORM') == "amazon" 
+              begin
+                ec2_url = settings.get('EC2_URL')
+                if ec2_url != nil and ec2_url.length>0
+                  region = "us-east-1"
+                  sa = (ec2_url).split"."
+		  if sa.size>1
+		      region = (sa[1])
+                  end
+                  if region == "amazonaws"
+                     region = "us-east-1"
+                  end   
+                  puts "Connecting to #{region}"  
+                  @cf = Fog::AWS::CloudFormation.new(:aws_access_key_id => settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key =>settings.get('AMAZON_SECRET_ACCESS_KEY'), :region => region ) 
+                else
+                  @cf = Fog::AWS::CloudFormation.new(:aws_access_key_id => settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key =>settings.get('AMAZON_SECRET_ACCESS_KEY')) 
+                end   
+              rescue
+                @cf = nil 
+                puts "***Error on connection to Cloud Formation - check your keys"
+                error_message(@ec2_main.tabBook,"Cloud Formation Connection Error",$!.to_s+" - check your EC2 Access Settings")
+              end
+              return @cf  
+            else
+              @cf = nil 
+              puts "***No Cloud Formation unless Amazon platform"
+            end 
+         end
+  end 
+ 
+  def reset_cf_connection
+      @cf = nil 
+  end 
+ 
+ 
  
   def error_message(owner,title,message)
          FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)

@@ -31,7 +31,7 @@ class RDS_SnapCreateDialog < FXDialogBox
         if db_snapshot_id.text == nil or db_snapshot_id.text == ""
            today = DateTime.now
            sel_instance = s
-           db_snapshot_id.text=s.gsub("_","-")+ "-" + today.strftime("%y%m%d")
+           db_snapshot_id.text=s.gsub("_","-")+ "-" + today.strftime("%Y%m%d")
         end   
     end
     instance.numVisible = 4
@@ -39,7 +39,7 @@ class RDS_SnapCreateDialog < FXDialogBox
     instance.connect(SEL_COMMAND) do |sender, sel, data|
       sel_instance = data
       today = DateTime.now
-      db_snapshot_id.text=sel_instance.gsub("_","-")+ "-" + today.strftime("%y%m%d")
+      db_snapshot_id.text=sel_instance.gsub("_","-")+ "-" + today.strftime("%Y%m%d")
     end
     
     FXLabel.new(frame1, "" )

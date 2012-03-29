@@ -34,6 +34,11 @@ class EC2_SecGrp_SelectDialog < FXDialogBox
          @ec2_main.environment.set_connection_failed
          return
        end 
+    elsif @type == "ops"
+       @ec2_main.serverCache.ops_secgrp.all.each do |r|
+          instances[i] = r
+          i = i+1
+       end
     else 
        @type = "database"
        rds = @ec2_main.environment.rds_connection

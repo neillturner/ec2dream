@@ -33,6 +33,10 @@
 #                    example: role[base],recipe[server]
 # chef_json        - json file to chef to configure server 
 #                    example: { "run_list": [ "role[base]", "recipe[ops_master]" ] }
+# chef_solo_run_list - run list to pass to chef solo to configure server 
+#                    example: role[base],recipe[server]
+# chef_solo_json     - json file to chef solo to configure server 
+#                    example: { "run_list": [ "role[base]", "recipe[ops_master]" ] }
 # signal           - specify Y to signal to cloudformation that application has completed configuration
 #                    NOTE: In the UserData the SignalURL= parameter must be last parameter 
 #
@@ -248,8 +252,12 @@ end
 #
 #
 
-def run_chef_client(run_list)
-   print_message("running chef run list #{run_list}")
+def run_chef_client(run_list, solo=false)
+   chef = "chef-client"
+   if solo
+     chef = "chef-solo" 
+   end
+   print_message("running #{chef} run list #{run_list}")
    doc = ""
    run_list.split(',').each do |item|
       if doc != ""
@@ -260,10 +268,10 @@ def run_chef_client(run_list)
    doc = "{ \"run_list\": [ #{doc} ] }"
    File.open("/etc/chef/cloud_init.json", 'w') {|f| f.write(doc) }
    system(@sudo+ "mkdir /var/log/chef")
-   print_message("chef-client messages at /var/log/chef/messages")   
-   print_message("chef-client jsonfile: cloud_init.json")
-   system(@sudo+ "chef-client -j /etc/chef/cloud_init.json -L /var/log/chef/messages")
-   print_message("chef-client finished")
+   print_message("#{chef} messages at /var/log/chef/messages")   
+   print_message("#{chef} jsonfile: cloud_init.json")
+   system(@sudo+ "#{chef} -j /etc/chef/cloud_init.json -L /var/log/chef/messages")
+   print_message("#{chef} finished")
 end 
 
 #
@@ -272,16 +280,19 @@ end
 #
 #
 
-def run_chef_client_json(json_string)
-   print_message("running chef with json file #{json_string}")
+def run_chef_client_json(json_string, solo=false)
+   chef = "chef-client"
+   if solo
+      chef = "chef-solo" 
+   end
+   print_message("running #{chef} with json file #{json_string}")
    File.open("/etc/chef/cloud_init.json", 'w') {|f| f.write(json_string) }
    system(@sudo+ "mkdir /var/log/chef")
-   print_message("chef-client messages at /var/log/chef/messages")
-   print_message("chef-client jsonfile: cloud_init.json")    
-   system(@sudo+ "chef-client -j /etc/chef/cloud_init.json -L /var/log/chef/messages")
-   print_message("chef-client finished")  
+   print_message("#{chef} messages at /var/log/chef/messages")
+   print_message("#{chef} jsonfile: cloud_init.json")    
+   system(@sudo+ "#{chef} -j /etc/chef/cloud_init.json -L /var/log/chef/messages")
+   print_message("#{chef} finished")  
 end
-
 
 print_message("cloud_int.rb - Initialise Cloud Settings")
 
@@ -407,5 +418,13 @@ end
 
 if options['chef_json'] != nil and options['chef_json'] != ""
    run_chef_client_json(options['chef_json'])
+end 
+
+if options['chef_solo_run_list'] != nil and options['chef_solo_run_list'] != ""
+   run_chef_client(options['chef_solo_run_list'],true)
+end 
+
+if options['chef_solo_json'] != nil and options['chef_solo_json'] != ""
+   run_chef_client_json(options['chef_solo_json'],true)
 end 
 

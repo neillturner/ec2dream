@@ -4,6 +4,7 @@ require 'fox16'
 require 'right_aws'
 require 'net/http'
 require 'resolv'
+require 'common/OPS_secgrp'
 
 
 class EC2_ServerCache 
@@ -11,6 +12,7 @@ class EC2_ServerCache
 def initialize(owner, tree)
         @ec2_main = owner
         @tree = tree
+        @ops_secgrp = OPS_SecGrp.new(owner)
 	@instances = {}
         @sg_instances = {}
         @serverList= Array.new
@@ -49,47 +51,54 @@ end
 
 
  def refreshServerTree(tree, serverBranch, doc, light, nolight, connect, disconnect)
-    puts "ServerCache.refreshServerTree"
     settings = @ec2_main.settings
-    keypair = ""
-    if settings.get('KEYPAIR_NAME') != nil and settings.get('KEYPAIR_NAME').length>0
-       keypair = settings.get('KEYPAIR_NAME')
-    end
-    ec2 = @ec2_main.environment.connection
-    puts "return from ec2 connection"
-    if ec2 != nil
-       @securityGrps = Array.new
-       eip = {}
-       i=0
-       begin
-          ec2.describe_security_groups.each do |r|
-             @secGrps[r[:aws_group_name]]=r
-             @securityGrps[i] = r[:aws_group_name]
-             i = i+1
-          end
-          ec2.describe_addresses.each do |r|
-             if r[:instance_id] != nil and r[:instance_id] != ""
-  	       eip[r[:instance_id]] = r[:public_ip]
-             end  
-          end          
-       rescue 
-	 puts "***Error on connection to EC2 - check your keys in ServerCache.refreshServerTree"
-         error_message("EC2 Connection Error",$!.to_s+" - check your EC2 Access Settings")
-         @ec2_main.environment.set_connection_failed
-         return
-       end 
-       @securityGrps = @securityGrps.sort
-       @instances = {}
-       @sg_instances = {}
-       @sg_active_instances = {}
-       @tags_filter= @ec2_main.settings.load_filter()
-       ec2.describe_instances([],@tags_filter[:instance]).each do |r|
+    if settings.get("EC2_PLATFORM") == "openstack"
+       ops_refreshServerTree(tree, serverBranch, doc, light, nolight, connect, disconnect) 
+    else
+       puts "ServerCache.refreshServerTree"
+       keypair = ""
+       if settings.get('KEYPAIR_NAME') != nil and settings.get('KEYPAIR_NAME').length>0
+          keypair = settings.get('KEYPAIR_NAME')
+       end
+       ec2 = @ec2_main.environment.connection
+       puts "return from ec2 connection"
+       if ec2 != nil
+          @securityGrps = Array.new
+          eip = {}
+          i=0
+          begin
+             ec2.describe_security_groups.each do |r|
+                @secGrps[r[:aws_group_name]]=r
+                @securityGrps[i] = r[:aws_group_name]
+                i = i+1
+             end
+             ec2.describe_addresses.each do |r|
+                if r[:instance_id] != nil and r[:instance_id] != ""
+  	          eip[r[:instance_id]] = r[:public_ip]
+                end  
+             end
+          rescue 
+	    puts "***Error on connection to EC2 - check your keys in ServerCache.refreshServerTree"
+            error_message("EC2 Connection Error",$!.to_s+" - check your EC2 Access Settings")
+            @ec2_main.environment.set_connection_failed
+            return
+          end              
+          @securityGrps = @securityGrps.sort
+          @instances = {}
+          @sg_instances = {}
+          @sg_active_instances = {}
+          @tags_filter= @ec2_main.settings.load_filter()
+          ec2.describe_instances([],@tags_filter[:instance]).each do |r|
              instance_id = r[:aws_instance_id]
              if eip[instance_id] != nil
                r[:public_ip] = eip[instance_id]
              end  
              @instances[instance_id]=r
-             gn = r[:groups][0][:group_name]
+             if r[:groups][0][:group_name] == nil
+	        gn = r[:groups][0][:group_id]
+	     else
+	        gn = r[:groups][0][:group_name]
+             end 
              if @sg_instances[gn] == nil
                 ig = Array.new
                 ig[0]= instance_id
@@ -110,7 +119,8 @@ end
 	        end
                 @sg_active_instances[gn] = ig
              end
-       end 
+          end   
+
        @serverList= Array.new
        @serverState  = Array.new
        i=0
@@ -160,7 +170,8 @@ end
           end
           i = i+1
        end
-    end 
+    end
+    end
  end
  
  def refresh(instance_id)
@@ -178,9 +189,11 @@ end
 	while i<r.length
 	  x=r[i]
 	  @instances[instance_id]=r[i]
-          #g = x[:aws_groups]
-          #gn = g[0]
-          gn = x[:groups][0][:group_name]
+          if x[:groups][0][:group_name] == nil
+	     gn = x[:groups][0][:group_id]
+	  else
+	     gn = x[:groups][0][:group_name]
+          end 
           ig = Array.new
           if @sg_instances[gn] == nil
              ig = Array.new
@@ -200,18 +213,15 @@ end
  	        i = ig.size
  	        ig[i-1] = instance_id
  	     end
-             @sg_active_instances[gn] = ig
-          end          
-	  #gp = x[:aws_groups]
-	  s = x[:aws_state]
-          #gi = ""
-          #gp.each do |g|
-          #   if gi == ""
-          #      gi = g 
-          #   end 
-          #end
-          gi = x[:groups][0][:group_name]
-	  i = i+1
+ 	     @sg_active_instances[gn] = ig
+          end
+          s = x[:aws_state]
+	  if x[:groups][0][:group_name] == nil
+	     gi = x[:groups][0][:group_id]
+	  else
+	     gi = x[:groups][0][:group_name]
+          end 
+          i = i+1
         end
         ec2.describe_addresses.each do |r|
           if r[:instance_id] == instance_id
@@ -294,14 +304,22 @@ end
        else
           ec2 = @ec2_main.environment.connection
           if ec2 != nil
-             r = ec2.describe_security_groups(group_name, :describe_by => :group_name)
- 	     i=0
-	     while i<r.length
-	        x=r[i]
-	        @secGrps[x[:aws_group_name]]=r[i]
-	        @ec2_main.treeCache.addSecGrp(group_name)
-	        i = i+1
-             end
+             if @ec2_main.settings.get("EC2_PLATFORM") != "openstack" 
+                r = ec2.describe_security_groups(group_name, :describe_by => :group_name)
+ 	        i=0
+	        while i<r.length
+	           x=r[i]
+	           @secGrps[x[:aws_group_name]]=r[i]
+	           @ec2_main.treeCache.addSecGrp(group_name)
+	           i = i+1
+	        end
+	     else
+               @secGrps[group_name]={}
+               @ec2_main.treeCache.addSecGrp(group_name)
+              end
+          else
+          
+          
           end
        end   
        return @secGrps[group_name]
@@ -309,7 +327,7 @@ end
   
   def refresh_secGrps(group_name)
       ec2 = @ec2_main.environment.connection
-      if ec2 != nil
+      if ec2 != nil and @ec2_main.settings.get("EC2_PLATFORM") != "openstack"
          r = ec2.describe_security_groups(group_name, :describe_by => :group_name)
    	 i=0
   	 while i<r.length
@@ -330,14 +348,11 @@ end
   
   def addInstance(r)
       si = r[:aws_instance_id]
-      gi = r[:groups][0][:group_name]
-      #gp = r[:aws_groups]
-      #gi = ""
-      #gp.each do |g|
-      #   if gi == ""
-      #      gi = g 
-      #   end 
-      #end
+      if r[:groups][0][:group_name] == nil
+         gi = r[:groups][0][:group_id]
+      else
+         gi = r[:groups][0][:group_name]
+      end 
       @ec2_main.treeCache.addInstance(gi, si)
       @instances[si]=r
   end 
@@ -356,14 +371,11 @@ end
      sa = Array.new
      i=0
      @instances.each do |key, r|
-         #gp = r[:aws_groups]
-         #gi = ""
-         #gp.each do |g|
-         #   if gi == ""
-         #      gi = g 
-         #   end 
-         #end
-         gi = r[:groups][0][:group_name]
+         if r[:groups][0][:group_name] == nil
+	    gi = r[:groups][0][:group_id]
+         else
+            gi = r[:groups][0][:group_name]
+         end   
          sa[i] = gi+"/"+key
          i=i+1
      end
@@ -376,14 +388,11 @@ end
        i=0
        @instances.each do |key, r|
            if r[:aws_state] != "terminated"
-              #gp = r[:aws_groups]
-              #gi = ""
-              #gp.each do |g|
-              #   if gi == ""
-              #      gi = g 
-              #   end 
-              #end
-              gi = r[:groups][0][:group_name]
+              if r[:groups][0][:group_name] == nil
+	         gi = r[:groups][0][:group_id]
+	      else
+	         gi = r[:groups][0][:group_name]
+              end 
               sa[i] = gi+"/"+key
               i=i+1
            end   
@@ -396,13 +405,15 @@ end
       gi = "" 
       if @instances.has_key?(i) == true 
          r = @instances[i]
-         #gp = s[:aws_groups]
-         #gp.each do |g|
-         #   if gi == ""
-         #      gi = g
-         #   end
-         #end
-         gi = r[:groups][0][:group_name]
+         if @ec2_main.settings.get("EC2_PLATFORM") != "openstack"
+            if r[:groups][0][:group_name] == nil
+	       gi = r[:groups][0][:group_id]
+	    else
+	       gi = r[:groups][0][:group_name]
+            end 
+         else 
+            gi = r.name
+         end   
       end
       return gi
   end
@@ -411,13 +422,114 @@ end
        gi = Array.new 
        if @instances.has_key?(i) == true 
            s = @instances[i]
-           gp = s[:groups]
-           gp.each do |g|
-             gi.push(g[:group_name]) 
+           if @ec2_main.settings.get("EC2_PLATFORM") != "openstack"
+              gp = s[:groups]
+              gp.each do |g|
+                if g[:group_name] == nil 
+                   gi.push(g[:group_id])
+                else
+                   gi.push(g[:group_name])
+                end   
+              end
+           else 
+              gi[0] = s.name
            end
         end
         return gi
   end
+  
+  #
+  # ops methods
+  #
+  def ops_refreshServerTree(tree, serverBranch, doc, light, nolight, connect, disconnect)
+     puts "ServerCache.ops_refreshServerStackTree"
+     conn = @ec2_main.environment.connection
+     if conn != nil
+        @securityGrps = Array.new
+        i=0
+        @ec2_main.serverCache.ops_secgrp.all.each do |r|
+            @secGrps[r]={}
+            @securityGrps[i] = r
+            i = i+1
+        end
+        @securityGrps = @securityGrps.sort
+        @instances = {}
+        @serverList = Array.new
+        @serverState = Array.new
+        instance_id = ""
+        j=0          
+        conn.servers.each do |r|
+             instance_id = r.id.to_s
+             puts "server #{instance_id}"
+             @instances[instance_id]=r 
+             @serverList[j] = "#{r.name}/#{r.id}"
+	     @serverState[j] =  r.state          
+             j=j+1
+        end
+        i=0
+        while i< @securityGrps.size 
+           puts "Security Group #{@securityGrps[i]}" 
+           @serverList[j] = @securityGrps[i]
+           j=j+1
+           i = i+1
+        end
+        puts "serverList #{@serverbList}"
+        if @serverList.size>0
+           tree.expandTree(serverBranch)
+        end
+        i=0
+        while i<@serverList.size
+          puts "Server #{@serverList[i]}  State #{@serverState[i]}"
+          if @serverList[i].index("/") != nil
+             case @serverState[i]
+                when "ACTIVE"
+                   tree.appendItem(serverBranch, @serverList[i], light, light)
+                when  "shutting-down"
+                   tree.appendItem(serverBranch, @serverList[i], disconnect, disconnect)
+                when "BUILD"
+                   tree.appendItem(serverBranch, @serverList[i], connect, connect)
+                when "stopping","stopped"
+                   tree.appendItem(serverBranch, @serverList[i], @stopped, @stopped)
+                else
+                   tree.appendItem(serverBranch, @serverList[i], nolight, nolight)
+             end 
+          else
+             t = tree.appendItem(serverBranch, @serverList[i], doc, doc, @serverList[i])
+          end
+          i = i+1
+        end
+     end 
+  end
+  
+ #        else 
+ #           ec2.servers.each do |r|
+ #            instance_id = r.id
+ #            @instances[instance_id]=r
+ #              gn = r[:groups][0][:name]
+ #              if @sg_instances[gn] == nil
+ #                 ig = Array.new
+ #                 ig[0]= instance_id
+ #              else
+ #                 ig = @sg_instances[gn]
+ #                 i = ig.size
+ #                 ig[i] = instance_id
+ #              end
+ #              @sg_instances[gn] = ig
+ #              # check this state
+ #              if r[:state] == "running"
+ #                 if @sg_active_instances[gn] == nil
+ # 	           ig = Array.new
+ # 	           ig[0]= instance_id
+ # 	        else
+ # 	           ig = @sg_instances[gn]
+ # 	           i = ig.size
+ # 	           ig[i-1] = instance_id
+ # 	        end
+ #                 @sg_active_instances[gn] = ig
+ #              end         
+ #           end
+ #      end 
+       
   
   #
   # rds methods
@@ -642,6 +754,10 @@ end
       else   
          return nil
       end   
+  end 
+  
+  def ops_secgrp
+       @ops_secgrp
   end 
   
   def error_message(title,message)

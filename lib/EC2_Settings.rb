@@ -61,9 +61,9 @@ class EC2_Settings
         #  Amazon EC2 Access Settings
         #
     	FXLabel.new(frame1, "" )
-        FXLabel.new(frame1, "  EC2 Access Settings", nil, LAYOUT_CENTER_X)
+        FXLabel.new(frame1, "  Cloud Access Settings", nil, LAYOUT_CENTER_X)
         FXLabel.new(frame1, "" )
-        FXLabel.new(frame1, "EC2_PLATFORM" )
+        FXLabel.new(frame1, "PLATFORM" )
 	@settings['EC2_PLATFORM'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
 	@settings['EC2_PLATFORM_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
 	@magnifier = @ec2_main.makeIcon("magnifier.png")
@@ -78,16 +78,16 @@ class EC2_Settings
                @settings['EC2_PLATFORM'].text = it
             end	    
         end        
-	FXLabel.new(frame1, "AMAZON_ACCESS_KEY_ID" )
+	FXLabel.new(frame1, "ACCESS_KEY_ID" )
 	@settings['AMAZON_ACCESS_KEY_ID'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
  	FXLabel.new(frame1, "" )
- 	FXLabel.new(frame1, "AMAZON_SECRET_ACCESS_KEY" )
+ 	FXLabel.new(frame1, "SECRET_ACCESS_KEY" )
 	@settings['AMAZON_SECRET_ACCESS_KEY'] = FXTextField.new(frame1, 60, nil, 0, :opts => TEXTFIELD_PASSWD|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
  	FXLabel.new(frame1, "" )
         FXLabel.new(frame1, "AMAZON_ACCOUNT_ID" )
 	@settings['AMAZON_ACCOUNT_ID'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
 	FXLabel.new(frame1, "" ) 	
- 	FXLabel.new(frame1, "EC2_URL" )
+ 	FXLabel.new(frame1, "URL" )
 	@settings['EC2_URL'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
 	@settings['EC2_URL_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
 	@settings['EC2_URL_BUTTON'].icon = @magnifier
@@ -114,7 +114,7 @@ class EC2_Settings
                      FXMessageBox.warning(@ec2_main,MBOX_OK,"RDS URL","Save settings and restart EC2Dream to show Amazon RDS entities")
             end	    
         end
-        FXLabel.new(frame1, "AMAZON NICKNAME TAG" )
+        FXLabel.new(frame1, "NICKNAME TAG" )
 	@settings['AMAZON_NICKNAME_TAG'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
         FXLabel.new(frame1, "" )
         FXLabel.new(frame1, "KEYPAIR_NAME" )
@@ -139,7 +139,7 @@ class EC2_Settings
 	FXLabel.new(frame1, "" )
 
 
-        FXLabel.new(frame1, "EC2_SSH_PRIVATE_KEY" )
+        FXLabel.new(frame1, "SSH_PRIVATE_KEY" )
 	@settings['EC2_SSH_PRIVATE_KEY'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
 	@settings['EC2_SSH_PRIVATE_KEY_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
 	@settings['EC2_SSH_PRIVATE_KEY_BUTTON'].icon = @magnifier
@@ -274,9 +274,9 @@ class EC2_Settings
       	 end      
         end
 	load_panel('EC2_PLATFORM')
+	@settings['EC2_PLATFORM'].text = (@settings['EC2_PLATFORM'].text).downcase
+	@properties['EC2_PLATFORM'] = @properties['EC2_PLATFORM'].downcase
         load_panel('KEYPAIR_NAME')
-        #load_panel('EC2_PRIVATE_KEY')
-        #load_panel('EC2_CERT')
         load_panel('EC2_URL')
         load_panel('EC2_SSH_PRIVATE_KEY')
         load_panel('AMAZON_ACCOUNT_ID')
@@ -316,8 +316,6 @@ class EC2_Settings
   
   def clear_panel
     clear('EC2_PLATFORM')	
-    #clear('EC2_PRIVATE_KEY')
-    #clear('EC2_CERT')
     clear('EC2_URL')
     clear('EC2_SSH_PRIVATE_KEY')
     clear('AMAZON_ACCOUNT_ID')
@@ -365,7 +363,7 @@ class EC2_Settings
   
   def save
      puts "Settings.save"
-     @settings['EC2_PLATFORM'].text = (@settings['EC2_PLATFORM'].text).capitalize
+     @settings['EC2_PLATFORM'].text = (@settings['EC2_PLATFORM'].text).downcase
      save_setting('EC2_PLATFORM') 
      save_setting("EC2_URL")
      save_setting("EC2_SSH_PRIVATE_KEY")

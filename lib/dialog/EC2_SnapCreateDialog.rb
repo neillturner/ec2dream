@@ -18,7 +18,7 @@ class EC2_SnapCreateDialog < FXDialogBox
     if sa.size>1
        snap_ebs = sa[1]
        today = DateTime.now
-       d = today.strftime("%y%m%d")
+       d = today.strftime("%Y%m%d")
        resource_tags=EC2_ResourceTags.new(@ec2_main,nil,"#{sa[0]}-#{d}")
     end
     @created = false
@@ -54,22 +54,29 @@ class EC2_SnapCreateDialog < FXDialogBox
        if ec2 != nil
           r = {}
           snap_id = ""
+          @created = false
+          desc = description.text
+          if desc == nil or desc == ""
+             today = DateTime.now
+             d = today.strftime("%Y%m%d")
+             desc = "snapshot of #{snap_ebs} taken #{d}" 
+          end   
 	  begin 
-             r = ec2.create_snapshot(snap_ebs,description.text)
+             r = ec2.create_snapshot(snap_ebs,desc)
              snap_id = r[:aws_id]
+             @created = true
           rescue
              error_message("EBS Create Snapshot failed",$!.to_s)
-             return
           end             
-          @created = true
-          begin 
-             if tags.text != nil and tags.text != ""
-                resource_tags.assign(snap_id)
+          if @created
+             begin 
+                if tags.text != nil and tags.text != ""
+                   resource_tags.assign(snap_id)
+                end   
+             rescue
+                error_message("Create Tags Failed",$!.to_s)
              end   
-          rescue
-             error_message("Create Tags Failed",$!.to_s)
-             return
-        end
+          end
        end
        self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
     end

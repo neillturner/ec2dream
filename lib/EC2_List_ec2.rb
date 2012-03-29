@@ -302,9 +302,9 @@ class EC2_List
      		   @image_locs = @image_locs.sort_by {|r| r[:aws_id]}
      		  when 1 
      		   @image_locs = @image_locs.sort_by {|r| r[:aws_location].downcase}  		   
-     		  when 3 
-     		   @image_locs = @image_locs.sort_by {|r| r[:aws_is_public]}
      		  when 4 
+     		   @image_locs = @image_locs.sort_by {|r| r[:aws_is_public]}
+     		  when 5 
      		   @image_locs = @image_locs.sort_by {|r| r[:root_device_type]}   		   
      		end
      		if @image_locs.length > 0
@@ -317,39 +317,23 @@ class EC2_List
 			   @table.setItemJustify(i, 0, FXTableItem::LEFT)	
 			   @table.setItemText(i, 1,@image_locs[i][:aws_location])	 
                            @table.setItemJustify(i, 1, FXTableItem::LEFT)
-			   if @image_locs[i][:tags] != nil
-			      #puts "image tags #{@image_locs[i][:tags]}"
-			      #x = 
-			      #puts "#{x}"
-			      @table.setItemText(i, 2,@image_locs[i][:tags].show)
-		           else
+                           if @image_locs[i][:aws_state] != nil
+			      @table.setItemText(i, 2, @image_locs[i][:aws_state])
+			   else
 			      @table.setItemText(i, 2, "")
+			   end   
+                           @table.setItemJustify(i, 2, FXTableItem::LEFT)
+			   if @image_locs[i][:tags] != nil
+			      @table.setItemText(i, 3,@image_locs[i][:tags].show)
+		           else
+			      @table.setItemText(i, 3, "")
 			   end
-			   @table.setItemJustify(i, 2, FXTableItem::LEFT)
-                           @table.setItemText(i, 3,@image_locs[i][:aws_is_public])
-                           @table.setItemJustify(i, 3, FXTableItem::LEFT)
-                           @table.setItemText(i, 4,@image_locs[i][:root_device_type])
+			   @table.setItemJustify(i, 3, FXTableItem::LEFT)
+                           @table.setItemText(i, 4,@image_locs[i][:aws_is_public])
                            @table.setItemJustify(i, 4, FXTableItem::LEFT)
-                           profile = @image_locs[i][:aws_id]
-                           fn = @ec2_main.settings.get_system('ENV_PATH')+"/image/"+profile+".properties"
-                           if File.exists?(fn)
-                            properties = {}
-      			 File.open(fn, 'r') do |properties_file|
-               	            properties_file.read.each_line do |line|
-               	               line.strip!
-               	               if (line[0] != ?# and line[0] != ?=)
-               	                  m = line.index('=')
-               	                  if (m)
-               	                     properties[line[0..m - 1].strip] = line[m + 1..-1].strip
-               	                  else
-               	                     properties[line] = ''
-               	                  end
-               	               end
-               	            end
-               	         end
-               	      	 @table.setItemText(i, 5, properties['Security_Group']) 
-                          end
-                          @table.setItemJustify(i, 5, FXTableItem::LEFT)
+                           @table.setItemText(i, 5,@image_locs[i][:root_device_type])
+                           @table.setItemJustify(i, 5, FXTableItem::LEFT)
+
                           i = i+1                   
                        end
                     else
@@ -361,36 +345,23 @@ class EC2_List
                            @table.setItemJustify(i, 0, FXTableItem::LEFT)
                            @table.setItemText(i, 1,@image_locs[j][:aws_location])
                            @table.setItemJustify(i, 1, FXTableItem::LEFT)
-			   if @image_locs[i][:tags] != nil
-			      @table.setItemText(i, 2,@image_locs[i][:tags].show)
-		           else
+                           if @image_locs[i][:aws_state] != nil
+                              @table.setItemText(i, 2, @image_locs[i][:aws_state])
+                           else
 			      @table.setItemText(i, 2, "")
+			   end   
+                           @table.setItemJustify(i, 2, FXTableItem::LEFT)
+			   if @image_locs[i][:tags] != nil
+			      @table.setItemText(i, 3,@image_locs[i][:tags].show)
+		           else
+			      @table.setItemText(i, 3, "")
 			   end
-			   @table.setItemJustify(i, 2, FXTableItem::LEFT)
-                           @table.setItemText(i, 3,@image_locs[j][:aws_is_public])
-                           @table.setItemJustify(i, 3, FXTableItem::LEFT)
-                           @table.setItemText(i, 4,@image_locs[j][:root_device_type])
-                           @table.setItemJustify(i, 4, FXTableItem::LEFT)                       
-                           profile = @image_locs[j][:aws_id]
-                           fn = @ec2_main.settings.get_system('ENV_PATH')+"/image/"+profile+".properties"
-                           if File.exists?(fn)
-                             properties = {}
-      			     File.open(fn, 'r') do |properties_file|
-               	              properties_file.read.each_line do |line|
-               	               line.strip!
-               	               if (line[0] != ?# and line[0] != ?=)
-               	                  m = line.index('=')
-               	                  if (m)
-               	                     properties[line[0..m - 1].strip] = line[m + 1..-1].strip
-               	                  else
-               	                     properties[line] = ''
-               	                  end
-               	               end
-               	            end
-               	         end
-               	      	 @table.setItemText(i, 5, properties['Security_Group']) 
-                          end
-                          @table.setItemJustify(i, 5, FXTableItem::LEFT)
+			   @table.setItemJustify(i, 3, FXTableItem::LEFT)
+                           @table.setItemText(i, 4,@image_locs[j][:aws_is_public])
+                           @table.setItemJustify(i, 4, FXTableItem::LEFT)
+                           @table.setItemText(i, 5,@image_locs[j][:root_device_type])
+                           @table.setItemJustify(i, 5, FXTableItem::LEFT)                       
+
                           j = j+1
                        end               
                     end

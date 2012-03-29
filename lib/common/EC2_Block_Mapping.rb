@@ -71,10 +71,11 @@ class EC2_Block_Mapping
 
    def load(r,field)
        @block_mapping = Array.new 
-        puts "field #{r[:field]}"
+       # puts "field #{r[:field]}"
        if r[:block_device_mappings] != nil
           r[:block_device_mappings].each do |m|
-            if m!= nil      
+            if m!= nil   
+               puts "m #{m}"
                @block_mapping.push(m)
  	    end
  	  end 

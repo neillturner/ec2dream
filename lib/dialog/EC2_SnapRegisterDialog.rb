@@ -42,7 +42,7 @@ class EC2_SnapRegisterDialog < FXDialogBox
     FXLabel.new(frame1, "Image Name" )
     image_name = FXTextField.new(frame1, 30, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
     today = DateTime.now
-    image_name.text = "xxxxxxx-"+ today.strftime("%y%m%d")
+    image_name.text = "xxxxxxx-"+ today.strftime("%Y%m%d")
     FXLabel.new(frame1, "Device Name" )
     device_name = FXTextField.new(frame1, 30, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
     device_name.text = "/dev/sda1"

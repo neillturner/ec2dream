@@ -15,7 +15,6 @@ require 'EC2_SecGrp'
 require 'EC2_Launch'
 require 'EC2_Environment'
 require 'EC2_List'
-require 'EC2_Stacks'
 require 'dialog/EC2_SystemDialog'
 require 'EC2_Notes'
 require 'cache/EC2_TreeCache'
@@ -43,10 +42,11 @@ class EC2_Main < FXMainWindow
 
   def initialize(app)
     puts "main.initialize "+RUBY_PLATFORM
+    $ec2_main = self
     @initial_startup = false
     @app = app
     # Do base class initialize first
-    super(app, "EC2Dream - Build and Manage EC2 Servers", :opts => DECOR_ALL, :width => 900, :height => 650)
+    super(app, "EC2Dream v3.2.0 - Build and Manage Cloud Servers", :opts => DECOR_ALL, :width => 900, :height => 650)
 
     # Status bar
     status = FXStatusBar.new(self,
@@ -87,8 +87,6 @@ class EC2_Main < FXMainWindow
     # list panel 	
      @list = EC2_List.new(self,app)
      
-     # Stacks panel 	
-     @stacks = EC2_Stacks.new(self)        
         
     # Settings panel
      @settings = EC2_Settings.new(self)
@@ -119,7 +117,7 @@ class EC2_Main < FXMainWindow
            treeCache.refresh()
         when "Settings"
            puts "editSettings"
-           @tabBook.setCurrent(6)
+           @tabBook.setCurrent(5)
         when "Security Groups"
            puts "editSecGrps"
            @secgrp.clear
@@ -130,16 +128,22 @@ class EC2_Main < FXMainWindow
            @secgrp.clear
            @secgrp.setType_rds
            @tabBook.setCurrent(3)   
-        when "Servers","EBS Volumes","EBS Snapshots","Elastic IPs","Key Pairs","Images","DB Parameter Groups","DB Snapshots","DB Events","Spot Requests","Load Balancers","Launch Configurations","Auto Scaling Groups"
-	   puts item.text
-	   @tabBook.setCurrent(4)
-	   @list.load(item.text)
+        when "Servers","EBS Volumes","EBS Snapshots","Elastic IPs","Key Pairs","Images","DB Parameter Groups","DB Snapshots","DB Events","Spot Requests","Load Balancers","Launch Configurations","Auto Scaling Groups","Local Servers","Cloud Formation Templates","Cloud Formation Stacks"
+           if @settings.get("EC2_PLATFORM") != "openstack" or item.text == "Local Servers"
+  	      puts item.text
+	      @tabBook.setCurrent(4)
+	      @list.load(item.text)
+	   end   
         else
            if item.parent != nil
               case (item.parent).text
                  when "Servers"
-                    if item.text["/i-"] != nil
-                      sa = (item.text).split"/i-"
+                    s_id = "/i-"  
+                    if @settings.get("EC2_PLATFORM") == "openstack"
+                       s_id="/"
+                    end  
+                    if item.text[s_id] != nil
+                      sa = (item.text).split(s_id)
 		      if sa.size>1
 		        @launch.load(sa[0])
 		        @secgrp.load(sa[0])
@@ -209,10 +213,7 @@ class EC2_Main < FXMainWindow
        return @list
   end
   
-  def stacks
-     return @stacks
-  end
-  
+    
   def settings
    return @settings
   end

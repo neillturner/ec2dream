@@ -72,32 +72,35 @@ end
            @tree.appendItem(@topmost, "Settings", @doc_settings, @doc_settings)
            @secGrpBranch = @tree.appendItem(@topmost, "Security Groups", @folder_open, @folder_closed)
            @serverBranch = @tree.appendItem(@topmost, "Servers", @folder_open, @folder_closed)
-                      
-           if @ec2_main.settings.get('RDS_URL') != nil and @ec2_main.settings.get('RDS_URL') != ""
+            if @ec2_main.settings.get('RDS_URL') != nil and @ec2_main.settings.get('RDS_URL') != ""
               @dbBranch = @tree.appendItem(@topmost, "RDS", @folder_open, @folder_closed)
               @dbsecGrpBranch = @tree.appendItem(@topmost, "DB Security Groups", @folder_open, @folder_closed)
               @dbparmBranch = @tree.appendItem(@topmost, "DB Parameter Groups", @folder_open, @folder_closed)
               @dbsnapBranch = @tree.appendItem(@topmost, "DB Snapshots", @folder_open, @folder_closed)
               @dbeventsBranch = @tree.appendItem(@topmost, "DB Events", @folder_open, @folder_closed)
+           end
+           if platform != "openstack"
+              @ebsVolBranch = @tree.appendItem(@topmost, "EBS Volumes", @folder_open, @folder_closed)
+              @ebsSnapBranch = @tree.appendItem(@topmost, "EBS Snapshots", @folder_open, @folder_closed)
+              @eipSnapBranch = @tree.appendItem(@topmost, "Elastic IPs", @folder_open, @folder_closed)
+              @kpBranch = @tree.appendItem(@topmost, "Key Pairs", @folder_open, @folder_closed)
+              @imagesBranch = @tree.appendItem(@topmost, "Images", @folder_open, @folder_closed)
            end   
-           @ebsVolBranch = @tree.appendItem(@topmost, "EBS Volumes", @folder_open, @folder_closed)
-           @ebsSnapBranch = @tree.appendItem(@topmost, "EBS Snapshots", @folder_open, @folder_closed)
-           @eipSnapBranch = @tree.appendItem(@topmost, "Elastic IPs", @folder_open, @folder_closed)
-           @kpBranch = @tree.appendItem(@topmost, "Key Pairs", @folder_open, @folder_closed)
-           @imagesBranch = @tree.appendItem(@topmost, "Images", @folder_open, @folder_closed)
-	   if platform != "Eucalyptus"
+	   if platform != "eucalyptus" and platform != "openstack"
+	      @cfBranch = @tree.appendItem(@topmost, "Cloud Formation Templates", @folder_open, @folder_closed)
+	      @cfsBranch = @tree.appendItem(@topmost, "Cloud Formation Stacks", @folder_open, @folder_closed)
               @spotBranch = @tree.appendItem(@topmost, "Spot Requests", @folder_open, @folder_closed)
               @elbBranch = @tree.appendItem(@topmost, "Load Balancers", @folder_open, @folder_closed)
 	      @launchBranch = @tree.appendItem(@topmost, "Launch Configurations", @folder_open, @folder_closed)
 	      @autoscaleBranch = @tree.appendItem(@topmost, "Auto Scaling Groups", @folder_open, @folder_closed)
            end
+           @localServersBranch = @tree.appendItem(@topmost, "Local Servers", @folder_open, @folder_closed)
            instances = {}
            @ec2_main.serverCache.refreshServerTree(@tree, @serverBranch,  @parallel, @light,  @nolight, @connect, @disconnect)
            puts "returned from refreshServerTree"
            if @ec2_main.settings.get('RDS_URL') != nil and @ec2_main.settings.get('RDS_URL') != ""
               @ec2_main.serverCache.refreshDBTree(@tree, @dbBranch, @paralleldb, @database, @nolight, @connect, @disconnect)
            end   
-           refreshImageTree(@tree, @imagesBranch, @parallel)
            if @ec2_main.environment.connection_failed
               @topmost.text = "Env - Error Connection failed"
            else
@@ -126,8 +129,11 @@ end
         @eipSnapBranch = @tree.appendItem(@topmost, "Elastic IPs", @folder_open, @folder_closed)
         @kpBranch = @tree.appendItem(@topmost, "Key Pairs", @folder_open, @folder_closed)
         @imagesBranch = @tree.appendItem(@topmost, "Images", @folder_open, @folder_closed)
+        @cfBranch = @tree.appendItem(@topmost, "Cloud Formation Templates", @folder_open, @folder_closed)
+	@cfsBranch = @tree.appendItem(@topmost, "Cloud Formation Stacks", @folder_open, @folder_closed)
         @spotBranch = @tree.appendItem(@topmost, "Spot Requests", @folder_open, @folder_closed)
         @elbBranch = @tree.appendItem(@topmost, "Load Balancers", @folder_open, @folder_closed)
+        @localServersBranch = @tree.appendItem(@topmost, "Local Servers", @folder_open, @folder_closed)
         instances = {}
         @status = "empty"
   end    
@@ -161,23 +167,27 @@ end
           @dbeventsBranch = @tree.appendItem(@topmost, "DB Events", @folder_open, @folder_closed)
        end   
        instances = {}
-       @ebsVolBranch = @tree.appendItem(@topmost, "EBS Volumes", @folder_open, @folder_closed)
-       @ebsSnapBranch = @tree.appendItem(@topmost, "EBS Snapshots", @folder_open, @folder_closed)
-       @eipSnapBranch = @tree.appendItem(@topmost, "Elastic IPs", @folder_open, @folder_closed)
-       @kpBranch = @tree.appendItem(@topmost, "Key Pairs", @folder_open, @folder_closed)
-       @imagesBranch = @tree.appendItem(@topmost, "Images", @folder_open, @folder_closed)
-       if platform != "Eucalyptus"
+       if platform != "openstack"
+          @ebsVolBranch = @tree.appendItem(@topmost, "EBS Volumes", @folder_open, @folder_closed)
+          @ebsSnapBranch = @tree.appendItem(@topmost, "EBS Snapshots", @folder_open, @folder_closed)
+          @eipSnapBranch = @tree.appendItem(@topmost, "Elastic IPs", @folder_open, @folder_closed)
+          @kpBranch = @tree.appendItem(@topmost, "Key Pairs", @folder_open, @folder_closed)
+          @imagesBranch = @tree.appendItem(@topmost, "Images", @folder_open, @folder_closed)
+       end   
+       if platform != "eucalyptus" and platform != "openstack"
+          @cfBranch = @tree.appendItem(@topmost, "Cloud Formation Templates", @folder_open, @folder_closed)
+	  @cfsBranch = @tree.appendItem(@topmost, "Cloud Formation Stacks", @folder_open, @folder_closed)
           @spotBranch = @tree.appendItem(@topmost, "Spot Requests", @folder_open, @folder_closed)
           @elbBranch = @tree.appendItem(@topmost, "Load Balancers", @folder_open, @folder_closed)
           @launchBranch = @tree.appendItem(@topmost, "Launch Configurations", @folder_open, @folder_closed)
           @autoscaleBranch = @tree.appendItem(@topmost, "Auto Scaling Groups", @folder_open, @folder_closed)
        end
+       @localServersBranch = @tree.appendItem(@topmost, "Local Servers", @folder_open, @folder_closed)
        @ec2_main.serverCache.refreshServerTree(@tree, @serverBranch, @parallel, @light, @nolight, @connect, @disconnect)
        if @ec2_main.settings.get('RDS_URL') != nil and @ec2_main.settings.get('RDS_URL') != ""
           @ec2_main.serverCache.refreshDBTree(@tree, @dbBranch, @paralleldb, @database, @nolight, @connect, @disconnect)
        end   
-      refreshImageTree(@tree, @imagesBranch, @parallel)
-      if @ec2_main.environment.connection_failed
+       if @ec2_main.environment.connection_failed
          @topmost.text = "Env - Error Connection failed"
       else
          keypair = @ec2_main.settings.get('KEYPAIR_NAME')
@@ -194,7 +204,7 @@ end
  end
 
  def addInstance(secGroup, instanceId)
-    r = @tree.prependItem(@serverBranch, secGroup + "/" +instanceId, @connect, @connect)
+    r = @tree.prependItem(@serverBranch, "#{secGroup}/#{instanceId}", @connect, @connect)
     @tree.selectItem(r)
  end
  
@@ -240,63 +250,6 @@ end
       end   
  end 
  
- ##
- ## how to do delete_DBsecGrp(groupName) ????
- ##
- 
-  def refreshImageTree(tree, imageBranch, doc)
-       puts "Tree.refreshImageTree"
-       fn = @ec2_main.settings.get_system('ENV_PATH')+"/image"
-       if File.exists?(fn)      
-          l = Dir.entries(@ec2_main.settings.get_system('ENV_PATH')+"/image")
-          li = Array.new
-          i = 0
-          l.each do |e|
-             if e != "." and e != ".."
-                e = e.to_s
-                j = e.index(".properties")
-                if  j != nil
-                   li[i] = e[0..j-1]
-                   i = i+1
-                end  
-             end 
-          end
-          if li.size>0
-             ec2 = @ec2_main.environment.connection
-             if ec2 != nil
-                i=0
-                begin
-                   ec2.describe_images(li).each do |r|
-                     if li[i] == r[:aws_id]
-                        k = r[:aws_location].index(".manifest.xml")
-                        if k == nil 
-                           li[i] = r[:aws_location]+" ("+li[i]+")"
-                        else
-                           lo = r[:aws_location]
-                           li[i] = lo[0..k-1]+" ("+li[i]+")"
-                        end
-                     end   
-                     i = i+1
-                   end
-                rescue
-   	          puts "***Error on connection to EC2 - check your keys in Tree.refreshImageTree"
-                   error_message("EC2 Connection Error",$!.to_s+" - check your EC2 Access Settings")
-                   @ec2_main.environment.set_connection_failed
-                   return
-                end
-             end  
-             i = 0
-             while i<li.size
-                tree.appendItem(imageBranch, li[i], doc, doc)
-                i = i+1
-             end
-             if li.size>0
-                tree.expandTree(imageBranch)
-             end   
-          end   
-       end
-  end
-  
   def status
     @status   
   end

@@ -136,7 +136,7 @@ class EC2_SecGrp_AuthorizeDialog < FXDialogBox
          r = ec2.authorize_security_group_named_ingress(@current_group, id ,group)
          @created = true
         rescue
-          error_message("Security Group Authorization failed",$!.to_s)
+          error_message("Security Group Authorization failed","Incorrect AMAZON_ACCOUNT_ID in Settings\n"+$!.to_s)
         end 
        end
   end 

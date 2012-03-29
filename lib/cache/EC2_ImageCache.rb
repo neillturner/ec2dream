@@ -29,7 +29,7 @@ class EC2_ImageCache
            if ec2 != nil
               @status = "loading"
               env_name = @ec2_main.environment.env
-              cache_filename = ENV['EC2DREAM_HOME']+"/env/"+env_name+"/image_cache.txt"
+              cache_filename = @ec2_main.settings.get_system("REPOSITORY_LOCATION")+"/"+env_name+"/image_cache.txt"
               if File.exist?(cache_filename)
                  answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Existing Cache","Do you wish to use the existing cache?")
                  if answer == MBOX_CLICKED_NO

@@ -1,0 +1,20 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Description": "Start a Server" ,
+  "Resources": {
+    "testx": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "InstanceType": "t1.micro",
+        "SecurityGroups": [ "default"  ],
+        "KeyName": "test",
+        "ImageId": "ami-de5aafb7",
+        "AvailabilityZone": "us-east-1a", 
+        "KeyName": "test", 
+        "UserData": { "Fn::Base64": "" }
+      }
+    }
+
+  }
+
+}

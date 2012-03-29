@@ -28,12 +28,6 @@ class EC2_ImageDialog < FXDialogBox
        type.appendItem("Amazon Images");
        type.appendItem("Public Images");
        type.appendItem("Private Images");
-       prev_images = get_prev_images()
-       i = 0
-       while i<prev_images.length
-          type.appendItem(prev_images[i])
-          i = i+1
-       end
        type.appendItem("alfresco");
        type.appendItem("alestic");
        type.appendItem("bitnami");
@@ -89,10 +83,6 @@ class EC2_ImageDialog < FXDialogBox
          puts "item "+selected_item
          if selected_item != "***Loading***" and selected_item != "***No Images Found***"
             puts image_type 
-            if image_type != "Owned By Me"
-               prev_images[prev_images.length] = selected_item
-               save_prev_images(prev_images)
-            end   
             sa = (selected_item).split"("
 	    if sa.size>1
 	       @curr_img = sa[1].chomp(")")
@@ -140,46 +130,7 @@ class EC2_ImageDialog < FXDialogBox
          end
   end
   
- 
-  
-  def get_prev_images
-    fn = @ec2_main.settings.get_system('ENV_PATH')+"/prev_images.txt"
-    prev_images = Array.new
-    if File.exists?(fn)
-       i = 0
-       File.open(fn, 'r') do |properties_file|
-       	  properties_file.read.each_line do |line|
-       	     prev_images[i] = line.strip!
-       	     i=i+1
-       	  end      
-       end
-    end   
-    return prev_images
-  end
-  
-  def save_prev_images(prev_images)
-     prev_images = prev_images.sort
-     prev_images = prev_images.uniq
-     doc = ""
-     i = 0
-     while i<prev_images.length
-        doc = doc + prev_images[i]+"\n"
-        i = i+1
-     end
-     fn = @ec2_main.settings.get_system('ENV_PATH')+"/prev_images.txt" 
-     #if File.exists?(fn)     
-        File.open(fn, "w") do |f|
-           f.write(doc)
-        end
-     #else
-     #   File.new(fn, "w") do |f|
-     #      f.write(doc)
-     #   end
-     #end
-  end
-  
-  
-  def selected
+ def selected
      sa = (@curr_img).split("/")
      sel_image = @curr_img 
      if sa.size>1

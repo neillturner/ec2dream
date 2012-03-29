@@ -23,7 +23,7 @@ class RDS_InstanceDeleteDialog < FXDialogBox
         FXLabel.new(@frame1, "Final Snapshot Id" )
  	final_snapshot_id = FXTextField.new(@frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
  	today = DateTime.now
- 	final_snapshot_id.text=instance_id.gsub("_","-")+ "-" + today.strftime("%y%m%d")
+ 	final_snapshot_id.text=instance_id.gsub("_","-")+ "-" + today.strftime("%Y%m%d")
         FXLabel.new(@frame1, "" )
         
         skip_final_snapshot.connect(SEL_COMMAND) do

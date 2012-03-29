@@ -36,7 +36,7 @@ class EC2_SecGrp
 	@refresh_button.connect(SEL_COMMAND) do |sender, sel, data|
 	    puts "server.refresh.connect"
 	    if @secgrp_loaded == true
-	       if @type == "ec2"
+	       if @type == "ec2" or @type == "ops" 
 	          @ec2_main.serverCache.refresh_secGrps(@secgrp['Security_Group'])
 	          load(@secgrp['Security_Group'])
 	       end   
@@ -122,7 +122,7 @@ class EC2_SecGrp
 	         @ec2_main.serverCache.refresh_secGrps(@secgrp['Security_Group'])
                  load(@secgrp['Security_Group'])
               end 
-           else
+           elsif @type == "rds"
  	      linkdialog = RDS_SecGrp_AuthorizeDialog.new(@ec2_main,@secgrp['Security_Group'] )
 	      linkdialog.execute
 	      if linkdialog.created
@@ -158,7 +158,7 @@ class EC2_SecGrp
 	        @curr_item_2 = ""
 	        @curr_item_3 = ""
 	     end   
-	   else
+	   elsif @type == "rds"
 	     if (@curr_item == nil or @curr_item == "") and (@curr_item_1 == nil or @curr_item_1 == "") and (@curr_item_2 == nil or @curr_item_2 == "")
                 error_message("No Authorization selected","No Authorization selected to revoke")
              else
@@ -194,7 +194,7 @@ class EC2_SecGrp
 	    end             
         end
 	@tag_button.connect(SEL_UPDATE) do |sender, sel, data|
-	   if @secgrp_loaded == true and @type == "ec2"
+	   if @secgrp_loaded == true and @type == "ec2" and @ec2_main.settings.get("EC2_PLATFORM") != "eucalyptus"
 	       sender.enabled = true
 	   else
 	       sender.enabled = false
@@ -232,110 +232,117 @@ class EC2_SecGrp
   end 
   
   def load(sg)
-     @type = "ec2"
-     @secgrp['Security_Group'] = sg
-     @top.clearItems
-     @top.setBackColor(FXRGB(240, 240, 240))     
-     @top.setTableSize(5, 2)
-     @top.setItemText(0, 1, sg)
-     @top.setItemJustify(0, 1, FXTableItem::LEFT)
-     @top.setColumnWidth(1,200)
-     @top.setItemText(0, 0, "Security Group")
-     @top.setItemJustify(0, 0, FXTableItem::LEFT)
-     @top.setCellColor(0,0,FXRGB(240, 240, 240))
-        lists_0 = Array.new 
-        lists_1 = Array.new
-        lists_2 = Array.new
-        lists_3 = Array.new
-        groups_perm = Array.new
-          x = @ec2_main.serverCache.secGrps(sg)
-          if x != nil
-            y = x[:aws_perms]
-            ec2 = @ec2_main.environment.connection
-            tx = ec2.describe_tags(:filters => {'resource-id' => x[:group_id]})
-    	    ta = {}
-    	    puts tx
-    	    if tx != nil
-    	       tx.each do |aws_tag|
-    	         ta[aws_tag[:key]] = aws_tag[:value]
-    	       end
-    	    end
-    	    if ta.size>0
-   	       @secgrp_tags = EC2_ResourceTags.new(@ec2_main,ta,nil)
-    	       @secgrp_tags_text = @secgrp_tags.show
-    	    else
-    	       @secgrp_tags = nil
-    	       @secgrp_tags_text =""
-    	    end            
-            @secgrp['Description'] = x[:aws_description]
-            @top.setItemText(1, 1, x[:aws_description])
-            @top.setItemJustify(1, 1, FXTableItem::LEFT)
-            @top.setItemText(1, 0, "Description")
-            @top.setCellColor(1,0,FXRGB(240, 240, 240))
-            @top.setItemJustify(1, 0, FXTableItem::LEFT)
-            @secgrp['group_id'] = x[:group_id]
-            @top.setItemText(2, 1, x[:group_id])
-            @top.setItemJustify(2, 1, FXTableItem::LEFT)
-            @top.setItemText(2, 0, "Group Id")
-            #@top.setCellColor(2,0,FXRGB(240, 240, 240))
-            @top.setItemJustify(2, 0, FXTableItem::LEFT)
-            @top.setItemText(3, 1, x[:vpc_id])
-            @top.setItemJustify(3, 1, FXTableItem::LEFT)
-            @top.setItemText(3, 0, "VPC Id")
-            #@top.setCellColor(3,0,FXRGB(240, 240, 240))
-            @top.setItemJustify(3, 0, FXTableItem::LEFT)
-            @top.setItemText(4, 1, @secgrp_tags_text)
-            @top.setItemJustify(4, 1, FXTableItem::LEFT)
-            @top.setItemText(4, 0, "Tags")
-            #@top.setCellColor(4,0,FXRGB(240, 240, 240))
-            @top.setItemJustify(4, 0, FXTableItem::LEFT)            
-            j = 0
-            y.each do |p|
-              o = "owner"
-              puts p
-              if p.has_key?(o.to_sym)
-                if x[:aws_owner] != p[:owner]
-                   gp_key = "#{p[:owner]}:#{p[:group_name]}"
+    if @ec2_main.settings.get("EC2_PLATFORM") == "openstack"
+       load_ops(sg)    
+    else
+       @type = "ec2"
+       @secgrp['Security_Group'] = sg
+       @top.clearItems
+       @top.setBackColor(FXRGB(240, 240, 240))     
+       @top.setTableSize(5, 2)
+       @top.setItemText(0, 1, sg)
+       @top.setItemJustify(0, 1, FXTableItem::LEFT)
+       @top.setColumnWidth(1,200)
+       @top.setItemText(0, 0, "Security Group")
+       @top.setItemJustify(0, 0, FXTableItem::LEFT)
+       @top.setCellColor(0,0,FXRGB(240, 240, 240))
+       lists_0 = Array.new 
+       lists_1 = Array.new
+       lists_2 = Array.new
+       lists_3 = Array.new
+       groups_perm = Array.new
+       x = @ec2_main.serverCache.secGrps(sg)
+       if x != nil
+          y = x[:aws_perms]
+          puts "x #{x}"
+          ec2 = @ec2_main.environment.connection
+          ta = {}
+          begin
+             tx = ec2.describe_tags(:filters => {'resource-id' => x[:group_id]})
+    	     puts tx
+    	  rescue
+    	  # not supported by eucalyptis
+    	  end
+    	     if tx != nil
+    	        tx.each do |aws_tag|
+    	           ta[aws_tag[:key]] = aws_tag[:value]
+    	        end
+    	     end
+    	     if ta.size>0
+   	        @secgrp_tags = EC2_ResourceTags.new(@ec2_main,ta,nil)
+    	        @secgrp_tags_text = @secgrp_tags.show
+    	     else
+    	        @secgrp_tags = nil
+    	        @secgrp_tags_text =""
+    	     end            
+             @secgrp['Description'] = x[:aws_description]
+             @top.setItemText(1, 1, x[:aws_description])
+             @top.setItemJustify(1, 1, FXTableItem::LEFT)
+             @top.setItemText(1, 0, "Description")
+             @top.setCellColor(1,0,FXRGB(240, 240, 240))
+             @top.setItemJustify(1, 0, FXTableItem::LEFT)
+             @secgrp['group_id'] = x[:group_id]
+             @top.setItemText(2, 1, x[:group_id])
+             @top.setItemJustify(2, 1, FXTableItem::LEFT)
+             @top.setItemText(2, 0, "Group Id")
+             #@top.setCellColor(2,0,FXRGB(240, 240, 240))
+             @top.setItemJustify(2, 0, FXTableItem::LEFT)
+             @top.setItemText(3, 1, x[:vpc_id])
+             @top.setItemJustify(3, 1, FXTableItem::LEFT)
+             @top.setItemText(3, 0, "VPC Id")
+             #@top.setCellColor(3,0,FXRGB(240, 240, 240))
+             @top.setItemJustify(3, 0, FXTableItem::LEFT)
+             @top.setItemText(4, 1, @secgrp_tags_text)
+             @top.setItemJustify(4, 1, FXTableItem::LEFT)
+             @top.setItemText(4, 0, "Tags")
+             #@top.setCellColor(4,0,FXRGB(240, 240, 240))
+             @top.setItemJustify(4, 0, FXTableItem::LEFT)            
+             j = 0
+             y.each do |p|
+                o = "owner"
+                puts p
+                if p.has_key?(o.to_sym)
+                  if x[:aws_owner] != p[:owner]
+                     gp_key = "#{p[:owner]}:#{p[:group_name]}"
+                  else
+                     gp_key = "#{p[:group_name]}"
+                  end
+                  if !groups_perm.include?(gp_key)
+                     groups_perm.push(gp_key)
+                     lists_0[j] = "icmp"
+   	             lists_1[j] = "-1"
+   	             lists_2[j] = "-1"
+   	             lists_3[j] = gp_key
+   	             lists_0[j+1] = "tcp"
+	  	     lists_1[j+1] = "1"
+	  	     lists_2[j+1] = "65535"
+   	             lists_3[j+1] = gp_key
+   	             lists_0[j+2] = "udp"
+		     lists_1[j+2] = "1"
+		     lists_2[j+2] = "65535"
+   	             lists_3[j+2] = gp_key
+   	             j=j+3
+   	          end   
                 else
-                   gp_key = "#{p[:group_name]}"
-                end
-                if !groups_perm.include?(gp_key)
-                   groups_perm.push(gp_key)
-                   lists_0[j] = "icmp"
-   	           lists_1[j] = "-1"
-   	           lists_2[j] = "-1"
-   	           lists_3[j] = gp_key
-   	           lists_0[j+1] = "tcp"
-		   lists_1[j+1] = "1"
-		   lists_2[j+1] = "65535"
-   	           lists_3[j+1] = gp_key
-   	           lists_0[j+2] = "udp"
-		   lists_1[j+2] = "1"
-		   lists_2[j+2] = "65535"
-   	           lists_3[j+2] = gp_key
-   	           j=j+3
-   	        end   
-              else
-                lists_0[j] = p[:protocol]
-   	        lists_1[j] = p[:from_port]
-   	        lists_2[j] = p[:to_port]
-   	        lists_3[j] = p[:cidr_ips]
-   	        j=j+1
-   	      end                
-            end  
-          end
-         i = lists_0.length
-         @table.clearItems
-         @table.setTableSize(i, 4) 
-	 @table.setColumnText(0,"Protocol")
-	 @table.setColumnWidth(0,100)
-	 @table.setColumnText(1,"From Port")
-	 @table.setColumnWidth(1,100)
-	 @table.setColumnText(2,"To Port")
-	 @table.setColumnWidth(2,100) 
-	 @table.setColumnText(3,"Source (IP or Group)")
-	 @table.setColumnWidth(3,120)          
-         while i>0
+                  lists_0[j] = p[:protocol]
+   	          lists_1[j] = p[:from_port]
+   	          lists_2[j] = p[:to_port]
+   	          lists_3[j] = p[:cidr_ips]
+   	          j=j+1
+   	        end                
+             end  
+          i = lists_0.length
+          @table.clearItems
+          @table.setTableSize(i, 4) 
+	  @table.setColumnText(0,"Protocol")
+	  @table.setColumnWidth(0,100)
+	  @table.setColumnText(1,"From Port")
+	  @table.setColumnWidth(1,100)
+	  @table.setColumnText(2,"To Port")
+	  @table.setColumnWidth(2,100) 
+	  @table.setColumnText(3,"Source (IP or Group)")
+	  @table.setColumnWidth(3,120)          
+          while i>0
             i = i-1
     	    @table.setItemText(i, 0, lists_0[i])
 	    @table.setItemJustify(i, 0, FXTableItem::LEFT)
@@ -345,13 +352,61 @@ class EC2_SecGrp
 	    @table.setItemJustify(i, 2, FXTableItem::RIGHT)
 	    @table.setItemText(i, 3, lists_3[i])
 	    @table.setItemJustify(i, 3, FXTableItem::RIGHT)
-	 end
-	@curr_item = ""
-	@curr_item_1 = ""
-	@curr_item_2 = ""
-	@curr_item_3 = "" 
-     @secgrp_loaded = true
-     @ec2_main.app.forceRefresh
+	  end
+	  @curr_item = ""
+	  @curr_item_1 = ""
+	  @curr_item_2 = ""
+	  @curr_item_3 = "" 
+          @secgrp_loaded = true
+          @ec2_main.app.forceRefresh
+        end  
+     end 
+  end 
+  
+  def load_ops(sg)
+        @type = "ops"
+        @secgrp['Security_Group'] = sg
+        @top.clearItems
+        @top.setBackColor(FXRGB(240, 240, 240))     
+        @top.setTableSize(5, 2)
+        @top.setItemText(0, 1, sg)
+        @top.setItemJustify(0, 1, FXTableItem::LEFT)
+        @top.setColumnWidth(1,200)
+        @top.setItemText(0, 0, "Security Group")
+        @top.setItemJustify(0, 0, FXTableItem::LEFT)
+        @top.setCellColor(0,0,FXRGB(240, 240, 240))
+        @secgrp['Description'] = ""
+        @top.setItemText(1, 1, "")
+        @top.setItemJustify(1, 1, FXTableItem::LEFT)
+        @top.setItemText(1, 0, "Description")
+        @top.setCellColor(1,0,FXRGB(240, 240, 240))
+        @top.setItemText(2, 1, "")
+        @top.setItemJustify(2, 1, FXTableItem::LEFT)
+        @top.setItemText(2, 0, "")
+        #@top.setCellColor(2,0,FXRGB(240, 240, 240))
+        @top.setItemJustify(2, 0, FXTableItem::LEFT)
+        @top.setItemText(3, 1, "")
+        @top.setItemJustify(3, 1, FXTableItem::LEFT)
+        @top.setItemText(3, 0, "")
+        #@top.setCellColor(3,0,FXRGB(240, 240, 240))
+        @top.setItemJustify(3, 0, FXTableItem::LEFT)
+        @top.setItemText(4, 1, "")
+        @top.setItemJustify(4, 1, FXTableItem::LEFT)
+        @top.setItemText(4, 0, "")
+        #@top.setCellColor(4,0,FXRGB(240, 240, 240))
+        @top.setItemJustify(4, 0, FXTableItem::LEFT)         
+        @table.clearItems
+        @table.setTableSize(0, 4) 
+  	@table.setColumnText(0,"Protocol")
+  	@table.setColumnWidth(0,100)
+  	@table.setColumnText(1,"From Port")
+  	@table.setColumnWidth(1,100)
+  	@table.setColumnText(2,"To Port")
+  	@table.setColumnWidth(2,100) 
+  	@table.setColumnText(3,"Source (IP or Group)")
+  	@table.setColumnWidth(3,120)          
+        @secgrp_loaded = true
+        @ec2_main.app.forceRefresh
   end 
   
   def load_rds(sg)
@@ -437,6 +492,9 @@ class EC2_SecGrp
   
   def setType_ec2
      @type = "ec2"
+     if @ec2_main.settings.get("EC2_PLATFORM") == "openstack"
+        @type = "ops"
+     end
   end   
   
    def setType_rds
@@ -456,19 +514,25 @@ class EC2_SecGrp
   def delete
      if @type == "rds"
        delete_rds
-     else  
+     elsif @type == "ops"
+       delete_ops
+     else
        secgrp_name = @secgrp['Security_Group']
        answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm delete","Confirm delete of Security Group "+secgrp_name)
        if answer == MBOX_CLICKED_YES
           ec2 = @ec2_main.environment.connection
 	  if ec2 != nil
 	     deleted = false
-	     begin 
-                r = ec2.delete_security_group(@secgrp['group_id'])
+	     begin
+	        if @ec2_main.settings.get("EC2_PLATFORM") != "eucalyptus"
+	           r = ec2.delete_security_group(:group_id => @secgrp['group_id'])
+	        else
+	           r = ec2.delete_security_group(:group_name => secgrp_name)
+                end
                 deleted = true
              rescue
                 error_message("Security_Group Delete failed",$!.to_s)
-             end	  
+             end
              if deleted 
 	        clear
 	        @ec2_main.treeCache.delete_secGrp(secgrp_name)
@@ -479,6 +543,24 @@ class EC2_SecGrp
        end
      end   
   end
+ 
+ def delete_ops
+        secgrp_name = @secgrp['Security_Group']
+        answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm delete","Confirm delete of Security Group "+secgrp_name)
+        if answer == MBOX_CLICKED_YES
+           deleted = @ec2_main.serverCache.ops_secgrp.delete(secgrp_name)
+           if !deleted
+              error_message("Security_Group Delete failed",$!.to_s)
+           end   
+           if deleted 
+ 	      clear
+ 	      @ec2_main.treeCache.delete_secGrp(secgrp_name)
+ 	      @ec2_main.serverCache.delete_secGrp(secgrp_name)
+ 	      @ec2_main.app.forceRefresh
+ 	   end 
+        end
+  end
+ 
  
   def delete_rds
         secgrp_name = @secgrp['Security_Group']
@@ -521,9 +603,9 @@ class EC2_SecGrp
        end
  end
  
-  def loaded
+ def loaded
       return @secgrp_loaded
-  end   
+ end   
  
  def enable_if_secgrp_loaded(sender)
        if loaded

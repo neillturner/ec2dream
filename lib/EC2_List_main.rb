@@ -30,6 +30,10 @@ class EC2_List
         @image_locs = Array.new
         @db_parm_grp = ""
         @engine = ""
+        @stack_name = ""
+        @stack_id = ""
+        @template_file = ""
+        @properties = ""
         @tags_filter = nil
         tab1 = FXTabItem.new(@ec2_main.tabBook, "Other")
   	page1 = FXVerticalFrame.new(@ec2_main.tabBook, LAYOUT_FILL, :padding => 0)
@@ -41,7 +45,10 @@ class EC2_List
 	@refresh_button.icon = @arrow_refresh
 	@refresh_button.tipText = " Status Refresh "
 	@refresh_button.connect(SEL_COMMAND) do |sender, sel, data|
-	load_sort(@type,@curr_sort)
+	   load_sort(@type,@curr_sort)
+	   if @type == "Cloud Formation Stacks"
+	      @ec2_main.treeCache.refresh
+	   end   
 	end
 	@refresh_button.connect(SEL_UPDATE) do |sender, sel, data|
 	   if @loaded == true
@@ -58,6 +65,32 @@ class EC2_List
 	@magnifier.create
         @market_icon = @ec2_main.makeIcon("cloudmarket.png")
 	@market_icon.create
+	@monitor = @ec2_main.makeIcon("monitor.png")
+	@monitor.create	
+	@chef_icon = @ec2_main.makeIcon("chef.png")
+	@chef_icon.create
+	@zones = @ec2_main.makeIcon("zones.png")
+	@zones.create	
+	@rocket = @ec2_main.makeIcon("rocket.png")
+	@rocket.create
+	@tag_blue = @ec2_main.makeIcon("tag_blue.png")
+	@tag_blue.create
+        @tag_red = @ec2_main.makeIcon("tag_red.png")
+	@tag_red.create
+        @funnel = @ec2_main.makeIcon("funnel.png")
+	@funnel.create
+	@events = @ec2_main.makeIcon("events.png")
+	@events.create
+	@delete_icon = @ec2_main.makeIcon("kill.png")
+	@delete_icon.create
+	@stop_icon = @ec2_main.makeIcon("cancel.png")
+	@stop_icon.create
+	@viewstack = @ec2_main.makeIcon("viewstack.png")
+	@viewstack.create
+        @put = @ec2_main.makeIcon("application_put.png")
+	@put.create
+	@rocket = @ec2_main.makeIcon("rocket.png")
+	@rocket.create
 	@create_button.icon = @create
 	@create_button.tipText = "  Create  "
 	@create_button.connect(SEL_COMMAND) do |sender, sel, data|
@@ -143,8 +176,27 @@ class EC2_List
                  editdialog.execute
                  if editdialog.saved 
                     load_sort(@type,@curr_sort)
-                 end   
-           end              
+                 end 
+	    when "Local Servers"
+	      createdialog = LOC_CreateDialog.new(@ec2_main)
+              createdialog.execute
+              if createdialog.created 
+                 load_sort(@type,@curr_sort)
+              end
+	    when "Cloud Formation Templates"
+	      createdialog = CF_CreateDialog.new(@ec2_main)
+              createdialog.execute
+              if createdialog.created 
+                 load_sort(@type,@curr_sort)
+              end
+	    when "Cloud Formation Stacks"
+	      createdialog = CF_StackDialog.new(@ec2_main)
+              createdialog.execute
+              if createdialog.stack_name != nil and createdialog.stack_name != ""
+                 @stack_name = createdialog.stack_name
+                 load_sort(@type,@curr_sort)
+              end                 
+           end
         end
         @create_button.connect(SEL_UPDATE) do |sender, sel, data|
            if @loaded == true and @type != "Servers" and @type != "DB Events" and @type != "DB Parameters" 
@@ -161,6 +213,9 @@ class EC2_List
 	       @create_button.tipText = "  CloudMarket Spot Prices "
 	      when "Scaling Activities"
 	       sender.enabled = false
+	      when "Cloud Formation Stacks"
+	       @create_button.icon = @magnifier
+	       @create_button.tipText = "  Select Stack Name  "	       
 	      else 
 	       @create_button.icon = @create
 	       @create_button.tipText = "  Create  "
@@ -306,7 +361,31 @@ class EC2_List
                      load_sort(@type,@curr_sort)
                   end
                 end
-            end            
+	    when "Local Servers"
+		if @curr_item == nil or @curr_item == ""
+                  error_message("No Server selected","No Server selected to delete")
+                else            
+                  deletedialog = LOC_DeleteDialog.new(@ec2_main, @curr_item)
+                  if deletedialog.deleted 
+                     load_sort(@type,@curr_sort)
+                  end
+                end
+	    when "Cloud Formation Templates"
+		if @curr_item == nil or @curr_item == ""
+                  error_message("No Stack selected","No Template definition selected to delete")
+                else            
+                  deletedialog = CF_DeleteDialog.new(@ec2_main, @curr_item)
+                  if deletedialog.deleted 
+                     load_sort(@type,@curr_sort)
+                  end
+                end 
+ 	    when "Cloud Formation Stacks"
+		if @curr_item == nil or @curr_item == ""
+                  error_message("No Stack selected","No Stack selected to delete")
+                else
+                  cf_delete_stack(@stack_id)
+                end                     
+            end
 	end
 	@delete_button.connect(SEL_UPDATE) do |sender, sel, data|
 	   if @loaded == true  and  @type != "Servers" and @type != "DB Events"
@@ -317,6 +396,12 @@ class EC2_List
 	          @delete_button.tipText = "  Cancel  "
 	       elsif @type == "Scaling Activities"
 	          sender.enabled = false
+	       elsif @type == "Cloud Formation Templates"
+	          @delete_button.icon = @delete_icon
+	       	  @delete_button.tipText = "  Delete Template Definition   "	    	          
+	       elsif @type == "Cloud Formation Stacks"
+	          @delete_button.icon = @stop_icon
+	       	  @delete_button.tipText = "  Delete Stack   "	          
 	       else
 	          @delete_button.tipText = "  Delete  "
 	       end	       
@@ -405,23 +490,43 @@ class EC2_List
                   error_message("No Group selected","No Auto Scaling Group selected to update")
                 else            
 		  editdialog = AS_GroupEditDialog.new(@ec2_main, @curr_item)
-                 editdialog.execute
-                 if editdialog.saved 
-                    load_sort(@type,@curr_sort)
-                 end
-              end
+                  editdialog.execute
+                  if editdialog.saved 
+                     load_sort(@type,@curr_sort)
+                  end
+                end  
    	    when "Triggers"
  	        if @curr_item == nil or @curr_item == ""
                   error_message("No Trigger selected","No Trigger selected to edit")
                 else            
 		  editdialog = AS_TriggerEditDialog.new(@ec2_main, @as_group, @curr_item)
-                 editdialog.execute
-                 if editdialog.saved 
-                    load_sort(@type,@curr_sort)
-                 end
-              end
-           end  
-	end
+                  editdialog.execute
+                  if editdialog.saved 
+                     load_sort(@type,@curr_sort)
+                  end
+                end 
+	    when "Local Servers"
+		if @curr_item == nil or @curr_item == ""
+                  error_message("No Server selected","No Server selected to edit")
+                else 
+                  editdialog = LOC_EditDialog.new(@ec2_main, @curr_item)
+                  editdialog.execute
+                  if editdialog.saved 
+                     load_sort(@type,@curr_sort)
+                  end
+                end
+	    when "Cloud Formation Templates"
+		if @curr_item == nil or @curr_item == ""
+                  error_message("No Stack selected","No Stack selected to edit")
+                else 
+                  editdialog = CF_EditDialog.new(@ec2_main, @curr_item)
+                  editdialog.execute
+                  if editdialog.saved 
+                     load_sort(@type,@curr_sort)
+                  end
+                end                
+            end               
+ 	end
 	@link_button.connect(SEL_UPDATE) do |sender, sel, data|
 	   if @loaded == true
 	       sender.enabled = false
@@ -457,7 +562,15 @@ class EC2_List
                 when "Triggers"
     		  sender.enabled = true
 	          @link_button.icon = @edit 
-	          @link_button.tipText = "  Edit Triggers  "  
+	          @link_button.tipText = "  Edit Triggers  " 
+	        when "Local Servers"
+    		  sender.enabled = true
+	          @link_button.icon = @edit 
+	          @link_button.tipText = "  Edit Servers  "  
+	        when "Cloud Formation Templates"
+    		  sender.enabled = true
+	          @link_button.icon = @edit 
+	          @link_button.tipText = "  Edit Stacks  " 	          
 	       end   
 	   else
 	      sender.enabled = false
@@ -466,6 +579,10 @@ class EC2_List
 	@link_break_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@script = @ec2_main.makeIcon("script.png")
 	@script.create
+	@script_edit = @ec2_main.makeIcon("script_edit.png")
+	@script_edit.create
+	@check = @ec2_main.makeIcon("spellcheck.png")
+	@check.create
 	@create_image_icon = @ec2_main.makeIcon("package.png")
 	@create_image_icon.create	
 	@link_break = @ec2_main.makeIcon("link_break.png")
@@ -529,7 +646,24 @@ class EC2_List
                else 
                   @as_group = @curr_item
                   load("Scaling Activities")
-               end            
+               end 
+	    when "Local Servers"
+		if @curr_item == nil or @curr_item == ""
+                  error_message("No Server selected","No Server selected to ssh")
+                else
+                  loc = EC2_Properties.new
+                  r = loc.get('loc_server',@curr_item)
+                  if r['server'] != nil and r['server'] != ""
+                     run = EC2_Run.new
+                     run.ssh(r['server'], r['address'], r['ssh_user'], r['ssh_key'], r['putty_key'], r['ssh_password'])
+                  end   
+                end               
+ 	    when "Cloud Formation Templates"
+		if @curr_item == nil or @curr_item == ""
+                  error_message("No Stack selected","No Stack selected to create")
+                else
+                  cf_create_stack(@curr_item, @template_file, @properties)
+                end        
             end
 	end
 	@link_break_button.connect(SEL_UPDATE) do |sender, sel, data|
@@ -555,6 +689,14 @@ class EC2_List
     		    sender.enabled = true
 	            @link_break_button.icon = @script 
 	            @link_break_button.tipText = "  List Scaling Activities  " 
+	         when "Local Servers"
+    		    sender.enabled = true
+	            @link_break_button.icon = @monitor 
+	            @link_break_button.tipText = "  ssh to Server  " 
+	         when "Cloud Formation Templates"
+    		    sender.enabled = true
+	            @link_break_button.icon = @rocket 
+	            @link_break_button.tipText = "  Create Stack  " 	            
 	       end   
 	   else
 	      sender.enabled = false
@@ -581,8 +723,8 @@ class EC2_List
 	      csv_text = "Key Pair Name,Fingerprint\n"
 	      no_cols = 2
 	     when "Images" 
-	      csv_text = "AMI,Manifest,Visibility,Root Device Type,Launch SecGrp\n"      	      
-	      no_cols = 4
+	      csv_text = "AMI,Manifest,State,Visibility,Root Device Type\n"      	      
+	      no_cols = 5
 	     when "Spot Requests" 
 	      csv_text = "Request Id,Tags,Spot Price,Image ID,Server,Instance Type,Status,Request Type,Valid From,Valid Until,Launch Group,Availability Zone,Avail Zone Group,SSH Key Name,Security Groups\n"
 	      no_cols = 15	      
@@ -609,10 +751,19 @@ class EC2_List
      		no_cols = 10
    	    when "Scaling Activities"
     	    	csv_text = "Activity Id,Start Time,End Time,Progress,Status Code,Cause,Description"
-	      no_cols = 7
+	        no_cols = 7
    	    when "Triggers"
     	    	csv_text = "Trigger Name,Created,Status,Measure Name,Statistic,Period,Lower Threshold,Lower Breach Scale Increment,Upper Threshold,Upper Breach Scale Increment,Breach Duration,Unit,Dimensions"
 		no_cols = 13
+	    when "Local Servers"
+    	    	csv_text = "Server,Address,Chef Node,SSH User,SSH Password,SSH Key,Putty Key"
+ 		no_cols = 7
+ 	    when "Cloud Formation Templates" 
+		csv_text = "Stack Name,Template File,Parameters\n"
+	        no_cols = 3
+ 	    when "Cloud Formation Stacks" 
+		csv_text = "Stack Name,Stack Id,Status,Creation Time,Disable Rollback\n"
+	        no_cols = 3	        
 	   end
 	   
 	   i = 0
@@ -641,16 +792,6 @@ class EC2_List
 	   end 
 	end
 	@launch_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
-	@zones = @ec2_main.makeIcon("zones.png")
-	@zones.create	
-	@rocket = @ec2_main.makeIcon("rocket.png")
-	@rocket.create
-	@tag_blue = @ec2_main.makeIcon("tag_blue.png")
-	@tag_blue.create
-        @tag_red = @ec2_main.makeIcon("tag_red.png")
-	@tag_red.create
-        @funnel = @ec2_main.makeIcon("funnel.png")
-	@funnel.create
 	@launch_button.icon = @rocket
 	@launch_button.tipText = " Launch Server Instance "
 	@launch_button.connect(SEL_COMMAND) do |sender, sel, data|
@@ -696,6 +837,23 @@ class EC2_List
 		     load_sort(@type,@curr_sort)
                   end
                 end
+ 	    when "Local Servers"
+		if @curr_item == nil or @curr_item == ""
+                  error_message("No Server selected","No Server selected to scp")
+                else
+                  loc = EC2_Properties.new
+                  r = loc.get('loc_server',@curr_item)
+                  if r['server'] != nil and r['server'] != ""
+                     run = EC2_Run.new
+                     run.scp(r['server'], r['address'], r['ssh_user'], r['ssh_key'], r['putty_key'], r['ssh_password'])
+                  end                   
+                end
+ 	    when "Cloud Formation Templates"
+		if @curr_item == nil or @curr_item == ""
+                  error_message("No Stack selected","No Stack selected to validate")
+                else
+                  cf_validate(@template_file)
+                end                       
             end            
 	end
 	@launch_button.connect(SEL_UPDATE) do |sender, sel, data|
@@ -718,6 +876,14 @@ class EC2_List
 	          sender.enabled = true
 		  @launch_button.icon = @server 
 	          @launch_button.tipText = "  Instances  "
+	        when "Local Servers"  
+	       	  sender.enabled = true
+                  @launch_button.icon = @put
+	          @launch_button.tipText = "  SCP  " 
+	        when "Cloud Formation Templates"
+	          sender.enabled = true
+		  @launch_button.icon = @check
+	          @launch_button.tipText = "Validate Template File"	          
                 else
 	          sender.enabled = false
 	       end   
@@ -768,6 +934,24 @@ class EC2_List
 		        load_sort(@type,@curr_sort)
                   end
                end
+  	    when "Local Servers"
+		if @curr_item == nil or @curr_item == ""
+                  error_message("No Server selected","No Server selected to run chef")
+                else
+                  loc = EC2_Properties.new
+                  r = loc.get('loc_server',@curr_item)
+                  if r['server'] != nil and r['server'] != ""
+                     run = EC2_Run.new
+                     run.chef(r['server'], r['address'], r['chef_node'], r['ssh_user'], r['ssh_key'], r['ssh_password'])
+                  end   
+                end
+  	    when "Cloud Formation Templates"
+		if @curr_item == nil or @curr_item == ""
+                  error_message("No Stack selected","No Stack selected to edit template file")
+                else
+                  run = EC2_Run.new
+                  run.edit(@template_file)
+                end                    
             end
 	end
 	@attributes_button.connect(SEL_UPDATE) do |sender, sel, data|
@@ -794,6 +978,14 @@ class EC2_List
 	            sender.enabled = true
 		    @attributes_button.icon = @view 
 	            @attributes_button.tipText = "  Set Desired Capacity  "
+	        when "Local Servers"
+	            sender.enabled = true
+		    @attributes_button.icon = @chef_icon
+	            @attributes_button.tipText = " Run Chef Solo Roles and Recipes "
+	        when "Cloud Formation Templates",
+	            @attributes_button.icon = @script_edit
+	            @attributes_button.tipText = "  Edit Cloud Formation Template File  "
+	            sender.enabled = true	            
 	       end
 	   else
              sender.enabled = false
@@ -888,9 +1080,17 @@ class EC2_List
                else 
                   @as_group = @curr_item
                   load("Triggers")
-               end   
+               end
+            when "Cloud Formation Templates" 
+	       if @curr_item == nil or @curr_item == ""
+                  error_message("No Stack Name Selected","No Stack Name selected to view stack")
+               else             
+                  @stack_name = @curr_item
+                  load("Cloud Formation Stacks")
+               end 
+            when "Cloud Formation Events" 
+               load("Cloud Formation Stacks")
             end
-
 	end
 	@tags_button.connect(SEL_UPDATE) do |sender, sel, data|
 	   if @loaded == true
@@ -908,10 +1108,14 @@ class EC2_List
 	            sender.enabled = true
 	         when "Spot Requests"
 	            sender.enabled = true
-                when "Auto Scaling Groups"
-    		  sender.enabled = true
-	          @tags_button.icon = @edit_lightning
-	          @tags_button.tipText = "  List Triggers  "
+                 when "Auto Scaling Groups"
+    		    sender.enabled = true
+	            @tags_button.icon = @edit_lightning
+	            @tags_button.tipText = "  List Triggers  "
+                 when "Cloud Formation Templates","Cloud Formation Events"
+    		    sender.enabled = true
+	            @tags_button.icon = @viewstack
+	            @tags_button.tipText = "  View Stack Status  "	            
 	       end
 	   else
              sender.enabled = false
@@ -969,6 +1173,15 @@ class EC2_List
                      @ec2_main.settings.save_filter(@tags_filter)
 		     load_sort(@type,@curr_sort)
                   end
+             when "Cloud Formation Templates" 
+	       if @curr_item == nil or @curr_item == ""
+                  error_message("No Stack Name Selected","No Stack Name selected to view events")
+               else             
+                  @stack_name = @curr_item
+                  load("Cloud Formation Events")
+               end  
+            when "Cloud Formation Stacks" 
+               load("Cloud Formation Events")
             end
 	end
 	@filter_button.connect(SEL_UPDATE) do |sender, sel, data|
@@ -985,6 +1198,10 @@ class EC2_List
 	            sender.enabled = true
 	         when "Spot Requests"
 	            sender.enabled = true
+		 when "Cloud Formation Templates","Cloud Formation Stacks"
+    		    sender.enabled = true
+	            @filter_button.icon = @events
+	            @filter_button.tipText = "  View Stack Events  "	            
 	        end
 	   else
              sender.enabled = false
@@ -1027,7 +1244,12 @@ class EC2_List
 	         @curr_avail_zone  = @table.getItemText(which.row,6).to_s
 	       when "Auto Scaling Groups"
 	         @curr_desired_capacity  = @table.getItemText(which.row,5).to_s
-	      end 	         
+	       when "Cloud Formation Templates"
+	         @template_file  = @table.getItemText(which.row,1).to_s 
+	         @properties = @table.getItemText(which.row,2).to_s 
+               when "Cloud Formation Stacks"
+	         @stack_id  = @table.getItemText(which.row,1).to_s 
+ 	      end 	         
 	   else
 	      @curr_row = nil
 	      @curr_item = ""
@@ -1055,9 +1277,6 @@ class EC2_List
   end
   
   def load_sort(other_type,sort_col)
-     #if @tags_filter == nil 
-     #   @tags_filter = @ec2_main.settings.load_filter
-     #end
      load_sort_reload(other_type,sort_col,true)
   end 
   
@@ -1070,6 +1289,12 @@ class EC2_List
              @title.text = other_type + " (Cached)"
           else 
              @title.text = other_type + " (Cache not loaded)"
+          end
+       elsif other_type == "Cloud Formation Stacks" or other_type == "Cloud Formation Events"
+          if @stack_name != nil and @stack_name != ""
+             @title.text = other_type + "(#{@stack_name})"
+          else
+             @title.text = other_type + "    "
           end
        else   
           @title.text = other_type + "    "
@@ -1109,9 +1334,17 @@ class EC2_List
 	   when "Auto Scaling Groups" 
 	     load_auto_scaling_groups(sort_col,reload)
 	   when "Scaling Activities"
-           load_scaling_activities(sort_col,reload)
+             load_scaling_activities(sort_col,reload)
 	   when "Triggers"
-           load_triggers(sort_col,reload)
+             load_triggers(sort_col,reload)
+           when "Local Servers"
+             load_local_servers(sort_col,reload)
+           when "Cloud Formation Templates"
+             load_cloud_formation_templates(sort_col,reload) 
+           when "Cloud Formation Stacks"
+             load_cloud_formation_stacks(sort_col,reload) 
+           when "Cloud Formation Events"
+             load_cloud_formation_events(sort_col,reload)                
           end              
        end
        @ec2_main.app.forceRefresh
@@ -1200,13 +1433,14 @@ class EC2_List
     		@table.setColumnWidth(0,150)
     		@table.setColumnText(1,"Manifest")
     		@table.setColumnWidth(1,420)
-      	        @table.setColumnText(2,"Tags")
-     	        @table.setColumnWidth(2,150)    		
-    		@table.setColumnText(3,'Visibility')
-    		@table.setColumnWidth(3,50)
-    		@table.setColumnText(4,'Root Device Type')
-    		@table.setColumnText(5,"Launch - SecGrp")
-    		@table.setColumnWidth(5,150)
+    		@table.setColumnText(2,"State")
+    		@table.setColumnWidth(2,150)    		
+      	        @table.setColumnText(3,"Tags")
+     	        @table.setColumnWidth(3,150)    		
+    		@table.setColumnText(4,'Visibility')
+    		@table.setColumnWidth(4,50)
+    		@table.setColumnText(5,'Root Device Type')
+
   	when "Spot Requests"
     	    	@table.setColumnText(0,"Request ID")
       	        @table.setColumnText(1,"Tags")
@@ -1369,6 +1603,54 @@ class EC2_List
      		@table.setColumnText(11,"Unit")
      		@table.setColumnText(12,"Dimensions")
      		@table.setColumnWidth(12,400)
+   	when "Local Servers"
+    	    	@table.setColumnText(0,"Server")
+    		@table.setColumnText(1,"Address")
+    		@table.setColumnWidth(1,150)
+    		@table.setColumnText(2,"Chef Node")
+    		@table.setColumnWidth(2,150)
+    		@table.setColumnText(3,"SSH User")
+    		@table.setColumnWidth(3,150)
+    		@table.setColumnText(4,"SSH Password")
+    		@table.setColumnWidth(4,150)
+                @table.setColumnText(5,"SSH Key")
+    		@table.setColumnWidth(5,150)    		
+     		@table.setColumnText(6,"Putty Key")
+     		@table.setColumnWidth(6,150)
+     	when "Cloud Formation Templates"
+                @table.setColumnText(0, "Stack Name")
+                @table.setColumnText(1, "Template File")
+                @table.setColumnWidth(1,350)
+                @table.setColumnText(2, "Parameters")
+                @table.setColumnWidth(2,350)
+                @table.setColumnText(3, "Disable Rollback")
+                @table.setColumnText(4, "Timeout in Minutes")
+     	when "Cloud Formation Stacks"
+                @table.setColumnText(0, "Stack Name")
+                @table.setColumnText(1, "Stack Id")
+                @table.setColumnWidth(1,350)
+                @table.setColumnText(2, "Status")
+                @table.setColumnWidth(2,150)
+                @table.setColumnText(3, "Creation Time")
+                @table.setColumnWidth(3,140)
+                @table.setColumnText(4, "Disable Rollback")
+        when "Cloud Formation Events"
+    	    	@table.setColumnText(0,"Event Id")
+    	    	@table.setColumnWidth(0,275)
+    		@table.setColumnText(1,"Stack Id")
+    		@table.setColumnWidth(1,350)
+    		@table.setColumnText(2,"Logical Resource Id")
+    		@table.setColumnWidth(2,150)
+    		@table.setColumnText(3,"PhysicalResource Id")
+    		@table.setColumnWidth(3,250)
+    		@table.setColumnText(4,"Resource Type")
+    		@table.setColumnWidth(4,250)
+                @table.setColumnText(5,"Timestamp")
+    		@table.setColumnWidth(5,150)    		
+     		@table.setColumnText(6,"Resource Status")
+     		@table.setColumnWidth(6,150)
+     		@table.setColumnText(7,"Resource Status Reason")
+     		@table.setColumnWidth(7,150) 
        end
   end
   

@@ -35,7 +35,7 @@ class EC2_ImageRegisterDialog < FXDialogBox
        end  
     end
     today = DateTime.now
-    d = today.strftime("%y%m%d")
+    d = today.strftime("%Y%m%d")
     path.text = "<bucket>/<server>-#{d}/image.manifest.xml"
   end 
   

@@ -17,7 +17,7 @@ class EC2_SecGrpDialog < FXDialogBox
     @type = type
     @win = false
     @rds_url = @ec2_main.settings.get('RDS_URL') 
-    @ec2_platform = @ec2_main.settings.get('EC2_PLATFORM').downcase 
+    @ec2_platform = @ec2_main.settings.get('EC2_PLATFORM')
 
     super(owner, "Create Security Group", :opts => DECOR_ALL, :width => 500, :height => 150)    
      
@@ -101,27 +101,38 @@ class EC2_SecGrpDialog < FXDialogBox
      @created = false
      ec2 = @ec2_main.environment.connection
      if ec2 != nil
-      begin 
-       r = ec2.create_security_group(sg,desc)
-       puts "return from create sec group "
-       puts r
-       if r[:return]
-        # give it time for security group to be created
-        puts "return from create sec group is true"
-        #g_id = r[:group_id]
-        if type == "windows"
-           ec2.authorize_security_group_IP_ingress(sg, 3389, 3389, 'tcp', '0.0.0.0/0')        
+      if @ec2_main.settings.get("EC2_PLATFORM") != "openstack" 
+         begin 
+            r = ec2.create_security_group(sg,desc)
+            puts "return from create sec group "
+            puts r
+            if r[:return]
+            # give it time for security group to be created
+               puts "return from create sec group is true"
+              #g_id = r[:group_id]
+              if type == "windows"
+                 ec2.authorize_security_group_IP_ingress(sg, 3389, 3389, 'tcp', '0.0.0.0/0')        
+              else
+                 ec2.authorize_security_group_IP_ingress(sg, 22, 22, 'tcp', '0.0.0.0/0')
+              end  
+              @created = true
+            else
+               error_message(@ec2_main,"Error","Security Group Creation failed")
+            end
+         rescue
+              error_message(@ec2_main,"Security Group already exists or permission changes failed",$!.to_s)
+         end 
+      else
+        puts "creating security group #{sg}"
+        response = @ec2_main.serverCache.ops_secgrp.create(sg,desc)
+        puts "created security group response #{response}"
+        if response
+           @created = true   
         else
-           ec2.authorize_security_group_IP_ingress(sg, 22, 22, 'tcp', '0.0.0.0/0')
-        end  
-        @created = true
-       else
-         error_message(@ec2_main,"Error","Security Group Creation failed")
-       end
-      rescue
-       error_message(@ec2_main,"Security Group already exists or permission changes failed",$!.to_s)
-      end 
-     end
+           error_message(@ec2_main,"Error","Security Group Creation failed")                
+        end
+      end  
+     end 
   end
   
   def create_db_secgrp(sg, desc)
