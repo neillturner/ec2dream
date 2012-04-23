@@ -107,7 +107,6 @@ class EC2_Launch
 	 if bm.size>0 
 	   i=0
            bm.each do |m|
-                puts "m #{m}"
 	        sa = (m[:ebs_snapshot_id]).split"/"
 		  if sa.size>1
                    m[:ebs_snapshot_id]=sa[1]
@@ -124,7 +123,6 @@ class EC2_Launch
        item_server = ""
        item = []
        begin
-          puts "launch_parn #{launch_parm}"
           item = ec2.launch_instances(server, launch_parm)
        rescue 
           error_message("Launch of Server Failed",$!.to_s)
@@ -132,7 +130,6 @@ class EC2_Launch
        end
        instances = []
        item.each do |r|
-          puts "r #{r}"
           if item_server == ""
              if r[:groups][0][:group_name] == nil
                 gi = r[:groups][0][:group_id]
@@ -166,7 +163,7 @@ class EC2_Launch
  def request_spot_instance
      puts "launch.request_spot_instance"
      platform = @ec2_main.settings.get("EC2_PLATFORM")
-     if platform == "eucalyptus"
+     if platform != "amazon"  
         error_message("Not Supported","Spot Requests not supported on #{platform}")
         return
      end

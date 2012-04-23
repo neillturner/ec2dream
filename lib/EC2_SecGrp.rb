@@ -194,7 +194,7 @@ class EC2_SecGrp
 	    end             
         end
 	@tag_button.connect(SEL_UPDATE) do |sender, sel, data|
-	   if @secgrp_loaded == true and @type == "ec2" and @ec2_main.settings.get("EC2_PLATFORM") != "eucalyptus"
+	   if @secgrp_loaded == true and @type == "ec2" and @ec2_main.settings.get("EC2_PLATFORM") == "amazon"
 	       sender.enabled = true
 	   else
 	       sender.enabled = false
@@ -524,7 +524,7 @@ class EC2_SecGrp
 	  if ec2 != nil
 	     deleted = false
 	     begin
-	        if @ec2_main.settings.get("EC2_PLATFORM") != "eucalyptus"
+	        if @ec2_main.settings.get("EC2_PLATFORM") == "amazon"
 	           r = ec2.delete_security_group(:group_id => @secgrp['group_id'])
 	        else
 	           r = ec2.delete_security_group(:group_name => secgrp_name)

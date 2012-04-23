@@ -279,7 +279,7 @@ class EC2_Server
 	 i = i+1
 	end 
 	@graphs.connect(SEL_COMMAND) do |sender, sel, data|
-	   if @ec2_main.settings.get("EC2_PLATFORM") != "openstack" and @ec2_main.settings.get("EC2_PLATFORM") != "eucalyptus"
+	   if @ec2_main.settings.get("EC2_PLATFORM") == "amazon"
 		mondialog = EC2_MonitorDialog.new(@ec2_main,@server['Instance_ID'].text,@secgrp,data)
 	       	mondialog.execute
 	   end    	

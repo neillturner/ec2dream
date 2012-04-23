@@ -108,24 +108,49 @@ class EC2_EnvCreateDialog < FXDialogBox
     @openstack_url = FXTextField.new(frame3, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @openstack_url.text = "https://nova-api.trystack.org:5443"
 
- 
+    # cloudstack
+    @cloudstacktab = FXTabItem.new(@tabbook, "&CloudStack", nil)
+    @cloudstackframe = FXHorizontalFrame.new(@tabbook )
+
+    frame4 = FXMatrix.new(@cloudstackframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
+
+    cloudstack_env = textBox("Environment Name",frame4)
+    @cloudstack_access_key = textBox("CloudStack API Key",frame4)
+    
+    FXLabel.new(frame4, "CloudStack Secret Key" )
+    @cloudstack_secret_access_key = FXTextField.new(frame4, 40, nil, 0, :opts => TEXTFIELD_PASSWD|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+    FXLabel.new(frame4, "" )
+    
+    FXLabel.new(frame4, "CloudStack URL" )
+    @cloudstack_url = FXTextField.new(frame4, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+    @cloudstack_url.text = "http://cloud-bridge-hostname:8090/bridge" 
     
     amazon_env.connect(SEL_CHANGED) {
       euca_env.text = amazon_env.text
       openstack_env.text = amazon_env.text
+      cloudstack_env.text = amazon_env.text
       @new_env = amazon_env.text
     }
     
     euca_env.connect(SEL_CHANGED) {
       amazon_env.text = euca_env.text
       openstack_env.text = euca_env.text
+      cloudstack_env.text = euca_env.text
       @new_env = euca_env.text
     }
     
     openstack_env.connect(SEL_CHANGED) {
       amazon_env.text = openstack_env.text
       euca_env.text = openstack_env.text
+      cloudstack_env.text = openstack_env.text
       @new_env = openstack_env.text
+    }
+    
+    cloudstack_env.connect(SEL_CHANGED) {
+      amazon_env.text = cloudstack_env.text
+      euca_env.text = cloudstack_env.text
+      openstack_env.text = cloudstack_env.text
+      @new_env = cloudstack_env.text
     }
 
     bottomFrame = FXVerticalFrame.new(mainFrame,LAYOUT_SIDE_BOTTOM|LAYOUT_FILL_X|LAYOUT_FILL_Y)
@@ -179,7 +204,7 @@ class EC2_EnvCreateDialog < FXDialogBox
             @ec2_url.text = $1
           end
         end
-	  @ec2_platform = "eucalyptus"
+	@ec2_platform = "eucalyptus"
         eucarc.close
     end 
     if @openstack_access_key.text != ""
@@ -187,16 +212,26 @@ class EC2_EnvCreateDialog < FXDialogBox
        Dir.mkdir("#{d}/ops_secgrp")
        File.open("#{d}/ops_secgrp/default.properties", 'w') {|f| f.write("default") }
     end
-      
+    if @cloudstack_access_key.text != ""
+       @ec2_platform = "cloudstack"
+    end      
     Dir.mkdir(d+"/launch")
     save_env
     @created = true
+    if  @ec2_platform == "cloudstack"
+      if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil 
+         message = "Exit EC2Dream and enter set EC2_API_VERSION=2010-11-15  before running ec2dream"
+      else
+         message = "Exit EC2Dream and enter export EC2_API_VERSION=2010-11-15  before running ec2dream"
+      end    
+      FXMessageBox.warning(self,MBOX_OK,"Restart EC2Dream",message)
+    end    
 
    rescue Exception => error
       puts error.message
       FXMessageBox.warning(self,MBOX_OK,"Error",error.message)
    end
-  end
+  end 
   
   def created 
      return @created
@@ -220,7 +255,17 @@ class EC2_EnvCreateDialog < FXDialogBox
               end
               if @openstack_url.text != nil 
   	       settings.put("EC2_URL",@openstack_url.text)
-  	      end	   
+  	      end
+	   elsif @ec2_platform == "cloudstack"
+              if @cloudstack_access_key.text != nil 
+                 settings.put("AMAZON_ACCESS_KEY_ID",@cloudstack_access_key.text)
+              end
+              if @cloudstack_secret_access_key.text != nil 
+                 settings.put("AMAZON_SECRET_ACCESS_KEY",@cloudstack_secret_access_key.text)
+              end
+              if @cloudstack_url.text != nil 
+  	       settings.put("EC2_URL",@cloudstack_url.text)
+  	      end  	      
 	   else
               if @amazon_access_key.text != nil 
                  settings.put("AMAZON_ACCESS_KEY_ID",@amazon_access_key.text)

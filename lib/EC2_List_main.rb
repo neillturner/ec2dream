@@ -1235,7 +1235,7 @@ class EC2_List
 	      @curr_item = @table.getItemText(which.row,0).to_s
 	      case @type
 	       when "Images"
-	         @curr_image_type = @table.getItemText(which.row,4).to_s
+	         @curr_image_type = @table.getItemText(which.row,5).to_s
 	       when "EBS Snapshots"
 	         @curr_size  = @table.getItemText(which.row,7).to_s
 	       when "Load Balancers"

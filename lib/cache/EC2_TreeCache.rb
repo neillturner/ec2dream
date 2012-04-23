@@ -86,7 +86,7 @@ end
               @kpBranch = @tree.appendItem(@topmost, "Key Pairs", @folder_open, @folder_closed)
               @imagesBranch = @tree.appendItem(@topmost, "Images", @folder_open, @folder_closed)
            end   
-	   if platform != "eucalyptus" and platform != "openstack"
+	   if platform != "eucalyptus" and platform != "openstack" and platform != "cloudstack"
 	      @cfBranch = @tree.appendItem(@topmost, "Cloud Formation Templates", @folder_open, @folder_closed)
 	      @cfsBranch = @tree.appendItem(@topmost, "Cloud Formation Stacks", @folder_open, @folder_closed)
               @spotBranch = @tree.appendItem(@topmost, "Spot Requests", @folder_open, @folder_closed)
@@ -174,7 +174,7 @@ end
           @kpBranch = @tree.appendItem(@topmost, "Key Pairs", @folder_open, @folder_closed)
           @imagesBranch = @tree.appendItem(@topmost, "Images", @folder_open, @folder_closed)
        end   
-       if platform != "eucalyptus" and platform != "openstack"
+       if platform != "eucalyptus" and platform != "openstack" and platform != "cloudstack"
           @cfBranch = @tree.appendItem(@topmost, "Cloud Formation Templates", @folder_open, @folder_closed)
 	  @cfsBranch = @tree.appendItem(@topmost, "Cloud Formation Stacks", @folder_open, @folder_closed)
           @spotBranch = @tree.appendItem(@topmost, "Spot Requests", @folder_open, @folder_closed)

@@ -392,7 +392,19 @@ class EC2_Environment < FXImageFrame
           puts "conn failed #{@ec2_failed}"
        end
     else
-    :eucalyptus
+       if settings.get("EC2_PLATFORM") == "cloudstack" 
+          if  ENV['EC2_API_VERSION'] != "2010-11-15"
+             set_connection_failed
+             puts "***Error on connection to EC2 - Environment Variable EC2_API_VERSION not set"
+             if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil 
+               puts "** enter set EC2_API_VERSION=2010-11-15  before running ec2dream **"
+             else
+               puts "** enter export EC2_API_VERSION=2010-11-15  before running ec2dream  **"
+             end 
+             puts "conn failed #{@ec2_failed}"          
+             return @ec2
+          end   
+       end
        begin
          if settings.get('EC2_URL') != nil and settings.get('EC2_URL').length>0
             puts "EC2_URL set to #{ENV['EC2_URL']}"

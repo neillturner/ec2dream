@@ -15,8 +15,9 @@ class EC2_PlatformsDialog < FXDialogBox
     @curr_item = ""
     @item_name = Array.new
     @item_name[0] = "amazon"
-    @item_name[1] = "eucalyptus"
-    @item_name[2] = "openstack"
+    @item_name[1] = "cloudstack"
+    @item_name[2] = "eucalyptus"
+    @item_name[3] = "openstack"
     super(owner, "Select Platform", :opts => DECOR_ALL, :width => 400, :height => 200)
     itemlist = FXList.new(self, :opts => LIST_SINGLESELECT|LAYOUT_FILL)
     @item_name.each do |e|

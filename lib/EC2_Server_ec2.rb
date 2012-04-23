@@ -216,7 +216,7 @@
  
  def monitor
   platform = @ec2_main.settings.get("EC2_PLATFORM")
-  if platform != "eucalyptus" and platform != "openstack"
+  if platform == "amazon"
     instance = @server['Instance_ID'].text
     answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm Monitoring","Confirm Monitoring of Server Instance "+instance)
     if answer == MBOX_CLICKED_YES
@@ -230,7 +230,7 @@
  
  def unMonitor
    platform = @ec2_main.settings.get("EC2_PLATFORM")
-   if platform != "eucalyptus" and platform != "openstack"
+   if platform == "amazon"
      instance = @server['Instance_ID'].text
      answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm Stop Monitoring","Confirm Stop Monitoring Server Instance "+instance)
      if answer == MBOX_CLICKED_YES

@@ -1,9 +1,19 @@
-EC2Dream - Build and Manage EC2 Servers Version 3.2 -  April 2012 
------------------------------------------------------------------
+EC2Dream - Build and Manage EC2 Servers Version 3.2.5 -  April 2012 
+-------------------------------------------------------------------
 
 EC2Dream is a Visual tool for system administration of Amazon AWS, Eucalyptus, OpenStack Clouds and local servers. 
 
 This version runs on Windows, Linux and Mac OSX clients. It is written in Ruby using the FXRuby graphics library. 
+
+Support for CloudStack 
+ CloudStack currently only supporst the Amazon EC2 API of 2010-11-15.
+To use EC2Dream with CloudStack you need to set the environment variable
+for  windows enter
+    SET EC2_API_VERSION=2010-11-15
+and for linux enter
+    export EC2_API_VERSION=2010-11-15
+then enter
+    ec2dream 
 
 Support for OpenStack
    Partial Support for OpenStack. simulating Security Groups until OpenStack 2.0 API is available. 
