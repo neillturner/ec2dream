@@ -22,14 +22,14 @@
 
 Gem::Specification.new do |spec|
   spec.name = 'ec2dream'
-  spec.version = '3.2.5'
+  spec.version = '3.3.0'
   spec.authors = ['Neill Turner']
   spec.email = 'neillwturner@gmail.com'
   spec.executables = ["ec2dream"]
   spec.homepage = 'http://ec2dream.blogspot.com'
   spec.summary = 'Build and Manage Cloud Servers with a Graphical User interface.'
   spec.require_path = 'lib'
-  spec.add_dependency('fxruby')
+  spec.add_dependency('fxruby', '<= 1.6.20')
   spec.add_dependency('right_aws_ec2dream')
   spec.add_dependency('tzinfo')
   spec.add_dependency('rubyzip')
@@ -40,11 +40,11 @@ Gem::Specification.new do |spec|
   spec.description = <<-EOF
 == DESCRIPTION:
 
-ec2dream
+Build and Manage Cloud Servers with a Graphical User interface
 
 == FEATURES:
 
-ec2dream
+Supports Multiple Clouds Amazon AWS, Eucalyptus, CloudStack and OpenStack and using the Chef systems integration for automating the cloud
 
 EOF
 

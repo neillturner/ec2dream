@@ -22,7 +22,7 @@ class EC2_InstanceDialog < FXDialogBox
     itemlist.appendItem('m2.2xlarge         (High Memory Extra Large 64-bit, 17.1 GB, 6.5 compute unit)')
     itemlist.appendItem('m2.4xlarge         (High Memory Double Extra Large 64-bit, 34.2 GB, 13 compute unit)')
     itemlist.appendItem('m2.4xlarge         (High Memory Quad Extra Large 64-bit, 68.4 GB, 26 compute unit)')
-    itemlist.appendItem('c1.medium        (High CPU Medium 32-bit, 1.7 GB, 5 compute unit)')
+    itemlist.appendItem('c1.medium        (High CPU Medium 32 or 64-bit, 1.7 GB, 5 compute unit)')
     itemlist.appendItem('c1.xlarge            (High CPU Extra Large 64-bit, 7 GB, 20 compute unit)')
     itemlist.appendItem('cc1.4xlarge        (Cluster Compute Quadruple Extra Large  64-bit, 23 GB, 33.5 compute unit. 10GBit network)')
     itemlist.appendItem('cc2.8xlarge        (Cluster Compute Eight Extra Large  64-bit, 60.5 GB, 88 compute unit. 10GBit network)')

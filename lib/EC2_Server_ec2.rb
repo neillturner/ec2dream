@@ -52,14 +52,15 @@
      if @ec2_main.settings.get("EC2_PLATFORM") == "openstack" 
         ops_load(instance_id)
      else   
-         puts "load "+instance_id
-         @type = "ec2"
-         @frame1.show()
-         @frame2.hide()
-         @frame3.hide()
-         @server['Instance_ID'].text = instance_id
-         ENV['EC2_INSTANCE'] = instance_id
-     	 r = @ec2_main.serverCache.instance(instance_id)
+       puts "load "+instance_id
+       @type = "ec2"
+       @frame1.show()
+       @frame2.hide()
+       @frame3.hide()
+       @server['Instance_ID'].text = instance_id
+       ENV['EC2_INSTANCE'] = instance_id
+       r = @ec2_main.serverCache.instance(instance_id)
+       if r != nil 
     	 gp = @ec2_main.serverCache.instance_groups(instance_id)
     	 gp_list = ""
     	 gp.each do |g|
@@ -137,6 +138,7 @@
          @server['Instance_Life_Cycle'].text = r[:instance_life_cycle]
          @server['Spot_Instance_Request_Id'].text = r[:spot_instance_request_id]
      	 @ec2_main.app.forceRefresh
+       end	 
      end	 
   end 
  

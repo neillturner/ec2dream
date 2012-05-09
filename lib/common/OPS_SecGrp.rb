@@ -17,7 +17,7 @@ class OPS_SecGrp
     sg_dir = "#{@ec2_main.settings.get_system('ENV_PATH')}/#{@secgrp_folder}"
     puts "sg dir #{sg_dir}"
     sec_grp = Array.new
-    if Dir.exists? sg_dir
+    if File.directory? sg_dir
        sec_grp = Dir.entries(sg_dir)
     end
     sec_grp.delete(".")
@@ -36,7 +36,7 @@ class OPS_SecGrp
     response = false
     sg_dir = "#{@ec2_main.settings.get_system('ENV_PATH')}/#{@secgrp_folder}"
     puts "Checking for folder #{sg_dir}"
-    if !Dir.exists? sg_dir
+    if !File.directory? sg_dir
        puts "creating....#{sg_dir}"
        Dir.mkdir(sg_dir)
     end

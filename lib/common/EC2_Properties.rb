@@ -10,7 +10,7 @@ class EC2_Properties
       puts "Checking for folder #{dir}"
       items = Array.new
       items_hashs = Array.new
-      if Dir.exists? dir
+      if File.directory? dir
          items = Dir.entries(dir)
       end
       items.delete(".")
@@ -74,7 +74,7 @@ class EC2_Properties
      end
      dir = "#{$ec2_main.settings.get_system('ENV_PATH')}/#{folder}"
      puts "Checking for folder #{dir}"
-     if !Dir.exists? dir
+     if !File.directory? dir
         puts "creating....#{dir}"
         Dir.mkdir(dir)
      end     

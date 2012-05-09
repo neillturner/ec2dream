@@ -4,7 +4,7 @@ require 'fox16'
 require 'right_aws'
 require 'net/http'
 require 'resolv'
-require 'common/OPS_secgrp'
+require 'common/OPS_SecGrp'
 
 
 class EC2_ServerCache 

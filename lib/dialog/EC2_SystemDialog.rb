@@ -16,7 +16,7 @@ class EC2_SystemDialog < FXDialogBox
     @loc = ""
     @remloc = ""
     local_repository = "#{ENV['EC2DREAM_HOME']}/env"
-    if !Dir.exists? local_repository
+    if !File.directory? local_repository
        puts "creating....#{local_repository}"
        Dir.mkdir(local_repository)
     end     

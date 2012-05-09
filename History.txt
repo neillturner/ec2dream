@@ -1,3 +1,7 @@
+Version 3.3.0 May 2012
+----------------------
+Changes to fix bugs on Mac and LInux.
+
 Version 3.2.5 April 2012
 ------------------------
 fix bug in unregistering images

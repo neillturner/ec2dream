@@ -14,7 +14,7 @@ class EC2_EnvDialog < FXDialogBox
     @ec2_main = owner
     envs = nil
     local_repository = "#{ENV['EC2DREAM_HOME']}/env"
-    if !Dir.exists? local_repository
+    if !File.directory? local_repository
        puts "creating....#{local_repository}"
        Dir.mkdir(local_repository)
     end 

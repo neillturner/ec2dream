@@ -567,7 +567,7 @@ class EC2_Launch
    end
    
    def put(key,value)
-      puts "Launch.put "+key
+      #puts "Launch.put "+key
       @properties[key] = value
       @launch[key].text = value
    end 
@@ -607,7 +607,7 @@ class EC2_Launch
       doc = ""
       @properties.each_pair do |key, value|
          if value != nil 
-            puts "#{key}=#{value}\n"
+            #puts "#{key}=#{value}\n"
             doc = doc + "#{key}=#{value}\n"
          end 
       end

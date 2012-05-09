@@ -454,6 +454,7 @@ class EC2_Launch
            @block_mapping.set_curr_row(which.row)
 	   @launch['Block_Devices'].selectRow(@block_mapping.curr_row)
 	end
+	FXLabel.new(@frame1, "" )
 	FXLabel.new(@frame1, "Notes")
 	@text_area = FXText.new(@frame1, :height => 100, :opts => LAYOUT_FIX_HEIGHT|TEXT_WORDWRAP|LAYOUT_FILL, :padding => 0)
 	#

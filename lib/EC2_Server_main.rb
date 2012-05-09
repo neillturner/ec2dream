@@ -373,7 +373,7 @@ class EC2_Server
 
 	if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
 	   FXLabel.new(@frame1, "EC2 SSH Private Key" )
- 	   @server[''] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+ 	   @server['EC2_SSH_Private_Key'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
 	   @server['EC2_SSH_Private_Key'].connect(SEL_COMMAND) do
                instance_id = @server['Instance_ID'].text
                @ec2_ssh_private_key[instance_id] = @server['EC2_SSH_Private_Key'].text

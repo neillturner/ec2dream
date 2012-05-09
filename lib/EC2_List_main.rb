@@ -1209,8 +1209,42 @@ class EC2_List
 	end	
 	
 	
+	
+        @help = @ec2_main.makeIcon("help.png")
+	@help.create
+	@help_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_RIGHT)
+	@help_button.icon = @help
+	@help_button.tipText = " Help "
+	@help_button.connect(SEL_COMMAND) do |sender, sel, data|
+	    case @type
+	    when "Cloud Formation Templates"
+               run = EC2_Run.new
+               run.browser("https://s3.amazonaws.com/cloudformation-templates-us-east-1/index.html")
+            when "Spot Requests"
+               run = EC2_Run.new
+               run.browser("http://thecloudmarket.com/stats#/spot_prices")
+            when "Auto Scaling Groups"
+               run = EC2_Run.new
+               run.browser("http://aws.amazon.com/documentation/autoscaling/")
+            else 
+               run = EC2_Run.new
+               run.browser("http://ec2dream.github.com/")
+            end   
+	end
+        @help_button.connect(SEL_UPDATE) do |sender, sel, data|
+             sender.enabled = true
+             case @type
+	       when "Cloud Formation Templates"
+                  @help_button.tipText = "  View Sample Templates  "
+               when "Spot Requests"
+                  @help_button.tipText = "  View Spot Prices  " 
+               else   
+                  @help_button.tipText = " View Help "
+	       end
+	end
 	@title = FXLabel.new(page1a, "", nil,:opts => LAYOUT_RIGHT)
 	@title.font = FXFont.new(app, "Arial", 11)
+	
         contents = FXVerticalFrame.new(page1,LAYOUT_SIDE_TOP|LAYOUT_FILL_X|LAYOUT_FILL_Y,
 	       :padLeft => 0, :padRight => 0, :padTop => 0, :padBottom => 0,	      
 	       :hSpacing => 0, :vSpacing => 0)
