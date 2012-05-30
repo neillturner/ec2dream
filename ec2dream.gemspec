@@ -22,14 +22,14 @@
 
 Gem::Specification.new do |spec|
   spec.name = 'ec2dream'
-  spec.version = '3.3.0'
+  spec.version = '3.3.5'
   spec.authors = ['Neill Turner']
   spec.email = 'neillwturner@gmail.com'
   spec.executables = ["ec2dream"]
   spec.homepage = 'http://ec2dream.blogspot.com'
   spec.summary = 'Build and Manage Cloud Servers with a Graphical User interface.'
   spec.require_path = 'lib'
-  spec.add_dependency('fxruby', '<= 1.6.20')
+  spec.add_dependency('fxruby')
   spec.add_dependency('right_aws_ec2dream')
   spec.add_dependency('tzinfo')
   spec.add_dependency('rubyzip')

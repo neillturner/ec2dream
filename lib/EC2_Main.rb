@@ -46,7 +46,7 @@ class EC2_Main < FXMainWindow
     @initial_startup = false
     @app = app
     # Do base class initialize first
-    super(app, "EC2Dream v3.3.0 - Build and Manage Cloud Servers", :opts => DECOR_ALL, :width => 900, :height => 650)
+    super(app, "EC2Dream v3.3.5 - Build and Manage Cloud Servers", :opts => DECOR_ALL, :width => 900, :height => 650)
 
     # Status bar
     status = FXStatusBar.new(self,

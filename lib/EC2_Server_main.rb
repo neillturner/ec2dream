@@ -259,7 +259,7 @@ class EC2_Server
 	end
 	@chef_button.connect(SEL_UPDATE) do |sender, sel, data|
            enable_if_ec2_server_loaded(sender)	
-	end	
+	end
         @graphs = FXComboBox.new(page1a, 15,
 	      :opts => COMBOBOX_NO_REPLACE|LAYOUT_RIGHT)
 	@graphs.numVisible = 12      
@@ -424,7 +424,7 @@ class EC2_Server
 	      end
 	   end       
         end
-	FXLabel.new(@frame1, "EC2 SSH User" )
+	FXLabel.new(@frame1, "EC2 SSH/Windows User" )
 	@server['EC2_SSH_User'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
         @server['EC2_SSH_User'].connect(SEL_COMMAND) do |sender, sel, data|
            @ec2_main.launch.put('EC2_SSH_User',data) 
@@ -839,12 +839,19 @@ class EC2_Server
               s = @server['Public_IP'].text
               if s == nil or s == ""
 	         s = currentServer
-	      end   
+	      end
+	      user = @ec2_main.launch.get("EC2_SSH_User")
+ 	      if @type == "ops" 
+ 	         user = @ec2_main.launch.ops_get("SSH_User")
+ 	      end  	    
+	      if user == nil or user == ""
+	         user = "Administrator"
+	      end     
 	      pk = get_pk
 	      if pk != nil and pk != ""
 	         pw = @server['Win_Admin_Password'].text
 	         if pw != nil and pw != ""
-	           c = "cmd.exe /c \@start \"\" \""+ENV['EC2DREAM_HOME']+"/launchrdp/LaunchRDP.exe\" "+s+" 3389 Administrator "+s+" "+pw+" 0 1 0"
+	           c = "cmd.exe /c \@start \"\" \""+ENV['EC2DREAM_HOME']+"/launchrdp/LaunchRDP.exe\" #{s} 3389 #{user} #{s} #{pw} 0 1 0"
 	           puts c
 	           system(c)
 	         else

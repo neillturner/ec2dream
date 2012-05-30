@@ -177,7 +177,7 @@ class EC2_EnvCreateDialog < FXDialogBox
     settings.load
     
     raise 'Environment Not Specified' if @env == nil or @env.length==0
-    raise 'Environment Name must contain A-Z, 0-9 or _ characters' if @env  =~ /\W/
+    raise 'Environment Name must only contain A-Z, 0-9 or _ characters' if @env  =~ /\W/
 
     d = @ec2_main.settings.get_system('REPOSITORY_LOCATION')+"/"+@env
         

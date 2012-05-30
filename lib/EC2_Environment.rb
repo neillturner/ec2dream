@@ -516,22 +516,61 @@ class EC2_Environment < FXImageFrame
      @rds = nil 
   end
   
+  #def mon_connection
+  #     puts "environment.mon_connection"
+  #     if @mon != nil
+  #       return @mon
+  #     else
+  #      settings = @ec2_main.settings
+  #      begin 
+  #         @mon = RightAws::AcwInterface.new(settings.get('AMAZON_ACCESS_KEY_ID'), settings.get('AMAZON_SECRET_ACCESS_KEY'))
+  #      rescue
+  #        @mon = nil 
+  #        puts "***Error on connection to Monitoring - check your keys"
+  #        error_message(@ec2_main.tabBook,"Monitoring Connection Error",$!.to_s+" - check your EC2 Access Settings")
+  #      end
+  #      return @mon  
+  #     end
+  #end
+  
   def mon_connection
-       puts "environment.mon_connection"
-       if @mon != nil
-         return @mon
-       else
-        settings = @ec2_main.settings
-        begin 
-           @mon = RightAws::AcwInterface.new(settings.get('AMAZON_ACCESS_KEY_ID'), settings.get('AMAZON_SECRET_ACCESS_KEY'))
-        rescue
-          @mon = nil 
-          puts "***Error on connection to Monitoring - check your keys"
-          error_message(@ec2_main.tabBook,"Monitoring Connection Error",$!.to_s+" - check your EC2 Access Settings")
-        end
-        return @mon  
-       end
-  end
+          puts "environment.mon_connection"
+          if @mon != nil
+            return @mon
+          else
+            settings = @ec2_main.settings
+            if settings.get('EC2_PLATFORM') != nil and settings.get('EC2_PLATFORM') == "amazon" 
+              begin
+                ec2_url = settings.get('EC2_URL')
+                if ec2_url != nil and ec2_url.length>0
+                  region = "us-east-1"
+                  sa = (ec2_url).split"."
+		  if sa.size>1
+		      region = (sa[1])
+                  end
+                  if region == "amazonaws"
+                     region = "us-east-1"
+                  end   
+                  puts "Connecting to #{region}" 
+                  @mon = Fog::AWS::CloudWatch.new(:aws_access_key_id => settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key =>settings.get('AMAZON_SECRET_ACCESS_KEY'), :region => region ) 
+                else
+                  @mon = Fog::AWS::CloudWatch.new(:aws_access_key_id => settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key =>settings.get('AMAZON_SECRET_ACCESS_KEY')) 
+                end   
+              rescue
+                @mon = nil 
+                puts "***Error on connection to CloudWatch - check your keys"
+                error_message(@ec2_main.tabBook,"CloudWatch Connection Error",$!.to_s+" - check your EC2 Access Settings")
+              end
+              return @mon  
+            else
+              @cf = nil 
+              puts "***No CloudWatch unless Amazon platform"
+            end 
+         end
+  end   
+      
+      
+      
       
   def reset_mon_connection
     @mon = nil 

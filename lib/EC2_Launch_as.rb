@@ -63,6 +63,7 @@ class EC2_Launch
      @as_bm.load_table(@as_launch['Block_Device_Mappings'])
      clear_notes     
      @launch_loaded = false
+     @as_launch['Launch_Configuration_Name'].enabled = true
    end 
   
    def as_clear(key)
@@ -86,6 +87,7 @@ class EC2_Launch
 	if @as_launch['Ramdisk_Id'].text != nil and @as_launch['Ramdisk_Id'].text != ""
 	   r[:ramdisk_id] = @as_launch['Ramdisk_Id'].text
 	end
+	puts "User data #{@as_launch['UserData'].text}"
 	if @as_launch['UserData'].text != nil and @as_launch['UserData'].text != ""
 	   r[:user_data] = @as_launch['UserData'].text
 	end
@@ -95,10 +97,10 @@ class EC2_Launch
 	   r[:block_device_mappings] = @as_bm.array
 	end   
       as = @ec2_main.environment.as_connection
-      if as != nil 
+      if as != nil
         begin
            as.create_launch_configuration(r[:launch_configuration_name], r[:image_id], r[:instance_type] , r)
-           @ec2_main.tabBook.setCurrent(5)
+           @ec2_main.tabBook.setCurrent(4)
            @ec2_main.list.load("Launch Configurations")
            @launch_loaded = true
 	  rescue

@@ -3,9 +3,8 @@ require 'fox16'
 require 'google_chart'
 require 'open-uri'
 require 'rubygems'
-require 'right_aws'
+require 'fog'
 require 'net/http'
-#require 'aws/right_mon_interface.rb'
 
 include Fox
 
@@ -59,7 +58,7 @@ class Float
 end  
 
 
-class EC2_MonitorDialog < FXDialogBox
+class EC2_MonitorDialog  < FXDialogBox
 
   def initialize(owner, instanceId, groupName, report)
 
@@ -69,8 +68,10 @@ class EC2_MonitorDialog < FXDialogBox
     @msg = ""
     @max_data = 0
     @created = false
+ 
     @mon = @ec2_main.environment.mon_connection
-    super(owner, "Monitoring", :opts => DECOR_ALL, :width => 800, :height => 650)
+ 
+    super(owner, "Monitoring", :opts => DECOR_ALL, :width => 800, :height => 500)
 
     @mainFrame = FXVerticalFrame.new(self,LAYOUT_SIDE_TOP|LAYOUT_FILL_X|LAYOUT_FILL_Y|PACK_UNIFORM_WIDTH)
     
@@ -91,25 +92,25 @@ class EC2_MonitorDialog < FXDialogBox
         @start_date = @end_date - 13
         @start_month = @start_date.strftime("%b")
         puts "Fornight Report from #{@start_date} to #{@end_date}"
-        @title.text = "Graphs for #{groupName}/#{instanceId} from "+@start_date.strftime("%b %d")+" to "+@end_date.strftime("%b %d")+" (Daily, Times in UTC, Sampling per min)"       
+        @title.text = "Graphs for #{groupName}/#{instanceId} from "+@start_date.strftime("%b %d")+" to "+@end_date.strftime("%b %d")+" (Daily, Times in UTC)"       
         getStatsReports(groupName,instanceId,"Fortnight")
     else if report == "Last Hour"
  	    @end_date = DateTime.now.new_offset(0)
  	    @start_date = @end_date - 1.hours 
  	    puts "Last 1 Hour for #{@start_date} to #{@end_date}"
- 	    @title.text = "Graphs for #{groupName}/#{instanceId} "+@start_date.strftime("%b %d %H:%M")+"-"+@end_date.strftime("%b %d %H:%M")+" (5 Mins, Times in UTC, Sampling per min)"
+ 	    @title.text = "Graphs for #{groupName}/#{instanceId} "+@start_date.strftime("%b %d %H:%M")+"-"+@end_date.strftime("%b %d %H:%M")+" (Times in UTC)"
  	    getStatsReports(groupName,instanceId,"Hourly")
          else if report == "Last 3 Hours"
 		@end_date = DateTime.now.new_offset(0)
 	        @start_date = @end_date - 3.hours 
  	        puts "Last 3 Hours for #{@start_date} to #{@end_date}"
- 	        @title.text = "Graphs for #{groupName}/#{instanceId} "+@start_date.strftime("%b %d %H:%M")+"-"+@end_date.strftime("%b %d %H:%M")+" (15 Mins, Times in UTC, Sampling per min)"
+ 	        @title.text = "Graphs for #{groupName}/#{instanceId} "+@start_date.strftime("%b %d %H:%M")+"-"+@end_date.strftime("%b %d %H:%M")+" (Times in UTC)"
  	        getStatsReports(groupName,instanceId,"Three Hourly")
               else if report == "Last 12 Hours"
  		     @end_date = DateTime.now.new_offset(0)
  	             @start_date = @end_date - 0.5 
   	             puts "Last 12 Hours for #{@start_date} to #{@end_date}"
-  	             @title.text = "Graphs for #{groupName}/#{instanceId} "+@start_date.strftime("%b %d %H:%M")+"-"+@end_date.strftime("%b %d %H:%M")+" (30 Mins, Times in UTC, Sampling per min)"
+  	             @title.text = "Graphs for #{groupName}/#{instanceId} "+@start_date.strftime("%b %d %H:%M")+"-"+@end_date.strftime("%b %d %H:%M")+" (Times in UTC)"
  	             getStatsReports(groupName,instanceId,"Twelve Hourly")
                    else
             	       d = Date.today
@@ -124,7 +125,7 @@ class EC2_MonitorDialog < FXDialogBox
        		       @start_date = DateTime.new(d.year,d.month,d.day,1)
        		       @end_date = DateTime.new(d.year,d.month,d.day,24)
        		       puts "Daily Report for #{@start_date} to #{@end_date}"
-       		       @title.text = "Graphs for #{groupName}/#{instanceId} for "+@start_date.strftime("%b %d")+" (Hourly, Times in UTC, Sampling per min)"                   
+       		       @title.text = "Graphs for #{groupName}/#{instanceId} for "+@start_date.strftime("%b %d")+" (Times in UTC)"                   
                        getStatsReports(groupName,instanceId,"Daily")
                    end
               end     
@@ -145,14 +146,14 @@ class EC2_MonitorDialog < FXDialogBox
      if @msg != nil and @msg != "" 
        return 
      end      
-     getStats("DiskReadOps","Count",groupName,instanceId,duration)
-     if @msg != nil and @msg != "" 
-       return 
-     end       
-     getStats("DiskWriteOps","Count",groupName,instanceId,duration)
-     if @msg != nil and @msg != "" 
-       return 
-     end       
+     #getStats("DiskReadOps","Count",groupName,instanceId,duration)
+     #if @msg != nil and @msg != "" 
+     #  return 
+     #end       
+     #getStats("DiskWriteOps","Count",groupName,instanceId,duration)
+     #if @msg != nil and @msg != "" 
+     #  return 
+     #end       
      getStats("DiskReadBytes","Bytes",groupName,instanceId,duration)
      if @msg != nil and @msg != "" 
        return 
@@ -181,20 +182,31 @@ class EC2_MonitorDialog < FXDialogBox
       end
       #puts "period #{period}"
       options = {}
-      options[:measure_name] = measure
-      options[:statistics] = @stats
-      options[:start_time] = @start_date
-      options[:end_time] = @end_date
-      options[:unit] = unit
-      options[:period] = period
-      options[:dimentions] = @dimensions
-      options[:namespace] = "AWS/EC2"
-      @response = @mon.get_metric_statistics(options)
+      options["Statistics"] = @stats
+      options["StartTime" ]     = @start_date
+      options["EndTime" ]      = @end_date
+      options["Period" ]          = period
+      options["Unit" ]             = unit
+      options["MetricName"]  = measure
+      options["Namespace"]  = "AWS/EC2"
+      options["Dimensions"]  = [{"Name" => "InstanceId","Value" => instanceId}]      
+      #options = {}
+      #options[:measure_name] = measure
+      #options[:statistics] = @stats
+      #options[:start_time] = @start_date
+      #options[:end_time] = @end_date
+      #options[:unit] = unit
+      #options[:period] = period
+      #options[:dimentions] = @dimensions
+      #options[:namespace] = "AWS/EC2"
+      #@response = @mon.get_metric_statistics(options)
+      @response = @mon.get_metric_statistics(options).body['GetMetricStatisticsResult']['Datapoints']
+      puts @response
       @max_data = 0
       @data = Array.new
       d = 0
       c = 0
-      @response[:datapoints].each do |r|
+      @response.each do |r|
           avg = 0.0
           max = 0.0
           min = 0.0
@@ -202,47 +214,60 @@ class EC2_MonitorDialog < FXDialogBox
           s = {}
           r.each do |key, value|
          	puts "#{key} = #{value}"
-         	if key.to_s == "average"
+         	if key.to_s == "Average"
          	   s[:avg] = value.to_f
+         	   if unit == "Bytes"
+         	      s[:avg] = s[:avg]/60
+         	   end 
          	end
-         	if key.to_s == "maximum"
+         	if key.to_s == "Maximum"
 	 	   s[:max] = value.to_f
+	 	   if unit == "Bytes"
+		      s[:max] = s[:max]/60
+         	   end 
          	end
-         	if key.to_s == "minimum"
+         	if key.to_s == "Minimum"
 	 	   s[:min] = value.to_f
+		   if unit == "Bytes"
+         	      s[:min] = s[:min]/60
+         	   end 	 	   
          	end
-         	if key.to_s == "average" or key.to_s == "maximum" or key.to_s == "average"
+         	if key.to_s == "Average" or key.to_s == "Maximum" or key.to_s == "Average"
          	   if value.to_i > @max_data
          	      @max_data =  value.to_i
+         	      if unit == "Bytes"
+		        @max_data = @max_data/60
+         	      end 	 	   
          	   end
          	end
-		if key.to_s == "timestamp" and duration == "Fortnight"
-                   d =  DateTime.parse(value)
+		if key.to_s == "Timestamp" and duration == "Fortnight"
+                   d =  DateTime.parse(value.to_s)
                    c = d - @start_date
                    puts "Day is #{c}"
                    s[:key] = c         	
          	end
- 		if key.to_s == "timestamp" and duration == "Daily"
-         	   d =  DateTime.parse(value)
+ 		if key.to_s == "Timestamp" and duration == "Daily"
+         	   d =  DateTime.parse(value.to_s)
          	   puts "Hour  #{d.hour()}"
          	   s[:key] = d.hour()
          	end
-                if key.to_s == "timestamp" and duration == "Hourly"
-                   d =  DateTime.parse(value)
+                if key.to_s == "Timestamp" and duration == "Hourly"
+                   puts "Value #{value}"
+                   d =  DateTime.parse(value.to_s)
                    diff = d - @start_date
                    diff = diff*24*12
                    s[:key] = (diff.to_i)+1
                    puts "diff #{diff} #{(diff.to_i)+1}"
                 end
-                if key.to_s == "timestamp" and duration == "Three Hourly"
-                   d =  DateTime.parse(value)
+                if key.to_s == "Timestamp" and duration == "Three Hourly"
+                   d =  DateTime.parse(value.to_s)
                    diff = d - @start_date
                    diff = diff*24*4
                    s[:key] = (diff.to_i)+1
                    puts "diff #{diff} #{(diff.to_i)+1}"
                 end
-                if key.to_s == "timestamp" and duration == "Twelve Hourly"
-                   d =  DateTime.parse(value)
+                if key.to_s == "Timestamp" and duration == "Twelve Hourly"
+                   d =  DateTime.parse(value.to_s)
                    diff = d - @start_date
                    diff = diff*24*2
                    s[:key] = (diff.to_i)+1
@@ -279,23 +304,23 @@ class EC2_MonitorDialog < FXDialogBox
 
 def fortnight_line_chart(measure,groupName,instanceId) 
 
-title = createGraphTitle(measure,groupName,instanceId)
-d = DateTime.now()
-x_axis_labels = Array.new
-i=0 
-while i <14
- x_axis_labels[13-i] = ((d-i).day).to_s
- i=i+1
-end 
+  title = createGraphTitle(measure,groupName,instanceId)
+  d = DateTime.now()
+  x_axis_labels = Array.new
+  i=0 
+  while i <14
+    x_axis_labels[13-i] = ((d-i).day).to_s
+    i=i+1
+  end 
 
-y_axis_labels = create_y_axis_labels()
+  y_axis_labels = create_y_axis_labels()
 
 
-series_1_xy = []
-series_2_xy = []
-series_3_xy = []
+  series_1_xy = []
+  series_2_xy = []
+  series_3_xy = []
 
-@data = @data.sort_by {|r| r[:key]}
+  @data = @data.sort_by {|r| r[:key]}
   i =0
   @data.each do |r|
     series_1_xy[i] = [r[:key], r[:avg] ]
@@ -307,19 +332,19 @@ series_3_xy = []
     i=i+1
   end  
 
-GoogleChart::LineChart.new('380x140', title, true) do  |lcxy|
-  lcxy.data "Avg", series_1_xy, '458B00'
-  lcxy.data "Max", series_2_xy, '0404B4'
-  lcxy.data "Min", series_3_xy, 'B40404'
-  lcxy.max_value [13,@max_data]
-  lcxy.data_encoding = :text
-  lcxy.axis :x, :labels => x_axis_labels
-  lcxy.axis :y, :labels => y_axis_labels
-  lcxy.grid :x_step => 7.7, :y_step => 10, :length_segment => 1, :length_blank => 3
-  puts lcxy.to_url
- end 
+  GoogleChart::LineChart.new('380x140', title, true) do  |lcxy|
+    lcxy.data "Avg", series_1_xy, '458B00'
+    lcxy.data "Max", series_2_xy, '0404B4'
+    lcxy.data "Min", series_3_xy, 'B40404'
+    lcxy.max_value [13,@max_data]
+    lcxy.data_encoding = :text
+    lcxy.axis :x, :labels => x_axis_labels
+    lcxy.axis :y, :labels => y_axis_labels
+    lcxy.grid :x_step => 7.7, :y_step => 10, :length_segment => 1, :length_blank => 3
+    puts lcxy.to_url
+   end 
 
-end
+ end
 
 def daily_line_chart(measure,groupName,instanceId) 
   
@@ -481,7 +506,7 @@ def three_hourly_line_chart(measure,groupName,instanceId)
     lcxy.axis :y, :labels => y_axis_labels
     lcxy.grid :x_step => 9.1, :y_step => 10, :length_segment => 1, :length_blank => 3
     puts lcxy.to_url
-   end 
+  end 
   
 end
 
@@ -561,10 +586,10 @@ def createGraphTitle(measure,groupName,instanceId)
        title = "CPU Utilisation (Percent)"
    end
    if measure == "NetworkIn"
-       title = "Network In (Bytes)"
+       title = "Network In (Bytes/Sec)"
    end
    if measure == "NetworkOut"
-       title = "Network Out (Bytes)"
+       title = "Network Out (Bytes/Sec)"
    end
    if measure == "DiskReadOps"
       title = "Disk Reads (Operations)"
@@ -573,10 +598,10 @@ def createGraphTitle(measure,groupName,instanceId)
        title = "Disk Writes (Operations)"
    end
    if measure == "DiskReadBytes"
-       title = "Disk Reads (Bytes)"
+       title = "Disk Reads (Bytes/Sec)"
    end
    if measure == "DiskWriteBytes"
-       title = "Disk Writes (Bytes)"
+       title = "Disk Writes (Bytes/Sec)"
    end
    
    return title
@@ -619,8 +644,12 @@ end
 
 
 def error_message(owner,title,message)
-      FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
+     # FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
+end
+
 end
 
 
-end
+
+
+

@@ -1,3 +1,8 @@
+Version 3.3.5 June 2012
+----------------------
+Fix monitoring graphs, allow windows user to be specified to logon to a server. 
+Works with Windows Ruby 1.9.3 as restriction on fxruby 1.6.20 removed
+
 Version 3.3.0 May 2012
 ----------------------
 Changes to fix bugs on Mac and LInux.
