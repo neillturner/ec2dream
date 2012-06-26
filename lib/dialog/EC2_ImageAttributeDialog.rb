@@ -18,7 +18,7 @@ class EC2_ImageAttributeDialog < FXDialogBox
         if sa.size>1
 	   image_id = sa[1].rstrip
         end
-        super(owner, "Image Attributes", :opts => DECOR_ALL, :width => 550, :height => 550)
+        super(owner, "Image Attributes", :opts => DECOR_ALL, :width => 600, :height => 550)
 	page1 = FXVerticalFrame.new(self, LAYOUT_FILL, :padding => 0)        
         frame1 = FXMatrix.new(page1, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
  	FXLabel.new(frame1, "Image Id" )

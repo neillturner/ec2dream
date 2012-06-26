@@ -1,4 +1,4 @@
-EC2Dream - Build and Manage EC2 Servers Version 3.3.5 -  June 2012 
+EC2Dream - Build and Manage EC2 Servers Version 3.4.0 -  July 2012 
 ------------------------------------------------------------------
 
 EC2Dream is a Visual tool for system administration of Amazon AWS, Eucalyptus, OpenStack Clouds and local servers. 

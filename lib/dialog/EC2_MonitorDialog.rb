@@ -62,7 +62,7 @@ class EC2_MonitorDialog  < FXDialogBox
 
   def initialize(owner, instanceId, groupName, report)
 
-    puts "CreateDialog.initialize"
+    puts "EC2_MonitorDialog.initialize"
     @ec2_main = owner
     @env = ""
     @msg = ""
@@ -134,39 +134,41 @@ class EC2_MonitorDialog  < FXDialogBox
   end  
   
   def getStatsReports(groupName,instanceId,duration)
-     getStats("CPUUtilization","Percent",groupName,instanceId,duration)
+     getStats("CPUUtilization","Percent",groupName,instanceId,duration,false)
      if @msg != nil and @msg != ""
        return 
      end  
-     getStats("NetworkIn","Bytes",groupName,instanceId,duration)
+     getStats("NetworkIn","Bytes",groupName,instanceId,duration,false)
      if @msg != nil and @msg != "" 
        return 
      end       
-     getStats("NetworkOut","Bytes",groupName,instanceId,duration)
+     getStats("NetworkOut","Bytes",groupName,instanceId,duration,true)
      if @msg != nil and @msg != "" 
        return 
      end      
-     #getStats("DiskReadOps","Count",groupName,instanceId,duration)
+     #getStats("DiskReadOps","Count",groupName,instanceId,duration,false)
      #if @msg != nil and @msg != "" 
      #  return 
      #end       
-     #getStats("DiskWriteOps","Count",groupName,instanceId,duration)
+     #getStats("DiskWriteOps","Count",groupName,instanceId,duration,false)
      #if @msg != nil and @msg != "" 
      #  return 
      #end       
-     getStats("DiskReadBytes","Bytes",groupName,instanceId,duration)
+     getStats("DiskReadBytes","Bytes",groupName,instanceId,duration,false)
      if @msg != nil and @msg != "" 
        return 
      end       
-     getStats("DiskWriteBytes","Bytes",groupName,instanceId,duration)
+     getStats("DiskWriteBytes","Bytes",groupName,instanceId,duration,false)
      if @msg != nil and @msg != "" 
        return 
      end       
   end   
   
-  def getStats(measure,unit,groupName,instanceId,duration)
+  def getStats(measure,unit,groupName,instanceId,duration,debug)
      begin  
-      puts "getStats #{measure} #{duration}"
+      if debug 
+         puts "getStats #{measure} #{duration}"
+      end   
       period = 3600
       case duration
         when "Fortnight"
@@ -201,7 +203,9 @@ class EC2_MonitorDialog  < FXDialogBox
       #options[:namespace] = "AWS/EC2"
       #@response = @mon.get_metric_statistics(options)
       @response = @mon.get_metric_statistics(options).body['GetMetricStatisticsResult']['Datapoints']
-      puts @response
+      #if debug 
+      #   puts @response
+      #end   
       @max_data = 0
       @data = Array.new
       d = 0
@@ -213,7 +217,13 @@ class EC2_MonitorDialog  < FXDialogBox
           time = 0
           s = {}
           r.each do |key, value|
-         	puts "#{key} = #{value}"
+                if debug
+                   if key == "Timestamp"
+         	      puts "#{key} = #{value} ---------------------------------------"
+         	   else
+         	      puts "#{key} = #{value}"
+         	   end
+         	end   
          	if key.to_s == "Average"
          	   s[:avg] = value.to_f
          	   if unit == "Bytes"
@@ -233,49 +243,63 @@ class EC2_MonitorDialog  < FXDialogBox
          	   end 	 	   
          	end
          	if key.to_s == "Average" or key.to_s == "Maximum" or key.to_s == "Average"
-         	   if value.to_i > @max_data
-         	      @max_data =  value.to_i
-         	      if unit == "Bytes"
-		        @max_data = @max_data/60
-         	      end 	 	   
+         	   if unit == "Bytes"
+         	      if value.to_i > @max_data*60
+         	         @max_data =  (value.to_i)/60
+           	      end   
+         	    else 
+         	      if value.to_i > @max_data
+		         @max_data =  value.to_i
+         	      end 	 
          	   end
          	end
 		if key.to_s == "Timestamp" and duration == "Fortnight"
                    d =  DateTime.parse(value.to_s)
                    c = d - @start_date
-                   puts "Day is #{c}"
+                   if debug 
+                      puts "Day is #{c}"
+                   end   
                    s[:key] = c         	
          	end
  		if key.to_s == "Timestamp" and duration == "Daily"
          	   d =  DateTime.parse(value.to_s)
-         	   puts "Hour  #{d.hour()}"
+         	   if debug 
+         	      puts "Hour  #{d.hour()}"
+         	   end   
          	   s[:key] = d.hour()
          	end
                 if key.to_s == "Timestamp" and duration == "Hourly"
-                   puts "Value #{value}"
+                   if debug 
+                      puts "Value #{value}"
+                   end   
                    d =  DateTime.parse(value.to_s)
                    diff = d - @start_date
                    diff = diff*24*12
                    s[:key] = (diff.to_i)+1
-                   puts "diff #{diff} #{(diff.to_i)+1}"
+                   if debug
+                      puts "diff #{diff} #{(diff.to_i)+1}"
+                   end   
                 end
                 if key.to_s == "Timestamp" and duration == "Three Hourly"
                    d =  DateTime.parse(value.to_s)
                    diff = d - @start_date
                    diff = diff*24*4
                    s[:key] = (diff.to_i)+1
-                   puts "diff #{diff} #{(diff.to_i)+1}"
+                   if debug 
+                      puts "diff #{diff} #{(diff.to_i)+1}"
+                   end   
                 end
                 if key.to_s == "Timestamp" and duration == "Twelve Hourly"
                    d =  DateTime.parse(value.to_s)
                    diff = d - @start_date
                    diff = diff*24*2
                    s[:key] = (diff.to_i)+1
-                   puts "diff #{diff} #{(diff.to_i)+1}"
+                   if debug 
+                      puts "diff #{diff} #{(diff.to_i)+1}"
+                   end   
                 end                
   	  end
   	  @data << s
-          puts "---------------------------------------"      
       end       
      rescue
       puts "***Error: Failed  "+$!.to_s
@@ -285,24 +309,24 @@ class EC2_MonitorDialog  < FXDialogBox
      end
     f = FXImageFrame.new(@topFrame, nil, :opts => LAYOUT_FILL)
     if duration == "Fortnight"
-       f.image = FXPNGImage.new(app, open(fortnight_line_chart(measure,groupName,instanceId).to_escaped_url, "rb").read)
+       f.image = FXPNGImage.new(app, open(fortnight_line_chart(measure,groupName,instanceId,debug).to_escaped_url, "rb").read)
     end
     if duration == "Daily"
-       f.image = FXPNGImage.new(app, open(daily_line_chart(measure,groupName,instanceId).to_escaped_url, "rb").read)
+       f.image = FXPNGImage.new(app, open(daily_line_chart(measure,groupName,instanceId,debug).to_escaped_url, "rb").read)
     end
     if duration == "Hourly"
-       f.image = FXPNGImage.new(app, open(hourly_line_chart(measure,groupName,instanceId).to_escaped_url, "rb").read)
+       f.image = FXPNGImage.new(app, open(hourly_line_chart(measure,groupName,instanceId,debug).to_escaped_url, "rb").read)
     end
     if duration == "Three Hourly"
-       f.image = FXPNGImage.new(app, open(three_hourly_line_chart(measure,groupName,instanceId).to_escaped_url, "rb").read)
+       f.image = FXPNGImage.new(app, open(three_hourly_line_chart(measure,groupName,instanceId,debug).to_escaped_url, "rb").read)
     end
     if duration == "Twelve Hourly"
-       f.image = FXPNGImage.new(app, open(twelve_hourly_line_chart(measure,groupName,instanceId).to_escaped_url, "rb").read)
+       f.image = FXPNGImage.new(app, open(twelve_hourly_line_chart(measure,groupName,instanceId,debug).to_escaped_url, "rb").read)
     end    
   end
   
 
-def fortnight_line_chart(measure,groupName,instanceId) 
+def fortnight_line_chart(measure,groupName,instanceId,debug) 
 
   title = createGraphTitle(measure,groupName,instanceId)
   d = DateTime.now()
@@ -326,27 +350,31 @@ def fortnight_line_chart(measure,groupName,instanceId)
     series_1_xy[i] = [r[:key], r[:avg] ]
     series_2_xy[i] = [r[:key], r[:max] ]
     series_3_xy[i] = [r[:key], r[:min] ]
-    puts "avg - #{i}   [#{r[:key]},#{r[:avg]}]"
-    puts "max - #{i}   [#{r[:key]},#{r[:max]}]"
-    puts "min - #{i}   [#{r[:key]},#{r[:min]}]"
+    if debug 
+        puts "avg - #{i}   [#{r[:key]},#{r[:avg]}]"
+        puts "max - #{i}   [#{r[:key]},#{r[:max]}]"
+        puts "min - #{i}   [#{r[:key]},#{r[:min]}]"
+    end    
     i=i+1
   end  
 
   GoogleChart::LineChart.new('380x140', title, true) do  |lcxy|
-    lcxy.data "Avg", series_1_xy, '458B00'
     lcxy.data "Max", series_2_xy, '0404B4'
+    lcxy.data "Avg", series_1_xy, '458B00'
     lcxy.data "Min", series_3_xy, 'B40404'
     lcxy.max_value [13,@max_data]
     lcxy.data_encoding = :text
     lcxy.axis :x, :labels => x_axis_labels
     lcxy.axis :y, :labels => y_axis_labels
     lcxy.grid :x_step => 7.7, :y_step => 10, :length_segment => 1, :length_blank => 3
-    puts lcxy.to_url
+    if debug
+       puts lcxy.to_url
+    end   
    end 
 
  end
 
-def daily_line_chart(measure,groupName,instanceId) 
+def daily_line_chart(measure,groupName,instanceId,debug) 
   
   title = createGraphTitle(measure,groupName,instanceId)
   d = DateTime.now()
@@ -369,27 +397,31 @@ def daily_line_chart(measure,groupName,instanceId)
     series_1_xy[i] = [r[:key], r[:avg] ]
     series_2_xy[i] = [r[:key], r[:max] ]
     series_3_xy[i] = [r[:key], r[:min] ]
-    puts "avg - #{i}   [#{r[:key]},#{r[:avg]}]"
-    puts "max - #{i}   [#{r[:key]},#{r[:max]}]"
-    puts "min - #{i}   [#{r[:key]},#{r[:min]}]"
+    if debug
+       puts "avg - #{i}   [#{r[:key]},#{r[:avg]}]"
+       puts "max - #{i}   [#{r[:key]},#{r[:max]}]"
+       puts "min - #{i}   [#{r[:key]},#{r[:min]}]"
+    end   
     i=i+1
   end  
  
   GoogleChart::LineChart.new('380x140', title, true) do  |lcxy|
-    lcxy.data "Avg", series_1_xy, '458B00'
     lcxy.data "Max", series_2_xy, '0404B4'
+    lcxy.data "Avg", series_1_xy, '458B00'
     lcxy.data "Min", series_3_xy, 'B40404'
     lcxy.max_value [24,@max_data]
     lcxy.data_encoding = :text
     lcxy.axis :x, :labels => x_axis_labels
     lcxy.axis :y, :labels => y_axis_labels
     lcxy.grid :x_step => 4.2, :y_step => 10, :length_segment => 1, :length_blank => 3
-    puts lcxy.to_url
+    if debug
+       puts lcxy.to_url
+    end   
    end 
   
 end
 
-def hourly_line_chart(measure,groupName,instanceId) 
+def hourly_line_chart(measure,groupName,instanceId,debug) 
   title = createGraphTitle(measure,groupName,instanceId)
   m = @start_date.min()
   h = @start_date.hour()
@@ -428,27 +460,31 @@ def hourly_line_chart(measure,groupName,instanceId)
     series_1_xy[i] = [r[:key], r[:avg] ]
     series_2_xy[i] = [r[:key], r[:max] ]
     series_3_xy[i] = [r[:key], r[:min] ]
-    puts "avg - #{i}   [#{r[:key]},#{r[:avg]}]"
-    puts "max - #{i}   [#{r[:key]},#{r[:max]}]"
-    puts "min - #{i}   [#{r[:key]},#{r[:min]}]"
+    if debug
+       puts "avg - #{i}   [#{r[:key]},#{r[:avg]}]"
+       puts "max - #{i}   [#{r[:key]},#{r[:max]}]"
+       puts "min - #{i}   [#{r[:key]},#{r[:min]}]"
+    end   
     i=i+1
   end
   
   GoogleChart::LineChart.new('380x140', title, true) do  |lcxy|
+    lcxy.data "Max", series_2_xy, '0404B4' 
     lcxy.data "Avg", series_1_xy, '458B00'
-    lcxy.data "Max", series_2_xy, '0404B4'
     lcxy.data "Min", series_3_xy, 'B40404'
     lcxy.max_value [11,@max_data]
     lcxy.data_encoding = :text
     lcxy.axis :x, :labels => x_axis_labels
     lcxy.axis :y, :labels => y_axis_labels
     lcxy.grid :x_step => 9.1, :y_step => 10, :length_segment => 1, :length_blank => 3
-    puts lcxy.to_url
+    if debug
+       puts lcxy.to_url
+    end   
    end 
   
 end
 
-def three_hourly_line_chart(measure,groupName,instanceId) 
+def three_hourly_line_chart(measure,groupName,instanceId,debug) 
   title = createGraphTitle(measure,groupName,instanceId)
   m = @start_date.min()
   h = @start_date.hour()
@@ -490,27 +526,31 @@ def three_hourly_line_chart(measure,groupName,instanceId)
     series_1_xy[i] = [r[:key], r[:avg] ]
     series_2_xy[i] = [r[:key], r[:max] ]
     series_3_xy[i] = [r[:key], r[:min] ]
-    puts "avg - #{i}   [#{r[:key]},#{r[:avg]}]"
-    puts "max - #{i}   [#{r[:key]},#{r[:max]}]"
-    puts "min - #{i}   [#{r[:key]},#{r[:min]}]"
+    if debug
+       puts "#{measure}#{groupName} avg - #{i}   [#{r[:key]},#{r[:avg]}]"
+       puts "#{measure}#{groupName} max - #{i}   [#{r[:key]},#{r[:max]}]"
+       puts "#{measure}#{groupName} min - #{i}   [#{r[:key]},#{r[:min]}]"
+    end   
     i=i+1
   end
   
   GoogleChart::LineChart.new('380x140', title, true) do  |lcxy|
-    lcxy.data "Avg", series_1_xy, '458B00'
     lcxy.data "Max", series_2_xy, '0404B4'
+    lcxy.data "Avg", series_1_xy, '458B00'
     lcxy.data "Min", series_3_xy, 'B40404'
     lcxy.max_value [11,@max_data]
     lcxy.data_encoding = :text
     lcxy.axis :x, :labels => x_axis_labels
     lcxy.axis :y, :labels => y_axis_labels
     lcxy.grid :x_step => 9.1, :y_step => 10, :length_segment => 1, :length_blank => 3
-    puts lcxy.to_url
+    if debug
+       puts lcxy.to_url
+    end   
   end 
   
 end
 
-def twelve_hourly_line_chart(measure,groupName,instanceId) 
+def twelve_hourly_line_chart(measure,groupName,instanceId,debug) 
   title = createGraphTitle(measure,groupName,instanceId)
   m = @start_date.min()
   h = @start_date.hour()
@@ -560,22 +600,26 @@ def twelve_hourly_line_chart(measure,groupName,instanceId)
     series_1_xy[i] = [r[:key], r[:avg] ]
     series_2_xy[i] = [r[:key], r[:max] ]
     series_3_xy[i] = [r[:key], r[:min] ]
-    puts "avg - #{i}   [#{r[:key]},#{r[:avg]}]"
-    puts "max - #{i}   [#{r[:key]},#{r[:max]}]"
-    puts "min - #{i}   [#{r[:key]},#{r[:min]}]"
+    if debug
+       puts "avg - #{i}   [#{r[:key]},#{r[:avg]}]"
+       puts "max - #{i}   [#{r[:key]},#{r[:max]}]"
+       puts "min - #{i}   [#{r[:key]},#{r[:min]}]"
+    end   
     i=i+1
   end
   
   GoogleChart::LineChart.new('380x140', title, true) do  |lcxy|
-    lcxy.data "Avg", series_1_xy, '458B00'
     lcxy.data "Max", series_2_xy, '0404B4'
+    lcxy.data "Avg", series_1_xy, '458B00'
     lcxy.data "Min", series_3_xy, 'B40404'
     lcxy.max_value [24,@max_data]
     lcxy.data_encoding = :text
     lcxy.axis :x, :labels => x_axis_labels
     lcxy.axis :y, :labels => y_axis_labels
     lcxy.grid :x_step => 4.2, :y_step => 10, :length_segment => 1, :length_blank => 3
-    puts lcxy.to_url
+    if debug
+       puts lcxy.to_url
+    end   
    end 
   
 end
@@ -609,30 +653,36 @@ end
 
 
 def create_y_axis_labels
-  puts "max data #{@max_data}"
+  #puts "max data #{@max_data}"
   if @max_data < 10 
      @max_data = 10
   end  
   y_axis_labels = (0..10).to_a.collect do |v|
-     puts "v #{v}"
+     #puts "v #{v}"
      if v ==5
         t = @max_data/2
         if t > 10000000
               ((t/1000000).to_i).to_s+"M"
+        else if t > 1000000
+              (((t.to_f)/1000000).round(2)).to_s+"M"   
         else if @max_data > 10000
                 ((t/1000).to_i).to_s+"K"
              else 
                   t.to_s
              end
+        end     
         end        
      else if v == 10
            if @max_data > 10000000
               ((@max_data/1000000).to_i).to_s+"M"
+           else if @max_data > 1000000
+              (((@max_data.to_f)/1000000).round(2)).to_s+"M"     
            else if @max_data > 10000
                 ((@max_data/1000).to_i).to_s+"K"
                 else 
                   @max_data.to_s
                 end
+           end     
            end
           else
             nil

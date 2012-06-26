@@ -24,12 +24,12 @@ class AS_BlockMappingEditDialog < FXDialogBox
     super(owner, @title, :opts => DECOR_ALL, :width => 350, :height => 175)
     frame1 = FXMatrix.new(self, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
     FXLabel.new(frame1, "Device Name" )
-    device_name = FXTextField.new(frame1, 30, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
-    device_name.enabled = false
+    device_name = FXTextField.new(frame1, 30, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    device_name.enabled = true
     FXLabel.new(frame1, "" ) 
     FXLabel.new(frame1, "Virtual Name" )
-    virtual_name = FXTextField.new(frame1, 30, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
-    virtual_name.enabled = false
+    virtual_name = FXTextField.new(frame1, 30, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    virtual_name.enabled = true
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "" )
     save = FXButton.new(frame1, "   &Return   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_LEFT)

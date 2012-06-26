@@ -476,7 +476,7 @@ class EC2_Environment < FXImageFrame
                  end   
                rescue
                  @as = nil 
-                 puts "***Error on connection to ELB - check your keys"
+                 puts "***Error on connection to auto scaling - check your keys"
                  error_message(@ec2_main.tabBook,"Auto Scaling Connection Error",$!.to_s+" - check your EC2 Access Settings")
                end
                return @as  
@@ -489,6 +489,47 @@ class EC2_Environment < FXImageFrame
   
     def reset_as_connection
        @as = nil 
+    end
+
+
+def as_connection_2
+          puts "environment.as_connection_2"
+          if @as2 != nil
+            return @as2
+          else
+            settings = @ec2_main.settings
+            if settings.get('EC2_PLATFORM') != nil and settings.get('EC2_PLATFORM') == "amazon" 
+              begin
+                ec2_url = settings.get('EC2_URL')
+                if ec2_url != nil and ec2_url.length>0
+                  region = "us-east-1"
+                  sa = (ec2_url).split"."
+		  if sa.size>1
+		      region = (sa[1])
+                  end
+                  if region == "amazonaws"
+                     region = "us-east-1"
+                  end   
+                  puts "Connecting to #{region}"  
+                  @as2 = Fog::AWS::AutoScaling.new(:aws_access_key_id => settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key =>settings.get('AMAZON_SECRET_ACCESS_KEY'), :region => region ) 
+                else
+                  @as2 = Fog::AWS::AutoScaling.new(:aws_access_key_id => settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key =>settings.get('AMAZON_SECRET_ACCESS_KEY')) 
+                end   
+              rescue
+                @as2 = nil 
+                puts "***Error on connection to auto scaling 2 - check your keys"
+                error_message(@ec2_main.tabBook,"Auto Scaling 2 Connection Error",$!.to_s+" - check your EC2 Access Settings")
+              end
+              return @as2  
+            else
+              @as2 = nil 
+              puts "***No Auto Scaling unless Amazon platform"
+            end 
+         end
+  end   
+  
+   def reset_as2_connection
+         @as2 = nil 
     end
 
   

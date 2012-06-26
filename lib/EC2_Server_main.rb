@@ -234,7 +234,7 @@ class EC2_Server
                  dialog.execute
                  if dialog.created
                     image_id = dialog.image_id
-                    FXMessageBox.information(page1,MBOX_OK,"EBS Image #{image_id} created")    
+                    FXMessageBox.information(@ec2_main,MBOX_OK,"EBS Image","EBS Image #{image_id} created")    
                  end
               else 
                  dialog = EC2_ImageRegisterDialog.new(@ec2_main)
@@ -432,8 +432,13 @@ class EC2_Server
 	end
 	FXLabel.new(@frame1, "" )        
 	FXLabel.new(@frame1, "Win Admin Password" )
-	@server['Win_Admin_Password'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
-	@server['Win_Admin_Password_Button'] = FXButton.new(@frame1, "", :opts => BUTTON_TOOLBAR)
+	@server['Win_Admin_Password'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_PASSWD)
+	@server['Win_Admin_Password'].connect(SEL_COMMAND) do |sender, sel, data|
+	   @ec2_main.launch.put('Win_Admin_Password',data) 
+    	   @ec2_main.launch.save        
+	end
+	@frame1g = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
+	@server['Win_Admin_Password_Button'] = FXButton.new(@frame1g, "", :opts => BUTTON_TOOLBAR)
 	@key = @ec2_main.makeIcon("key.png")
 	@key.create
 	@server['Win_Admin_Password_Button'].icon = @key
@@ -456,6 +461,7 @@ class EC2_Server
                      @windows_admin_pw[instance_id] = pw
                      @ec2_main.launch.put('Win_Admin_Password',pw) 
     	 	     @ec2_main.launch.save
+    	 	     FXMessageBox.information(@ec2_main,MBOX_OK,"Win Admin Password","Windows Admin password #{pw} saved") 
 	           rescue
 	             error_message("Error - Unable to get Windows password", $!.to_s) 
 	           end
@@ -470,6 +476,13 @@ class EC2_Server
              error_message("Error","Server not running. Press refresh")
            end 
         end
+        @server['Win_Admin_Password_Button2'] = FXButton.new(@frame1g, "", :opts => BUTTON_TOOLBAR)
+	@server['Win_Admin_Password_Button2'].icon = @magnifier
+	@server['Win_Admin_Password_Button2'].tipText = "Show Windows Admin Password"
+	@server['Win_Admin_Password_Button2'].connect(SEL_COMMAND) do
+	   spdialog = EC2_ShowPasswordDialog.new(@ec2_main,"Win Admin Password",@server['Win_Admin_Password'].text)
+           spdialog.execute	
+	end 
 	FXLabel.new(@frame1, "AMI Launch Index" )    	 
         @server['Ami_Launch_Index'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
         FXLabel.new(@frame1, "" )
@@ -852,6 +865,7 @@ class EC2_Server
 	         pw = @server['Win_Admin_Password'].text
 	         if pw != nil and pw != ""
 	           c = "cmd.exe /c \@start \"\" \""+ENV['EC2DREAM_HOME']+"/launchrdp/LaunchRDP.exe\" #{s} 3389 #{user} #{s} #{pw} 0 1 0"
+	           #c = "cmd.exe /c \@start \"\" \""+ENV['EC2DREAM_HOME']+"/launchrdp/rdp.exe\" /v:#{s}:3389 /u:#{user} /p:#{pw}"
 	           puts c
 	           system(c)
 	         else
@@ -1054,7 +1068,7 @@ class EC2_Server
       	       node_name = "#{chef_repository}/nodes/#{chef_node}.json"
       	       ec2_server_name = @server['Public_DSN'].text
       	       ssh_user = @server['EC2_SSH_User'].text
-      	    end   
+      	    end 
       	    if RUBY_PLATFORM.index("mswin") != nil  or RUBY_PLATFORM.index("i386-mingw32") != nil
                 if chef_repository != nil
                   chef_repository = chef_repository.gsub('/','\\') 
@@ -1064,11 +1078,11 @@ class EC2_Server
                 end
                 node_name = node_name.gsub('/','\\') 
       	    end
-      	    if chef_repository == nil or chef_repository == ""
+      	    if chef_repository == nil or chef_repository == "" 
                error_message("No Chef Repository","No CHEF_REPOSITORY specified in Settings")
                return
             end
-            if private_key == nil or private_key == ""
+            if private_key == nil or private_key == "" and @server['Platform'].text != "windows"
                error_message("No ec2 ssh private key","No EC2_SSH_PRIVATE_KEY specified in Settings")
                return
             end
@@ -1089,7 +1103,7 @@ class EC2_Server
             end
             answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm Chef Solo","Confirm Running of Chef-Solo for Node #{chef_node} on server #{short_name}")
             if answer == MBOX_CLICKED_YES
-
+              if @server['Platform'].text != "windows"
                if RUBY_PLATFORM.index("mswin") != nil  or RUBY_PLATFORM.index("i386-mingw32") != nil
                   ENV["EC2_CHEF_REPOSITORY"] = chef_repository
                   ENV["EC2_SSH_PRIVATE_KEY"] = private_key
@@ -1100,7 +1114,17 @@ class EC2_Server
     	          c = "#{ENV['EC2DREAM_HOME']}/chef/chef_push.sh #{chef_repository} #{chef_node} #{ec2_server_name} #{private_key} #{ssh_user}"
     	          puts c
     	          system(c)
-    	       end   
+    	       end
+    	      else
+    	        # handle windows servers
+		if RUBY_PLATFORM.index("mswin") != nil  or RUBY_PLATFORM.index("i386-mingw32") != nil
+                  ENV["EC2_CHEF_REPOSITORY"] = chef_repository
+                  ENV["EC2_SSH_PASSWORD"] = @server['Win_Admin_Password'].text
+                  c = "cmd.exe /c \@start \"chef-solo #{chef_node} #{ec2_server_name}\" \"#{ENV['EC2DREAM_HOME']}/chef/chef_push_win.bat\"  #{chef_node} #{ec2_server_name} #{ssh_user}"
+    	          puts c
+    	          system(c)
+    	        end   	      
+    	      end
     	    end
    end
 end

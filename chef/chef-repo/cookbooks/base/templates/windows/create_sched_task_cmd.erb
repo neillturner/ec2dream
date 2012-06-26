@@ -1,0 +1,5 @@
+REM 
+REM Create scheduled task for cloud_init
+REM 
+schtasks /delete /tn cloud_init /f
+schtasks /create /tn cloud_init /sc onstart /tr "c:\opscode\chef\embedded\bin\ruby c:\user\administrator\cloud_init.rb" /rl highest /ru administrator /rp "<%= @node[:base][:win_admin_password] %>"

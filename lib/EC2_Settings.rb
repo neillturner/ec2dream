@@ -10,6 +10,7 @@ require 'dialog/EC2_ImageDialog'
 require 'dialog/EC2_RegionsDialog'
 require 'dialog/EC2_PlatformsDialog'
 require 'dialog/EC2_TimezoneDialog'
+require 'dialog/EC2_ShowPasswordDialog'
 
 class EC2_Settings
 
@@ -82,8 +83,14 @@ class EC2_Settings
 	@settings['AMAZON_ACCESS_KEY_ID'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
  	FXLabel.new(frame1, "" )
  	FXLabel.new(frame1, "SECRET_ACCESS_KEY" )
-	@settings['AMAZON_SECRET_ACCESS_KEY'] = FXTextField.new(frame1, 60, nil, 0, :opts => TEXTFIELD_PASSWD|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
- 	FXLabel.new(frame1, "" )
+	@settings['AMAZON_SECRET_ACCESS_KEY'] = FXTextField.new(frame1, 60, nil, 0, :opts => TEXTFIELD_PASSWD|FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+	@settings['AMAZON_SECRET_ACCESS_KEY_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
+	@settings['AMAZON_SECRET_ACCESS_KEY_BUTTON'].icon = @magnifier
+	@settings['AMAZON_SECRET_ACCESS_KEY_BUTTON'].tipText = "Show Secret Access Key"
+	@settings['AMAZON_SECRET_ACCESS_KEY_BUTTON'].connect(SEL_COMMAND) do
+	   spdialog = EC2_ShowPasswordDialog.new(@ec2_main,"AMAZON_SECRET_ACCESS_KEY",@settings['AMAZON_SECRET_ACCESS_KEY'].text)
+           spdialog.execute	
+	end 	
         FXLabel.new(frame1, "AMAZON_ACCOUNT_ID" )
 	@settings['AMAZON_ACCOUNT_ID'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
 	FXLabel.new(frame1, "" ) 	

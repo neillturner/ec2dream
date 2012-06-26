@@ -106,15 +106,17 @@ class EC2_BlockMappingEditDialog < FXDialogBox
     save.connect(SEL_COMMAND) do |sender, sel, data|
        @bm[:device_name] = device_name.text
        @bm[:virtual_name] = virtual_name.text
-       @bm[:ebs_snapshot_id] = snap.text
-       @bm[:ebs_volume_size] = volume_size.text
-       #if image_bm == false
-          if delete_on_termination.itemCurrent?(1) 
-             @bm[:ebs_delete_on_termination] ="false"  
-          else
-             @bm[:ebs_delete_on_termination] ="true"
-          end   
-       #end
+       if snap.text != nil and snap.text != ""
+          @bm[:ebs_snapshot_id] = snap.text
+          @bm[:ebs_volume_size] = volume_size.text
+          #if image_bm == false
+             if delete_on_termination.itemCurrent?(1) 
+                @bm[:ebs_delete_on_termination] ="false"  
+             else
+                @bm[:ebs_delete_on_termination] ="true"
+             end   
+          #end
+       end   
        @saved = true
        self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
     end

@@ -22,6 +22,10 @@ class EC2_List
         @image_type = "Owned By Me"
         @image_platform = "All Platforms"
         @image_root = ""
+	@search_search = ""
+        @search_type = "Owned By Me"
+        @search_platform = "All Platforms"
+        @search_root = ""        
         @data = Array.new
         @tags = Array.new
         @ebs_vols = {}
@@ -128,12 +132,16 @@ class EC2_List
                  load_sort(@type,@curr_sort)
               end 
             when "Images"
-	       createdialog = EC2_ImageSelectDialog.new(@ec2_main)
+	       createdialog = EC2_ImageSelectDialog.new(@ec2_main,@search_type,@search_platform,@search_root,@search_search)
 	       createdialog.execute
 	       @image_search =  createdialog.search
 	       @image_type = createdialog.type
                @image_platform = createdialog.platform
                @image_root = createdialog.root_device_type
+	       @search_search =  createdialog.search
+	       @search_type = createdialog.type
+               @search_platform = createdialog.platform
+               @search_root = createdialog.root_device_type               
                if createdialog.selected 
                  load_sort(@type,@curr_sort)
                end
@@ -1464,11 +1472,11 @@ class EC2_List
              @table.setColumnWidth(1,350)	
   	when "Images"
     		@table.setColumnText(0,"AMI")
-    		@table.setColumnWidth(0,150)
+    		@table.setColumnWidth(0,100)
     		@table.setColumnText(1,"Manifest")
-    		@table.setColumnWidth(1,420)
+    		@table.setColumnWidth(1,320)
     		@table.setColumnText(2,"State")
-    		@table.setColumnWidth(2,150)    		
+    		@table.setColumnWidth(2,100)    		
       	        @table.setColumnText(3,"Tags")
      	        @table.setColumnWidth(3,150)    		
     		@table.setColumnText(4,'Visibility')

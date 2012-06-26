@@ -21,6 +21,7 @@ require 'common/EC2_Block_Mapping'
 require 'common/EC2_ResourceTags'
 require 'dialog/OPS_ImageDialog'
 require 'dialog/OPS_FlavorDialog'
+require 'dialog/EC2_ShowPasswordDialog'
 
 require 'EC2_Launch_main'
 require 'EC2_Launch_ec2'

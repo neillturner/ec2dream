@@ -19,5 +19,6 @@
 
 include_recipe "base_hosted::centos" if platform?("centos")
 include_recipe "base_hosted::ubuntu" if platform?("ubuntu")
+include_recipe "base_hosted::windows" if platform?("windows")
 
 

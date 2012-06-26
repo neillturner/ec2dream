@@ -107,12 +107,16 @@ class EC2_Launch
 	 if bm.size>0 
 	   i=0
            bm.each do |m|
+            if m != nil 
+              if m[:ebs_snapshot_id] != nil
 	        sa = (m[:ebs_snapshot_id]).split"/"
 		  if sa.size>1
                    m[:ebs_snapshot_id]=sa[1]
 	        end
+	      end  
               bm[i]=m
-              i = i+1
+            end  
+            i = i+1
            end
            #if @launch['Image_Root_Device_Type'].text != "ebs" or bm.size>1
               launch_parm[:block_device_mappings] = bm

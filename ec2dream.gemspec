@@ -22,7 +22,7 @@
 
 Gem::Specification.new do |spec|
   spec.name = 'ec2dream'
-  spec.version = '3.3.5'
+  spec.version = '3.4.0'
   spec.authors = ['Neill Turner']
   spec.email = 'neillwturner@gmail.com'
   spec.executables = ["ec2dream"]
@@ -35,6 +35,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency('rubyzip')
   spec.add_dependency('gchartrb')
   spec.add_dependency('pocketknife_ec2dream', '>= 0.1.5')
+  spec.add_dependency('pocketknife_windows')
   spec.add_dependency('fog', '>= 1.1.2')
 
   spec.description = <<-EOF
@@ -54,6 +55,7 @@ EOF
     candidates = candidates +  Dir.glob("{putty}/*")
     candidates = candidates +  Dir.glob("{stacks}/*")
     candidates = candidates +  Dir.glob("{tar}/*")
+    candidates = candidates +  Dir.glob("{wget}/*")
     candidates = candidates +  Dir.glob("{WinSCP}/*")
   spec.files = candidates.sort
   spec.test_files = Dir.glob('test/**/*')

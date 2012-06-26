@@ -454,6 +454,63 @@ class EC2_Launch
            @block_mapping.set_curr_row(which.row)
 	   @launch['Block_Devices'].selectRow(@block_mapping.curr_row)
 	end
+        page1a = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
+        FXLabel.new(page1a, " ",:opts => LAYOUT_LEFT )
+        @create_button = FXButton.new(page1a, " ",:opts => BUTTON_TOOLBAR)
+	@create = @ec2_main.makeIcon("new.png")
+	@create.create
+	@create_button.icon = @create
+	@create_button.tipText = "  Add Block Device  "
+	@create_button.connect(SEL_COMMAND) do |sender, sel, data|
+	      editdialog = EC2_BlockMappingEditDialog.new(@ec2_main,nil)
+              editdialog.execute
+              if editdialog.saved 
+                bm = editdialog.block_mapping
+                @block_mapping.push(bm)
+                @block_mapping.load_table(@launch['Block_Devices'])
+              end
+        end
+        @create_button.connect(SEL_UPDATE) do |sender, sel, data|
+	    sender.enabled = true
+	end
+        @edit_button = FXButton.new(page1a, " ",:opts => BUTTON_TOOLBAR)
+	@edit = @ec2_main.makeIcon("application_edit.png")
+	@edit.create
+	@edit_button.icon = @edit
+	@edit_button.tipText = "  Edit Block Device  "
+	@edit_button.connect(SEL_COMMAND) do |sender, sel, data|
+	      if @block_mapping.curr_row == nil
+		 error_message("No Block Device selected","No Block Device selected to edit")
+              else	
+	         editdialog = EC2_BlockMappingEditDialog.new(@ec2_main,@block_mapping.get)
+                 editdialog.execute
+                 if editdialog.saved 
+                    bm = editdialog.block_mapping
+                    @block_mapping.update(bm)
+                    @block_mapping.load_table(@launch['Block_Devices'])
+                 end
+              end   
+        end	
+	@delete_button = FXButton.new(page1a, " ",:opts => BUTTON_TOOLBAR)
+	@delete = @ec2_main.makeIcon("kill.png")
+	@delete.create
+	@delete_button.icon = @delete
+	@delete_button.tipText = "  Delete Block Device  "
+	@delete_button.connect(SEL_COMMAND) do |sender, sel, data|
+		if @block_mapping.curr_row == nil
+		   error_message("No Block Device selected","No Block Device selected to delete")
+                else
+                   m = @block_mapping.get
+                   answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm delete","Confirm delete of Block Device #{m[:device_name]}")
+                   if answer == MBOX_CLICKED_YES
+                      @block_mapping.delete
+                      @block_mapping.load_table(@launch['Block_Devices'])                   
+                   end   
+	        end  
+	end
+	@delete_button.connect(SEL_UPDATE) do |sender, sel, data|
+	       sender.enabled = true
+	end		
 	FXLabel.new(@frame1, "" )
 	FXLabel.new(@frame1, "Notes")
 	@text_area = FXText.new(@frame1, :height => 100, :opts => LAYOUT_FIX_HEIGHT|TEXT_WORDWRAP|LAYOUT_FILL, :padding => 0)
@@ -760,8 +817,8 @@ class EC2_Launch
 	FXLabel.new(@frame3, "Block Device Mappings")
 	@as_launch['Block_Device_Mappings'] = FXTable.new(@frame3,:height => 40, :opts => LAYOUT_FIX_HEIGHT|LAYOUT_FILL|TABLE_COL_SIZABLE|TABLE_ROW_SIZABLE|TABLE_READONLY  )
 	@as_launch['Block_Device_Mappings'].connect(SEL_COMMAND) do |sender, sel, which|
-	   @as_bm.curr_row = which.row
-	   @as_launch['Block_Devices_Mappings'].selectRow(@as_bm.curr_row)
+	   @as_bm.set_curr_row(which.row)
+	   @as_launch['Block_Device_Mappings'].selectRow(@as_bm.curr_row)
 	end 
    	page3a = FXHorizontalFrame.new(@frame3,LAYOUT_FILL_X, :padding => 0)
         FXLabel.new(page3a, " ",:opts => LAYOUT_LEFT )

@@ -18,6 +18,7 @@ require 'dialog/EC2_InstanceModifyDialog'
 require 'dialog/EC2_SnapCreateDialog'
 require 'common/EC2_ResourceTags'
 require 'dialog/EC2_ImageRegisterDialog'
+require 'dialog/EC2_ShowPasswordDialog'
 require 'common/EC2_Run'
 
 require 'EC2_Server_main'

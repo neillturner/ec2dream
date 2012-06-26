@@ -1,3 +1,9 @@
+Version 3.4.0 July 2012
+-----------------------
+Various fixes including correcting monitoring graphs so values should be correct now.
+added popups to show password fields. 
+Chef support extends to windows servers using pocketknife_windows gem. 
+
 Version 3.3.5 June 2012
 ----------------------
 Fix monitoring graphs, allow windows user to be specified to logon to a server. 

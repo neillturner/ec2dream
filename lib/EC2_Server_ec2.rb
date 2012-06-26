@@ -60,7 +60,7 @@
        @server['Instance_ID'].text = instance_id
        ENV['EC2_INSTANCE'] = instance_id
        r = @ec2_main.serverCache.instance(instance_id)
-       if r != nil 
+       if r != nil
     	 gp = @ec2_main.serverCache.instance_groups(instance_id)
     	 gp_list = ""
     	 gp.each do |g|
@@ -124,7 +124,11 @@
     	       @server['Win_Admin_Password'].text = ""
     	   end
     	 end
-    	 @server['Monitoring_State'].text = r[:aws_monitoring_state]
+    	 if r[:monitoring_state] != nil and r[:monitoring_state] == "enabled"
+    	    @server['Monitoring_State'].text = "detailed"
+    	 else
+    	    @server['Monitoring_State'].text = "basic"
+    	 end
          @server['Ami_Launch_Index'].text = r[:ami_launch_index]
          @server['Kernel_Id'].text = r[:aws_kernel_id]
          @server['Ramdisk_Id'].text = r[:aws_ramdisk_id]

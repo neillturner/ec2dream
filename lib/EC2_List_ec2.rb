@@ -346,13 +346,13 @@ class EC2_List
                            @table.setItemText(i, 1,@image_locs[j][:aws_location])
                            @table.setItemJustify(i, 1, FXTableItem::LEFT)
                            if @image_locs[i][:aws_state] != nil
-                              @table.setItemText(i, 2, @image_locs[i][:aws_state])
+                              @table.setItemText(i, 2, @image_locs[j][:aws_state])
                            else
 			      @table.setItemText(i, 2, "")
 			   end   
                            @table.setItemJustify(i, 2, FXTableItem::LEFT)
 			   if @image_locs[i][:tags] != nil
-			      @table.setItemText(i, 3,@image_locs[i][:tags].show)
+			      @table.setItemText(i, 3,@image_locs[j][:tags].show)
 		           else
 			      @table.setItemText(i, 3, "")
 			   end
