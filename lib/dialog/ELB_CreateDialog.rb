@@ -1,11 +1,10 @@
 
 require 'rubygems'
 require 'fox16'
-require 'right_aws'
 require 'net/http'
 require 'resolv'
-
-require 'dialog/ELB_ListenerEditDialog'
+require 'common/error_message'
+require 'dialog/ELB_ListenerEditdialog'
 require 'dialog/EC2_AvailZoneDialog'
 
 include Fox
@@ -19,14 +18,14 @@ class ELB_CreateDialog < FXDialogBox
     	@created = false
     	@listener_table = Array.new
     	el = {}
-        el[:protocol] = "HTTP"
-        el[:load_balancer_port] = "80"
-        el[:instance_port] = "80"    	
+        el['Protocol'] = "HTTP"
+        el['LoadBalancerPort'] = "80"
+        el['InstancePort'] = "80"    	
     	@listener_table.push(el)
     	@curr_row = nil
     	@az_table = Array.new
     	@az_curr_row = nil
-    	super(owner, "Create Elastic Load Balancer", :opts => DECOR_ALL, :width => 600, :height => 200)
+    	super(owner, "Create Elastic Load Balancer", :opts => DECOR_ALL, :width => 700, :height => 240)
     	@frame1 = FXMatrix.new(self, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
     	FXLabel.new(@frame1, "" )
     	FXLabel.new(@frame1, "" )
@@ -38,7 +37,7 @@ class ELB_CreateDialog < FXDialogBox
     	FXLabel.new(@frame1, "" )
     	FXLabel.new(@frame1, "" )
     	FXLabel.new(@frame1, "Listeners")
-    	@elb_listeners = FXTable.new(@frame1,:height => 60, :opts => LAYOUT_FIX_HEIGHT|LAYOUT_FILL|TABLE_READONLY  )
+    	@elb_listeners = FXTable.new(@frame1,:height => 100, :opts => LAYOUT_FIX_HEIGHT|LAYOUT_FILL|TABLE_READONLY  )
         @header1 = @elb_listeners.columnHeader
 	@header1.connect(SEL_COMMAND) do |sender, sel, which|
 	# do nothing
@@ -55,10 +54,10 @@ class ELB_CreateDialog < FXDialogBox
 	@create_button.icon = @create
 	@create_button.tipText = "  Add Listener  "
 	@create_button.connect(SEL_COMMAND) do |sender, sel, data|
-	      editdialog = ELB_ListenerEditDialog.new(@ec2_main,nil)
-              editdialog.execute
-              if editdialog.saved 
-                el = editdialog.result
+	      dialog = ELB_ListenerEditDialog.new(@ec2_main,@elb_name.text,nil)
+              dialog.execute
+              if dialog.saved 
+                el = dialog.result
                 @listener_table.push(el)
                 load_listener_table
               end   
@@ -75,10 +74,10 @@ class ELB_CreateDialog < FXDialogBox
 	      if @curr_row == nil
 		 error_message("No Listener Selected","No listener selected to edit")
               else
-  	         editdialog = ELB_ListenerEditDialog.new(@ec2_main,@listener_table[@curr_row])
-                 editdialog.execute
-                 if editdialog.saved 
-                    el = editdialog.result
+  	         dialog = ELB_ListenerEditDialog.new(@ec2_main,@elb_name.text,@listener_table[@curr_row])
+                 dialog.execute
+                 if dialog.saved 
+                    el = dialog.result
                     @listener_table[@curr_row] = el
                     load_listener_table                   
                  end
@@ -94,7 +93,7 @@ class ELB_CreateDialog < FXDialogBox
 		   error_message("No Listener selected","No Listener selected to delete")
                 else
                    m = @listener_table[@curr_row]
-                   answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm delete","Confirm delete of listener #{m[:protocol]};#{m[:load_balancer_port]};#{m[:instance_port]}")
+                   answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm delete","Confirm delete of listener #{m['Protocol']};#{m['LoadBalancerPort']};#{m['InstancePort']};#{m['SSLCertificateId']}")
                    if answer == MBOX_CLICKED_YES 
                       @listener_table.delete_at(@curr_row)
                       puts @listener_table
@@ -109,12 +108,12 @@ class ELB_CreateDialog < FXDialogBox
         FXLabel.new(@frame1, "" )
         FXLabel.new(@frame1, "" )
     	FXLabel.new(@frame1, "Availability Zones")
-    	@avail_zones = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_READONLY)
+    	@avail_zones = FXTextField.new(@frame1, 80, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_READONLY)
     	page1b = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
     	FXLabel.new(page1b, " ",:opts => LAYOUT_LEFT )
     	@az_create_button = FXButton.new(page1b, " ",:opts => BUTTON_TOOLBAR)
 	@az_create_button.icon = @create
-	@az_create_button.tipText = "  Add Availability Zone "
+	@az_create_button.tipText = "  Select Availability Zone "
 	@az_create_button.connect(SEL_COMMAND) do |sender, sel, data|
 	   dialog = EC2_AvailZoneDialog.new(@ec2_main)
 	   dialog.execute
@@ -161,34 +160,33 @@ class ELB_CreateDialog < FXDialogBox
   end 
   
   def create_elb
-     elb = @ec2_main.environment.elb_connection
-     if elb != nil
-      begin 
-       r = elb.create_load_balancer(@elb_name,  @az_table, @listener_table)
-       @created = true
-      rescue
+     begin
+        r = @ec2_main.environment.elb.create_load_balancer(@az_table, @elb_name, @listener_table)
+        @created = true
+     rescue
         error_message("Create Elastic Load Balancer Failed",$!.to_s)
-      end 
-     end
+     end 
   end 
   
   def load_listener_table
          @elb_listeners.clearItems
          @elb_listeners.rowHeaderWidth = 0	
-         @elb_listeners.setTableSize(@listener_table.size, 3)
+         @elb_listeners.setTableSize(@listener_table.size, 4)
          @elb_listeners.setColumnText(0, "Protocol")
          @elb_listeners.setColumnText(1, "Load Balancer Port")
-         @elb_listeners.setColumnText(2, "Instance Port") 
-         @elb_listeners.setColumnWidth(1,150)
+         @elb_listeners.setColumnText(2, "Instance Port")
+         @elb_listeners.setColumnText(3, "SSL Certificate Id")
          i = 0
          @listener_table.each do |m|
            if m!= nil 
-              @elb_listeners.setItemText(i, 0, "#{m[:protocol]}")
-              @elb_listeners.setItemText(i, 1, "#{m[:load_balancer_port]}")
-              @elb_listeners.setItemText(i, 2, "#{m[:instance_port]}")
+              @elb_listeners.setItemText(i, 0, "#{m['Protocol']}")
+              @elb_listeners.setItemText(i, 1, "#{m['LoadBalancerPort']}")
+              @elb_listeners.setItemText(i, 2, "#{m['InstancePort']}")
+              @elb_listeners.setItemText(i, 3, "#{m['SSLCertificateId']}")
               @elb_listeners.setItemJustify(i, 0, FXTableItem::LEFT)
               @elb_listeners.setItemJustify(i, 1, FXTableItem::LEFT)
               @elb_listeners.setItemJustify(i, 2, FXTableItem::LEFT)
+              @elb_listeners.setItemJustify(i, 3, FXTableItem::LEFT)
               i = i+1
    	   end 
          end   
@@ -209,13 +207,16 @@ class ELB_CreateDialog < FXDialogBox
          end   
    end
 
+  def saved
+     @created
+  end
 
   def created
     @created
   end
-  
-  def error_message(title,message)
-      FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
+ 
+  def success
+     @created
   end
-  
+ 
 end

@@ -1,6 +1,5 @@
 class EC2_Launch
 
-
  def launch_instance
     puts "launch.launch_instance"
      platform = @ec2_main.settings.get("EC2_PLATFORM")
@@ -12,8 +11,6 @@ class EC2_Launch
     end
     answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm Launch","Confirm Launch of Server Image "+server)
     if answer == MBOX_CLICKED_YES
-     ec2 = @ec2_main.environment.connection
-     if ec2 != nil
        launch_parm = Hash.new
        if platform == "eucalyptus"
           if @launch['Addressing'].text != nil and  @launch['Addressing'].text != ""
@@ -21,43 +18,44 @@ class EC2_Launch
           end
        end   
        if @launch['Minimum_Server_Count'].text != nil and @launch['Minimum_Server_Count'].text != ""
-         launch_parm[:min_count]= @launch['Minimum_Server_Count'].text
+         launch_parm['MinCount']= @launch['Minimum_Server_Count'].text
        else
-         launch_parm[:min_count]= "1"
+         launch_parm['MinCount']= "1"
        end
        if @launch['Maximum_Server_Count'].text != nil and @launch['Maximum_Server_Count'].text != ""
-         launch_parm[:max_count]= @launch['Maximum_Server_Count'].text
+         launch_parm['MaxCount']= @launch['Maximum_Server_Count'].text
        else
-         launch_parm[:max_count]= "1"
+         launch_parm['MaxCount']= "1"
        end
        if @launch['Instance_Type'].text != nil and @launch['Instance_Type'].text != ""
-         launch_parm[:instance_type]= @launch['Instance_Type'].text
+         launch_parm['InstanceType']= @launch['Instance_Type'].text
        end
        if @launch['Keypair'].text != nil and @launch['Keypair'].text != ""
-          launch_parm[:key_name]= @launch['Keypair'].text
+          launch_parm['KeyName']= @launch['Keypair'].text
        else 
           error_message("Launch Error","Keypair not specified")
           return
        end
-       g = Array.new
-       g[0] = [@launch['Security_Group'].text]
-       if @launch['Additional_Security_Groups'].text != nil and @launch['Additional_Security_Groups'].text != ""
-          a = @launch['Additional_Security_Groups'].text
-          i = 1
-          sa = (a).split(",")
-          sa.each do |s|
-            g[i] = s
-            i = i+1
-          end          
-       end
+       g = []
+       a = @launch['Security_Group'].text
+       sa = (a).split(",")
+       sa.each do |s|
+          g.push(s[0..s.length-1])
+       end       
        it = (@launch['Instance_Type'].text).downcase
-       launch_parm[:group_names] = g 
+       launch_parm['SecurityGroup'] = g 
        if @launch['Availability_Zone'].text != nil and @launch['Availability_Zone'].text != ""
-             launch_parm[:availability_zone]= @launch['Availability_Zone'].text
+             launch_parm['Placement.AvailabilityZone']= @launch['Availability_Zone'].text
        end
-       launch_parm[:user_data] = ""
+       if @launch['Subnet_Id'].text != nil and @launch['Subnet_Id'].text != ""
+            launch_parm['SubnetId']= @launch['Subnet_Id'].text
+       end
+       if @launch['Private_IP'].text != nil and @launch['Private_IP'].text != ""
+            launch_parm['PrivateIpAddress']= @launch['Private_IP'].text
+       end       
+       launch_parm['UserData'] = ""
        if @launch['User_Data'].text != nil and @launch['User_Data'].text != ""
-             launch_parm[:user_data]= @launch['User_Data'].text
+             launch_parm['UserData']= @launch['User_Data'].text
        end
        if @launch['User_Data_File'].text != nil and @launch['User_Data_File'].text != ""
            fn = @launch['User_Data_File'].text
@@ -67,102 +65,131 @@ class EC2_Launch
 	      d = f.read
               f.close
            rescue 
-              puts "***Error could not read user data file"
+              puts "ERROR: could not read user data file"
               error_message("Launch Error","Could not read User Data File")
               return
            end
-           if launch_parm[:user_data] != nil and launch_parm[:user_data] != ""
-              launch_parm[:user_data]=launch_parm[:user_data]+","+d
+           if launch_parm['UserData'] != nil and launch_parm['UserData'] != ""
+              launch_parm['UserData']=launch_parm['UserData']+","+d
            else
-              launch_parm[:user_data]=d
+              launch_parm['UserData']=d
            end   
        end
        if @launch['Monitoring_State'].itemCurrent?(1)
-            launch_parm[:monitoring_enabled] = "true"
+            launch_parm['Monitoring.Enabled'] = true
        end
-       if platform != "eucalyptus"
+       if platform != "eucalyptus" and platform != "cloudstack"
           if @launch['Disable_Api_Termination'].itemCurrent?(1)
-            launch_parm[:disable_api_termination] = "false"
+            launch_parm['DisableApiTermination'] = false
           else
-            launch_parm[:disable_api_termination] = "true"
+            launch_parm['DisableApiTermination'] = true
           end
-       end
-       if @launch['Image_Root_Device_Type'].text != nil and  @launch['Image_Root_Device_Type'].text == "ebs"
-          if @launch['Instance_Initiated_Shutdown_Behavior'].itemCurrent?(1)
-             launch_parm[:instance_initiated_shutdown_behavior] = "terminate"
-          else
-             launch_parm[:instance_initiated_shutdown_behavior] = "stop"
+          if @launch['Image_Root_Device_Type'].text != nil and  @launch['Image_Root_Device_Type'].text == "ebs"
+             if @launch['Instance_Initiated_Shutdown_Behavior'].itemCurrent?(1)
+                launch_parm['InstanceInitiatedShutdownBehavior'] = "terminate" 
+             else
+                launch_parm['InstanceInitiatedShutdownBehavior'] = "stop"
+             end
           end
-       end   
-       if @launch['Additional_Info'].text != nil and @launch['Additional_Info'].text != ""
-             launch_parm[:additional_info]= @launch['Additional_Info'].text
        end
        bm = Array.new
        if @image_bm.size>0
-          bm = @image_bm.array
+          bm = @image_bm.array_fog
        end
        if @block_mapping.size>0
-           bm = bm + @block_mapping.array
+           bm = bm + @block_mapping.array_fog
        end	
 	 if bm.size>0 
 	   i=0
            bm.each do |m|
             if m != nil 
-              if m[:ebs_snapshot_id] != nil
-	        sa = (m[:ebs_snapshot_id]).split"/"
+              if m['Ebs.SnapshotId'] != nil
+	        sa = (m['Ebs.SnapshotId']).split"/"
 		  if sa.size>1
-                   m[:ebs_snapshot_id]=sa[1]
+                   m['Ebs.SnapshotId']=sa[1]
 	        end
 	      end  
               bm[i]=m
             end  
             i = i+1
            end
-           #if @launch['Image_Root_Device_Type'].text != "ebs" or bm.size>1
-              launch_parm[:block_device_mappings] = bm
-           #end   
+           launch_parm['BlockDeviceMapping'] = bm
        end 
        save
-       puts "launch server "+server
+       puts "launch server #{server} parms #{launch_parm}"
        item_server = ""
        item = []
        begin
-          item = ec2.launch_instances(server, launch_parm)
+          #item = ec2.launch_instances(server, launch_parm)
+          item =  @ec2_main.environment.servers.create_server(server, nil, nil, launch_parm)
        rescue 
-          error_message("Launch of Server Failed",$!.to_s)
-          return
+          error_message("Launch of Server Failed",$!)
+         return
        end
        instances = []
        item.each do |r|
           if item_server == ""
-             if r[:groups][0][:group_name] == nil
-                gi = r[:groups][0][:group_id]
-             else
-                gi = r[:groups][0][:group_name]
-             end   
+              gi = launch_group_name(r)
+              #if r[:groups][0][:group_name] == nil
+              #  gi = r[:groups][0][:group_id]
+             #else
+             #   gi = r[:groups][0][:group_name]
+             #end   
     	     item_server = gi+"/"+r[:aws_instance_id]
           end
           puts "item server #{item_server}"
           instances.push(r[:aws_instance_id]) 
-          @ec2_main.serverCache.addInstance(r)
+          #@ec2_main.serverCache.addInstance(r)
        end
        begin 
           if @resource_tags  != nil and @resource_tags.empty == false
              instances.each do |s| 
                 @resource_tags.assign(s)
              end
-          end   
+          end
+          nickname_tag = @ec2_main.settings.get('AMAZON_NICKNAME_TAG')
+     	  if nickname_tag != nil and nickname_tag != ""
+     	     name = @launch['Name'].text
+             instances.each do |s|
+                ec2 = @ec2_main.environment.connection
+                if ec2 != nil
+                   r = ec2.create_tags(s, {nickname_tag => name})
+                end 
+             end    	  
+     	  end
        rescue
-          error_message("Create Tags Failed",$!.to_s)
+          error_message("Create Tags Failed",$!)
           return
-       end         
+       end 
        if item_server != ""
+          @ec2_main.treeCache.refresh
           @ec2_main.server.load_server(item_server)
           @ec2_main.tabBook.setCurrent(1)
        end   
     end
-   end 
  end 
+ 
+ def launch_group_name(x)
+    gn = ""
+    begin
+     if x['groupSet'] != nil 
+        gn = x['groupSet'][1]
+     elsif x[:sec_groups].instance_of? Array and x[:sec_groups][0] != nil
+        gn = x[:sec_groups][0]
+     elsif x['security_groups'].instance_of? Array and  x['security_groups'][0] != nil
+        gn = x['security_groups'][0]['name']
+     elsif x[:groups].instance_of? Array and x[:groups][0][:group_name] == nil
+        gn = x[:groups][0][:group_id]
+     else
+        gn = x[:groups][0][:group_name]
+     end
+    rescue
+    end
+    if gn == nil
+      gn = ""
+    end
+    return gn
+ end
  
  def request_spot_instance
      puts "launch.request_spot_instance"
@@ -179,45 +206,37 @@ class EC2_Launch
      end
      answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm Request","Confirm Spot Instance Request of Server Image "+server)
      if answer == MBOX_CLICKED_YES
-      ec2 = @ec2_main.environment.connection
-      if ec2 != nil
-        launch_parm = Hash.new
-        launch_parm[:image_id]=server
-        launch_parm[:spot_price]= @launch['Spot_Price'].text
+        launch_parm = {}
+        launch_parm['LaunchSpecification.ImageId']=server
+        launch_parm['SpotPrice']= @launch['Spot_Price'].text
         if @launch['Maximum_Server_Count'].text != nil and @launch['Maximum_Server_Count'].text != ""
-          launch_parm[:instance_count]= @launch['Maximum_Server_Count'].text
+          launch_parm['InstanceCount']= @launch['Maximum_Server_Count'].text
         else
-          launch_parm[:instance_count]= "1"
+          launch_parm['InstanceCount']= "1"
         end
         if @launch['Instance_Type'].text != nil and @launch['Instance_Type'].text != ""
-          launch_parm[:instance_type]= @launch['Instance_Type'].text
+          launch_parm['LaunchSpecification.InstanceType']= @launch['Instance_Type'].text
         end
         if @launch['Keypair'].text != nil and @launch['Keypair'].text != ""
-           launch_parm[:key_name]= @launch['Keypair'].text
+           launch_parm['LaunchSpecification.KeyName']= @launch['Keypair'].text
         else 
            error_message("Launch Error","Keypair not specified")
            return
         end
-        g = Array.new
-        if @launch['Additional_Security_Groups'].text == nil or @launch['Additional_Security_Groups'].text == ""
-           g[0] = [@launch['Security_Group'].text]
-        else
-           g[0] = @launch['Security_Group'].text
-           a = @launch['Additional_Security_Groups'].text
-           i = 1
-           a.each(",") do |s|
-            g[i] = s[0..s.length-1]
-            i = i+1
-           end 
+        g = []
+        a = @launch['Security_Group'].text
+        sa = (a).split(",")
+        sa.each do |s|        
+            g.push(s[0..s.length-1])
         end
         it = (@launch['Instance_Type'].text).downcase
-        launch_parm[:group_names] = g 
+        launch_parm['LaunchSpecification.SecurityGroup'] = g 
         if @launch['Availability_Zone'].text != nil and @launch['Availability_Zone'].text != ""
-              launch_parm[:availability_zone]= @launch['Availability_Zone'].text
+              launch_parm['LaunchSpecification.Placement.AvailabilityZone']= @launch['Availability_Zone'].text
         end
-        launch_parm[:user_data] = ""
+        launch_parm['LaunchSpecification.UserData'] = ""
         if @launch['User_Data'].text != nil and @launch['User_Data'].text != ""
-              launch_parm[:user_data]= @launch['User_Data'].text
+              launch_parm['LaunchSpecification.UserData']= @launch['User_Data'].text
         end
         if @launch['User_Data_File'].text != nil and @launch['User_Data_File'].text != ""
             fn = @launch['User_Data_File'].text
@@ -227,62 +246,79 @@ class EC2_Launch
  	      d = f.read
                f.close
             rescue 
-               puts "***Error could not read user data file"
+               puts "ERROR: could not read user data file"
                error_message("Launch Error","Could not read User Data File")
                return
             end
-            if launch_parm[:user_data] != nil and launch_parm[:user_data] != ""
-               launch_parm[:user_data]=launch_parm[:user_data]+","+d
+            if launch_parm['LaunchSpecification.UserData'] != nil and launch_parm['LaunchSpecification.UserData'] != ""
+               launch_parm['LaunchSpecification.UserData']=launch_parm['LaunchSpecification.UserData']+","+d
             else
-               launch_parm[:user_data]=d
+               launch_parm['LaunchSpecification.UserData']=d
             end   
         end
         if @launch['Monitoring_State'].itemCurrent?(1)
-             launch_parm[:monitoring_enabled] = "true"
+             launch_parm['LaunchSpecification.Monitoring.Enabled'] = true
         end
+        if @launch['Subnet_Id'].text != nil and @launch['Subnet_Id'].text != ""
+          launch_parm['LaunchSpecification.SubnetId']= @launch['Subnet_Id'].text
+        end        
+        
        # currently block mappings not supported on spot instance requests.
        # if @block_mapping != nil and @block_mapping.size>0
        #      launch_parm[:block_device_mappings] = @block_mapping
        # end        
         save
-        puts "request spot instance "+server
-        item = {}
-        begin
-           item = ec2.request_spot_instances(launch_parm)
+        puts "request spot instance #{server} parameters #{launch_parm}"
+        item = []
+       begin
+           #item = ec2.request_spot_instances(launch_parm)
+           item = @ec2_main.environment.servers.request_spot_instances(launch_parm)
         rescue
-           error_message("Spot Instance Request Failed",$!.to_s)
+           error_message("Spot Instance Request Failed",$!)
            return 
         end
+        req_id = item[0]['spotInstanceRequestId']
         begin 
            if @resource_tags  != nil and @resource_tags.empty == false
               item.each do |r|
-                 @resource_tags.assign(r[:spot_instance_request_id])
+                 @resource_tags.assign(req_id)
               end   
-           end   
+           end 
+          nickname_tag = @ec2_main.settings.get('AMAZON_NICKNAME_TAG')
+     	  if nickname_tag != nil and nickname_tag != ""
+     	     name = @launch['Name'].text
+             item.each do |r|
+                ec2 = @ec2_main.environment.connection
+                if ec2 != nil
+                   r = ec2.create_tags(req_id, {nickname_tag => name})
+                end 
+             end    	  
+     	  end           
         rescue
-          error_message("Create Tags Failed",$!.to_s)
+          error_message("Create Tags Failed",$!)
           return
        end       
-      end
-     end 
+    end 
  end
  
- def load(sec_grp)
+ def load(profile)
    puts "Launch.load"
-   if @ec2_main.settings.get("EC2_PLATFORM") == "openstack"
-      load_ops(sec_grp)
+   if  @ec2_main.settings.openstack
+      load_ops(profile)
+   elsif @ec2_main.settings.cloudfoundry
+      load_cfy(profile)
    else   
       clear_panel      
       @type = "ec2"
       @profile_type = "secgrp"
       @profile_folder = "launch"
+      @properties = {}
       @frame1.show()
-      @frame2.hide()
       @frame3.hide()
       @frame4.hide()
-      @profile = sec_grp
-      @launch['Security_Group'].text = @profile
-      @launch['Security_Group'].enabled = false
+      @profile = profile
+      @launch['Name'].text = @profile
+      @launch['Name'].enabled = false
       @launch['Chef_Node'].text = @profile
       @launch['Image_Id'].enabled = true
       @launch['Image_Id_Button'].enabled = true
@@ -311,7 +347,6 @@ class EC2_Launch
         end        
         load_panel('Security_Group')
         load_panel('Chef_Node')
-        load_panel('Additional_Security_Groups')
 	load_panel('Addressing')
         load_panel('Image_Id')
         load_panel('Image_Manifest')
@@ -324,6 +359,8 @@ class EC2_Launch
         load_panel('Instance_Type')
         load_panel('Keypair')
         load_panel('Availability_Zone')
+        load_panel('Subnet_Id')
+        load_panel('Private_IP')
         load_panel('User_Data')
         load_panel('User_Data_File')
         load_monitoring_state()
@@ -340,11 +377,6 @@ class EC2_Launch
         @image_bm.load_from_properties(@properties,"Image_Bm",@launch['Image_Block_Devices']) 
         @launch_loaded = true
       else
-        # default to empty values
-        keypair = @ec2_main.settings.get('KEYPAIR_NAME')
-        if keypair != nil and keypair != ""
-         put('Keypair',keypair)
-        end
         @launch_loaded = true
       end
       load_notes
@@ -354,16 +386,15 @@ class EC2_Launch
    
    def load_image
       puts "Launch.load_image"
-      ec2 = @ec2_main.environment.connection
-      if ec2 != nil
        image_id = @properties['Image_Id']
        if image_id != nil and image_id != ""
          begin 
-          ec2.describe_images([image_id]).each do |r|
+          #ec2.describe_images([image_id]).each do |r|
+            r = @ec2_main.environment.images.get(image_id) 
             #puts r 
-            put('Image_Manifest',r[:aws_location])
-            put('Image_Architecture',r[:aws_architecture])
-            if r[:aws_is_public] == true
+            put('Image_Manifest',r['imageLocation'])
+            put('Image_Architecture',r['architecture'])
+            if r['isPublic'] == true
               put('Image_Visibility',"Public")
             else
               put('Image_Visibility',"Private")
@@ -372,16 +403,15 @@ class EC2_Launch
             if it == nil or it == ""
 	       put('Instance_Type',"m1.small")
             end
-            put('Image_Root_Device_Type',r[:root_device_type])
-            @image_bm.load(r,@launch['Image_Block_Devices'])
-          end            
+            put('Image_Root_Device_Type',r['rootDeviceType'])
+            @image_bm.load_fog(r,@launch['Image_Block_Devices'])
+          #end            
          rescue
           puts "**Error Image not found"
           put('Image_Manifest',"*** Not Found ***")
           error_message("Error","Launch Profile: Image Id not found")
          end
-       end   
-      end
+      end   
    end
    
    def load_profile(image)
@@ -393,7 +423,6 @@ class EC2_Launch
             image_id = sa[1].rstrip
          end         
          @frame1.show()
-         @frame2.hide()
 	 @frame3.hide()
 	 @frame4.hide()
          @profile_type = "image"
@@ -403,6 +432,7 @@ class EC2_Launch
          end    
          clear_panel
          @profile = image_id
+         @properties = {}
          @launch['Image_Id'].text = @profile
          @launch['Security_Group'].enabled = true
          @launch['Image_Id'].enabled = false
@@ -425,7 +455,6 @@ class EC2_Launch
            end
            load_panel('Security_Group')
            load_panel('Chef_Node')
-           load_panel('Additional_Security_Groups')
 	   load_panel('Addressing')
            load_panel('Image_Id')
            load_panel('Image_Manifest')
@@ -438,6 +467,8 @@ class EC2_Launch
            load_panel('Instance_Type')
            load_panel('Keypair')
            load_panel('Availability_Zone')
+           load_panel('Subnet_Id')
+           load_panel('Private_IP')
            load_panel('User_Data')
            load_panel('User_Data_File')
            load_monitoring_state()
@@ -452,10 +483,6 @@ class EC2_Launch
            load_panel('Win_Admin_Password')        
            @launch_loaded = true
          else
-           keypair = @ec2_main.settings.get('KEYPAIR_NAME')
-           if keypair != nil and keypair != ""
-            put('Keypair',keypair)
-           end
            pk = @ec2_main.settings.get('EC2_SSH_PRIVATE_KEY')
    	   if pk != nil and pk != ""
    	      put('EC2_SSH_Private_Key',pk)
@@ -507,13 +534,20 @@ class EC2_Launch
    end 
    
    def clear_panel
-     puts "Launch.clear_panel" 
-     @type = ""
+    puts "Launch.clear_panel"
+    if  @ec2_main.settings.cloudfoundry
+      clear_cfy_panel
+    elsif @ec2_main.settings.openstack
+      clear_ops_panel
+    else
+     @type = "ec2"
      @profile = ""
+     @properties = {}
      @resource_tags = nil 
+     @launch['Name'].text = ""
+     @launch['Name'].enabled = true
      clear('Security_Group')
      clear('Chef_Node')
-     clear('Additional_Security_Groups')
      clear('Tags')
      clear('Addressing')
      clear('Image_Id')
@@ -527,6 +561,8 @@ class EC2_Launch
      clear('Instance_Type')
      clear('Keypair')
      clear('Availability_Zone')
+     clear('Subnet_Id')
+     clear('Private_IP')
      clear('User_Data')
      clear('User_Data_File')
      clear_monitoring_state
@@ -543,7 +579,7 @@ class EC2_Launch
      @image_bm.clear(@properties,"Image_Bm",@launch['Image_Block_Devices'])
      clear_notes     
      @launch_loaded = false
-     #puts @launch['Security_Group'].text
+    end
    end 
    
    def clear_monitoring_state
@@ -577,11 +613,14 @@ class EC2_Launch
    end 
    
    def save
-      puts "Launch.save"
+     puts "Launch.save"
+     @profile = @launch['Name'].text
+     if @profile == nil or @profile == ""
+        error_message("Error","No Server Name specified") 
+     else 
       load_image
       save_launch('Security_Group')
       save_launch('Chef_Node')
-      save_launch('Additional_Security_Groups')
       save_launch('Addressing')
       save_launch('Image_Id')
       save_launch('Image_Manifest')
@@ -594,6 +633,8 @@ class EC2_Launch
       save_launch('Instance_Type')
       save_launch('Keypair')
       save_launch('Availability_Zone')
+      save_launch('Subnet_Id')
+      save_launch('Private_IP')
       save_launch('User_Data')
       save_launch('User_Data_File')
       save_monitoring_state()
@@ -631,6 +672,7 @@ class EC2_Launch
          puts "launch loaded false"
          @launch_loaded = false      
       end
+     end 
    end
    
    def delete
@@ -655,32 +697,27 @@ class EC2_Launch
    
   def image_info
      puts "Launch.image_info" 
-    ec2 = @ec2_main.environment.connection
-    if ec2 != nil
        img = @launch['Image_Id'].text
-       ec2.describe_images([img]).each do |r|
-         put('Image_Manifest',r[:aws_location])
-         put('Image_Architecture',r[:aws_architecture])
-         public = r[:aws_is_public]
-         if public == true 
+       #ec2.describe_images([img]).each do |r|
+         r = @ec2_main.environment.images.get(img)
+         put('Image_Manifest',r['imageLocation'])
+         put('Image_Architecture',r['architecture'])
+         if r['isPublic'] == true 
             put('Image_Visibility','public')
          else
             put('Image_Visibility','private')
          end
-	   it = @launch['Instance_Type'].text
+	 it = @launch['Instance_Type'].text
          if it == nil or it == ""
-            if r[:aws_architecture] == "x86_64"
+            if r['architecture'] == "x86_64"
 	         put('Instance_Type',"m1.large")
 	      else
 	         put('Instance_Type',"m1.small")
             end 
          end
-         put('Image_Root_Device_Type',r[:root_device_type])
-         @image_bm.load(r,@launch['Image_Block_Devices'])
-         puts "bm*** #{@launch['Image_Block_Devices']}"
-       end
-    end
-  end 
+         put('Image_Root_Device_Type',r['rootDeviceType'])
+         @image_bm.load_fog(r,@launch['Image_Block_Devices'])
+   end 
    
    def save_monitoring_state
         if @launch['Monitoring_State'].itemCurrent?(1) 
@@ -718,7 +755,6 @@ class EC2_Launch
   
 def clear_notes
     @text_area.text = ""
-    @rds_text_area.text = ""
     @ops_text_area.text = ""
     @loaded = false
 end
@@ -733,9 +769,7 @@ def load_notes
          File.new(fn, "w")
       end
       f = File.open(fn, "r")
-      if @type == "rds"
-         @rds_text_area.text = f.read
-      elsif @type == "ops"
+      if @type == "ops"
          @ops_text_area.text = f.read
       else
          @text_area.text = f.read
@@ -748,9 +782,7 @@ def load_notes
 end        
   
 def save_notes
-   if @type == "rds"
-      textOutput = @rds_text_area.text
-   elsif @type == "ops"
+   if @type == "ops"
       textOutput = @ops_text_area.text      
    else   
       textOutput = @text_area.text

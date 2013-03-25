@@ -1,7 +1,5 @@
-
 require 'rubygems'
 require 'fox16'
-require 'right_aws'
 require 'net/http'
 require 'resolv'
 require 'fileutils'
@@ -70,13 +68,22 @@ class EC2_EnvCopyDialog < FXDialogBox
       else
         FileUtils.cp_r(s, d)
      	@copied = true
+     	@ec2_main.imageCache.set_status("empty")
       end
      end 
     end
   end
   
+  def saved
+     @copied
+  end
+  
   def copied 
-     return @copied
-  end   
+     @copied
+  end  
+
+  def success
+     @copied
+  end  
  
 end

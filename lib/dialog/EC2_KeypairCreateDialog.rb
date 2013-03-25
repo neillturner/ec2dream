@@ -1,8 +1,8 @@
 require 'rubygems'
 require 'fox16'
-require 'right_aws'
 require 'net/http'
 require 'resolv'
+require 'common/error_message'
 
 include Fox
 
@@ -37,24 +37,29 @@ class EC2_KeypairCreateDialog < FXDialogBox
   end 
   
   def create_keypair(name)
-     ec2 = @ec2_main.environment.connection
-     if ec2 != nil
       begin 
-       r = ec2.create_key_pair(name)
-       @text_area.setText(r[:aws_material])
+       r = @ec2_main.environment.keypairs.create(name)
+       if r[:aws_material] != nil
+          @text_area.setText(r[:aws_material])
+       else
+          @text_area.setText("#{r['private_key']}")
+       end
        @created = true
       rescue
-        error_message("Create Key Pair Failed",$!.to_s)
+        error_message("Create Key Pair Failed",$!)
       end 
-     end
   end 
+  
+  def saved
+     @created
+  end
   
   def created
      @created
   end
   
-  def error_message(title,message)
-      FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
+  def success
+     @created
   end
 
 end

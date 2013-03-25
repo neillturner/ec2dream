@@ -1,11 +1,10 @@
 
 require 'rubygems'
 require 'fox16'
-require 'right_aws'
 require 'net/http'
 require 'resolv'
 require 'fileutils'
- 
+require 'common/error_message'
 
 include Fox
 
@@ -15,13 +14,15 @@ class EC2_EnvDeleteDialog < FXDialogBox
     @ec2_main = owner
     @envs = Dir.entries(@ec2_main.settings.get_system('REPOSITORY_LOCATION'))
     @delete_env = ""
+	@deleted = false
+	@curr_env = @ec2_main.settings.get_system("ENVIRONMENT")
     super(owner, "Select Environment to Delete", :opts => DECOR_ALL, :width => 400, :height => 200)
     cancel = FXButton.new(self, "   &CANCEL   ", nil, self, ID_CANCEL, FRAME_RAISED|LAYOUT_CENTER_X|LAYOUT_SIDE_BOTTOM)
     @envlist = FXList.new(self, :opts => LIST_SINGLESELECT|LAYOUT_FILL)
     auto = "false" 
     @envs.each do |e|
      if e != "." and e != ".."
-      @envlist.appendItem(e)
+      @envlist.appendItem(e) if e != @curr_env
      end 
     end
     
@@ -50,11 +51,11 @@ class EC2_EnvDeleteDialog < FXDialogBox
         begin 
            FileUtils.rm_r d
         rescue 
-           error_message("Delete Environment Failed","Delete Environment Failed. Quit EC2Dream and try again")
+           error_message("Delete Environment Failed","Delete Environment Failed. Restart and try again")
            return
         end         
         if File.exists?(d)
-           error_message("Delete Environment Failed","Delete Environment Failed. Quit EC2Dream and try again")
+           error_message("Delete Environment Failed","Delete Environment Failed. Restart and try again")
         end   
         @envlist.clearItems
         @envs = Dir.entries(@ec2_main.settings.get_system('REPOSITORY_LOCATION'))
@@ -63,20 +64,22 @@ class EC2_EnvDeleteDialog < FXDialogBox
 	      @envlist.appendItem(e)
 	     end 
         end
+		@deleted = true 
+		# don't allow delete of current environment 
         # if deleted current environment reset system properties
-        settings = @ec2_main.settings
-        #settings.load_system
-	curr_env = settings.get_system("ENVIRONMENT")
-	if curr_env == @delete_env
-	   settings.put_system("ENVIRONMENT","")
-	   settings.put_system("AUTO","false")
-	   settings.save_system
-	end
+        #settings = @ec2_main.settings
+	#curr_env = settings.get_system("ENVIRONMENT")
+	#if curr_env == @delete_env
+	#   settings.put_system("ENVIRONMENT","")
+	#   settings.put_system("AUTO","false")
+	 #  settings.save_system
+	#end
+	#@ec2_main.imageCache.set_status("empty")
      end    
   end  
- 
-  def error_message(title,message)
-    FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
+  
+  def success
+     @deleted
   end
   
 end

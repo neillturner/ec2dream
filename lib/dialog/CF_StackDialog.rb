@@ -6,7 +6,7 @@ include Fox
 class CF_StackDialog < FXDialogBox
 
   def initialize(owner)
-    puts " CF_StackDialog.initialize"
+    puts " CF_StackSelectDialog.initialize"
     @saved = false
     @ec2_main = owner
     @stack_name = ""
@@ -28,6 +28,10 @@ class CF_StackDialog < FXDialogBox
        self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
     end
   end 
+  
+   def selected
+      @stack_name
+  end
   
   def stack_name
     @stack_name

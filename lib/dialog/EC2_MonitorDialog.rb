@@ -1,9 +1,7 @@
-
 require 'fox16'
 require 'google_chart'
 require 'open-uri'
 require 'rubygems'
-require 'fog'
 require 'net/http'
 
 include Fox
@@ -69,7 +67,7 @@ class EC2_MonitorDialog  < FXDialogBox
     @max_data = 0
     @created = false
  
-    @mon = @ec2_main.environment.mon_connection
+    @mon = @ec2_main.environment.cloud_watch
  
     super(owner, "Monitoring", :opts => DECOR_ALL, :width => 800, :height => 500)
 
@@ -134,7 +132,7 @@ class EC2_MonitorDialog  < FXDialogBox
   end  
   
   def getStatsReports(groupName,instanceId,duration)
-     getStats("CPUUtilization","Percent",groupName,instanceId,duration,false)
+     getStats("CPUUtilization","Percent",groupName,instanceId,duration,true)
      if @msg != nil and @msg != ""
        return 
      end  
@@ -142,7 +140,7 @@ class EC2_MonitorDialog  < FXDialogBox
      if @msg != nil and @msg != "" 
        return 
      end       
-     getStats("NetworkOut","Bytes",groupName,instanceId,duration,true)
+     getStats("NetworkOut","Bytes",groupName,instanceId,duration,false)
      if @msg != nil and @msg != "" 
        return 
      end      
@@ -167,7 +165,7 @@ class EC2_MonitorDialog  < FXDialogBox
   def getStats(measure,unit,groupName,instanceId,duration,debug)
      begin  
       if debug 
-         puts "getStats #{measure} #{duration}"
+         puts "getStats #{measure} #{duration} #{instanceId}"
       end   
       period = 3600
       case duration
@@ -201,22 +199,21 @@ class EC2_MonitorDialog  < FXDialogBox
       #options[:period] = period
       #options[:dimentions] = @dimensions
       #options[:namespace] = "AWS/EC2"
-      #@response = @mon.get_metric_statistics(options)
-      @response = @mon.get_metric_statistics(options).body['GetMetricStatisticsResult']['Datapoints']
+      @response = @mon.get_metric_statistics(options)
       #if debug 
       #   puts @response
-      #end   
-      @max_data = 0
-      @data = Array.new
-      d = 0
-      c = 0
-      @response.each do |r|
-          avg = 0.0
-          max = 0.0
-          min = 0.0
-          time = 0
-          s = {}
-          r.each do |key, value|
+      #end 
+         @max_data = 0
+         @data = Array.new
+         d = 0
+         c = 0
+         @response.each do |r|
+            avg = 0.0
+            max = 0.0
+            min = 0.0
+            time = 0
+            s = {}
+            r.each do |key, value|
                 if debug
                    if key == "Timestamp"
          	      puts "#{key} = #{value} ---------------------------------------"
@@ -298,15 +295,15 @@ class EC2_MonitorDialog  < FXDialogBox
                       puts "diff #{diff} #{(diff.to_i)+1}"
                    end   
                 end                
-  	  end
-  	  @data << s
+  	    end
+  	    @data << s
+  	    
       end       
      rescue
-      puts "***Error: Failed  "+$!.to_s
-      @msg = $!.to_s
-      error_message(@ec2_main,"Monitoring Access Error",@msg[0,50])
+      puts "ERROR: Failed  "+$!.to_s
       return
      end
+   begin 
     f = FXImageFrame.new(@topFrame, nil, :opts => LAYOUT_FILL)
     if duration == "Fortnight"
        f.image = FXPNGImage.new(app, open(fortnight_line_chart(measure,groupName,instanceId,debug).to_escaped_url, "rb").read)
@@ -322,7 +319,12 @@ class EC2_MonitorDialog  < FXDialogBox
     end
     if duration == "Twelve Hourly"
        f.image = FXPNGImage.new(app, open(twelve_hourly_line_chart(measure,groupName,instanceId,debug).to_escaped_url, "rb").read)
-    end    
+    end 
+   rescue
+     puts "ERROR: Failed  "+$!.to_s
+     return
+   end
+    
   end
   
 
@@ -692,10 +694,6 @@ def create_y_axis_labels
   return y_axis_labels   
 end  
 
-
-def error_message(owner,title,message)
-     # FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
-end
 
 end
 

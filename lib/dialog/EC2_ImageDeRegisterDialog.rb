@@ -1,9 +1,9 @@
 
 require 'rubygems'
 require 'fox16'
-require 'right_aws'
 require 'net/http'
 require 'resolv'
+require 'common/error_message'
 
 include Fox
 
@@ -18,20 +18,14 @@ def initialize(owner,image)
   end
   @deleted = false
   if sel_image != "** Not Found **"
-    ec2 = @ec2_main.environment.connection
     answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm","Confirm Deregister of Image "+sel_image)
     if answer == MBOX_CLICKED_YES
-        ec2 = @ec2_main.environment.connection
-        if ec2 != nil
   	   begin
-              ec2.deregister_image(sel_image)
+              @ec2_main.environment.images.deregister_image(sel_image)
               @deleted = true
            rescue
-             error_message("DeRegister of Image failed",$!.to_s)
+             error_message("DeRegister of Image failed",$!)
            end
-        else
-      	   puts "***Error: No EC2 Connection"
-        end
     end    
   end     
 end
@@ -40,8 +34,8 @@ end
       @deleted
   end
   
-   def error_message(title,message)
-      FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
-   end
-    
+  def success
+     @deleted
+  end
+
 end

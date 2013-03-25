@@ -1,9 +1,9 @@
 
 require 'rubygems'
 require 'fox16'
-require 'right_aws'
 require 'net/http'
 require 'resolv'
+require 'common/error_message'
 
 include Fox
 
@@ -26,15 +26,13 @@ class AS_CapacityDialog < FXDialogBox
     frame2 = FXHorizontalFrame.new(page1,LAYOUT_FILL, :padding => 0)
     update = FXButton.new(frame2, "   &Update   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     update.connect(SEL_COMMAND) do |sender, sel, data|
-       as = @ec2_main.environment.as_connection
-       if as != nil
-	    begin 
-             as.set_desired_capacity(@as_name, desired_capacity.text )
+	  begin 
+             #as.set_desired_capacity(@as_name, desired_capacity.text )
+             @ec2_main.environment.auto_scaling_groups.set_desired_capacity(@as_name, desired_capacity.text )
           rescue
-             error_message("Set Desired Capacity Failed",$!.to_s)
+             error_message("Set Desired Capacity Failed",$!)
           end             
           @updated = true
-       end
        self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
     end
   end  
@@ -42,8 +40,13 @@ class AS_CapacityDialog < FXDialogBox
   def updated
      @updated
   end
-  
-  def error_message(title,message)
-    FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
+ 
+  def saved
+      @updated
   end
+  
+  def success
+     @updated
+  end
+ 
 end

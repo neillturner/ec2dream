@@ -8,7 +8,25 @@ class EC2_Block_Mapping
 
   def array
      return @block_mapping 
-  end   
+  end  
+
+  def array_fog
+       i=0
+       data = Array.new
+       @block_mapping.each do |m|
+           if m != nil
+              r= {}
+              r['DeviceName']=m[:device_name]
+              r['Ebs.SnapshotId']=m[:ebs_snapshot_id]
+              r['Ebs.VolumeSize']=m[:ebs_volume_size].to_i
+              r['VirtualName']=m[:virtual_name]
+              r['Ebs.DeleteOnTermination']=m[:ebs_delete_on_termination]
+              data[i]=r 
+              i = i+1
+           end   
+        end
+        return data
+   end  
 
   def curr_row
       return @curr_row
@@ -82,6 +100,20 @@ class EC2_Block_Mapping
        end
        load_table(field)      
   end
+  
+  def load_fog(r,field)
+         @block_mapping = Array.new 
+         # puts "field #{r[:field]}"
+         if r[:block_device_mappings] != nil
+            r[:block_device_mappings].each do |m|
+              if m!= nil   
+                 puts "m #{m}"
+                 @block_mapping.push(m)
+   	    end
+   	  end 
+         end
+         load_table_fog(field)      
+  end
 
   def load_from_properties(props,prop_text,field)
       i=0
@@ -118,6 +150,22 @@ class EC2_Block_Mapping
               i = i+1
    	     end 
          end   
+   end
+   
+   def load_table_fog(field)
+            field.clearItems
+            field.rowHeaderWidth = 0	
+            field.setTableSize(@block_mapping.size, 1)
+            field.setColumnText(0, "Device Name;Virtual Name;Snapshot Id;Size;Delete On Termination") 
+            field.setColumnWidth(0,350)
+            i = 0
+            @block_mapping.each do |m|
+              if m!= nil 
+                 field.setItemText(i, 0, "#{m['DeviceName']};#{m['VirtualName']};#{m['Ebs.SnapshotId']};#{m['Ebs.VolumeSize']};#{m['Ebs.DeleteOnTermination']}")
+                 field.setItemJustify(i, 0, FXTableItem::LEFT)
+                 i = i+1
+      	     end 
+            end   
    end
 
 end

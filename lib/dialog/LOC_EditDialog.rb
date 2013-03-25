@@ -1,7 +1,7 @@
-
 require 'rubygems'
 require 'fox16'
 require 'common/EC2_Properties'
+require 'common/error_message'
 
 include Fox
 
@@ -117,7 +117,7 @@ class LOC_EditDialog < FXDialogBox
            return
         end   
       rescue
-        error_message("Update Local Server",$!.to_s)
+        error_message("Update Local Server",$!)
         return
       end
      end
@@ -126,9 +126,9 @@ class LOC_EditDialog < FXDialogBox
   def saved
     @saved
   end
-  
-  def error_message(title,message)
-      FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
+
+  def success
+     @saved
   end
   
 end

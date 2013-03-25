@@ -1,11 +1,10 @@
-
 require 'rubygems'
 require 'fox16'
-require 'right_aws'
 require 'net/http'
 require 'resolv'
 require 'fileutils'
 require 'rexml/document'
+require 'common/error_message'
 
 include Fox
 
@@ -18,85 +17,92 @@ class EC2_ImageEBSDeleteDialog < FXDialogBox
     if sa.size>1
        sel_image = sa[1].rstrip
     end        
-    @ec2 = @ec2_main.environment.connection
     @s3_bucket = nil
     @manifest_file = ""
     @file_folder = ""
-    snapshot_ids = Array.new
+    snapshot_ids = []
     snapshots = ""
     @deleted = false
     r = get_image(sel_image)
     begin 
-       if r[:root_device_name] != nil
-          root_device = r[:root_device_name]
-          snapshot_id = ""
-          if r[:block_device_mappings] != nil 
-	     r[:block_device_mappings].each do |m|
-	        puts "s #{m[:ebs_snapshot_id]}"
-                snapshot_ids.push(m[:ebs_snapshot_id])
-                if snapshots == nil or snapshots == ""
-                   snapshots = m[:ebs_snapshot_id]
-                else
-                   snapshots = "#{snapshots},#{m[:ebs_snapshot_id]}"
+       if r['rootDeviceName'] != nil
+          root_device = r['rootDeviceName']
+           if r['blockDeviceMapping'] != nil 
+	     r['blockDeviceMapping'].each do |m|
+	        puts "snapshot #{m['snapshotId']}"
+	        if m['snapshotId'] != nil and m['snapshotId'] != ""
+                   snapshot_ids.push(m['snapshotId'])
+                   if snapshots == nil or snapshots == ""
+                      snapshots = m['snapshotId']
+                   else
+                      snapshots = "#{snapshots},#{m['snapshotId']}"
+                   end   
                 end 
 	     end
 	  end    
        end
-    rescue 
+    rescue
+       puts "ERROR processing snapshots"
        return
-    end   
-    answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm","Confirm Deregister of Image #{sel_image} and Delete of Snapshot(s) #{snapshots}")
-    if answer == MBOX_CLICKED_YES
-       if @ec2 != nil
+    end 
+    if  @ec2_main.settings.openstack
+       answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm","Confirm Delete of Image #{sel_image}")
+       if answer == MBOX_CLICKED_YES
+          delete_image(sel_image)
+       end
+    else
+       answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm","Confirm Deregister of Image #{sel_image} and Delete of Snapshot(s) #{snapshots}")
+       if answer == MBOX_CLICKED_YES
           begin
-             @ec2.deregister_image(sel_image)
+             @ec2_main.environment.images.deregister_image(sel_image)
           rescue
-             error_message("DeRegister of Image failed",$!.to_s)
+             error_message("DeRegister of Image failed",$!)
              return
           end
+          sleep 10
           snapshot_ids.each {|s| delete_snapshot(s) }
           @deleted = true
-       else
-      	  puts "***Error: No EC2 Connection"
-       end
+       end   
     end    
   end 
    
   def get_image(image_id)
         r = {}
-        ec2 = @ec2_main.environment.connection
-        if ec2 != nil
   	   begin
-              a = ec2.describe_images([image_id])
-              r = a[0]
+              r = @ec2_main.environment.images.get(image_id)
            rescue
-             error_message("Image not found",$!.to_s)
+             error_message("Image not found",$!)
            end
-        else
-      	   puts "***Error: No EC2 Connection"
-        end  
         return r 
   end 
   
+  def delete_image(image_id)
+      if image_id != nil and image_id != "" 
+            begin 
+              @ec2_main.environment.images.delete_image(image_id)
+              @deleted = true
+           rescue
+              error_message("Image Deletion failed","The Snapshot might still be registered as an image. #{$!}")
+           end   
+      end  
+  end     
+  
   def delete_snapshot(snapshot_id)
     if snapshot_id != nil and snapshot_id != "" 
-      ec2 = @ec2_main.environment.connection
-      if ec2 != nil
           begin 
-            ec2.delete_snapshot(snapshot_id)
+            @ec2_main.environment.snapshots.delete_snapshot(snapshot_id)
          rescue
-            error_message("EBS Snapshot Deletion failed",$!.to_s)
+            error_message("Snapshot Deletion failed",$!)
          end   
-      end
     end  
   end     
    
    def deleted 
       @deleted
    end 
-   
-   def error_message(title,message)
-      FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
+ 
+   def success 
+    @deleted
    end
-    
+   
 end

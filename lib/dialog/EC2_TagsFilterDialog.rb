@@ -1,7 +1,5 @@
-
 require 'rubygems'
 require 'fox16'
-require 'right_aws'
 require 'net/http'
 require 'resolv'
 
@@ -9,7 +7,7 @@ include Fox
 
 class EC2_TagsFilterDialog < FXDialogBox
 
-  def initialize(owner, resource, tags=[])
+  def initialize(owner, resource, tags={})
     puts "TagsFilterDialog.initialize"
     @ec2_main = owner
     @resource_id = resource 
@@ -55,27 +53,20 @@ class EC2_TagsFilterDialog < FXDialogBox
     i = 0
     puts tags
     if tags != nil
-       tags.each do |t|
-          #puts "t #{t}" 
-          t.each do |t2|
-             #puts "t2 #{t2}  #{t2.class}"
-               if t2.instance_of? Array
-                  t2.each do |a|
-                     #puts "a #{a}  #{a.class}"
-                     if a.instance_of? String 
-                        if a.length>4 and a[0..3]=="tag:"
-                           @key[i].text = "#{a[4..-1]}"
-                        else
-                           if @value[i].text != "" 
-                              @value[i].text = "#{@value[i].text},#{a}" 
-                           else 
-	   	              @value[i].text = a
-	   	           end                          
-                        end
-                     end  
-                  end
-               end
+       tags.each do |t , t2|
+         @key[i].text = t
+         if t2.instance_of? Array
+            t3 = ""
+            t2.each do |a|
+              if t3 != "" 
+                 t3 = "#{t3},#{a}" 
+              else 
+	   	 t3 = a
+	      end 
+	    end  
+	    @value[i].text = t3
           end
+          i=i+1
        end    
     end
     FXLabel.new(frame1,"")
@@ -93,20 +84,18 @@ class EC2_TagsFilterDialog < FXDialogBox
     end
 
   end 
-  
+
   def save_tags
-    @tag_filter = []
+    @tag_filter = {}
     for i in 0..9 do
       if @key[i].text != nil and @key[i].text != ""
-        t = []
-        t.push(["tag:#{@key[i].text}"])
+        t=@key[i].text
         if @value[i].text != nil and @value[i].text != ""
            t2 = @value[i].text.split(",")
-           t.push(t2) 
         else
-           t.push([""])
+           t2 = [""]
         end
-        @tag_filter.push(t)
+        @tag_filter[t] = t2
       end
     end
     puts "save_tags #{@tag_filter}"
@@ -120,9 +109,9 @@ class EC2_TagsFilterDialog < FXDialogBox
   def saved
      @saved
   end
-  
-  def error_message(title,message)
-      FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
+
+  def success
+     @saved
   end
   
 end

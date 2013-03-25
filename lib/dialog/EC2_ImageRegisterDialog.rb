@@ -1,9 +1,9 @@
 
 require 'rubygems'
 require 'fox16'
-require 'right_aws'
 require 'net/http'
 require 'resolv'
+require 'common/error_message'
 
 include Fox
 
@@ -40,29 +40,30 @@ class EC2_ImageRegisterDialog < FXDialogBox
   end 
   
   def register_image(p)
-     ec2 = @ec2_main.environment.connection
      sa = (p).split("/")
      sel_image = p 
      if sa.size>1
         sel_image = sa[1].rstrip
      end  
-     if ec2 != nil
       begin 
-       r = ec2.register_image(sel_image)
+       @ec2_main.environment.images.register_image(sel_image)
        @created = true
        FXMessageBox.information(@ec2_main,MBOX_OK,"Image Registered","Image \""+r+"\" sucessfully registered")
       rescue
-        error_message("Register Image Failed",$!.to_s)
+        error_message("Register Image Failed",$!)
       end 
-     end
   end 
+  
+  def saved
+     @created
+  end
   
   def created
       @created
   end
   
-  def error_message(title,message)
-      FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
+  def success
+     @created
   end
 
 end

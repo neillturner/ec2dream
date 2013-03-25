@@ -1,9 +1,8 @@
-
 require 'rubygems'
 require 'fox16'
-require 'right_aws'
 require 'net/http'
 require 'resolv'
+require 'common/error_message'
 
 include Fox
 
@@ -17,10 +16,10 @@ class AS_InstancesDialog < FXDialogBox
     	@curr_instance = ""
         @decrement_capacity = true
     	@curr_row = nil
-     	super(owner, "Instances for #{as_group}", :opts => DECOR_ALL, :width => 600, :height => 310)
+     	super(owner, "Instances for #{as_group}", :opts => DECOR_ALL, :width => 800, :height => 310)
     	@frame1 = FXMatrix.new(self, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
     	FXLabel.new(@frame1, "Auto Scaling Group" )
-	@as_group_name = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_READONLY)
+	@as_group_name = FXTextField.new(@frame1, 90, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_READONLY)
 	@as_group_name.text = @as_name
     	FXLabel.new(@frame1, "" )
       FXLabel.new(@frame1, "Decrement Desired Capacity" )
@@ -30,16 +29,6 @@ class AS_InstancesDialog < FXDialogBox
 	decrement_desired_capacity.appendItem("False")
 	decrement_desired_capacity.setCurrentItem(0)
       FXLabel.new(@frame1, "" )
-      #  decrement_desired_capacity = FXCheckButton.new(@frame1,"Decrement Desired Capacity", :opts => ICON_BEFORE_TEXT|LAYOUT_SIDE_BOTTOM|LAYOUT_FILL_X)
-	#decrement_desired_capacity.setCheck(TRUE) 
-      #  FXLabel.new(@frame1, "" )
-      #  decrement_desired_capacity.connect(SEL_COMMAND) do
-      #    if @decrement_capacity == false
-      #       @decrement_capacity = true
-      #   else
-      #       @decrement_capacity = false
-      #    end
-      #  end         
         FXLabel.new(@frame1, "Instances")
     	@as_instances = FXTable.new(@frame1,:height => 200, :opts => LAYOUT_FIX_HEIGHT|LAYOUT_FILL|TABLE_READONLY  )
         @header1 = @as_instances.columnHeader
@@ -99,64 +88,67 @@ class AS_InstancesDialog < FXDialogBox
   end 
     
   def terminate_instance(as_group, instance_id, decrement_capacity)
-       as = @ec2_main.environment.as_connection
-       if as != nil
            begin
-              as.terminate_instance_in_auto_scaling_group(instance_id, decrement_capacity)
+              @ec2_main.environment.auto_scaling_groups.terminate_instance_in_auto_scaling_group(instance_id, decrement_capacity)
               @updated = true
 	      @curr_instance = ""
               describe_instances(as_group)
            rescue
-              error_message("Terminate of Instance #{instance_id} Failed",$!.to_s)
+              error_message("Terminate of Instance #{instance_id} Failed",$!)
            end 
-       end
   end
   
   def describe_instances(as_group)
-        as = @ec2_main.environment.as_connection
-        if as != nil
          begin 
-            as.describe_auto_scaling_groups(as_group).each do |r|
-  		    load_instances_table(r[:instances])
-            end 
-         rescue
-            error_message("Describe Auto Scaling Groups Failed",$!.to_s)
-            return
+            r = @ec2_main.environment.auto_scaling_groups.get(as_group)
+  	    load_instances_table(r[:instances])
+          rescue
+            error_message("Describe Auto Scaling Groups Failed",$!)
          end
-        end
   end
   
   def load_instances_table(r)
            @as_instances.clearItems
            @as_instances.rowHeaderWidth = 0	
-           @as_instances.setTableSize(r.size, 3)
+           @as_instances.setTableSize(r.size, 5)
            @as_instances.setColumnText(0, "Instance Id")
            @as_instances.setColumnText(1, "Lifecycle State")
            @as_instances.setColumnText(2, "Availability Zone")
-           @as_instances.setColumnWidth(0,120)
-           @as_instances.setColumnWidth(1,120)
+           @as_instances.setColumnText(3, "Health Status")
+           @as_instances.setColumnText(4, "Launch Config Name")
+           @as_instances.setColumnWidth(0,100)
+           @as_instances.setColumnWidth(1,100)
            @as_instances.setColumnWidth(2,130)
+           @as_instances.setColumnWidth(3,120)
+           @as_instances.setColumnWidth(4,140)
            i = 0
            r.each do |m|
              if m!= nil 
-                @as_instances.setItemText(i, 0, "#{m[:instance_id]}")
-                @as_instances.setItemText(i, 1, "#{m[:lifecycle_state]}")
-                @as_instances.setItemText(i, 2, "#{m[:availability_zone]}")
+                @as_instances.setItemText(i, 0, "#{m.id}")
+                @as_instances.setItemText(i, 1, "#{m.life_cycle_state}")
+                @as_instances.setItemText(i, 2, "#{m.availability_zone}")
+                @as_instances.setItemText(i, 3, "#{m.health_status}")
+                @as_instances.setItemText(i, 4, "#{m.launch_configuration_name}")
                 @as_instances.setItemJustify(i, 0, FXTableItem::LEFT)
                 @as_instances.setItemJustify(i, 1, FXTableItem::LEFT)
                 @as_instances.setItemJustify(i, 2, FXTableItem::LEFT)
+                @as_instances.setItemJustify(i, 3, FXTableItem::LEFT)
+                @as_instances.setItemJustify(i, 4, FXTableItem::LEFT)
                 i = i+1
      	       end 
            end   
   end 
-  
+ 
+  def saved
+     @updated
+  end
   
   def updated
     @updated
   end
-  
-  def error_message(title,message)
-      FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
+
+  def success
+     @updated
   end
   
 end

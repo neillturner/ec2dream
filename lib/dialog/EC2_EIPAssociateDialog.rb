@@ -1,9 +1,9 @@
 
 require 'rubygems'
 require 'fox16'
-require 'right_aws'
 require 'net/http'
 require 'resolv'
+require 'common/error_message'
 
 include Fox
 
@@ -21,9 +21,7 @@ class EC2_EIPAssociateDialog < FXDialogBox
     i = 0 
     j = 0
     k = 0
-    ec2 = @ec2_main.environment.connection
-    if ec2 != nil
-       ec2.describe_addresses.each do |r|
+       @ec2_main.environment.addresses.all.each do |r|
            if r[:instance_id] == nil
     	      if eip_address == r[:public_ip]
     	         eip_address_available = true
@@ -34,7 +32,6 @@ class EC2_EIPAssociateDialog < FXDialogBox
            end
            i = i+1
        end 
-    end
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "" )    
@@ -70,7 +67,7 @@ class EC2_EIPAssociateDialog < FXDialogBox
     FXLabel.new(frame1, "" )
     create.connect(SEL_COMMAND) do |sender, sel, data|
        if eip_address == nil or eip_address == ""
-         error_message("Error","Elastic IP Address not selected")
+         error_message("Error","IP Address Address not selected")
        else
          if server_instance == nil or server_instance == ""
            error_message("Error","Server not selected")
@@ -91,27 +88,25 @@ class EC2_EIPAssociateDialog < FXDialogBox
        server_instance = sia[1]
      end 
      if answer == MBOX_CLICKED_YES
-       ec2 = @ec2_main.environment.connection
-       if ec2 != nil
         begin 
-          r = ec2.associate_address(server_instance, {:public_ip=> eip_address})
+          r = @ec2_main.environment.addresses.associate(server_instance, eip_address)
           @created = true
         rescue
-          error_message("Asociate Elastic IP failed",$!.to_s)
+          error_message("Asociate IP Address failed",$!)
         end
-       end 
      end
   end 
-  
+
+  def saved
+     @created
+  end  
   
   def created
       @created
   end
   
-  
-  def error_message(title,message)
-      FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
+  def success
+     @created
   end
-  
- 
+
 end

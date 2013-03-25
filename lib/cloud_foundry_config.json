@@ -1,0 +1,42 @@
+{
+ "Cloud":{
+"Compute":{
+    "Apps":{
+      "request":"list_apps",
+      "name":"app",
+      "response": "response",
+      "response_code": 200,
+      "action": ["create","", "edit","","","","","",""],
+      "icon": ["@create", "", "@edit","","@csv","","","",""],
+      "tooltip":[" Create ","", " Edit ",""," Csv Data ","","","",""],
+      "dialog":["@ec2_main.launch.clear_cfy_panel;@ec2_main.tabBook.setCurrent(2)","@ec2_main.launch.load(@curr_item);@ec2_main.tabBook.setCurrent(2)", "","","","","","",""],
+      "dialog_parm": ["","", "","","","","","",""], 
+      "keys": ["name"]
+    },
+   "Services":{
+      "request":"list_services",
+      "name":"service",
+      "response": "response",
+      "response_code": 200,
+      "action": ["create","delete", "","","","","","",""],
+      "icon": ["@create","@delete","","","@csv","","","",""],
+      "tooltip":[" Create "," Delete ","",""," Csv Data ","","","",""],
+      "dialog":["CFY_ServiceCreateDialog","CFY_ServiceDeleteDialog","","","","","","",""],
+      "dialog_parm": ["","","","","","","","",""], 
+      "keys": ["name"]
+    },	
+   "Users":{
+      "request":"list_users",
+      "name":"user",
+      "response": "response",
+      "response_code": 200,
+      "action": ["","", "","","","","","",""],
+      "icon": ["", "", "","","","","","",""],
+      "tooltip":["","", "","","","","","",""],
+      "dialog":["","", "","","","","","",""],
+      "dialog_parm": ["","", "","","","","","",""], 
+      "keys": ["email"]
+    }
+   }
+ } 
+}

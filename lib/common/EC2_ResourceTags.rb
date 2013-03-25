@@ -1,6 +1,5 @@
 require 'rubygems'
 require 'fox16'
-require 'right_aws'
 require 'net/http'
 require 'resolv'
 
@@ -73,6 +72,7 @@ class EC2_ResourceTags
   end
  
   def assign(resource_id)
+    if !@ec2_main.settings.openstack 
      if @tags != nil 
       ec2 = @ec2_main.environment.connection
       if ec2 != nil
@@ -84,7 +84,8 @@ class EC2_ResourceTags
          return false
        end 
       end
-     end 
+     end
+    end 
   end 
 
   def load(fn)

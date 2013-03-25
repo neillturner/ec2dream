@@ -1,7 +1,5 @@
-
 require 'rubygems'
 require 'fox16'
-require 'right_aws'
 require 'net/http'
 require 'resolv'
 require 'common/EC2_ResourceTags'
@@ -116,9 +114,9 @@ class EC2_TagsEditDialog < FXDialogBox
   def saved
      @saved
   end
-  
-  def error_message(title,message)
-      FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
+
+  def success
+     @saved
   end
   
 end

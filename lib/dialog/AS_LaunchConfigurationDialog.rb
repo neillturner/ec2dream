@@ -1,7 +1,6 @@
 
 require 'rubygems'
 require 'fox16'
-require 'right_aws'
 require 'net/http'
 require 'resolv'
 
@@ -14,11 +13,10 @@ class AS_LaunchConfigurationDialog < FXDialogBox
     @ec2_main = owner
     @curr_item = ""
     @item_name = Array.new
-    as = @ec2_main.environment.as_connection
-    if as != nil
        i=0
        begin 
-          as.describe_launch_configurations.each do |r|
+          #as.describe_launch_configurations.each do |r|
+          @ec2_main.environment.launch_configurations.all.each do |r|
             @item_name[i] = r[:launch_configuration_name]
             i = i+1
           end
@@ -40,7 +38,6 @@ class AS_LaunchConfigurationDialog < FXDialogBox
          puts "Launch Configuration "+@curr_item
          self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
        end
-    end
   end
   
   def selected

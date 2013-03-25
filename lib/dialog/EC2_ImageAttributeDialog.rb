@@ -1,10 +1,10 @@
 
 require 'rubygems'
 require 'fox16'
-require 'right_aws'
 require 'net/http'
 require 'resolv'
-
+require 'common/error_message'
+require 'common/browser'
 
 include Fox
 
@@ -13,11 +13,7 @@ class EC2_ImageAttributeDialog < FXDialogBox
   def initialize(owner, image)
         puts "ImageAttributeDialog.initialize"
         @ec2_main = owner
-        sa = (image).split("/")
-        image_id = image 
-        if sa.size>1
-	   image_id = sa[1].rstrip
-        end
+	image_id = image
         super(owner, "Image Attributes", :opts => DECOR_ALL, :width => 600, :height => 550)
 	page1 = FXVerticalFrame.new(self, LAYOUT_FILL, :padding => 0)        
         frame1 = FXMatrix.new(page1, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
@@ -30,7 +26,7 @@ class EC2_ImageAttributeDialog < FXDialogBox
 	aws_id_button.icon = aws_id_icon
 	aws_id_button.tipText = "  CloudMarket Info  "
 	aws_id_button.connect(SEL_COMMAND) do |sender, sel, data|
-           @ec2_main.environment.browser("http://thecloudmarket.com/image/#{aws_id.text}")
+           browser("http://thecloudmarket.com/image/#{aws_id.text}")
 	end 	
  	FXLabel.new(frame1, "Location" )
  	aws_location = FXTextField.new(frame1, 60, nil, 0, :opts => TEXT_READONLY)
@@ -54,6 +50,10 @@ class EC2_ImageAttributeDialog < FXDialogBox
  	FXLabel.new(frame1, "" )
  	FXLabel.new(frame1, "Visibility" )
  	visibility = FXTextField.new(frame1, 60, nil, 0, :opts => TEXT_READONLY)
+
+ 	FXLabel.new(frame1, "" )
+ 	FXLabel.new(frame1, "Tags" )
+	tags = FXTextField.new(frame1, 60, nil, 0, :opts => TEXT_READONLY)
   
  	FXLabel.new(frame1, "" )  	
  	FXLabel.new(frame1, "Architecture" )
@@ -79,25 +79,21 @@ class EC2_ImageAttributeDialog < FXDialogBox
  	FXLabel.new(frame1, "Product Codes" )
  	aws_product_codes = FXTextField.new(frame1, 60, nil, 0, :opts => TEXT_READONLY)
 
- 	FXLabel.new(frame1, "" )
- 	FXLabel.new(frame1, "launch Permission Groups" )
- 	launch_permission_groups = FXTextField.new(frame1, 60, nil, 0, :opts => TEXT_READONLY)
+ 	#FXLabel.new(frame1, "" )
+ 	#FXLabel.new(frame1, "launch Permission Groups" )
+ 	#launch_permission_groups = FXTextField.new(frame1, 60, nil, 0, :opts => TEXT_READONLY)
 
- 	FXLabel.new(frame1, "" )
- 	FXLabel.new(frame1, "launch Permission Users" )
- 	launch_permission_users = FXTextField.new(frame1, 60, nil, 0, :opts => TEXT_READONLY)
+ 	#FXLabel.new(frame1, "" )
+ 	#FXLabel.new(frame1, "launch Permission Users" )
+ 	#launch_permission_users = FXTextField.new(frame1, 60, nil, 0, :opts => TEXT_READONLY)
 
  	FXLabel.new(frame1, "" ) 	
  	FXLabel.new(frame1, "Platform" )
 	platform = FXTextField.new(frame1, 60, nil, 0, :opts => TEXT_READONLY)
 	
  	FXLabel.new(frame1, "" )
- 	FXLabel.new(frame1, "Code" )
+ 	FXLabel.new(frame1, "State Reason" )
 	code = FXTextField.new(frame1, 60, nil, 0, :opts => TEXT_READONLY)
-	
- 	FXLabel.new(frame1, "" )
- 	FXLabel.new(frame1, "Message" )
-	message = FXTextField.new(frame1, 60, nil, 0, :opts => TEXT_READONLY)
 	
  	FXLabel.new(frame1, "" )
  	FXLabel.new(frame1, "Root Device Type" )
@@ -117,48 +113,55 @@ class EC2_ImageAttributeDialog < FXDialogBox
            self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
         end
         r = get_image(image_id)
-        a = get_image_launch_permissions(image_id)
- 	if r != nil 
- 	   description.text = r[:description]
- 	   aws_owner.text = r[:aws_owner]
- 	   aws_location.text = r[:aws_location]
- 	   ami_name.text = r[:ami_name]
- 	   image_owner_alias.text = r[:image_owner_alias]
-  	   if r[:aws_is_public]
+        #a = get_image_launch_permissions(image_id)
+        a = nil
+ 	if r != nil
+ 	  #if r.instance_of?(Hash)
+ 	   description.text = r['description']
+ 	   aws_owner.text = r['imageOwnerId']
+           aws_location.text = r['imageLocation']
+ 	   ami_name.text = r['imageId']
+ 	   image_owner_alias.text = r['imageOwnerAlias']
+  	   if r['isPublic'] == true
  	      visibility.text = "Public"
  	   else
  	      visibility.text = "Private"
  	   end 	   
- 	   aws_architecture.text = r[:aws_architecture]   
- 	   aws_image_type.text = r[:aws_image_type]   
- 	   aws_kernel_id.text = r[:aws_kernel_id]   
- 	   aws_ramdisk_id.text = r[:aws_ramdisk_id]   
- 	   aws_state.text = r[:aws_state]  
- 	   pc = r[:aws_product_codes]
- 	   if pc != nil 
- 	      pc.each do |p|
- 	         if aws_product_codes.text == nil or aws_product_codes.text == ""
- 	            aws_product_codes.text = p
- 	         else   
- 	            aws_product_codes.text = "#{aws_product_codes.text},#{p}"
- 	         end
- 	      end   
- 	   end 	   
- 	   platform.text = r[:platform]
- 	   code.text = r[:state_reason_code].to_s
- 	   message.text = r[:state_reason_message]
- 	   root_device_type.text = r[:root_device_type]
- 	   root_device_name.text = r[:root_device_name]
-	   if r[:block_device_mappings] != nil 
-	     r[:block_device_mappings].each do |m|
-	      d = m[:ebs_delete_on_termination] ? 'true' : 'false'	
+ 	   aws_architecture.text = r['architecture']   
+ 	   aws_image_type.text = r['imageType']   
+ 	   aws_kernel_id.text = r['kernelId']   
+ 	   aws_ramdisk_id.text = r['ramdiskId']   
+ 	   aws_state.text = r['imageState']  
+ 	   aws_product_codes.text = r['productCodes'].to_s if r['productCodes'] != []
+  	   platform.text = r['platform']
+ 	   code.text = r['stateReason'].to_s if r['stateReason'] != {}
+ 	   tags.text = r['tagSet'].to_s if r['tagSet'] != {}
+ 	   root_device_type.text = r['rootDeviceType']
+ 	   root_device_name.text = r['rootDeviceName']
+	   if r['blockDeviceMapping'] != nil 
+	     r['blockDeviceMapping'].each do |m|
 	      if block_devices.text==""
-	         block_devices.text="#{m[:device_name]},#{m[:ebs_snapshot_id]},#{m[:ebs_volume_size]},#{d}\n"
+	         block_devices.text=m.to_s
 	      else
-	         block_devices.text="#{block_devices.text} #{m[:device_name]},#{m[:ebs_snapshot_id]},#{m[:ebs_volume_size]},#{d}\n"
+	         block_devices.text=block_devices.text+m.to_s
 	      end
 	     end   
           end
+         #else
+         # ami_name.text =  r.name
+         # l = {}
+         # begin 
+         #    l = r.links[0]
+         # rescue
+         # end
+         # #puts "** #{l[0]}"
+         # #a=l[0]
+         # aws_location.text = "#{l["href"]}"
+         # description.text = "Created #{r.created_at} Updated #{r.updated_at}" 
+         # aws_state.text = r.status
+         # code.text = "Progress #{r.progress}%"
+         # platform.text =  "#{r.server}"
+         #end
        end  
  	if a != nil
  	   lp = a[:groups]
@@ -186,41 +189,31 @@ class EC2_ImageAttributeDialog < FXDialogBox
   
   def get_image(image_id)
         r = {}
-        ec2 = @ec2_main.environment.connection
-        if ec2 != nil
   	   begin
-              a = ec2.describe_images([image_id])
-              r = a[0]
+              r = @ec2_main.environment.images.get(image_id)
+              puts "image in json #{r.to_json}"              
            rescue
-             puts "Image not found"
+             puts "Image #{image_id} not found"
              r = nil
            end
-        else
-      	   puts "***Error: No EC2 Connection"
-        end  
         return r 
   end
   
-  def get_image_launch_permissions(image_id)
-        r = {}
-        ec2 = @ec2_main.environment.connection
-        if ec2 != nil
-  	   begin
-              r = ec2.describe_image_attribute(image_id)
-           rescue
-             puts "describe_image_attribute #{$!.to_s}"
-             r = nil 
-             #error_message("Image Attributes not found",$!.to_s)
-           end
-        else
-      	   puts "***Error: No EC2 Connection"
-        end  
-        return r 
-  end  
-  
-  def error_message(title,message)
-      FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
-  end
+ # def get_image_launch_permissions(image_id)
+ #       r = {}
+ # 	   begin
+ #             r = @ec2_main.environment.images.get_attribute(image_id)
+ #          rescue
+  #           puts "describe_image_attribute #{image_id} #{$!.to_s}"
+#	     r = nil 
+#             #error_message("Image Attributes not found",$!.to_s)
+#           end
+#        return r 
+#  end
+
+  def success
+   @false
+  end 
   
  
 end

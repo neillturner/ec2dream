@@ -1,0 +1,108 @@
+{
+ "Cloud":{
+   "Compute":{
+    "Launch": {},
+    "Security Groups":{
+      "request":"describe_security_groups",
+      "name":"security_group",
+      "response": "response",
+      "response_code": 200,
+      "action": ["create","edit", "","","","","","",""],
+      "icon": ["@create", "@edit", "","","@csv","","","",""],
+      "tooltip":[" Create Security Group "," Edit Security Group ", "","","","",""," "," "],
+      "dialog":["EC2_SecGrp_CreateDialog","$ec2_main.secgrp.load(@curr_item);$ec2_main.tabBook.setCurrent(3)","","","","","","",""],
+      "dialog_parm": ["","", "","","","","","groupId",""], 
+      "keys": ["aws_group_name"]
+    },
+   "Servers":{
+      "request":"describe_instances",
+      "name":"instance",
+      "response": "response",
+      "response_code": 200,
+      "action": ["","", "","","","","","",""],
+      "icon": ["","","","","@csv","","","",""],
+      "tooltip":["","","",""," Csv Data ","","","",""],
+      "dialog":["","","","","","","","",""],
+      "dialog_parm": ["","","","","","","","",""], 
+      "keys": ["aws_id"]
+    },	
+   "Images":{
+      "request":"describe_images",
+      "name":"image",
+      "response": "response",
+      "response_code": 200,
+      "action": ["","","","","","","display Attributes","",""],
+      "icon": ["@magnifier","@delete","","","@csv","","@view","",""],
+      "tooltip":["  Select Images  ","  Delete and Deregister EBS Image  ","",""," Csv Data "," Launch Server Instance ","  Image Attributes  ","",""],
+      "dialog":["EC2_ImageSelectDialog","EC2_ImageEBSDeleteDialog","","","","","EC2_ImageAttributeDialog","",""],
+      "dialog_parm": ["","","","","","","","",""], 
+      "keys": ["aws_id","aws_location"]
+    },
+  "Volumes":{
+      "request":"describe_volumes",
+      "name":"volume",
+      "response": "response",
+      "response_code": 200,
+      "action": ["","","attach","detach","","","snapshot","",""],
+      "icon": ["@create","@delete","@link","@link_break","@csv","","@camera","",""],
+      "tooltip":["  Create  ","Delete"," Attach Volume "," Detach Volume "," Csv Data ","","  Create Snapshot  ","",""],
+      "dialog": ["EC2_EBSCreateDialog","EC2_EBSDeleteDialog","EC2_EBSAttachDialog","EC2_EBSDetachDialog","","","EC2_SnapVolumeDialog","",""],
+      "dialog_parm": ["","","","@curr_instance","","","","",""], 
+      "keys": ["aws_id"]
+    },
+  "Snapshots":{
+      "request":"describe_snapshots(:owner => @snap_owner)",
+      "name":"snapshot",
+      "response": "response",
+      "response_code": 200,
+      "action": ["","","","Register as Image","","","","",""],
+      "icon": ["@create","@delete","@magnifier","@create_image_icon","@csv","","","",""],
+      "tooltip":[" Create Volume ","Delete"," Select Snapshots "," Register Image "," Csv Data ","","","",""],
+      "dialog":["EC2_EBSCreateDialog","EC2_SnapDeleteDialog","EC2_SnapSelectDialog","EC2_SnapRegisterDialog","","","",""],
+      "dialog_parm": ["","","","","","","","",""], 
+      "keys": ["aws_id"]
+    },
+   "Key Pairs":{
+      "request":"describe_key_pairs",
+      "name":"key_pair",
+      "response": "response",
+      "response_code": 200,
+      "action": ["","","","","","","","",""],
+      "icon": ["@create","@delete","","","@csv","","","",""],
+      "tooltip":["  Create  ","Delete","",""," Csv Data ","","","",""],
+      "dialog":["EC2_KeypairCreateDialog","EC2_KeypairDeleteDialog","","","","","","",""],
+      "dialog_parm": ["","","","","","","","",""], 
+      "keys": ["aws_key_name"]
+    },
+  "IP Addresses":{
+      "request":"describe_addresses",
+      "name":"address",
+      "response": "response",
+      "response_code": 200,
+      "action": ["","","associate","dis-associate","","","","",""],
+      "icon": ["@create","@delete","@link","@link_break","@csv","","","",""],
+      "tooltip":["  Create  ","Delete"," Associate IP Address "," Dis-associate IP Address "," Csv Data ","","","",""],
+      "dialog":["","EC2_EIPDeleteDialog","EC2_EIPAssociateDialog","EC2_EIPDisassociateDialog","","","","",""],
+      "dialog_parm": ["","","@curr_instance","@curr_instance","","","","",""], 
+      "keys": ["public_ip"]
+    },
+	"Local Servers":{
+          "request":"",
+          "name":"local_server",
+          "response": "",
+          "response_code": 200,
+          "action": ["create","delete", "edit","","","","","",""],
+          "icon": ["@create","@delete","@edit","@put","@csv","@chef_icon","","",""],
+          "tooltip":[" Create Config ","  Delete Config "," edit Config ",""," Csv Data ","","","",""],
+          "dialog":["LOC_CreateDialog","LOC_DeleteDialog","LOC_EditDialog","","","","","",""],
+          "dialog_parm": ["","","","","","","","",""], 
+          "keys": ["server"]
+    }
+  }   
+ } 
+}
+
+ 
+
+ 
+   

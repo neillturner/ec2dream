@@ -1,16 +1,15 @@
-
 require 'rubygems'
 require 'fox16'
-require 'right_aws'
 require 'net/http'
 require 'resolv'
 require 'common/EC2_ResourceTags'
+require 'common/error_message'
 
 include Fox
 
 class EC2_TagsAssignDialog < FXDialogBox
 
-  def initialize(owner, resource, resource_tags)
+  def initialize(owner, resource)
     puts "TagsAssignDialog.initialize"
     @ec2_main = owner
     sa = (resource).split("/")
@@ -21,7 +20,8 @@ class EC2_TagsAssignDialog < FXDialogBox
     @nickname_tag = @ec2_main.settings.get('AMAZON_NICKNAME_TAG')
     if @nickname_tag == nil
        @nickname_tag = ""
-    end    
+    end  
+    resource_tags = get_tags(@resource_id)
     @tags = {}
     @saved = false
     @deleted = false
@@ -257,7 +257,7 @@ class EC2_TagsAssignDialog < FXDialogBox
     end
    if resource_tags != nil
     i=0
-    curr_tags = resource_tags.get
+    curr_tags = resource_tags
     puts "curr_tags #{curr_tags}"
     if curr_tags != nil 
        curr_tags.each_pair do |k,v|
@@ -274,6 +274,17 @@ class EC2_TagsAssignDialog < FXDialogBox
     end
   end 
   
+  def get_tags(resource_id)
+          data = @ec2_main.environment.tags.all(resource_id)
+          ta = {}
+    	  if data != nil
+    	     data.each do |aws_tag|
+    	        ta[aws_tag['key']] = aws_tag['value']
+    	     end
+    	  end
+    	  ta
+  end
+  
   def save_tag(resource_id, key, value)
     if key != nil and key != ""
      ec2 = @ec2_main.environment.connection
@@ -282,7 +293,7 @@ class EC2_TagsAssignDialog < FXDialogBox
        r = ec2.create_tags(resource_id, {key => value})
        @saved = true
       rescue
-        error_message("Create Tags Failed",$!.to_s)
+        error_message("Create Tags Failed",$!)
       end 
      end
     end 
@@ -298,7 +309,7 @@ class EC2_TagsAssignDialog < FXDialogBox
        @deleted = true
        @saved = true
       rescue
-        error_message("Delete Tags Failed",$!.to_s)
+        error_message("Delete Tags Failed",$!)
       end 
      end
     end 
@@ -308,8 +319,8 @@ class EC2_TagsAssignDialog < FXDialogBox
     @saved
   end
   
-  def error_message(title,message)
-      FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
-  end
-  
+  def success
+     @saved
+  end 
+
 end

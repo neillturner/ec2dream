@@ -13,17 +13,25 @@
 # accesskey        - Amazon Access Key. If not specified gets it from the Settings.rb
 # secretaccesskey  - Amazon Secret Access Key. If not specified gets it from the Settings.rb
 #
+# Up to 5 EBS Disks
+# 
 # vol              - volume of ebs to attach
 # dir              - directory where volume is to me mounted
 # device           - device where vol is to be attached
-# init_ebs         - specify Y to initialize the ebs (be careful with this option it wipe existing data on ebs)
+# init_ebs         - specify Y to initialize the ebs (be careful with this option it will wipe existing data on ebs)
 # format           - optional parmeter to specify file system format when init_ebs set to Y. Default is "ext3"
 #
 # vol2             - second volume of ebs to attach
 # dir2             - second directory where volume is to me mounted
 # device2          - second device where vol is to be attached
-# init_ebs2        - specify Y to initialize the second ebs (be careful with this option it wipe existing data on ebs)
+# init_ebs2        - specify Y to initialize the second ebs (be careful with this option it will wipe existing data on ebs)
 # format2          - optional parmeter to specify file system format when init_ebs2 set to Y. Default is "ext3"
+#
+# vol5             - fifth volume of ebs to attach
+# dir5             - fifth directory where volume is to me mounted
+# device5          - fifth device where vol is to be attached
+# init_ebs5        - specify Y to initialize the fifth ebs (be careful with this option it will wipe existing data on ebs)
+# format5          - optional parmeter to specify file system format when init_ebs5 set to Y. Default is "ext3"
 #
 # elasticip        - specify elastic ip for instance
 # resize_ebs       - specify Y to resize device specified by device parameter to resize 
@@ -356,6 +364,19 @@ end
 if options['vol2'] != nil and options['vol2'] != ""
    process_ebs(ec2, options['vol2'], options['device2'], options['dir2'], options['init_ebs2'], options['format2'])
 end  
+
+if options['vol3'] != nil and options['vol3'] != ""
+   process_ebs(ec2, options['vol3'], options['device3'], options['dir3'], options['init_ebs3'], options['format3'])
+end  
+
+if options['vol4'] != nil and options['vol4'] != ""
+   process_ebs(ec2, options['vol4'], options['device4'], options['dir4'], options['init_ebs4'], options['format4'])
+end  
+
+if options['vol5'] != nil and options['vol5'] != ""
+   process_ebs(ec2, options['vol5'], options['device5'], options['dir5'], options['init_ebs5'], options['format5'])
+end  
+
 
 #
 # generate hosts file  

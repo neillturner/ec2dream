@@ -1,7 +1,5 @@
-
 require 'rubygems'
 require 'fox16'
-require 'right_aws'
 require 'net/http'
 require 'resolv'
 require 'dialog/EC2_EBSAttachDeviceDialog'
@@ -149,9 +147,5 @@ class EC2_BlockMappingEditDialog < FXDialogBox
   def block_mapping
      @bm
   end   
-  
-  def error_message(title,message)
-      FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
-  end
-  
+
 end

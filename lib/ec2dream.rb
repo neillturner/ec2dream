@@ -20,7 +20,7 @@ class Ec2dream
      end
      application.setSleepTime(20)
      FXToolTip.new(application, TOOLTIP_PERMANENT, 0)
-     EC2_Main.new(application)
+     EC2_Main.new(application,"EC2Dream")
      application.create
      application.run
      FXApp::ID_QUIT

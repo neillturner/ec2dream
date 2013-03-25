@@ -1,8 +1,8 @@
 require 'rubygems'
 require 'fox16'
-require 'right_aws'
 require 'net/http'
 require 'resolv'
+require 'common/error_message'
 
 include Fox
 
@@ -92,7 +92,7 @@ class EC2_SystemDialog < FXDialogBox
             envs = Dir.entries(location.text)
          rescue
             @valid_loc = false
-            error_message("Repository Location does not exist",$!.to_s)
+            error_message("Repository Location does not exist",$!)
          end
       end
       if @valid_loc == true
@@ -130,9 +130,5 @@ class EC2_SystemDialog < FXDialogBox
      end
      @settings.put_system('TIMEZONE',"UTC")
   end
-  
-  def error_message(title,message)
-        FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
-  end
-   
+
 end

@@ -1,9 +1,8 @@
-
 require 'rubygems'
 require 'fox16'
-require 'right_aws'
 require 'net/http'
 require 'resolv'
+require 'common/error_message'
 
 include Fox
 
@@ -27,7 +26,7 @@ class EC2_SpotRequestCancelDialog < FXDialogBox
               ec2.cancel_spot_instance_requests([@delete_item])
               @deleted = true
            rescue
-             error_message("Spot Request Cancel failed",$!.to_s)
+             error_message("Spot Request Cancel failed",$!)
            end   
         end
      end    
@@ -37,7 +36,8 @@ class EC2_SpotRequestCancelDialog < FXDialogBox
     @deleted
   end
 
-  def error_message(title,message)
-    FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
+  def success 
+    @deleted
   end
+  
 end

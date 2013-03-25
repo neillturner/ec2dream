@@ -1,9 +1,9 @@
 
 require 'rubygems'
 require 'fox16'
-require 'right_aws'
 require 'net/http'
 require 'resolv'
+require 'common/error_message'
 
 include Fox
 
@@ -13,11 +13,13 @@ class EC2_SecGrp_AuthorizeDialog < FXDialogBox
     puts "SecGrp_AuthorizeDialog.initialize"
     @ec2_main = owner
     @current_group = current_group
+    @current_group_id = 0
     sg_protocol = "tcp"
     sg_group = ""
-    sg = Array.new    
+    sg = Array.new 
+    sg_id = {}
     @created = false
-    super(owner, "Security Group Authorization", :opts => DECOR_ALL, :width => 250, :height => 200)
+    super(owner, "Security Group Authorization", :opts => DECOR_ALL, :width => 250, :height => 250)
     frame1 = FXMatrix.new(self, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
     FXLabel.new(frame1, "Protocol" )
     protocol = FXComboBox.new(frame1, 5, :opts => COMBOBOX_NO_REPLACE|LAYOUT_RIGHT)
@@ -37,6 +39,15 @@ class EC2_SecGrp_AuthorizeDialog < FXDialogBox
     FXLabel.new(frame1, "To Port" )
     to_port = FXTextField.new(frame1, 20, nil, 0, :opts => TEXTFIELD_INTEGER|LAYOUT_RIGHT)
     FXLabel.new(frame1,"")
+    FXLabel.new(frame1,"")
+    FXLabel.new(frame1,"")
+    FXLabel.new(frame1,"")
+    FXHorizontalSeparator.new(frame1, LAYOUT_FILL_X|SEPARATOR_GROOVE|LAYOUT_SIDE_BOTTOM)
+    FXHorizontalSeparator.new(frame1, LAYOUT_FILL_X|SEPARATOR_GROOVE|LAYOUT_SIDE_BOTTOM)
+    FXLabel.new(frame1,"")
+    FXLabel.new(frame1,"")
+    FXLabel.new(frame1,"")
+    FXLabel.new(frame1,"")    
     
     FXLabel.new(frame1, "IP Address" )
     ip_address = FXTextField.new(frame1, 20, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
@@ -55,13 +66,15 @@ class EC2_SecGrp_AuthorizeDialog < FXDialogBox
     
     FXLabel.new(frame1, "Group" )
     group = FXComboBox.new(frame1, 20, :opts => COMBOBOX_NO_REPLACE|LAYOUT_RIGHT)
-    ec2 = @ec2_main.environment.connection
-    if ec2 != nil
-       r = ec2.describe_security_groups()
+       r = @ec2_main.environment.security_group.all
        i=0
        while i<r.length
           x = r[i]
           sg[i] = x[:aws_group_name]
+          sg_id[x[:aws_group_name]] = x[:id]
+          if x[:aws_group_name] == current_group
+              @current_group_id = x[:id]
+          end
           i = i+1
        end
        sg = sg.sort
@@ -70,8 +83,7 @@ class EC2_SecGrp_AuthorizeDialog < FXDialogBox
        while i<sg.length
           group.appendItem(sg[i]);
           i = i+1
-       end 
-    end
+       end       
     group.numVisible = 9
     group.connect(SEL_COMMAND) do |sender, sel, data|
        sg_group = data
@@ -81,7 +93,7 @@ class EC2_SecGrp_AuthorizeDialog < FXDialogBox
     create = FXButton.new(frame1, "   &Save   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     FXLabel.new(frame1, "" )
     create.connect(SEL_COMMAND) do |sender, sel, data|
-      if sg_group == nil or  sg_group == "" or sg_group == "No Group" 
+      #
          if from_port.text == nil or from_port.text == ""
 	    error_message("Error","From Port Not specified")
 	 else
@@ -96,58 +108,59 @@ class EC2_SecGrp_AuthorizeDialog < FXDialogBox
 	          if to_port.text == nil or to_port.text == ""
 	             error_message("Error","To Port Not specified")
 	          else
-	             if ip_address.text == nil or ip_address.text == ""
-	    	        error_message("Error","IP Address Not specified")
-	             else
-	                auth_ip(protocol, from_port, to_port, ip_address)
-	             end   
+	             if sg_group == nil or  sg_group == "" or sg_group == "No Group" 
+	                if ip_address.text == nil or ip_address.text == ""
+	    	           error_message("Error","IP Address Not specified")
+	                else
+	                   auth_ip(protocol.text, from_port.text, to_port.text, ip_address.text, nil)
+	                end
+	             else 
+	                auth_ip(protocol.text, from_port.text, to_port.text, "", sg_group)
+	             end
 	          end   
                end
             end
          end
-      else
-         auth(sg_group)
-      end
+      #else
+      #   auth(sg_group,sg_id[sg_group])
+      #end
       if @created == true
            self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
       end
     end 
   end 
   
-  def auth_ip(protocol, from_port, to_port, ip_address)
+  def auth_ip(protocol, from_port, to_port, ip_address, group_auth)
      @created = false
-     ec2 = @ec2_main.environment.connection
-     if ec2 != nil
-      begin
-       r = ec2.authorize_security_group_IP_ingress(@current_group, from_port, to_port, protocol, ip_address)
-       @created = true
-      rescue
-        error_message("Invalid IP Address",$!.to_s)
-      end 
-     end
+     begin
+        @ec2_main.environment.security_group.create_security_group_rule(@current_group_id, protocol, from_port, to_port, ip_address, @current_group, @current_group, group_auth)     
+        @created = true
+     rescue
+        error_message("Invalid IP Address or Group not found",$!)
+     end        
   end
   
-  def auth(group)
-       @created = false
-       ec2 = @ec2_main.environment.connection
-       if ec2 != nil
-        id = @ec2_main.settings.get('AMAZON_ACCOUNT_ID')
-        begin
-         r = ec2.authorize_security_group_named_ingress(@current_group, id ,group)
-         @created = true
-        rescue
-          error_message("Security Group Authorization failed","Incorrect AMAZON_ACCOUNT_ID in Settings\n"+$!.to_s)
-        end 
-       end
+  #def auth(group,group_id)
+  #     @created = false
+  #      id = @ec2_main.settings.get('AMAZON_ACCOUNT_ID')
+  #      begin
+  #       r = @ec2_main.environment.security_group.authorize_security_group_named_ingress(@current_group, id ,group, @current_group_id, group_id)
+  #       @created = true
+  #      rescue
+  ##        error_message("Security Group Authorization failed",$!)
+  #      end 
+  #end 
+ 
+  def saved
+     @created
   end 
-  
+ 
   def created
      @created
   end
   
-  def error_message(title,message)
-      FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
+  def success
+     @created
   end
   
- 
 end

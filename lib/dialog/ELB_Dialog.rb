@@ -1,7 +1,5 @@
-
 require 'rubygems'
 require 'fox16'
-require 'right_aws'
 require 'net/http'
 require 'resolv'
 
@@ -10,20 +8,13 @@ include Fox
 class ELB_Dialog < FXDialogBox
 
   def initialize(owner)
-    puts "ELBDialog.initialize"
-    @ec2_main = owner
-    @curr_item = ""
-    @item_name = Array.new
-    elb = @ec2_main.environment.elb_connection
-    if elb != nil
-       i=0
-       begin 
-          elb.describe_load_balancers.each do |r|
-            @item_name[i] = r[:load_balancer_name]
-            i = i+1
-          end
-       rescue
-       end       
+       puts "ELBDialog.initialize"
+       @ec2_main = owner
+       @curr_item = ""
+       @item_name = Array.new
+       @ec2_main.environment.elb.describe_load_balancers.each do |r|
+          @item_name.push(r['LoadBalancerName'])
+        end
        @item_name = @item_name.sort
        super(owner, "Select Load Balancer", :opts => DECOR_ALL, :width => 400, :height => 200)
        itemlist = FXList.new(self, :opts => LIST_SINGLESELECT|LAYOUT_FILL)
@@ -40,7 +31,6 @@ class ELB_Dialog < FXDialogBox
          puts "ELB "+@curr_item
          self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
        end
-    end
   end
   
   def selected

@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'fox16'
+require 'common/error_message'
 
 include Fox
 
@@ -20,7 +21,7 @@ class CF_DeleteDialog < FXDialogBox
                  error_message("Stack Deletion failed","Stack Deletion failed")
               end
            rescue
-             error_message("Stack Deletion failed",$!.to_s)
+             error_message("Stack Deletion failed",$!)
            end   
         end
      end    
@@ -30,7 +31,8 @@ class CF_DeleteDialog < FXDialogBox
     @deleted
   end
 
-  def error_message(title,message)
-    FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
+  def success 
+    @deleted
   end
+  
 end

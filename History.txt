@@ -1,3 +1,39 @@
+Version 3.6.0 April 2013
+------------------------
+Switch back to standard fog gem as bugs fixed.
+Re-architect list processng to be dynamic and extensible. 
+Create json config for each cloud.
+Merge settings and environment tabs. 
+Move list to first tab.
+drop right_aws.
+
+
+Version 3.5.2 March 2013
+------------------------
+Correct create Environment
+ 
+Version 3.5.2 March 2013
+------------------------
+Environments in tree 
+Servers under Security Groups in tree
+Launch profiles by server name 
+Various fixes to bugs
+
+
+Version 3.5.1 Feb 2013
+----------------------
+Add private ip address
+Change tree view of servers to group by security group and use the Amazon tag for the server name
+if specified.
+
+Version 3.5.0 Jan 2013
+----------------------
+Full Support for Openstack HP Cloud and Rackspace.
+Support for CloudFoundry.
+Upgrade of AWS Autoscaling to latest API and fog.
+Migration of LoadBalancer to fog, 
+Start of migration of code from right_aws to the fog ruby cloud services.
+
 Version 3.4.0 July 2012
 -----------------------
 Various fixes including correcting monitoring graphs so values should be correct now.

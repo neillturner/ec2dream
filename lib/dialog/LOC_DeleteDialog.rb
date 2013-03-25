@@ -1,6 +1,6 @@
-
 require 'rubygems'
 require 'fox16'
+require 'common/error_message'
 
 include Fox
 
@@ -21,7 +21,7 @@ class LOC_DeleteDialog < FXDialogBox
                  error_message("Server Deletion failed","Server Deletion failed")
               end
            rescue
-             error_message("Server Deletion failed",$!.to_s)
+             error_message("Server Deletion failed",$!)
            end   
         end
      end    
@@ -30,8 +30,13 @@ class LOC_DeleteDialog < FXDialogBox
   def deleted 
     @deleted
   end
-
-  def error_message(title,message)
-    FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
+  
+  def success 
+    @deleted
   end
+
+  def success
+     @deleted
+  end
+  
 end

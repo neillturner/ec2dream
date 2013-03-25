@@ -1,9 +1,8 @@
-
 require 'rubygems'
 require 'fox16'
-require 'right_aws'
 require 'net/http'
 require 'resolv'
+require 'common/error_message'
 
 include Fox
 
@@ -30,7 +29,7 @@ class EC2_InstanceModifyDialog < FXDialogBox
  	@magnifier = @ec2_main.makeIcon("magnifier.png")
 	@magnifier.create
 	@server['Instance_Type_Button'].icon = @magnifier
-	@server['Instance_Type_Button'].tipText = "Select Image"
+	@server['Instance_Type_Button'].tipText = "Select Instance Type"
 	@server['Instance_Type_Button'].connect(SEL_COMMAND) do
 	   @dialog = EC2_InstanceDialog.new(@ec2_main)
 	   @dialog.execute
@@ -41,17 +40,17 @@ class EC2_InstanceModifyDialog < FXDialogBox
 	end
  	FXLabel.new(@frame1, "Kernel" )
  	@server['Kernel'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN)
- 	@server['Kernel'].text = get_attribute(instance_id,"kernel")
+ 	@server['Kernel'].text = get_attribute(instance_id,"kernelId")
  	@orig_server['Kernel'] = @server['Kernel'].text 	
  	FXLabel.new(@frame1, "" ) 
  	FXLabel.new(@frame1, "Ramdisk" )
  	@server['Ramdisk'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN)
- 	@server['Ramdisk'].text = get_attribute(instance_id,"ramdisk")
+ 	@server['Ramdisk'].text = get_attribute(instance_id,"ramdiskId")
  	@orig_server['Ramdisk'] = @server['Ramdisk'].text 	 	
  	FXLabel.new(@frame1, "" )  	
 	FXLabel.new(@frame1, "User Data" )
         @server['User_Data'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN)
- 	@server['User_Data'].text = get_attribute(instance_id,"userData")
+ 	@server['User_Data'].text = "" # get_attribute(instance_id,"userData")
  	@orig_server['User_Data'] = @server['User_Data'].text         
         FXLabel.new(@frame1, "" )
 	FXLabel.new(@frame1, "User Data File")
@@ -75,7 +74,7 @@ class EC2_InstanceModifyDialog < FXDialogBox
 	@server['Disable_Api_Termination'].appendItem("true")	
 	@server['Disable_Api_Termination'].appendItem("false")
 	@server['Disable_Api_Termination'].setCurrentItem(0)
- 	disable_api = get_attribute(instance_id,"disableApiTermination")
+ 	disable_api = ""  # get_attribute(instance_id,"disableApiTermination")
 	disable_api = disable_api.to_s
         @orig_server['Disable_Api_Termination'] = disable_api 	
  	if disable_api == "true"
@@ -90,7 +89,7 @@ class EC2_InstanceModifyDialog < FXDialogBox
 	@server['Instance_Initiated_Shutdown_Behavior'].appendItem("stop")	
 	@server['Instance_Initiated_Shutdown_Behavior'].appendItem("terminate")
 	@server['Instance_Initiated_Shutdown_Behavior'].setCurrentItem(0)
- 	instance_init_shut = get_attribute(instance_id,"instanceInitiatedShutdownBehavior")
+ 	instance_init_shut = ""   # get_attribute(instance_id,"instanceInitiatedShutdownBehavior")
 	instance_init_shut = instance_init_shut.to_s
         @orig_server['Instance_Initiated_Shutdown_Behavior'] = instance_init_shut 	
  	if instance_init_shut == "stop"
@@ -100,7 +99,7 @@ class EC2_InstanceModifyDialog < FXDialogBox
  	end	
 	FXLabel.new(@frame1, "" )        
 	FXLabel.new(@frame1, "Root Device Name" )        
-        @server['Root_Device_Name'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN)
+        @server['Root_Device_Name'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
         @server['Root_Device_Name'].text = get_attribute(instance_id,"rootDeviceName")
  	@orig_server['Root_Device_Name'] = @server['Root_Device_Name'].text 
         FXLabel.new(@frame1, "" )
@@ -118,10 +117,10 @@ class EC2_InstanceModifyDialog < FXDialogBox
   end 
   
   def modify_instance
-    modify_attribute(@server['Instance_ID'].text,'instanceType',@server['Instance_Type'].text, @orig_server['Instance_Type'])
-    modify_attribute(@server['Instance_ID'].text,'kernel',@server['Kernel'].text, @orig_server['Kernel'])
-    modify_attribute(@server['Instance_ID'].text,'ramdisk',@server['Ramdisk'].text, @orig_server['Ramdisk'])
-    modify_attribute(@server['Instance_ID'].text,'userData',@server['User_Data'].text, @orig_server['User_Data'])
+    modify_attribute(@server['Instance_ID'].text,'InstanceType.Value',@server['Instance_Type'].text, @orig_server['Instance_Type'])
+    modify_attribute(@server['Instance_ID'].text,'Kernel.Value',@server['Kernel'].text, @orig_server['Kernel'])
+    modify_attribute(@server['Instance_ID'].text,'Ramdisk.Value',@server['Ramdisk'].text, @orig_server['Ramdisk'])
+    modify_attribute(@server['Instance_ID'].text,'UserData.Value',@server['User_Data'].text, @orig_server['User_Data'])
     if @server['User_Data_File'].text != nil and @server['User_Data_File'].text != ""
        fn = @server['User_Data_File'].text
        d = ""
@@ -130,64 +129,69 @@ class EC2_InstanceModifyDialog < FXDialogBox
       	   d = f.read
           f.close
        rescue 
-          puts "***Error could not read user data file"
+          puts "ERROR: could not read user data file"
           error_message("Attribute Error","Could not read User Data File")
           return
        end
-       modify_attribute(@server['Instance_ID'].text,'userData',d,"")
+       modify_attribute(@server['Instance_ID'].text,'UserData.Value',d,"")
     end
     disable_api = "true"
     if @server['Disable_Api_Termination'].itemCurrent?(1)
        disable_api = "false"
     end     
-    modify_attribute(@server['Instance_ID'].text,'disableApiTermination',disable_api, @orig_server['Disable_Api_Termination'])
+    modify_attribute(@server['Instance_ID'].text,'DisableApiTermination.Value',disable_api, @orig_server['Disable_Api_Termination'])
     instance_init_shut = "stop"
     if @server['Instance_Initiated_Shutdown_Behavior'].itemCurrent?(1)
        instance_init_shut = "terminate"
     end
-    modify_attribute(@server['Instance_ID'].text,'instanceInitiatedShutdownBehavior',instance_init_shut, @orig_server['Instance_Initiated_Shutdown_Behavior'])
-    modify_attribute(@server['Instance_ID'].text,'rootDeviceName',@server['Root_Device_Name'].text, @orig_server['Root_Device_Name'])
+    modify_attribute(@server['Instance_ID'].text,'InstanceInitiatedShutdownBehavior.Value',instance_init_shut, @orig_server['Instance_Initiated_Shutdown_Behavior'])
+    #modify_attribute(@server['Instance_ID'].text,'RootDeviceName',@server['Root_Device_Name'].text, @orig_server['Root_Device_Name'])
   end   
 
  def modify_attribute(instance,attr,value,orig_value)
     if orig_value != value
-       ec2 = @ec2_main.environment.connection
-       if ec2 != nil
           begin
-             ec2.modify_instance_attribute(instance,attr,value)
+             #ec2.modify_instance_attribute(instance,attr,value)
+             if attr == 'DisableApiTermination.Value'
+               bvalue = false
+               bvalue = true if attr == 'DisableApiTermination.Value' and value == "true"
+               @ec2_main.environment.servers.modify_instance_attribute(instance,attr,bvalue)
+             else  
+               @ec2_main.environment.servers.modify_instance_attribute(instance,attr,value)
+             end  
              orig_value = value
              @modified = true
           rescue
-             error_message("Modify Instance Attribute Failed",$!.to_s)
+             error_message("Modify Instance Attribute Failed",$!)
           end
-       end   
     end
  end
  
  def get_attribute(instance,attr)
-     ec2 = @ec2_main.environment.connection
      value = ""
-     if ec2 != nil
         begin
-          r = ec2.describe_instance_attribute(instance,attr)
+          #r = ec2.describe_instance_attribute(instance,attr)
+          r = r = @ec2_main.serverCache.instance(instance)
+          #r = @ec2_main.environment.servers.describe_instance_attribute(instance,attr)
           if r != nil and r != ""
-             value = r
+             value = r[attr] if r[attr] != nil
           end   
         rescue
-          error_message("Get Instance Attribute Failed",$!.to_s)
+          error_message("Get Instance Attribute Failed",$!)
         end  
-     end
      return value
  end
+ 
+  def saved
+      @modified
+  end
   
   def modified
      @modified
   end
-  
-  def error_message(title,message)
-      FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
-      @modified = false
-  end
-  
  
+  def success
+     @modified
+  end 
+
 end

@@ -1,10 +1,10 @@
 
 require 'rubygems'
 require 'fox16'
-require 'right_aws'
 require 'net/http'
 require 'resolv'
 require 'dialog/EC2_EBSAttachDeviceDialog'
+require 'common/error_message'
 
 include Fox
 
@@ -18,13 +18,12 @@ class EC2_EBSAttachDialog < FXDialogBox
     ebs_device = "/dev/sdf"
     ebs_server = ""
     @created = false
-    super(owner, "Attach EBS Volume     ", :opts => DECOR_ALL, :width => 400, :height => 120)
+    super(owner, "Attach Volume     ", :opts => DECOR_ALL, :width => 400, :height => 120)
     frame1 = FXMatrix.new(self, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
     
     FXLabel.new(frame1, "Volume" )
     volume = FXTextField.new(frame1, 20, nil, 0, :opts => TEXTFIELD_READONLY)
     volume.text = ebs_volume
-    ec2 = @ec2_main.environment.connection
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "Server     " )
     serverlist = FXComboBox.new(frame1, 35,
@@ -93,15 +92,12 @@ class EC2_EBSAttachDialog < FXDialogBox
       if ebs_device.include? "windows"
         ebs_device = ebs_device[-4..-1]
       end  
-      ec2 = @ec2_main.environment.connection
-      if ec2 != nil
          begin 
-            ec2.attach_volume(ebs_volume, ebs_server, ebs_device)
+            @ec2_main.environment.volumes.attach_volume(ebs_server, ebs_volume, ebs_device)
             @created = true
          rescue
-            error_message("EBS Attach failed",$!.to_s)
+            error_message("Attach Volume Failed",$!)
          end
-      end    
   end    
   
   def pad(i)
@@ -112,14 +108,17 @@ class EC2_EBSAttachDialog < FXDialogBox
       end
       return p
   end 
+
+  def saved
+     @created
+  end
   
   def created
      @created
   end
-  
-  def error_message(title,message)
-      FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
+
+  def success
+     @created
   end
   
- 
 end

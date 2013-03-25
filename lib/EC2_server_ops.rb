@@ -12,23 +12,22 @@ class EC2_Server
        ops_clear('Chef_Node')
        ops_clear('Security_Groups')
        ops_clear('Image_ID')
-       ops_clear('Image_Name')
        ops_clear('State')
-       ops_clear('Addr')
-       ops_clear('Addr_Type')
+       ops_clear('Addresses')
+       ops_clear('Public_Addr')
        ops_clear('Progress')
        ops_clear('Personality')
        ops_clear('Flavor')
        ops_clear('Availability_Zone')
+       ops_clear('Launch_Time')
        ops_clear('Key_Name')
-       #if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
-       #   clear('EC2_SSH_Private_Key')
-       #else
-       #   clear('Putty_Private_Key')
-       #end
-       #clear('EC2_SSH_User')
+       if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
+          ops_clear('SSH_Private_Key')
+       else
+          ops_clear('Putty_Private_Key')
+       end
+       ops_clear('EC2_SSH_User')
        @frame1.hide()
-       @frame2.hide()
        @page1.width=300
        @frame3.show()
        @server_status = ""
@@ -40,64 +39,42 @@ class EC2_Server
   end 
  
   def ops_load(instance_id)
-         puts "server.ops_load "+instance_id
-         @type = "ops"
-         @frame1.hide()
-         @frame2.hide()
-         @page1.width=300
-         @frame3.show()
-         @ops_server['Instance_ID'].text = instance_id
-         ENV['EC2_INSTANCE'] = instance_id
-     	 r = @ec2_main.serverCache.instance(instance_id)
-     	 puts "ops instance #{r}"
-    	 gp = @ec2_main.serverCache.instance_groups(instance_id)
-    	 gp_list = ""
-    	 gp.each do |g|
-    	   if gp_list.length>0
-    	    gp_list = gp_list+","+g
-    	   else
-    	    gp_list = g
-    	    @secgrp = g
-    	   end 
-    	 end
+      puts "server.ops_load "+instance_id
+      @type = "ops"
+      @frame1.hide()
+      @page1.width=300
+      @frame3.show()
+      @ops_server['Instance_ID'].text = instance_id
+      ENV['EC2_INSTANCE'] = instance_id
+      #puts "instance id #{instance_id}"
+      r = @ec2_main.serverCache.instance(instance_id)
+      if r != nil	 
+     	 gp = group_array(r)
+         gp_list = ""
+         gp_first = ""
+         gp.each do |g|
+            if gp_list.length>0
+               gp_list = gp_list+","+g
+            else
+               gp_first = g
+               gp_list = g
+            end 
+         end   	 
     	 @ops_server['Security_Groups'].text = gp_list
-    	 @ops_server['Name'].text = r.name
+    	 @secgrp = gp_first
+    	 if r[:name] == nil 
+    	   return
+    	 end  
+    	 @ops_server['Name'].text = r[:name]
     	 @ops_server['Chef_Node'].text = ops_get_chef_node
-    	 @ops_server['Image_ID'].text = r.image["id"]
-    	 @ops_server['Image_Name'].text = image(r.image["id"])
-    	 @ops_server['State'].text = r.state
+    	 @ops_server['Image_ID'].text = r[:aws_image_id]
+    	 @ops_server['State'].text = r[:aws_state]
     	 @server_status = @ops_server['State'].text
+    	 @ops_server['Launch_Time'].text = convert_time(r[:aws_launch_time])
     	 @ops_server['Key_Name'].text = ""
-    	 if r.addresses["internet"] != nil 
-    	    @ops_server['Addr'].text = r.addresses["internet"][0]["addr"]
-    	    @ops_server['Addr_Type'].text = "IPV#{r.addresses["internet"][0]["version"]}"
-    	 else
-    	     @ops_server['Addr'].text = ""
-    	     @ops_server['Addr_Type'].text = ""
-    	 end 
-    	 @ops_server['Progress'].text = "#{r.progress}%"
-    	 if r.personality != nil
-    	    @ops_server['Personality'].text = r.personality
-    	 else
-    	    @ops_server['Personality'].text = ""
+    	 if r[:key_name] != nil
+    	    @ops_server['Key_Name'].text =  r[:key_name]
     	 end
-    	 @ops_server['Flavor'].text = flavor(r.flavor["id"])
-    	 if r.availability_zone != nil
-    	    @ops_server['Availability_Zone'].text = r.availability_zone
-    	 else
-    	    @ops_server['Availability_Zone'].text =  ""
-    	 end   
-    	 #if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
-         #   @server['EC2_SSH_Private_Key'].text = get_pk
-         #else
-         #   @server['Putty_Private_Key'].text = get_ppk
-         #end
-         #@server['EC2_SSH_User'].text = ""
-         #instance_id = @server['Instance_ID'].text
-         #ssh_u = @ec2_main.launch.get('EC2_SSH_User')
-         #if ssh_u != nil and ssh_u != ""
-         #   @server['EC2_SSH_User'].text = ssh_u
-         #end   
      	 #if @windows_admin_pw[instance_id] != nil and @windows_admin_pw[instance_id] != ""
     	 #  @server['Win_Admin_Password'].text = @windows_admin_pw[instance_id]
     	 #else
@@ -106,108 +83,110 @@ class EC2_Server
     	 #  else
     	 #      @server['Win_Admin_Password'].text = ""
     	 #  end
-    	 #end
-     	 @ec2_main.app.forceRefresh
-  end 
- 
- 
-  def ops_run_ssh
-             s = @ops_server['Addr'].text
-             if s == nil or s == ""
- 	       s = currentServer
- 	    end
- 	    user = @ec2_main.launch.ops_get("SSH_User")
- 	    adminPass = @ec2_main.launch.ops_get("Admin_Password")
- 	    if user == nil or user == ""
- 	       user = "root"
- 	    end
-             if RUBY_PLATFORM.index("mswin") != nil  or RUBY_PLATFORM.index("i386-mingw32") != nil
- 	       pk = ops_get_ppk
- 	       if pk != nil and pk != ""
- 	       	  c = "cmd.exe /c \@start \"\" /b \""+ENV['EC2DREAM_HOME']+"/putty/putty.exe\" -ssh "+s+" -i "+"\""+pk+"\""+" -l "+user
- 	          #c = "cmd.exe /c \@start \"\" /b \""+ENV['EC2DREAM_HOME']+"/putty/putty.exe\" -ssh "+s+" -pw "+"\""+adminPass+"\""+" -l "+user
- 	          puts c
- 	          system(c)
- 	       else
- 	          error_message("Error","No Putty Private Key in Settings")
-                end
-             else
- 	       pk = ops_get_pk
- 	       if pk != nil and pk != ""
- 	          te = "xterm"
-                   if @ec2_main.settings.get_system('TERMINAL_EMULATOR') != nil and @ec2_main.settings.get_system('TERMINAL_EMULATOR') != ""
- 	             te = @ec2_main.settings.get_system('TERMINAL_EMULATOR')
- 	          end 
- 	          if RUBY_PLATFORM.index("linux") != nil
- 	             if te == "xterm"
-                          c = "xterm -hold -e ssh -i "+pk+" "+s+" -l "+user+" &"
-                      else 
-                          c = te+ " -x ssh -i "+pk+" "+s+" -l "+user+" &"
-                      end
- 	          else
- 		     if te == "xterm"
-                          c = "xterm -e ssh -i "+pk+" "+s+" -l "+user+" &"
-                      else 
-                          c = te+ " -x ssh -i "+pk+" "+s+" -l "+user+" &"
-                      end	          
- 	          end	          
- 	          puts c
- 	          system(c)
- 	       else
- 	          error_message("Error","No SSH Private Key in Settings")
-                end
+    	 #end    	 
+     	 if @ops_public_addr[instance_id] != nil and @ops_public_addr[instance_id] != ""
+    	   @ops_server['Public_Addr'].text = @ops_public_addr[instance_id]
+    	 elsif @ec2_main.launch.ops_get('Public_Addr') != nil 
+    	    @ops_server['Public_Addr'].text = @ec2_main.launch.ops_get('Public_Addr')
+    	 else   
+    	    @ops_server['Public_Addr'].text = ""
+    	 end   
+    	 @ops_server['Addresses'].text = ""
+    	 addr_list = ""
+    	 r[:addresses].each do |k, a|
+    	    #puts "k #{k} a #{a}"
+    	    a.each do |v|
+    	       #puts "v #{v}"
+    	       if v["addr"] != nil
+    	          if addr_list.length > 0
+    	             addr_list = addr_list+","+v["addr"]
+    	          else
+    	             addr_list = v["addr"]
+                  end
+                  if  @ops_server['Public_Addr'].text == "" and !v["addr"].start_with?("10.") and v["addr"].index(':')==nil
+                     @ops_server['Public_Addr'].text = v["addr"]
+                     @ops_public_addr[instance_id]
+                  end   
+               end
              end
+         end  
+         @ops_server['Addresses'].text = addr_list
+    	 @ops_server['Progress'].text = "#{r[:progress]}%"
+    	 #if r.personality != nil
+    	 #   @ops_server['Personality'].text = r.personality
+    	 #else
+    	 #   @ops_server['Personality'].text = ""
+    	 #end
+    	 if  @ec2_main.settings.openstack_rackspace
+    	    @ops_server['Flavor'].text = r[:flavor]
+    	 else
+    	    @ops_server['Flavor'].text = r[:flavor]["id"]
+    	 end   
+    	 if r[:availability_zone] != nil
+    	    @ops_server['Availability_Zone'].text = r[:availability_zone]
+    	 else
+    	    @ops_server['Availability_Zone'].text =  ""
+    	 end   
+    	 if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
+            @ops_server['EC2_SSH_Private_Key'].text = get_pk
+         else
+            @ops_server['Putty_Private_Key'].text = get_ppk
+         end
+         @ops_server['EC2_SSH_User'].text = ""
+         #instance_id = @ops_server['Instance_ID'].text
+         ssh_u = @ec2_main.launch.ops_get('EC2_SSH_User')
+         if ssh_u != nil and ssh_u != ""
+            @ops_server['EC2_SSH_User'].text = ssh_u
+         end  
+       	 if @ops_admin_pw[instance_id] != nil and @ops_admin_pw[instance_id] != ""
+    	   @ops_server['Admin_Password'].text = @ops_admin_pw[instance_id]
+    	 else
+      	   if @ec2_main.launch.ops_get('Security_Group') == @secgrp
+    	      @ops_server['Admin_Password'].text = @ec2_main.launch.ops_get('Admin_Password')
+    	   else
+    	       @ops_server['Admin_Password'].text = ""
+    	   end
+    	 end
+    	 if r[:password] != nil
+	    @ops_server['Admin_Password'].text =  r[:password]
+	 end
+     end
+     @ec2_main.app.forceRefresh
   end 
+ 
+def group_array(x)
+     ga = Array.new
+     puts "security groups #{x['security_groups']}"
+     if x[:sec_groups].instance_of? Array and x[:sec_groups][0] != nil 
+        ga = x[:sec_groups]
+     elsif x['security_groups'].instance_of? Array and x['security_groups'][0] != nil
+        x['security_groups'].each do |g|
+         ga.push(g['name'])
+        end 
+     elsif x[:groups].instance_of? Array and x[:groups][0][:group_name] == nil
+        x[:groups].each do |g|
+         ga.push(g['group_id'])
+        end      
+     else
+        x[:groups].each do |g|
+         ga.push(g['group_name'])
+        end     
+     end 
+     return ga
+ end  
  
  
  def ops_terminate
    instance = @ops_server['Instance_ID'].text
    answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm Termination","Confirm Termination of Server Instance "+instance)
    if answer == MBOX_CLICKED_YES
-    conn = @ec2_main.environment.connection
-    if conn != nil
        begin
-          r = conn.servers.destroy(instance)
+          r = @ec2_main.environment.servers.delete_server(instance)
        rescue
-          error_message("Terminate Instance Failed",$!.to_s)
+          error_message("Terminate Instance Failed",$!)
        end      
-    end
    end 
  end 
- 
- def flavor(id)
-   flavor_name = id.to_s
-   if @flavor.length == 0
-      conn = @ec2_main.environment.connection
-      if conn != nil
-         conn.flavors.each do |r|
-            @flavor[r.id.to_s] = r
-         end
-      end
-   end
-   if @flavor[id] != nil 
-      flavor_name =  @flavor[id].name
-   end
-   return flavor_name
- end  
-     
-  def image(id)
-     image_name = id.to_s
-     if @image.length == 0
-        conn = @ec2_main.environment.connection
-        if conn != nil
-           conn.images.each do |r|
-              @image[r.id.to_s] = r
-           end
-        end
-     end
-     if @image[id] != nil 
-        image_name =  @image[id].name
-     end
-     return image_name
- end  
-  
-  
  
   def ops_get_chef_node
        instance_id = @ops_server['Instance_ID'].text
@@ -222,30 +201,6 @@ class EC2_Server
        return cn
   end 
   
-  def ops_get_pk
-      instance_id = @ops_server['Instance_ID'].text
-      if @ec2_ssh_private_key[instance_id] != nil and @ec2_ssh_private_key[instance_id] != ""
-  	pk =  @ec2_ssh_private_key[instance_id]
-      else  
-        pk = @ec2_main.launch.ops_get('SSH_Private_Key')
-        if pk == nil or pk == ""
-         pk = @ec2_main.settings.get('EC2_SSH_PRIVATE_KEY')
-        end
-      end   
-      return pk
-    end   
-    
-    def ops_get_ppk
-      instance_id = @ops_server['Instance_ID'].text
-      if @putty_private_key[instance_id] != nil and @putty_private_key[instance_id] != ""
-  	pk =  @putty_private_key[instance_id]
-      else	  
-         pk = @ec2_main.launch.ops_get('Putty_Private_Key')
-         if pk == nil or pk == ""
-            pk = @ec2_main.settings.get('PUTTY_PRIVATE_KEY')
-         end
-      end   
-      return pk
-  end  
+
 
 end

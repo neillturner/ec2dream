@@ -1,7 +1,5 @@
-
 require 'rubygems'
 require 'fox16'
-require 'right_aws'
 require 'net/http'
 require 'resolv'
 
@@ -16,8 +14,11 @@ class EC2_PlatformsDialog < FXDialogBox
     @item_name = Array.new
     @item_name[0] = "amazon"
     @item_name[1] = "cloudstack"
-    @item_name[2] = "eucalyptus"
-    @item_name[3] = "openstack"
+    @item_name[2] = "cloudfoundry"
+    @item_name[3] = "eucalyptus"
+    @item_name[4] = "openstack"
+    @item_name[5] = "openstack_hp"
+    @item_name[6] = "openstack_rackspace"
     super(owner, "Select Platform", :opts => DECOR_ALL, :width => 400, :height => 200)
     itemlist = FXList.new(self, :opts => LIST_SINGLESELECT|LAYOUT_FILL)
     @item_name.each do |e|

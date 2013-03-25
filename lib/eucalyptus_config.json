@@ -1,0 +1,108 @@
+{
+ "Cloud":{
+   "Compute":{
+    "Launch": {},
+    "Security Groups":{
+      "request":"describe_security_groups",
+      "name":"security_group",
+      "response": "response.body['securityGroupInfo']",
+      "response_code": 200,
+      "action": ["create","edit", "","","","","","",""],
+      "icon": ["@create", "@edit", "","","@csv","","","",""],
+      "tooltip":[" Create Security Group "," Edit Security Group ", "","","","","","",""],
+      "dialog":["EC2_SecGrp_CreateDialog","$ec2_main.secgrp.load(@curr_item);$ec2_main.tabBook.setCurrent(3)","","","","","","",""],
+      "dialog_parm": ["","", "","","","","","",""], 
+      "keys": ["groupName"]
+    },
+   "Servers":{
+      "request":"describe_instances",
+      "name":"instance",
+      "response": "response.body['reservationSet']",
+      "response_code": 200,
+      "action": ["view details","", "","","","","","",""],
+      "icon": ["@view","","","","@csv","","","",""],
+      "tooltip":[" View ","","",""," Csv Data ","","","",""],
+      "dialog":["$ec2_main.server.load(@curr_item);$ec2_main.tabBook.setCurrent(1)","","","","","","","",""],
+      "dialog_parm": ["","","","","","","","",""], 
+      "keys": ["instanceId"]
+    },	
+   "Images":{
+      "request":"describe_images",
+      "name":"image",
+      "response": "response.body['imageSet']",
+      "response_code": 200,
+      "action": ["","","","","","","display Attributes","",""],
+      "icon": ["@magnifier","@delete","","","@csv","","@view","",""],
+      "tooltip":["  Select Images  ","  Delete and Deregister EBS Image  ","",""," Csv Data "," Launch Server Instance ","  Image Attributes  ","",""],
+      "dialog":["EC2_ImageSelectDialog","EC2_ImageEBSDeleteDialog","","","","","EC2_ImageAttributeDialog","",""],
+      "dialog_parm": ["","","","","","","","",""], 
+      "keys": ["imageId","imageLocation"]
+    },
+  "Volumes":{
+      "request":"describe_volumes",
+      "name":"volume",
+      "response": "response.body['volumeSet']",
+      "response_code": 200,
+      "action": ["","","attach","detach","","","snapshot","",""],
+      "icon": ["@create","@delete","@link","@link_break","@csv","","@camera","",""],
+      "tooltip":["  Create  ","Delete"," Attach Volume "," Detach Volume "," Csv Data ","","  Create Snapshot  ","",""],
+      "dialog": ["EC2_EBSCreateDialog","EC2_EBSDeleteDialog","EC2_EBSAttachDialog","EC2_EBSDetachDialog","","","EC2_SnapVolumeDialog","",""],
+      "dialog_parm": ["","","","@curr_instance","","","","",""], 
+      "keys": ["volumeId"]
+    },
+  "Snapshots":{
+      "request":"describe_snapshots",
+      "name":"snapshot",
+      "response": "response.body['snapshotSet']",
+      "response_code": 200,
+      "action": ["","delete","","Register as Image","","","","",""],
+      "icon": ["@create","@delete","","@create_image_icon","@csv","","","",""],
+      "tooltip":[" Create Volume ","Delete",""," Register Image "," Csv Data ","","","",""],
+      "dialog":["EC2_EBSCreateDialog","EC2_SnapDeleteDialog","","EC2_SnapRegisterDialog","","","","",""],
+      "dialog_parm": ["@curr_item,@volumeSize","","","","","","","",""], 
+      "keys": ["snapshotId"]
+    },
+   "Key Pairs":{
+      "request":"describe_key_pairs",
+      "name":"key_pair",
+      "response": "response.body['keySet']",
+      "response_code": 200,
+      "action": ["","","","","","","","",""],
+      "icon": ["@create","@delete","","","@csv","","","",""],
+      "tooltip":["  Create  ","Delete","",""," Csv Data ","","","",""],
+      "dialog":["EC2_KeypairCreateDialog","EC2_KeypairDeleteDialog","","","","","","",""],
+      "dialog_parm": ["","","","","","","","",""], 
+      "keys": ["keyName"]
+    },
+  "IP Addresses":{
+      "request":"describe_addresses",
+      "name":"address",
+      "response": "response.body['addressesSet']",
+      "response_code": 200,
+      "action": ["","","associate","dis-associate","","","","",""],
+      "icon": ["@create","@delete","@link","@link_break","@csv","","","",""],
+      "tooltip":["  Create  ","Delete"," Associate IP Address "," Dis-associate IP Address "," Csv Data ","","","",""],
+      "dialog":["","EC2_EIPDeleteDialog","EC2_EIPAssociateDialog","EC2_EIPDisassociateDialog","","","","",""],
+      "dialog_parm": ["","","","@curr_instance","","","","",""], 
+      "keys": []
+    },
+  "Local Servers":{
+          "request":"",
+          "name":"local_server",
+          "response": "",
+          "response_code": 200,
+          "action": ["create","delete", "edit","","","","","",""],
+          "icon": ["@create","@delete","@edit","@put","@csv","@chef_icon","","",""],
+          "tooltip":[" Create Config ","  Delete Config "," edit Config ",""," Csv Data ","","","",""],
+          "dialog":["LOC_CreateDialog","LOC_DeleteDialog","LOC_EditDialog","","","","","",""],
+          "dialog":["LOC_CreateDialog","LOC_DeleteDialog","LOC_EditDialog","","","","","",""],
+          "keys": ["server"]
+    }
+  }   
+ } 
+}
+
+ 
+
+ 
+   

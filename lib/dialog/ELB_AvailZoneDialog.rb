@@ -1,10 +1,8 @@
-
 require 'rubygems'
 require 'fox16'
-require 'right_aws'
 require 'net/http'
 require 'resolv'
-
+require 'common/error_message'
 require 'dialog/EC2_AvailZoneDialog'
 
 include Fox
@@ -18,7 +16,7 @@ class ELB_AvailZoneDialog < FXDialogBox
     	puts "az #{item}"
     	@az_table = item.split(/,/)
     	@az_curr_row = nil
-    	super(owner, "Stickiness Policies for #{load_balancer}", :opts => DECOR_ALL, :width => 600, :height => 100)
+    	super(owner, "Availability Zones for #{load_balancer}", :opts => DECOR_ALL, :width => 600, :height => 100)
     	@frame1 = FXMatrix.new(self, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
         FXLabel.new(@frame1, "" )
         FXLabel.new(@frame1, "" )
@@ -80,31 +78,25 @@ class ELB_AvailZoneDialog < FXDialogBox
   def enable_az(load_balancer, item)
      answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm Enable","Confirm enable of availability zone "+item)
      if answer == MBOX_CLICKED_YES
-        elb = @ec2_main.environment.elb_connection
-        if elb != nil
-           begin 
-              r = elb.enable_availability_zones_for_load_balancer(load_balancer, item)
-              @az_table.push(item)
-              @updated = true
-           rescue
-              error_message("Enable Availability Zones Failed",$!.to_s)
-           end
-        end   
+        begin 
+           r = @ec2_main.environment.elb.enable_availability_zones_for_load_balancer([item],load_balancer)
+           @az_table.push(item)
+           @updated = true
+        rescue
+           error_message("Enable Availability Zones Failed",$!)
+        end
      end
   end 
   
   def disable_az(load_balancer, item)
      answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm Disable","Confirm disable of availability zone "+item)
      if answer == MBOX_CLICKED_YES
-        elb = @ec2_main.environment.elb_connection
-        if elb != nil
-           begin 
-              r = elb.disable_availability_zones_for_load_balancer(load_balancer, item)
-              @az_table.delete(item)
-              @updated = true
-           rescue
-              error_message("Enable Availability Zones Failed",$!.to_s)
-           end
+        begin 
+           r = @ec2_main.environment.elb.disable_availability_zones_for_load_balancer([item], load_balancer)
+           @az_table.delete(item)
+           @updated = true
+        rescue
+           error_message("Enable Availability Zones Failed",$!)
         end   
      end
   end  
@@ -124,13 +116,16 @@ class ELB_AvailZoneDialog < FXDialogBox
          end   
   end
 
-
+  def saved
+     @updated
+  end
+  
   def updated
     @updated
   end
   
-  def error_message(title,message)
-      FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
+  def success
+     @updated
   end
   
 end

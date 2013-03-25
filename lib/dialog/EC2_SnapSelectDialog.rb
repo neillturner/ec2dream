@@ -1,6 +1,5 @@
 require 'rubygems'
 require 'fox16'
-require 'right_aws'
 require 'net/http'
 require 'resolv'
 
@@ -76,9 +75,5 @@ class EC2_SnapSelectDialog < FXDialogBox
   def selected
      @selected
   end  
-    
-  def error_message(title,message)
-      FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
-  end
-  
+
 end

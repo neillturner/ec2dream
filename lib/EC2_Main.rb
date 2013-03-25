@@ -1,9 +1,5 @@
 #!/usr/bin/ruby
 
-#$LOAD_PATH << "." 
-
-#puts $LOAD_PATH
-
 require 'rubygems'
 require 'fox16'
 require 'fox16/colors' 
@@ -16,10 +12,18 @@ require 'EC2_Launch'
 require 'EC2_Environment'
 require 'EC2_List'
 require 'dialog/EC2_SystemDialog'
-require 'EC2_Notes'
+require 'dialog/EC2_EnvCreateDialog'
+require 'dialog/EC2_EnvDeleteDialog'
 require 'cache/EC2_TreeCache'
 require 'cache/EC2_ServerCache'
 require 'cache/EC2_ImageCache'
+require 'Amazon'
+require 'Hp'
+require 'Rackspace'
+require 'Openstack'
+require 'Eucalyptus'
+require 'CloudStack'
+require 'Cloud_Foundry'
 
 include Fox
 
@@ -40,13 +44,12 @@ class EC2_Main < FXMainWindow
   end  
 
 
-  def initialize(app)
+  def initialize(app,product)
     puts "main.initialize "+RUBY_PLATFORM
     $ec2_main = self
     @initial_startup = false
     @app = app
-    # Do base class initialize first
-    super(app, "EC2Dream v3.4.0 - Build and Manage Cloud Servers", :opts => DECOR_ALL, :width => 900, :height => 650)
+    super(app, "#{product} v3.6.0 - Visual Cloud Computing Admin for Fog", :opts => DECOR_ALL, :width => 900, :height => 650)
 
     # Status bar
     status = FXStatusBar.new(self,
@@ -75,6 +78,9 @@ class EC2_Main < FXMainWindow
       LAYOUT_FILL_X|LAYOUT_FILL_Y|LAYOUT_RIGHT)
     @environment = EC2_Environment.new(self,app)
     
+	# list panel 	
+     @list = EC2_List.new(self,app)
+	 
     # Server panel  
      @server = EC2_Server.new(self)
       
@@ -84,18 +90,12 @@ class EC2_Main < FXMainWindow
     # SecGrp panel  
      @secgrp = EC2_SecGrp.new(self) 
         
-    # list panel 	
-     @list = EC2_List.new(self,app)
-     
-        
     # Settings panel
      @settings = EC2_Settings.new(self)
     # load system parameters 
      @settings.load_system
      
-    # Notes
-     @notes = EC2_Notes.new(self)
-     
+    
      # need to cope with case of no system.properties file and the value not set. 
      @environment.initial_load 
     
@@ -104,95 +104,150 @@ class EC2_Main < FXMainWindow
      end 
      
   end
-
+ 
   def tree_process(item)
     puts "main.tree_process"
-    keypair = settings.get('KEYPAIR_NAME')
     conn_failed = @environment.connection_failed
     if !conn_failed 
-     case item.text
-        when "Env - #{@environment.env}","Env - #{@environment.env} (Keypair #{keypair})"
-           puts "environment"
-           #@tabBook.setCurrent(0)
-           treeCache.refresh()
-        when "Settings"
-           puts "editSettings"
-           @tabBook.setCurrent(5)
-        when "Security Groups"
-           puts "editSecGrps"
-           @secgrp.clear
-           @secgrp.setType_ec2
-           @tabBook.setCurrent(3)
-        when "DB Security Groups"
-           puts "edit DBSecGrps"
-           @secgrp.clear
-           @secgrp.setType_rds
-           @tabBook.setCurrent(3)   
-        when "Servers","EBS Volumes","EBS Snapshots","Elastic IPs","Key Pairs","Images","DB Parameter Groups","DB Snapshots","DB Events","Spot Requests","Load Balancers","Launch Configurations","Auto Scaling Groups","Local Servers","Cloud Formation Templates","Cloud Formation Stacks"
-           if @settings.get("EC2_PLATFORM") != "openstack" or item.text == "Local Servers"
-  	      puts item.text
-	      @tabBook.setCurrent(4)
-	      @list.load(item.text)
-	   end   
-        else
-           if item.parent != nil
-              case (item.parent).text
-                 when "Servers"
-                    s_id = "/i-"  
-                    if @settings.get("EC2_PLATFORM") == "openstack"
-                       s_id="/"
-                    end  
-                    if item.text[s_id] != nil
-                      sa = (item.text).split(s_id)
-		      if sa.size>1
-		        @launch.load(sa[0])
-		        @secgrp.load(sa[0])
-		        #@scripts.load(sa[0])
-		        #@stacks.remote_host(sa[0])
-      		      end
-      		      @server.load_server(item.text)
-                      @tabBook.setCurrent(1)
-      		     else
-      		      @server.clear_panel
-      		      @launch.load(item.text)
-      		      @secgrp.load(item.text)
-      		      @tabBook.setCurrent(2)
-                     end
-         	 when "RDS"
-                     if item.text["/"] != nil
-                      sa = (item.text).split"/"
- 		      if sa.size>1
-		        @launch.clear_panel
-		        @secgrp.clear()
-      		      end
-      		      @server.load_rds_server(item.text)
-                      @tabBook.setCurrent(1)
-      		     else
-      		      @server.clear_rds_panel
-      		      @launch.load_rds(item.text)
-      		      @secgrp.load_rds(item.text)
-      		      @tabBook.setCurrent(2)
-                     end
-         	 when "Images"
-         	      if item.text["("] != nil 
-         	         sa = (item.text).split"("
-		         if sa.size>1
-		           im = sa[1]
-		           puts im[0,im.length-1]
-         	           @launch.load_profile(im[0,im.length-1])
-         	           @tabBook.setCurrent(2)
-         	         end  
-         	      end  
-                 end
-        end 
+     if item.parent == nil
+       tree_top_level(item)
+     elsif (item.parent).parent == nil and (item.parent).text == "Environments"    
+       if item.text == "Create New Environment"
+	      dialog = EC2_EnvCreateDialog.new($ec2_main)
+	      dialog.execute
+	      if dialog.created
+	         @environment.load_env
+	      end 
+       elsif item.text == "Delete Existing Environment"
+	      if @treeCache.status != "loading" 
+	         dialog = EC2_EnvDeleteDialog.new($ec2_main)
+    	     dialog.execute
+			 if dialog.success
+			    @treeCache.refresh_env
+			 end	
+    	  end
+       else		  
+          @settings.put_system('ENVIRONMENT',item.text)
+          @settings.save_system
+          @environment.reset_connection
+          @environment.load_env
+       end       
+     elsif (item.parent).parent == nil  and ((item.parent).text == "Env - #{@environment.env}")  
+       tree_first_level(item)
+     elsif (item.parent).parent != nil  
+       tree_second_level(item)
      end
-    end
-  end             
+    end 
+  end   
   
-  def browser(url)
-     @environment.browser(url)
-  end  
-    
+  def tree_top_level(item)
+     if item.text == "Environments"
+        #puts "environment"
+        #@tabBook.setCurrent(4)	 
+     elsif item.text == "Env - #{@environment.env}"
+        puts "environment"
+        @tabBook.setCurrent(4)
+     end
+  end 
+  
+  def tree_first_level(item) 
+     if (item.parent).parent != nil 
+       tree_second_level(item)
+     else  
+        case item.text
+          when "Refresh"
+              puts "refresh environment"
+              treeCache.refresh()
+          when "Launch"
+             puts "launch"
+             @launch.clear_panel
+             @tabBook.setCurrent(2)           
+  	   #  when "Apps"   
+  	   #@server.clear_panel
+  	   #@launch.clear_panel
+  	   #@secgrp.clear_panel
+       #    @tabBook.setCurrent(2)
+	   when "Servers","Apps"
+         puts "#{item.text}"
+  	     @tabBook.setCurrent(0)
+  	     @list.load(item.text)
+	   else
+	      puts "first level menu #{item.text}"
+		  if item.numChildren == 0 
+    	   puts item.text
+  	       @tabBook.setCurrent(0)
+  	       @list.load(item.text)
+	     else 
+		    if item.expanded? 
+			  @tree.collapseTree(item)
+			else 
+			  @tree.expandTree(item)
+            end 			
+          end 	   
+      	end
+      end	
+   end 
+   
+   def tree_second_level(item)
+      # need to handle a server not under a security group 
+         if ((item.parent).parent).text == "Servers" or (item.parent).text == "Servers"
+            process_server(item)
+         else 
+                        case (item.parent).text 
+	                  when "Apps"
+	                       sa = (item.text).split"/"
+	                       g = ""
+	                       if sa.size>1
+	                          g = sa[0]
+	    		         if g != nil and g != ""
+	 		            @launch.load(g)
+	       		            @server.load(item.text)
+	                             @tabBook.setCurrent(1)
+	                          end
+	                       else
+	  	                 @launch.load(item.text)
+	       		         @server.clear_panel
+	                          @tabBook.setCurrent(2)
+	                       end
+	                  else
+	                      puts "second level menu #{item.text} #{(item.parent).text}"
+  	                      @tabBook.setCurrent(0)
+  	                      @list.load(item.text,(item.parent).text)           
+      	                  end      
+            end
+   end   
+  
+  def process_server(item)
+                 s_id = "/i-" 
+                 if settings.openstack
+                   s_id="/"
+                 end  
+                 if item.text[s_id] != nil
+                    sa = (item.text).split(s_id)
+                    g = ""
+      		    n = ""
+                    if sa.size>1
+                       g = serverCache.instance_sec_group(sa[1])
+      		       n=sa[0]
+                       if g == nil or g == ""
+                          g = sa[0]
+                       end  
+                    end
+      		    if g != nil and g != ""
+      		       @launch.load(n)
+      		       @secgrp.load(g)
+            	    end
+            	    @server.load_server(item.text)
+                    @tabBook.setCurrent(1)
+            	 else
+            	    @server.clear_panel
+            	    @launch.clear_panel
+            	    @secgrp.load(item.text)
+            	    @tabBook.setCurrent(3)
+                 end
+  end              
+  
+   
   def tabBook
      return @tabBook
   end
@@ -209,6 +264,10 @@ class EC2_Main < FXMainWindow
      return @secgrp
   end
   
+  def secGrp
+     return @secgrp
+  end
+  
   def list
        return @list
   end
@@ -218,10 +277,7 @@ class EC2_Main < FXMainWindow
    return @settings
   end
   
-  def notes
-     return @notes
-  end
-  
+    
   def environment 
    return @environment
   end
@@ -242,6 +298,54 @@ class EC2_Main < FXMainWindow
      return @tree
   end
   
+  def cloud
+      platform = @settings.get("EC2_PLATFORM")
+	  case platform
+	   when "amazon"
+	     if @Amazon != nil
+           @Amazon
+         else
+           @Amazon = Amazon.new
+		 end
+       when "openstack_hp"
+	     if @Hp != nil
+           @Hp
+         else
+           @Hp = Hp.new
+		 end
+       when "openstack_rackspace"
+	     if @Rackspace != nil
+           @Rackspace
+         else
+           @Rackspace = Rackspace.new
+		 end          
+       when "openstack" 
+	     if @OpenStack != nil
+           @OpenStack
+         else
+           @OpenStack = OpenStack.new
+		 end  	   
+       when "eucalyptus"
+	     if @Eucalyptus != nil
+           @Eucalyptus
+         else
+           @Eucalyptus = Eucalyptus.new
+		 end
+	   when "cloudstack"
+	     if @CloudStack != nil
+           @CloudStack
+         else
+           @CloudStack = CloudStack.new
+		 end	   
+	   when "cloudfoundry"
+	     if @Cloud_Foundry != nil
+           @Cloud_Foundry
+         else
+           @Cloud_Foundry = Cloud_Foundry.new
+		 end	   
+      end   
+  end
+  
   def app
     return @app
   end  
@@ -260,9 +364,6 @@ class EC2_Main < FXMainWindow
     return 1
   end
   
-  def error_message(title,message)
-      FXMessageBox.warning(self,MBOX_OK,title,message)
-   end
   
   def enable_if_env_set(sender)
       @env = @environment.env
@@ -285,8 +386,9 @@ class EC2_Main < FXMainWindow
     super
     show(PLACEMENT_SCREEN)
      if !File.exists?(ENV['EC2DREAM_HOME']+"/env/system.properties")
-       systemdialog = EC2_SystemDialog.new(self)
-       systemdialog.execute(PLACEMENT_DEFAULT)
+       dialog = EC2_SystemDialog.new(self)
+       dialog.execute(PLACEMENT_DEFAULT)
+       treeCache.load_empty
     end   
   end
   

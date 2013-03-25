@@ -1,7 +1,5 @@
-
 require 'rubygems'
 require 'fox16'
-require 'right_aws'
 require 'net/http'
 require 'resolv'
 require 'common/EC2_ResourceTags'
@@ -15,9 +13,8 @@ class EC2_SnapDialog < FXDialogBox
     @ec2_main = owner
     @curr_item = ""
     @item_name = Array.new
-    ec2 = @ec2_main.environment.connection
-    if ec2 != nil
-       ec2.describe_snapshots.each do |r|
+       #ec2.describe_snapshots.each do |r|
+       @ec2_main.environment.snapshots.all.each do |r|
             if r[:tags] != nil
                t = EC2_ResourceTags.new(@ec2_main,r[:tags])
                n = t.nickname()
@@ -43,17 +40,16 @@ class EC2_SnapDialog < FXDialogBox
           puts "Snap "+@curr_item
           self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
        end
-    end
   end
   
   def selected
     return @curr_item
   end  
   
-  def error_message(title,message)
-      FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
+  def success 
+    true
   end
-  
+
 end
 
 

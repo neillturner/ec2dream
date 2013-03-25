@@ -1,9 +1,9 @@
 
 require 'rubygems'
 require 'fox16'
-require 'right_aws'
 require 'net/http'
 require 'resolv'
+require 'common/error_message'
 
 include Fox
 
@@ -21,7 +21,7 @@ class EC2_EnvDialog < FXDialogBox
     begin
        envs = Dir.entries(@ec2_main.settings.get_system("REPOSITORY_LOCATION"))
     rescue
-       error_message(@ec2_main,"Repository Location does not exist",$!.to_s)
+       error_message("Repository Location does not exist",$!)
     end
     super(owner, "Select Environment", :opts => DECOR_ALL, :width => 400, :height => 200)
     auto_check = FXCheckButton.new(self,"Automatically open environment at startup", :opts => ICON_BEFORE_TEXT|LAYOUT_SIDE_BOTTOM|LAYOUT_FILL_X)
@@ -62,6 +62,7 @@ class EC2_EnvDialog < FXDialogBox
         @ec2_main.settings.put_system('AUTO',auto)
         @ec2_main.settings.save_system
        end
+       @ec2_main.imageCache.set_status("empty")
        self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
     end
   end
@@ -70,8 +71,4 @@ class EC2_EnvDialog < FXDialogBox
     return @curr_env
   end
   
-  def error_message(owner,title,message)
-      FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
-  end
-
 end

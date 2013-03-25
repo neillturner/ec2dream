@@ -1,7 +1,7 @@
-
 require 'rubygems'
 require 'fox16'
 require 'common/EC2_Properties'
+require 'common/error_message'
 
 include Fox
 
@@ -100,18 +100,22 @@ class LOC_CreateDialog < FXDialogBox
            error_message("Error","Create Local Server Failed")
         end   
       rescue
-        error_message("Create Local Server",$!.to_s)
+        error_message("Create Local Server",$!)
         return
       end
      end
   end 
 
+  def saved
+     @saved
+  end
+
   def created
     @saved
   end
-  
-  def error_message(title,message)
-      FXMessageBox.warning(@ec2_main,MBOX_OK,title,message)
+
+  def success
+     @saved
   end
   
 end
