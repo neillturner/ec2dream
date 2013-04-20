@@ -60,6 +60,7 @@ def initialize(owner, tree)
 end  
 
   def load(env)
+     puts "tree.cache.load #{env}"
      @env = env
      platform = @ec2_main.settings.get("EC2_PLATFORM")
      if @topmost == nil or (@topmost.class  == Fox::FXTreeItem and @topmost.text != "Loading......")
@@ -98,10 +99,13 @@ end
             end
          @status = "loaded"
          @ec2_main.app.forceRefresh
+     else 
+        puts "not loading the tree at environment load time"
      end 
   end  
 
   def load_empty
+             puts "tree.cache.load_empty"
              @tree.clearItems
              @environments = @tree.appendItem(nil, "Environments", @doc_settings, @doc_settings) 
              @tree.expandTree(@environments)

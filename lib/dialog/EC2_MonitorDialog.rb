@@ -58,7 +58,7 @@ end
 
 class EC2_MonitorDialog  < FXDialogBox
 
-  def initialize(owner, instanceId, groupName, report)
+  def initialize(owner, instanceId, groupName, report, config)
 
     puts "EC2_MonitorDialog.initialize"
     @ec2_main = owner
@@ -66,10 +66,14 @@ class EC2_MonitorDialog  < FXDialogBox
     @msg = ""
     @max_data = 0
     @created = false
- 
     @mon = @ec2_main.environment.cloud_watch
- 
-    super(owner, "Monitoring", :opts => DECOR_ALL, :width => 800, :height => 500)
+    @config = config
+    report_count=0
+    @config["CloudWatch"].each do |report|
+       report_count=report_count+1
+    end  
+    height=((report_count/2.0).round)*167 
+    super(owner, "Monitoring", :opts => DECOR_ALL, :width => 800, :height => height)
 
     @mainFrame = FXVerticalFrame.new(self,LAYOUT_SIDE_TOP|LAYOUT_FILL_X|LAYOUT_FILL_Y|PACK_UNIFORM_WIDTH)
     
@@ -129,43 +133,48 @@ class EC2_MonitorDialog  < FXDialogBox
               end     
          end
     end
+    @msgFrame = FXHorizontalFrame.new(@mainFrame,LAYOUT_CENTER_Y|LAYOUT_FILL_X|PACK_UNIFORM_WIDTH)
+    @msg = FXLabel.new(@msgFrame, "",nil,:opts => LAYOUT_CENTER_X|JUSTIFY_TOP)
+    @msg.text = "* Graphs only available when Amazon CloudWatch Monitoring Scripts installed on instance"
   end  
   
   def getStatsReports(groupName,instanceId,duration)
-     getStats("CPUUtilization","Percent",groupName,instanceId,duration,true)
-     if @msg != nil and @msg != ""
-       return 
-     end  
-     getStats("NetworkIn","Bytes",groupName,instanceId,duration,false)
-     if @msg != nil and @msg != "" 
-       return 
-     end       
-     getStats("NetworkOut","Bytes",groupName,instanceId,duration,false)
-     if @msg != nil and @msg != "" 
-       return 
-     end      
-     #getStats("DiskReadOps","Count",groupName,instanceId,duration,false)
-     #if @msg != nil and @msg != "" 
-     #  return 
-     #end       
-     #getStats("DiskWriteOps","Count",groupName,instanceId,duration,false)
-     #if @msg != nil and @msg != "" 
-     #  return 
-     #end       
-     getStats("DiskReadBytes","Bytes",groupName,instanceId,duration,false)
-     if @msg != nil and @msg != "" 
-       return 
-     end       
-     getStats("DiskWriteBytes","Bytes",groupName,instanceId,duration,false)
-     if @msg != nil and @msg != "" 
-       return 
-     end       
+     @config["CloudWatch"].each do |report|
+        title=report[0]
+        parms=report[1]
+        getStats(title,parms['namespace'],parms['measure'],parms['unit'],parms['dimensions'],groupName,instanceId,duration,true)
+	if @msg != nil and @msg != ""
+	  return 
+        end  
+     end   
   end   
   
-  def getStats(measure,unit,groupName,instanceId,duration,debug)
+  def getStats(title,namespace,measure,unit,dimensions,groupName,instanceId,duration,debug)
+      if measure == "DiskSpaceUtilization"
+        begin
+         @dev = ""
+         options = {}
+         options["MetricName"]  = measure
+         options["Namespace"]  = namespace
+         options["Dimensions"]  = [{"Name" => "InstanceId","Value" => instanceId}] 
+         dimensions.each do |d|
+           options["Dimensions"].push(d)
+         end  
+         @response = @mon.list_metrics(options)
+         @response[0]['Dimensions'].each do |m|
+            if m['Name'] == "Filesystem"
+               @dev = m['Value']
+               puts "filesystem device for DiskSpaceUtilization report is #{@dev}"
+               title = "#{title} for #{@dev}"
+            end 
+        end
+       rescue
+          puts "*** Error finding Filesystem for DiskSpaceUtilization report"
+       end
+     end
      begin  
       if debug 
-         puts "getStats #{measure} #{duration} #{instanceId}"
+         puts "getStats #{namespace} #{measure} #{duration} #{instanceId}"
       end   
       period = 3600
       case duration
@@ -188,8 +197,16 @@ class EC2_MonitorDialog  < FXDialogBox
       options["Period" ]          = period
       options["Unit" ]             = unit
       options["MetricName"]  = measure
-      options["Namespace"]  = "AWS/EC2"
-      options["Dimensions"]  = [{"Name" => "InstanceId","Value" => instanceId}]      
+      options["Namespace"]  = namespace
+      options["Dimensions"]  = [{"Name" => "InstanceId","Value" => instanceId}] 
+      if !dimensions.empty?
+         dimensions.each do |d|
+            options["Dimensions"].push(d)
+         end   
+      end 
+      if measure == "DiskSpaceUtilization" and @dev != nil and @dev != ""
+         options["Dimensions"].push({"Name" => "Filesystem","Value" => @dev})
+      end
       #options = {}
       #options[:measure_name] = measure
       #options[:statistics] = @stats
@@ -198,10 +215,10 @@ class EC2_MonitorDialog  < FXDialogBox
       #options[:unit] = unit
       #options[:period] = period
       #options[:dimentions] = @dimensions
-      #options[:namespace] = "AWS/EC2"
+      #options[:namespace] = namespace
       @response = @mon.get_metric_statistics(options)
       #if debug 
-      #   puts @response
+         puts "*** response #{@response}"
       #end 
          @max_data = 0
          @data = Array.new
@@ -306,19 +323,19 @@ class EC2_MonitorDialog  < FXDialogBox
    begin 
     f = FXImageFrame.new(@topFrame, nil, :opts => LAYOUT_FILL)
     if duration == "Fortnight"
-       f.image = FXPNGImage.new(app, open(fortnight_line_chart(measure,groupName,instanceId,debug).to_escaped_url, "rb").read)
+       f.image = FXPNGImage.new(app, open(fortnight_line_chart(title,measure,groupName,instanceId,debug).to_escaped_url, "rb").read)
     end
     if duration == "Daily"
-       f.image = FXPNGImage.new(app, open(daily_line_chart(measure,groupName,instanceId,debug).to_escaped_url, "rb").read)
+       f.image = FXPNGImage.new(app, open(daily_line_chart(title,measure,groupName,instanceId,debug).to_escaped_url, "rb").read)
     end
     if duration == "Hourly"
-       f.image = FXPNGImage.new(app, open(hourly_line_chart(measure,groupName,instanceId,debug).to_escaped_url, "rb").read)
+       f.image = FXPNGImage.new(app, open(hourly_line_chart(title,measure,groupName,instanceId,debug).to_escaped_url, "rb").read)
     end
     if duration == "Three Hourly"
-       f.image = FXPNGImage.new(app, open(three_hourly_line_chart(measure,groupName,instanceId,debug).to_escaped_url, "rb").read)
+       f.image = FXPNGImage.new(app, open(three_hourly_line_chart(title,measure,groupName,instanceId,debug).to_escaped_url, "rb").read)
     end
     if duration == "Twelve Hourly"
-       f.image = FXPNGImage.new(app, open(twelve_hourly_line_chart(measure,groupName,instanceId,debug).to_escaped_url, "rb").read)
+       f.image = FXPNGImage.new(app, open(twelve_hourly_line_chart(title,measure,groupName,instanceId,debug).to_escaped_url, "rb").read)
     end 
    rescue
      puts "ERROR: Failed  "+$!.to_s
@@ -328,9 +345,8 @@ class EC2_MonitorDialog  < FXDialogBox
   end
   
 
-def fortnight_line_chart(measure,groupName,instanceId,debug) 
+def fortnight_line_chart(title,measure,groupName,instanceId,debug) 
 
-  title = createGraphTitle(measure,groupName,instanceId)
   d = DateTime.now()
   x_axis_labels = Array.new
   i=0 
@@ -376,9 +392,8 @@ def fortnight_line_chart(measure,groupName,instanceId,debug)
 
  end
 
-def daily_line_chart(measure,groupName,instanceId,debug) 
+def daily_line_chart(title,measure,groupName,instanceId,debug) 
   
-  title = createGraphTitle(measure,groupName,instanceId)
   d = DateTime.now()
   x_axis_labels = Array.new
   i=1 
@@ -423,8 +438,7 @@ def daily_line_chart(measure,groupName,instanceId,debug)
   
 end
 
-def hourly_line_chart(measure,groupName,instanceId,debug) 
-  title = createGraphTitle(measure,groupName,instanceId)
+def hourly_line_chart(title,measure,groupName,instanceId,debug) 
   m = @start_date.min()
   h = @start_date.hour()
   x_axis_labels = Array.new
@@ -486,8 +500,7 @@ def hourly_line_chart(measure,groupName,instanceId,debug)
   
 end
 
-def three_hourly_line_chart(measure,groupName,instanceId,debug) 
-  title = createGraphTitle(measure,groupName,instanceId)
+def three_hourly_line_chart(title,measure,groupName,instanceId,debug) 
   m = @start_date.min()
   h = @start_date.hour()
   x_axis_labels = Array.new
@@ -552,8 +565,7 @@ def three_hourly_line_chart(measure,groupName,instanceId,debug)
   
 end
 
-def twelve_hourly_line_chart(measure,groupName,instanceId,debug) 
-  title = createGraphTitle(measure,groupName,instanceId)
+def twelve_hourly_line_chart(title,measure,groupName,instanceId,debug) 
   m = @start_date.min()
   h = @start_date.hour()
   x_axis_labels = Array.new
@@ -625,34 +637,6 @@ def twelve_hourly_line_chart(measure,groupName,instanceId,debug)
    end 
   
 end
-
-def createGraphTitle(measure,groupName,instanceId)
-   title =groupName+"/"+instanceId+" "
-   if measure == "CPUUtilization"
-       title = "CPU Utilisation (Percent)"
-   end
-   if measure == "NetworkIn"
-       title = "Network In (Bytes/Sec)"
-   end
-   if measure == "NetworkOut"
-       title = "Network Out (Bytes/Sec)"
-   end
-   if measure == "DiskReadOps"
-      title = "Disk Reads (Operations)"
-   end
-   if measure == "DiskWriteOps"
-       title = "Disk Writes (Operations)"
-   end
-   if measure == "DiskReadBytes"
-       title = "Disk Reads (Bytes/Sec)"
-   end
-   if measure == "DiskWriteBytes"
-       title = "Disk Writes (Bytes/Sec)"
-   end
-   
-   return title
-end
-
 
 def create_y_axis_labels
   #puts "max data #{@max_data}"

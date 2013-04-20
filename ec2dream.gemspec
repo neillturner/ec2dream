@@ -22,7 +22,7 @@
 
 Gem::Specification.new do |spec|
   spec.name = 'ec2dream'
-  spec.version = '3.6.0'
+  spec.version = '3.6.1'
   spec.authors = ['Neill Turner']
   spec.email = 'neillwturner@gmail.com'
   spec.executables = ["ec2dream"]

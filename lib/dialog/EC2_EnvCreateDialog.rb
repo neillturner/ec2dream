@@ -267,6 +267,7 @@ class EC2_EnvCreateDialog < FXDialogBox
       cloudstack_env.text = amazon_env.text
       cloudfoundry_env = amazon_env.text
       @new_env = amazon_env.text
+      @ec2_platform = "amazon"
     }
     
     euca_env.connect(SEL_CHANGED) {
@@ -277,6 +278,7 @@ class EC2_EnvCreateDialog < FXDialogBox
       cloudstack_env.text = euca_env.text
       cloudfoundry_env = euca_env.text
       @new_env = euca_env.text
+      @ec2_platform = "eucalyptus"
     }
     
     openstack_env.connect(SEL_CHANGED) {
@@ -287,6 +289,7 @@ class EC2_EnvCreateDialog < FXDialogBox
       cloudstack_env.text = openstack_env.text
       cloudfoundry_env = openstack_env.text
       @new_env = openstack_env.text
+      @ec2_platform = "openstack"
     }
     
     hp_env.connect(SEL_CHANGED) {
@@ -297,6 +300,7 @@ class EC2_EnvCreateDialog < FXDialogBox
       cloudstack_env.text = hp_env.text
       cloudfoundry_env = hp_env.text
       @new_env = hp_env.text
+      @ec2_platform = "openstack_hp"
     }    
 
     rack_env.connect(SEL_CHANGED) {
@@ -307,6 +311,7 @@ class EC2_EnvCreateDialog < FXDialogBox
       openstack_env.text = rack_env.text
       cloudfoundry_env = rack_env.text
       @new_env = rack_env.text
+      @ec2_platform = "openstack_rackspace"
     }
     
     cloudstack_env.connect(SEL_CHANGED) {
@@ -317,6 +322,7 @@ class EC2_EnvCreateDialog < FXDialogBox
       openstack_env.text = cloudstack_env.text
       cloudfoundry_env = cloudstack_env.text
       @new_env = cloudstack_env.text
+      @ec2_platform = "cloudstack"
     }
     
     cloudfoundry_env.connect(SEL_CHANGED) {
@@ -326,6 +332,7 @@ class EC2_EnvCreateDialog < FXDialogBox
       rack_env.text = cloudfoundry_env.text
       openstack_env.text = cloudfoundry_env.text
       @new_env = cloudfoundry_env.text
+      @ec2_platform = "cloudfoundry"
     }    
 
     bottomFrame = FXVerticalFrame.new(mainFrame,LAYOUT_SIDE_BOTTOM|LAYOUT_FILL_X|LAYOUT_FILL_Y)
@@ -382,18 +389,18 @@ class EC2_EnvCreateDialog < FXDialogBox
 	@ec2_platform = "eucalyptus"
         eucarc.close
     end 
-    if @cloudstack_access_key.text != ""
-       @ec2_platform = "cloudstack"
-    end 
-    if @hp_access_key.text != ""
-       @ec2_platform = "openstack_hp"
-    end 
-    if @rack_access_key.text != ""
-       @ec2_platform = "openstack_rackspace"
-    end 
-    if @cloudfoundry_access_key.text != ""
-       @ec2_platform = "cloudfoundry"
-    end     
+    #if @cloudstack_access_key.text != ""
+    #   @ec2_platform = "cloudstack"
+    #end 
+    #if @hp_access_key.text != ""
+    #   @ec2_platform = "openstack_hp"
+    #end 
+    #if @rack_access_key.text != ""
+    #   @ec2_platform = "openstack_rackspace"
+    #end 
+    #if @cloudfoundry_access_key.text != ""
+    #   @ec2_platform = "cloudfoundry"
+    #end     
     Dir.mkdir(d+"/launch")
     save_env
     if  @ec2_platform.start_with?("openstack")
@@ -402,14 +409,14 @@ class EC2_EnvCreateDialog < FXDialogBox
     end
     @created = true
     @ec2_main.imageCache.set_status("empty")
-    if  @ec2_platform == "cloudstack"
-      if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil 
-         message = "Exit EC2Dream and enter set EC2_API_VERSION=2010-11-15  before running ec2dream"
-      else
-         message = "Exit EC2Dream and enter export EC2_API_VERSION=2010-11-15  before running ec2dream"
-      end    
-      FXMessageBox.warning(self,MBOX_OK,"Restart EC2Dream",message)
-    end    
+    #if  @ec2_platform == "cloudstack"
+    #  if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil 
+    #     message = "Exit EC2Dream and enter set EC2_API_VERSION=2010-11-15  before running ec2dream"
+    #  else
+    #     message = "Exit EC2Dream and enter export EC2_API_VERSION=2010-11-15  before running ec2dream"
+    #  end    
+    #  FXMessageBox.warning(self,MBOX_OK,"Restart EC2Dream",message)
+    #end    
 
    rescue Exception => error
       puts error.message
@@ -432,6 +439,7 @@ class EC2_EnvCreateDialog < FXDialogBox
   def save_env
            puts "CreateDialog.save "+@env
            settings = @ec2_main.settings
+           
            settings.put_system('ENVIRONMENT', @env)
            settings.put_system('AUTO', 'false')
            settings.save_system

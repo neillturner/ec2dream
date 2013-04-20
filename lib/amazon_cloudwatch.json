@@ -1,0 +1,36 @@
+{
+ "CloudWatch":{
+ "CPU Utilisation (Percent)":{
+   "measure":"CPUUtilization","unit":"Percent","namespace":"AWS/EC2",
+   "dimensions" : {}
+ },
+ "Network In (Bytes/Sec)":{
+   "measure":"NetworkIn","unit":"Bytes","namespace":"AWS/EC2",
+   "dimensions" : {}
+ },
+ "Network Out (Bytes/Sec)":{
+   "measure":"NetworkOut","unit":"Bytes","namespace":"AWS/EC2",
+   "dimensions" : {}
+ },
+ "Disk Reads (Bytes/Sec)":{
+   "measure":"DiskReadBytes","unit":"Bytes","namespace":"AWS/EC2",
+   "dimensions" : {}
+ },
+ "Disk Writes (Bytes/Sec)":{
+   "measure":"DiskWriteBytes","unit":"Bytes","namespace":"AWS/EC2",
+   "dimensions" : {}
+ },
+ "Memory Utilization (Percent)*":{
+   "measure":"MemoryUtilization","unit":"Percent","namespace":"System/Linux",
+   "dimensions" : {}
+ },
+ "Swap Utilization (Percent)*":{
+   "measure":"SwapUtilization","unit":"Percent","namespace":"System/Linux",
+   "dimensions" : {}
+ },
+ "Disk Space Utilization (Percent)*":{
+   "measure":"DiskSpaceUtilization","unit":"Percent","namespace":"System/Linux",
+   "dimensions" : [{ "Name":"MountPath","Value":"/"}]
+ }
+ }
+}

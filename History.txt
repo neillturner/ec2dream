@@ -1,3 +1,8 @@
+Version 3.6.1 April 2013
+------------------------
+fix bugs in create environment.
+enhancements to cloudwatch graphs and abilty to configure via json file. 
+
 Version 3.6.0 April 2013
 ------------------------
 Switch back to standard fog gem as bugs fixed.
@@ -5,6 +10,7 @@ Re-architect list processng to be dynamic and extensible.
 Create json config for each cloud.
 Merge settings and environment tabs. 
 Move list to first tab.
+complete migration from right_aws to fog.
 drop right_aws.
 
 
@@ -42,7 +48,7 @@ Chef support extends to windows servers using pocketknife_windows gem.
 
 Version 3.3.5 June 2012
 ----------------------
-Fix monitoring graphs, allow windows user to be specified to logon to a server. 
+Fix monitoring graphs, allow windows user to be specified and logon to a server. 
 Works with Windows Ruby 1.9.3 as restriction on fxruby 1.6.20 removed
 
 Version 3.3.0 May 2012
@@ -104,7 +110,7 @@ Version 1.90 - 19 May 2010
 --------------------------
 Add new Asia Pacific Region EC2 region
 Add US West 1 REgion to RDS
-Add support for LOad Balancers
+Add support for Load Balancers
 
 
 Version 1.87 - 16 Apr 2010
@@ -130,7 +136,7 @@ More info in Image List
 Includes latest version of WinSCP 4.2.5
 Improved EBS snapshot support
 Create EBS volumes from snapshot list. 
-Create EBS snapshots from snapshot list. y
+Create EBS snapshots from snapshot list. 
 various bug fixes
 
 Version 1.80 - 20 Jan 2010
@@ -261,7 +267,7 @@ Various bug fixes
 
 Version 0.85 - 3 July 2009
 --------------------------
-Added EBS Volumes, Snampshots, IP addresses, System log display.  
+Added EBS Volumes, Snapshots, IP addresses, System log display.  
 
 
 Version 0.82 - 26 June 2009

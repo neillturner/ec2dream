@@ -49,7 +49,7 @@ class EC2_Main < FXMainWindow
     $ec2_main = self
     @initial_startup = false
     @app = app
-    super(app, "#{product} v3.6.0 - Visual Cloud Computing Admin for Fog", :opts => DECOR_ALL, :width => 900, :height => 650)
+    super(app, "#{product} v3.6.1 - Visual Cloud Computing Admin", :opts => DECOR_ALL, :width => 900, :height => 650)
 
     # Status bar
     status = FXStatusBar.new(self,
@@ -115,7 +115,9 @@ class EC2_Main < FXMainWindow
        if item.text == "Create New Environment"
 	      dialog = EC2_EnvCreateDialog.new($ec2_main)
 	      dialog.execute
+	       puts "Environment Created #{dialog.created}"
 	      if dialog.created
+	         @environment.reset_connection
 	         @environment.load_env
 	      end 
        elsif item.text == "Delete Existing Environment"
@@ -344,6 +346,16 @@ class EC2_Main < FXMainWindow
            @Cloud_Foundry = Cloud_Foundry.new
 		 end	   
       end   
+  end
+  
+  def cloud_reset
+    @Amazon = nil
+    @Hp = nil
+    @Rackspace = nil
+    @OpenStack = nil
+    @Eucalyptus = nil
+    @CloudStack = nil
+    @Cloud_Foundry = nil
   end
   
   def app

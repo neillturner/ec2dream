@@ -195,8 +195,10 @@ class EC2_Environment < FXImageFrame
   end   
   
   def reset_connection
+    puts "environment.reset_connection"
     @ec2 = nil
     @ec2_failed = false
+    $ec2_main.cloud_reset
   end 
   
   def as_connection

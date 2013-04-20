@@ -521,11 +521,12 @@ class Data_servers
      if conn != nil
         if  @ec2_main.settings.openstack
         # openstack
-        elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
-           data = conn.get_password_data(instance)
-           data  = data['passwordData']
+        ##elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
+        #   data = conn.get_password_data(instance)
+        #   data  = data['passwordData']
         elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
            response = conn.get_password_data(instance)
+           puts "*** status #{response.status} response #{response.body}"
            if response.status = 200
               data = response.body['passwordData']
            end               

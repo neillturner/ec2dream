@@ -36,7 +36,7 @@ class EC2_Server
 	@put.create
 	@reboot = @ec2_main.makeIcon("arrow_red_redo.png")
 	@reboot.create
-	@desktop = @ec2_main.makeIcon("desktop_empty.png")
+	@desktop = @ec2_main.makeIcon("windows.png")
 	@desktop.create
 	@disconnect = @ec2_main.makeIcon("disconnect.png")
 	@disconnect.create
@@ -144,7 +144,7 @@ class EC2_Server
         if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
 	   @remote_desktop_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	   @remote_desktop_button.icon = @desktop
-	   @remote_desktop_button.tipText = " Remote Desktop "
+	   @remote_desktop_button.tipText = " Windows Remote Desktop "
 	   @remote_desktop_button.connect(SEL_COMMAND) do |sender, sel, data|
 	      puts "server.serverRemote_Desktop.connect"
               run_remote_desktop    
@@ -332,8 +332,19 @@ class EC2_Server
 	end 
 	@graphs.connect(SEL_COMMAND) do |sender, sel, data|
 	   if @ec2_main.settings.get("EC2_PLATFORM") == "amazon"
-		dialog = EC2_MonitorDialog.new(@ec2_main,@server['Instance_ID'].text,@secgrp,data)
-	       	dialog.execute
+	        if @amazon_cloudwatch == nil 
+                   cloudwatch_data = File.read("#{ENV['EC2DREAM_HOME']}/lib/amazon_cloudwatch.json")
+                   @amazon_cloudwatch = JSON.parse(cloudwatch_data)
+                   cloudwatch_data = File.read("#{ENV['EC2DREAM_HOME']}/lib/amazon_windows_cloudwatch.json")
+                   @amazon_windows_cloudwatch = JSON.parse(cloudwatch_data)
+                end
+                if @server['Platform'].text == "windows"
+		   dialog = EC2_MonitorDialog.new(@ec2_main,@server['Instance_ID'].text,@secgrp,data,@amazon_windows_cloudwatch)
+	       	   dialog.execute
+	       	else
+		   dialog = EC2_MonitorDialog.new(@ec2_main,@server['Instance_ID'].text,@secgrp,data,@amazon_cloudwatch)
+	       	   dialog.execute
+	        end	   
 	   end    	
         end
         FXLabel.new(page1a, "Graphs",:opts => LAYOUT_RIGHT )
@@ -520,14 +531,18 @@ class EC2_Server
 	         begin
 	             #pw = ec2.get_initial_password(@server['Instance_ID'], pk_text)
 	             pw = @ec2_main.environment.servers.get_initial_password(@server['Instance_ID'], pk_text)
-                     @server['Win_Admin_Password'].text = pw
-                     instance_id = @server['Instance_ID'].text
-                     @windows_admin_pw[instance_id] = pw
-                     if @ec2_main.launch.loaded == true
-                        @ec2_main.launch.put('Win_Admin_Password',pw) 
-    	 	        @ec2_main.launch.save
-    	 	     end   
-    	 	     FXMessageBox.information(@ec2_main,MBOX_OK,"Win Admin Password","Windows Admin password #{pw} saved") 
+	             if pw != nil and pw != ""
+                        @server['Win_Admin_Password'].text = pw
+                        instance_id = @server['Instance_ID'].text
+                        @windows_admin_pw[instance_id] = pw
+                        if @ec2_main.launch.loaded == true
+                           @ec2_main.launch.put('Win_Admin_Password',pw) 
+    	 	           @ec2_main.launch.save
+    	 	        end   
+    	 	        FXMessageBox.information(@ec2_main,MBOX_OK,"Win Admin Password","Windows Admin password #{pw} saved")
+    	 	     else 
+    	 	        FXMessageBox.information(@ec2_main,MBOX_OK,"Win Admin Password"," Unable to get Windows password")
+    	 	     end
 	         rescue
 	             error_message("Error - Unable to get Windows password", $!) 
 	         end
