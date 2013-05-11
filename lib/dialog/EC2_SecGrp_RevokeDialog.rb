@@ -9,17 +9,14 @@ include Fox
 
 class EC2_SecGrp_RevokeDialog < FXDialogBox
 
-  def initialize(owner, current_group, protocol, from_port, to_port, ip_address_or_group, rule_id=0)
+  def initialize(owner, current_group, protocol, from_port, to_port, ip_address_or_group, rule_id=0, current_group_id=nil, auth_group_id)
     @ec2_main = owner
     @deleted = false
-    #message = "Confirm revoke of group #{ip_address_or_group}"
-    #if ip_address_or_group.include? "."
-       message = "Confirm revoke of #{protocol} #{from_port} #{to_port} #{ip_address_or_group}"
-    #end
+    message = "Confirm revoke of #{protocol} #{from_port} #{to_port} #{ip_address_or_group}"
     answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm",message)
     if answer == MBOX_CLICKED_YES
        #if ip_address_or_group.include? "."
-          revoke_ip(current_group, protocol, from_port, to_port, ip_address_or_group, rule_id)
+          revoke_ip(current_group, protocol, from_port, to_port, ip_address_or_group, rule_id, current_group_id, auth_group_id)
        #else
        #   revoke(current_group, ip_address_or_group, rule_id)
        #end
@@ -27,14 +24,14 @@ class EC2_SecGrp_RevokeDialog < FXDialogBox
   end
   
   
-  def revoke_ip(sec_group, protocol, from_port, to_port, ip_address, rule_id)
+  def revoke_ip(sec_group, protocol, from_port, to_port, ip_address, rule_id, group_id, auth_group_id)
           @deleted = false
           if  !@ec2_main.settings.openstack 
              begin
                if ip_address.include? "."
-                  r =  @ec2_main.environment.security_group.delete_security_group_rule(sec_group, protocol, from_port, to_port, ip_address, rule_id=nil, nil)
+                  r =  @ec2_main.environment.security_group.delete_security_group_rule(sec_group, protocol, from_port, to_port, ip_address, rule_id=nil, nil, group_id)
                else
-                  r =  @ec2_main.environment.security_group.delete_security_group_rule(sec_group, protocol, from_port, to_port, nil, rule_id=nil, ip_address)
+                  r =  @ec2_main.environment.security_group.delete_security_group_rule(sec_group, protocol, from_port, to_port, nil, rule_id=nil, ip_address, group_id, auth_group_id )
                end
                @deleted = true
              rescue

@@ -17,6 +17,7 @@ require 'data/Data_volumes'
 require 'data/Data_keypairs'
 require 'data/Data_tags'
 require 'data/Data_elb'
+require 'data/Data_vpc'
 require 'data/Data_cloud_watch'
 require 'data/Data_cfy_app'
 require 'data/Data_cfy_service'
@@ -56,6 +57,7 @@ class EC2_Environment < FXImageFrame
         @data_flavors = nil
         @data_regions = nil
         @data_elb = nil
+        @data_vpc = nil
         @data_cloud_watch = nil
         @data_cfy_app = nil
         @data_cfy_service = nil
@@ -357,6 +359,15 @@ def cf_connection
        else
          @data_elb = Data_elb.new(@ec2_main)
        end
+  end 
+  
+  def vpc
+          puts "environment.vpcb"
+          if @data_vpc != nil
+            return @data_vpc
+         else
+           @data_vpc = Data_vpc.new(@ec2_main)
+         end
   end 
   
   def cloud_watch

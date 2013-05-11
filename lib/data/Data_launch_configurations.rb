@@ -30,7 +30,7 @@ class Data_launch_configurations
                   data.push(r)
                end
          rescue
-            puts "**Error getting all launch_configurations  #{$!}"
+            puts "ERROR: getting all launch_configurations  #{$!}"
          end
       end   
       return data

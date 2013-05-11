@@ -53,7 +53,7 @@ class Data_flavors
                  end
               end
            rescue
-              puts "**Error getting all flavors  #{$!}"
+              puts "ERROR: getting all flavors  #{$!}"
            end
         else 
            raise "Connection Error"   

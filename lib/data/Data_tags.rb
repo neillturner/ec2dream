@@ -22,7 +22,7 @@ class Data_tags
               data = []
            end  
     	 rescue
-            puts "**Error getting all tags  #{$!}"
+            puts "ERROR: getting all tags  #{$!}"
          end
       end   
       return data

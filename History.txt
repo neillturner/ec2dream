@@ -1,3 +1,10 @@
+Version 3.6.2  May 2013
+-----------------------
+Extensive changes to support Amazon AWS VPCs.
+Improvements to Cloud Formation support by alway saving stack configuration when doing another function.
+Added provisioned Iops for creating amazon aws ebs.
+List IAM and CDN entities. 
+
 Version 3.6.1 April 2013
 ------------------------
 fix bugs in create environment.

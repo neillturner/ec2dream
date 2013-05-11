@@ -42,6 +42,7 @@
        clear('Instance_Life_Cycle')
        clear('Spot_Instance_Request_Id')
        clear('Monitoring_State')
+       clear('Ebs_Optimized')
        @frame1.show()
        @frame3.hide()
        @server_status = ""
@@ -112,6 +113,11 @@
     	 else
     	    @server['Monitoring_State'].text = "basic"
     	 end
+         if r['ebsOptimized'] != nil and r['ebsOptimized'] == true
+    	    @server['Ebs_Optimized'].text = "true"
+    	 else
+    	    @server['Ebs_Optimized'].text = "false"
+    	 end    	 
          @server['Ami_Launch_Index'].text = r['amiLaunchIndex'].to_s
          @server['Kernel_Id'].text = r['kernelId']
          @server['Ramdisk_Id'].text = r['ramdiskId']
@@ -124,6 +130,8 @@
          load_block_mapping(r)
          @server['Instance_Life_Cycle'].text = r['instanceLifecycle']
          @server['Spot_Instance_Request_Id'].text = r['spotInstanceRequestId']
+       else 
+         puts "ERROR: No Server cache for instances #{instance_id}"
        end
        @ec2_main.app.forceRefresh
      end	 
@@ -199,7 +207,7 @@
  
  def monitor
     instance = @server['Instance_ID'].text
-    answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm Monitoring","Confirm Monitoring of Server Instance "+instance)
+    answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm Monitoring","Confirm Detailed Monitoring of Server Instance "+instance)
     if answer == MBOX_CLICKED_YES
        begin 
           r = @ec2_main.environment.servers.monitor_instances(instance)
@@ -211,7 +219,7 @@
  
  def unMonitor
      instance = @server['Instance_ID'].text
-     answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm Stop Monitoring","Confirm Stop Monitoring Server Instance "+instance)
+     answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm Stop Monitoring","Confirm Stop Detailed Monitoring Server Instance "+instance)
      if answer == MBOX_CLICKED_YES
         begin
            r = @ec2_main.environment.servers.unmonitor_instances(instance)

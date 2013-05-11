@@ -365,7 +365,7 @@ class EC2_Server
     	   end   
 	end 	
  	FXLabel.new(@frame1, "" )
- 	FXLabel.new(@frame1, "Instance ID" )
+ 	FXLabel.new(@frame1, "Instance Id" )
  	@server['Instance_ID'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
 	@server['Instance_ID_Button'] = FXButton.new(@frame1, " ",:opts => BUTTON_TOOLBAR)
 	@server['Instance_ID_Button'].icon = @view
@@ -383,7 +383,7 @@ class EC2_Server
  	@server['Tags'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
         FXLabel.new(@frame1, "" )
 
- 	FXLabel.new(@frame1, "Image ID" )
+ 	FXLabel.new(@frame1, "Image Id" )
  	@server['Image_ID'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
  	@frame1a = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
 	@server['attributes_button'] = FXButton.new(@frame1a, " ",:opts => BUTTON_TOOLBAR)
@@ -420,7 +420,13 @@ class EC2_Server
  	FXLabel.new(@frame1, "" )
 	FXLabel.new(@frame1, "Private IP" )
  	@server['Private_IP'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
- 	FXLabel.new(@frame1, "" ) 	 	
+ 	FXLabel.new(@frame1, "" )
+	FXLabel.new(@frame1, "Subnet Id" )
+	@frame1e = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
+        @server['Subnet_Id'] = FXTextField.new(@frame1e, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+	FXLabel.new(@frame1e, "    VPC Id" )        
+        @server['Vpc_Id'] = FXTextField.new(@frame1e, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+        FXLabel.new(@frame1, "" )         	
  	FXLabel.new(@frame1, "Instance Type" )
  	@frame1b = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
  	@server['Instance_Type'] = FXTextField.new(@frame1b, 20, nil, 0, :opts => TEXTFIELD_READONLY)
@@ -573,14 +579,11 @@ class EC2_Server
         @server['Ramdisk_Id'] = FXTextField.new(@frame1f, 20, nil, 0, :opts => TEXTFIELD_READONLY)
         FXLabel.new(@frame1, "" )
         FXLabel.new(@frame1, "Platform" )
-        @server['Platform'] = FXTextField.new(@frame1, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+        @frame1h = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
+        @server['Platform'] = FXTextField.new(@frame1h, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+        FXLabel.new(@frame1h, "  Ebs Optimized" )
+	@server['Ebs_Optimized'] =  FXTextField.new(@frame1h, 15, nil, 0, :opts => TEXTFIELD_READONLY)	        
         FXLabel.new(@frame1, "" )
-	FXLabel.new(@frame1, "Subnet Id" )
-	@frame1e = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
-        @server['Subnet_Id'] = FXTextField.new(@frame1e, 25, nil, 0, :opts => TEXTFIELD_READONLY)
-	FXLabel.new(@frame1e, "    VPC Id" )        
-        @server['Vpc_Id'] = FXTextField.new(@frame1e, 25, nil, 0, :opts => TEXTFIELD_READONLY)
-        FXLabel.new(@frame1, "" )        
 	FXLabel.new(@frame1, "Root Device Type" )
 	@frame1d = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
         @server['Root_Device_Type'] = FXTextField.new(@frame1d, 20, nil, 0, :opts => TEXTFIELD_READONLY)
@@ -1057,6 +1060,7 @@ class EC2_Server
                password = @ops_server['Admin_Password'].text
             else 
                address = @server['Public_IP'].text
+               address = @server['Private_IP'].text if address == nil or address == ""
                user = @ec2_main.launch.get("EC2_SSH_User")
                password = ""
             end  
@@ -1162,7 +1166,11 @@ class EC2_Server
   
   def currentServer
       if @type == "ec2"
-          return @server['Public_DSN'].text
+          if @server['Public_DSN'].text != nil and @server['Public_DSN'].text != ""
+             return @server['Public_DSN'].text
+          else
+             return @server['Private_DSN'].text
+          end
       elsif @type == "ops"
           return @ops_server['Public_Addr'].text
       elsif @type == "cfy"
@@ -1172,38 +1180,39 @@ class EC2_Server
       end   
   end
   
-  def securityGrps
-       return @ec2_main.serverCache.securityGrps
-  end 
+  # not used i believe
+  #def securityGrps
+  #     return @ec2_main.serverCache.securityGrps
+  #end 
   
-  def instances
-       return @ec2_main.serverCache.instances
-  end 
+  #def instances
+  #     return @ec2_main.serverCache.instances
+  #end 
   
-  def instance_names
-     return @ec2_main.serverCache.instance_names
-  end
+  #def instance_names
+  #  return @ec2_main.serverCache.instance_names
+  #end
   
-  def instance_running_names
-     return @ec2_main.serverCache.running_names
-  end 
+  #def instance_running_names
+  #   return @ec2_main.serverCache.running_names
+  #end 
   
   def instance_group(i)
       return @ec2_main.serverCache.instance_group(i)
   end    
   
   
-  def securityGrps_Instances
-       return @ec2_main.serverCache.sg_instances
-  end 
+  #def securityGrps_Instances
+  #     return @ec2_main.serverCache.sg_instances
+  #end 
   
-  def running(group)
-      return @ec2_main.serverCache.running(group)
-  end
+  #def running(group)
+  #    return @ec2_main.serverCache.running(group)
+  #end
   
-  def active(group)
-        return @ec2_main.serverCache.active(group)
-  end
+  #def active(group)
+  #      return @ec2_main.serverCache.active(group)
+  #end
   
   def load_server(server)
       sa = (server).split"/"

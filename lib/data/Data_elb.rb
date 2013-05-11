@@ -202,7 +202,7 @@ class Data_elb
 	      data = {}
            end
         rescue 
-           puts "**Error describe_instance_health #{$!}"
+           puts "ERROR: describe_instance_health #{$!}"
         end
      end    
   end
@@ -219,7 +219,7 @@ class Data_elb
 	      data = {}
            end
         rescue 
-           puts "**Error describe_load_balancers #{$!}"
+           puts "ERROR: describe_load_balancers #{$!}"
         end
      end 
      return data
@@ -237,7 +237,7 @@ class Data_elb
 	      data = {}
            end
         rescue 
-           puts "**Error describe_load_balancer_policies #{$!}"
+           puts "ERROR: describe_load_balancer_policies #{$!}"
         end
      end
      return data
@@ -255,7 +255,7 @@ class Data_elb
 	      data = {}
            end
         rescue 
-           puts "**Error describe_load_balancer_policy_types #{$!}"
+           puts "ERROR: describe_load_balancer_policy_types #{$!}"
         end
      end
      return data

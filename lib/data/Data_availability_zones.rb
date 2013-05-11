@@ -45,7 +45,7 @@ class Data_availability_zones
                   data = conn.describe_availability_zones
                end 
              rescue
-               puts "**Error getting all availablity zones  #{$!}"
+               puts "ERROR: getting all availablity zones  #{$!}"
              end
           end   
       end   

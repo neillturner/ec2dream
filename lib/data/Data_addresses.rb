@@ -51,7 +51,7 @@ class Data_addresses
                data = conn.describe_addresses
             end    
          rescue
-            puts "**Error getting all Addresses  #{$!}"
+            puts "ERROR: getting all Addresses  #{$!}"
          end
       end   
       return data
@@ -80,7 +80,7 @@ class Data_addresses
   #    { :return         => true,
   #      :association_id => 'eipassoc-fc5ca095'}
   #  
-  def associate(server_id, ip_address)
+  def associate(server_id, ip_address, network_interface_id=nil, allocation_id=nil)
      data = false
      conn = @ec2_main.environment.connection
      if conn != nil
@@ -92,7 +92,11 @@ class Data_addresses
 	      data = false
            end
         elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
-           data = conn.associate_address(server_id, ip_address)
+           if allocation_id != nil and allocation_id != ""
+                 data = conn.associate_address(server_id, ip_address, network_interface_id, allocation_id)
+           else 
+                data = conn.associate_address(server_id, ip_address)
+           end
 	   data = data.body
         else           
            data = conn.associate_address(server_id, {:public_ip=> ip_address})
@@ -114,7 +118,10 @@ class Data_addresses
        data = nil
        conn = @ec2_main.environment.connection
        if conn != nil
-          if  !@ec2_main.settings.openstack
+          if  @ec2_main.settings.amazon
+             pool = "standard" if pool == nil 
+             data = conn.allocate_address(pool) 
+          elsif  !@ec2_main.settings.openstack
              data = conn.allocate_address({}) 
           else
              if pool == nil 
@@ -156,26 +163,30 @@ class Data_addresses
   # 
   #  ec2.disassociate_address(:public_ip => '75.101.154.140') #=> true
   #
-  def disassociate(server_id, ip_address)
+  def disassociate(server_id, ip_address, association_id=nil)
      data = nil
      conn = @ec2_main.environment.connection
      if conn != nil
         if  @ec2_main.settings.openstack
            data = conn.disassociate_address(server_id.to_i, ip_address)
-	   if data.status == 202
-	      data = true
+           if data.status == 202
+              data = true
 	   else   
 	      data = nil
            end
         elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
-           data = conn.disassociate_address(ip_address )
+           if association_id != nil 
+              data = conn.disassociate_address(nil, association_id )
+           else
+              data = conn.disassociate_address(ip_address)
+           end   
 	   data = true
         else 	
            data = conn.disassociate_address({:public_ip=> ip_address})
         end   
-     else 
+    else 
         raise "Connection Error"
-     end
+    end
      return data
   end 
  
@@ -185,7 +196,7 @@ class Data_addresses
   #
   #  ec2.release_address(:public_ip => '75.101.154.140') #=> true
   # 
-  def release(address_id)
+  def release(address_id, allocation_id)
      data = nil
      conn = @ec2_main.environment.connection
      if conn != nil
@@ -207,10 +218,13 @@ class Data_addresses
   	      raise "Address Not Found" 
   	   end
         elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
-           data = conn.release_address(address_id)
-	   data = data.body
-        else   		
-           data = conn.release_address({:public_ip => address_id})
+           if allocation_id != nil 
+              data = conn.release_address(allocation_id)
+	      data = data.body           
+           else
+              data = conn.release_address(address_id)
+	      data = data.body
+	   end   
         end            
      else 
         raise "Connection Error"

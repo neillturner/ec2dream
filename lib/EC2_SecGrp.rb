@@ -25,6 +25,7 @@ class EC2_SecGrp
     	@secgrp_tags = nil
     	@secgrp_tags_text =""
     	@rule_ids = []
+    	@sec_group_ids = {}
 	@arrow_refresh = @ec2_main.makeIcon("arrow_redo.png")
 	@arrow_refresh.create 
 	@create = @ec2_main.makeIcon("new.png")
@@ -50,8 +51,8 @@ class EC2_SecGrp
 	    puts "server.refresh.connect"
 	    if @secgrp_loaded == true
 	       if @type == "ec2" 
-	          @ec2_main.serverCache.refresh_secGrps(@secgrp['Security_Group'])
-	          load(@secgrp['Security_Group'])
+	          @ec2_main.serverCache.refresh_secGrps(@secgrp['Security_Group'],@secgrp['vpc_id'])
+	          load(@secgrp['Security_Group'],@secgrp['vpc_id'])
 	       end   
 	    end   
 	end
@@ -68,7 +69,8 @@ class EC2_SecGrp
 	    if  dialog.created
 	       type = dialog.type
 	       created_secgrp = dialog.sec_grp
-               load(created_secgrp)
+	       created_vpc = dialog.vpc
+               load(created_secgrp,created_vpc)
 	    end 	     
 	end
 	@create_button.connect(SEL_UPDATE) do |sender, sel, data|
@@ -87,7 +89,8 @@ class EC2_SecGrp
 	   if dialog.selected
 	      type = dialog.type
 	      selected_secgrp = dialog.sec_grp
-              load(selected_secgrp)
+	      selected_vpc = dialog.vpc
+              load(selected_secgrp,selected_vpc)
 	   end	
 	end	
 	@select_button.connect(SEL_UPDATE) do |sender, sel, data|
@@ -107,11 +110,11 @@ class EC2_SecGrp
         @link_button.tipText = "Make Authorisation"	
 	@link_button.connect(SEL_COMMAND) do |sender, sel, data|
 	   if @type == "ec2"
-	      dialog = EC2_SecGrp_AuthorizeDialog.new(@ec2_main,@secgrp['Security_Group'] )
+	      dialog = EC2_SecGrp_AuthorizeDialog.new(@ec2_main,@secgrp['Security_Group'],@secgrp['vpc_id'] )
 	      dialog.execute
 	      if dialog.created
-	         @ec2_main.serverCache.refresh_secGrps(@secgrp['Security_Group'])
-                 load(@secgrp['Security_Group'])
+	         @ec2_main.serverCache.refresh_secGrps(@secgrp['Security_Group'],@secgrp['vpc_id'])
+                 load(@secgrp['Security_Group'],@secgrp['vpc_id'])
               end 
            end
  	end
@@ -134,10 +137,10 @@ class EC2_SecGrp
                 if  @ec2_main.settings.openstack
                    rule_id = @rule_ids[@curr_row]
                 end
-	        dialog = EC2_SecGrp_RevokeDialog.new(@ec2_main,@secgrp['Security_Group'],@curr_item, @curr_item_1, @curr_item_2, @curr_item_3, rule_id  )
+ 	        dialog = EC2_SecGrp_RevokeDialog.new(@ec2_main,@secgrp['Security_Group'],@curr_item, @curr_item_1, @curr_item_2, @curr_item_3, rule_id, @secgrp['group_id'], @sec_group_ids[@curr_item_3]  )
 	        if dialog.deleted
-	           @ec2_main.serverCache.refresh_secGrps(@secgrp['Security_Group'])
-	           load(@secgrp['Security_Group'])
+	           @ec2_main.serverCache.refresh_secGrps(@secgrp['Security_Group'],@secgrp['vpc_id'])
+	           load(@secgrp['Security_Group'],@secgrp['vpc_id'])
 	        end
 	        @curr_item = ""
 	        @curr_item_1 = ""
@@ -160,7 +163,7 @@ class EC2_SecGrp
             dialog = EC2_TagsAssignDialog.new(@ec2_main,@secgrp['group_id'])
             dialog.execute
             if dialog.saved
-               load(@secgrp['Security_Group']) 
+               load(@secgrp['Security_Group'],@secgrp['vpc_id']) 
 	    end             
         end
 	@tag_button.connect(SEL_UPDATE) do |sender, sel, data|
@@ -199,7 +202,8 @@ class EC2_SecGrp
       load(item.text)
   end 
   
-  def load(sg)
+  def load(sg,vpc=nil)
+    puts "SecGrp.load #{sg} #{vpc}"
     @type = "ec2"
     if  @ec2_main.settings.openstack
        load_ops(sg)    
@@ -219,7 +223,8 @@ class EC2_SecGrp
        lists_2 = []
        lists_3 = []
        groups_perm = []
-       x = @ec2_main.serverCache.secGrps(sg)
+       @sec_group_ids = {}
+       x = @ec2_main.serverCache.secGrps(sg,vpc)
        if x != nil
              data = @ec2_main.environment.tags.all(x[:group_id])
     	     ta = {}
@@ -247,6 +252,7 @@ class EC2_SecGrp
              @top.setItemText(2, 0, "Group Id")
              #@top.setCellColor(2,0,FXRGB(240, 240, 240))
              @top.setItemJustify(2, 0, FXTableItem::LEFT)
+             @secgrp['vpc_id'] = x[:vpc_id]
              @top.setItemText(3, 1, x[:vpc_id])
              @top.setItemJustify(3, 1, FXTableItem::LEFT)
              @top.setItemText(3, 0, "VPC Id")
@@ -261,7 +267,7 @@ class EC2_SecGrp
              y = x[:aws_perms]
              if y != nil
               y.each do |p|
-                o = "owner"
+                 o = "owner"
                 if p.has_key?(o.to_sym)
                   if x[:aws_owner] != p[:owner]
                      gp_key = "#{p[:owner]}:#{p[:group_name]}"
@@ -296,13 +302,22 @@ class EC2_SecGrp
              y = x['ipPermissions']
              acct_no = @ec2_main.settings.get('AMAZON_ACCOUNT_ID')
              y.each do |p|
-   	          p['groups'].each do |item| 
-   	             if item['userId'].to_s != acct_no 
-   	                 gp_key = "#{item['userId']}:#{item['groupName']}"
-   	             else
-   	                 gp_key = "#{item['groupName']}"
+    	          p['groups'].each do |item|
+   	             gp_key = ""
+   	             if item['groupName'] != nil
+   	                gp_key = item['groupName'] 
+   	                gp_key = "#{item['userId']}:#{gp_key}" if item['userId'].to_s != acct_no
    	             end
-                     lists_0[j] = p['ipProtocol']
+    	             if item['groupName'] == nil and item['groupId'] != nil and @secgrp['vpc_id'] != nil and @secgrp['vpc_id'] != ""
+    	                @ec2_main.environment.security_group.all({'group-id' => item['groupId'], 'vpc-id' => @secgrp['vpc_id']}).each do |r|
+   	                   gp_key = r['groupName'] 
+   	                   gp_key = "#{item['userId']}:#{gp_key}" if item['userId'].to_s != acct_no
+   	                   @sec_group_ids[gp_key] = item['groupId']
+   	                end 
+   	             elsif gp_key == ""  
+   	                puts "ERROR: Group name found for group permission #{item['groupId']}" 
+   	             end
+   	             lists_0[j] = p['ipProtocol']
    	             lists_1[j] = p['fromPort'].to_s
    	             lists_2[j] = p['toPort'].to_s   	          
    	             lists_3[j] = gp_key
@@ -327,7 +342,7 @@ class EC2_SecGrp
 	  @table.setColumnText(2,"To Port")
 	  @table.setColumnWidth(2,100) 
 	  @table.setColumnText(3,"Source (IP or Group)")
-	  @table.setColumnWidth(3,120)          
+	  @table.setColumnWidth(3,200)          
           while i>0
             i = i-1
     	    @table.setItemText(i, 0, lists_0[i])
@@ -439,6 +454,7 @@ class EC2_SecGrp
         #@type = ""
         @secgrp['Security_Group'] = ""
         @secgrp['Description'] = ""
+        @secgrp['vpc_id'] = ""
         @top.clearItems
         @table.clearItems
         @secgrp_loaded = false
@@ -458,9 +474,9 @@ class EC2_SecGrp
                 error_message("Security_Group Delete failed",$!)
              end
              if deleted 
+	        @ec2_main.treeCache.delete_secGrp(secgrp_name,@secgrp['vpc_id'])
+	        @ec2_main.serverCache.delete_secGrp(secgrp_name,@secgrp['vpc_id'])
 	        clear
-	        @ec2_main.treeCache.delete_secGrp(secgrp_name)
-	        @ec2_main.serverCache.delete_secGrp(secgrp_name)
 	        @ec2_main.app.forceRefresh
 	     end 
        end

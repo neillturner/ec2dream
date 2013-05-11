@@ -20,9 +20,10 @@ def config
  @config
 end
 
-def conn(type) 
+def conn(type)
   #Fog.mock!
   if @conn[type] == nil
+     puts "Amazon.conn  #{type}"
      ec2_url = $ec2_main.settings.get('EC2_URL')
      region = "us-east-1"
      if ec2_url != nil and ec2_url.length>0
@@ -45,6 +46,9 @@ def conn(type)
          @conn[type] = Fog::Compute.new(:provider=>'AWS',:aws_access_key_id =>  $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY') , :region => region)
          #$ec2_main.log.write("conn = Fog::Compute.new(:provider=>'AWS',:aws_access_key_id =>  #{$ec2_main.settings.get('AMAZON_ACCESS_KEY_ID')}, :aws_secret_access_key => #{$ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY')} , :region => #{region})")
          #@conn[type]
+     when 'CDN'	
+         @conn[type] = Fog::CDN.new(:provider=>'AWS',:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY') )      
+         #@conn[type] = Fog::AWS::CDN.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY') )          
       when 'CloudFormation'	      
          @conn[type] = Fog::AWS::CloudFormation.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :region => region ) 
       when 'CloudWatch'     
@@ -56,14 +60,16 @@ def conn(type)
          @conn[type] = Fog::AWS::ElasticBeanstalk.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :region => region )        
 	 when 'ELB' 
          @conn[type] = Fog::AWS::ELB.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :region => region )
-     when 'Rds'
+     when 'IAM'	
+         @conn[type] = Fog::AWS::IAM.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY') )          
+   when 'Rds'
          @conn[type] = Fog::AWS::Rds.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :region => region )       
      else 
         nil
     end
     rescue
        reset_connection
-       puts "***Error on #{type} connection to amazon #{$!}"
+       puts "ERROR: on #{type} connection to amazon #{$!}"
        puts "check your keys in environment"
     end  	
     

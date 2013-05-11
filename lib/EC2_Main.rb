@@ -49,7 +49,7 @@ class EC2_Main < FXMainWindow
     $ec2_main = self
     @initial_startup = false
     @app = app
-    super(app, "#{product} v3.6.1 - Visual Cloud Computing Admin", :opts => DECOR_ALL, :width => 900, :height => 650)
+    super(app, "#{product} v3.6.2 - Build and Manage Cloud Servers...visually", :opts => DECOR_ALL, :width => 900, :height => 650)
 
     # Status bar
     status = FXStatusBar.new(self,
@@ -163,7 +163,8 @@ class EC2_Main < FXMainWindow
           when "Launch"
              puts "launch"
              @launch.clear_panel
-             @tabBook.setCurrent(2)           
+             @tabBook.setCurrent(2)
+           #  @launch.select
   	   #  when "Apps"   
   	   #@server.clear_panel
   	   #@launch.clear_panel
@@ -174,6 +175,11 @@ class EC2_Main < FXMainWindow
   	     @tabBook.setCurrent(0)
   	     @list.load(item.text)
 	   else
+	     if (item.text).start_with? "vpc-"
+		    puts "#{item.text}"
+  	        @tabBook.setCurrent(0)
+  	        @list.load("Servers")
+		 else	
 	      puts "first level menu #{item.text}"
 		  if item.numChildren == 0 
     	   puts item.text
@@ -185,15 +191,20 @@ class EC2_Main < FXMainWindow
 			else 
 			  @tree.expandTree(item)
             end 			
-          end 	   
+          end
+		 end 
       	end
       end	
    end 
    
    def tree_second_level(item)
       # need to handle a server not under a security group 
-         if ((item.parent).parent).text == "Servers" or (item.parent).text == "Servers"
-            process_server(item)
+         if ((item.parent).parent).text == "Servers" or (item.parent).text == "Servers" 
+		    process_server(item)
+		 elsif (((item.parent).parent).text).start_with? "vpc-" 
+            process_server(item,((item.parent).parent).text)
+		 elsif ((item.parent).text).start_with? "vpc-"	
+            process_server(item,(item.parent).text)		 
          else 
                         case (item.parent).text 
 	                  when "Apps"
@@ -211,7 +222,11 @@ class EC2_Main < FXMainWindow
 	       		         @server.clear_panel
 	                          @tabBook.setCurrent(2)
 	                       end
-	                  else
+					  when "Launch"
+						  puts "Launch #{item.text} "
+						  @launch.load(item.text)
+					  	  @tabBook.setCurrent(2)
+ 	                  else
 	                      puts "second level menu #{item.text} #{(item.parent).text}"
   	                      @tabBook.setCurrent(0)
   	                      @list.load(item.text,(item.parent).text)           
@@ -219,7 +234,7 @@ class EC2_Main < FXMainWindow
             end
    end   
   
-  def process_server(item)
+  def process_server(item,vpc=nil)
                  s_id = "/i-" 
                  if settings.openstack
                    s_id="/"
@@ -237,14 +252,14 @@ class EC2_Main < FXMainWindow
                     end
       		    if g != nil and g != ""
       		       @launch.load(n)
-      		       @secgrp.load(g)
+      		       @secgrp.load(g,vpc)
             	    end
             	    @server.load_server(item.text)
                     @tabBook.setCurrent(1)
             	 else
             	    @server.clear_panel
             	    @launch.clear_panel
-            	    @secgrp.load(item.text)
+            	    @secgrp.load(item.text,vpc)
             	    @tabBook.setCurrent(3)
                  end
   end              

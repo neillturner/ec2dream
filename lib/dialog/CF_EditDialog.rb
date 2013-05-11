@@ -4,6 +4,7 @@ require 'fox16'
 require 'common/EC2_Properties'
 require 'common/error_message'
 require 'common/edit'
+require 'dialog/CF_ValidateDialog'
 
 include Fox
 
@@ -66,8 +67,16 @@ class CF_EditDialog < FXDialogBox
          error_message("Error","Stack Name not specified")
        else
          save_stack(stack_name.text,template_file.text,parameters.text,disable_rollback.text,timeout_in_minutes.text)
+       end  
+    end
+    validate = FXButton.new(frame2, "   &Validate Template   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
+    validate.connect(SEL_COMMAND) do |sender, sel, data|
+       if stack_name.text == nil or stack_name.text == ""
+         error_message("Error","Stack Name not specified")
+       else
+         save_stack(stack_name.text,template_file.text,parameters.text,disable_rollback.text,timeout_in_minutes.text)
          if @saved == true
-           self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+            dialog = CF_ValidateDialog.new(@ec2_main,stack_name.text,template_file.text)
          end
        end  
     end
@@ -162,7 +171,11 @@ class CF_EditDialog < FXDialogBox
             end
           end  
         end        
-     end    
+     end 
+     exit = FXButton.new(frame2, "   &Exit   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
+     exit.connect(SEL_COMMAND) do |sender, sel, data|
+        self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+     end
     
     if curr_item != nil and curr_item != ""
        r = get_stack(curr_item)

@@ -316,7 +316,7 @@ def load_ops_image
             ops_put('Image_Name',r[:name]) 
           end            
          rescue
-          puts "**Error Image not found"
+          puts "ERROR: Image not found"
           error_message("Error","Launch Profile: Image Id not found")
          end
        end   

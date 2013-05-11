@@ -1,4 +1,4 @@
-def chef(server, address,  chef_node, ssh_user, private_key, password, platform)
+def chef(server, address,  chef_node, ssh_user, private_key, password, platform="")
            # private_key = @ec2_main.settings.get('EC2_SSH_PRIVATE_KEY')    
            #chef_node = @secgrp
            #if @server['Chef_Node'].text != nil and @server['Chef_Node'].text != ""

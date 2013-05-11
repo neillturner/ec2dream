@@ -1,4 +1,4 @@
-Fogviz - Build and Manage EC2 Servers Version 3.6.1 -  April 2013 
+Fogviz - Build and Manage EC2 Servers Version 3.6.2 -  May 2013 
 -----------------------------------------------------------------
 
 Fogviz is visual cloud computing admin for the Fog ruby cloud services library and combines Fog, Ruby, Chef and Git into an open source devops platform supporting:

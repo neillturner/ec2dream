@@ -193,8 +193,12 @@ class Data_servers
                    data.push(r)                   
                 end 
             elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
-              filter = {}
-              filter = {'instance-id' => instance} if instance != []
+              if filters != nil 
+	         filter = filters          
+              else 
+                 filter = {}
+              end   
+              filter['instance-id'] = instance if instance != []
               response = conn.describe_instances(filter)
 	      if response.status == 200
 	         data_s = response.body['reservationSet']
@@ -269,7 +273,7 @@ class Data_servers
                 data = conn.describe_instances(instance,filters)
             end   
          rescue
-            puts "**Error getting all servers  #{$!}"
+            puts "ERROR: getting all servers  #{$!}"
          end
       end   
       return data
@@ -527,6 +531,7 @@ class Data_servers
         elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
            response = conn.get_password_data(instance)
            puts "*** status #{response.status} response #{response.body}"
+           puts "ERROR: there is fog bug getting windows admin password"
            if response.status = 200
               data = response.body['passwordData']
            end               

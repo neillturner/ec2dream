@@ -44,7 +44,7 @@ class Data_keypairs
                data = conn.describe_key_pairs
             end   
          rescue
-            puts "**Error getting all key pairs  #{$!}"
+            puts "ERROR: getting all key pairs  #{$!}"
          end
       end   
       return data

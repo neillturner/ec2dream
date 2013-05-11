@@ -43,10 +43,10 @@
       "name":"address",
       "response": "response.body['floating_ips']",
       "response_code": 200,
-      "action": ["","","associate","dis-associate","","","","",""],
+      "action": ["create","delete","associate","dis-associate","","","","",""],
       "icon": ["@create","@delete","@link","@link_break","@csv","","","",""],
-      "tooltip":["  Create  ","Delete"," Associate IP Address "," Dis-associate IP Address "," csv data ","","","",""],
-      "dialog":["","EC2_EIPDeleteDialog","EC2_EIPAssociateDialog","EC2_EIPDisassociateDialog","","","","",""],
+      "tooltip":["  Allocate  ","Delete"," Associate IP Address "," Dis-associate IP Address "," csv data ","","","",""],
+      "dialog":["EC2_EIPCreateDialog","EC2_EIPDeleteDialog","EC2_EIPAssociateDialog","EC2_EIPDisassociateDeleteDialog","","","","",""],
       "dialog_parm": ["","","","@curr_instance","","","","",""], 
       "keys": ["ip"]
     },

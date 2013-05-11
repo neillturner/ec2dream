@@ -220,7 +220,7 @@ def initialize(owner)
              data = conn.describe_images(:filters => filter)          
           end   
        rescue
-          puts "**Error getting all images #{$!}"
+          puts "ERROR: getting all images #{$!}"
        end
     end   
     return data
@@ -262,7 +262,7 @@ def initialize(owner)
              data = conn.describe_images_by_owner(owner)
           end
        rescue
-          puts "**Error getting images by executable #{$!}"
+          puts "ERROR: getting images by executable #{$!}"
        end
     end 
     return data  
@@ -312,7 +312,7 @@ def initialize(owner)
           end
        rescue
           data = []
-          puts "**Error getting images by executable #{$!}"
+          puts "ERROR: getting images by executable #{$!}"
        end
     end   
     return data  
@@ -325,7 +325,7 @@ def initialize(owner)
        begin 
           data = conn.images.details
        rescue
-          puts "**Error getting images details #{$!}"
+          puts "ERROR: getting images details #{$!}"
        end
     end   
     return data
@@ -338,7 +338,7 @@ def initialize(owner)
        begin 
           data = conn.images.find_by_id(id)
        rescue
-          puts "**Error finding images by id #{id} #{$!}"
+          puts "ERROR: finding images by id #{id} #{$!}"
        end
     end   
     return data
@@ -351,7 +351,7 @@ def initialize(owner)
        begin 
           data = conn.images.public
        rescue
-          puts "**Error getting images public #{$!}"
+          puts "ERROR: getting images public #{$!}"
        end
     end   
     return data
@@ -364,7 +364,7 @@ def initialize(owner)
        begin 
           data = conn.images.private
        rescue
-          puts "**Error getting images private #{$!}"
+          puts "ERROR: getting images private #{$!}"
        end
     end   
     return data

@@ -34,7 +34,7 @@ class Data_auto_scaling_groups
                   data.push(r)
                end
          rescue
-            puts "**Error getting all auto_scaling_groups  #{$!}"
+            puts "ERROR: getting all auto_scaling_groups  #{$!}"
          end
       end   
       return data

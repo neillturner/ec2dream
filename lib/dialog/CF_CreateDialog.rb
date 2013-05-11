@@ -33,6 +33,12 @@ class CF_CreateDialog < FXDialogBox
            "Template Files (*.*)"
         ]
         dialog.selectMode = SELECTFILE_EXISTING
+        #chef_repository = $ec2_main.settings.get('CHEF_REPOSITORY')
+        #if dir.exists?("#{chef_repository}/cloudformation")
+        #   dialog.directory = "#{chef_repository}/cloudformation"
+        #elsif dir.exists?(chef_repository) 
+        #   dialog.directory = chef_repository
+        #end
         if dialog.execute != 0
            template_file.text = dialog.filename
         end

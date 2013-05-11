@@ -36,7 +36,7 @@ def conn(type)
      end
     rescue
        reset_connection
-       puts "***Error on #{type} connection to openstack #{$!}"
+       puts "ERROR: on #{type} connection to openstack #{$!}"
        puts "check your keys in environment"
     end  	
     

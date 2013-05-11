@@ -13,6 +13,7 @@ class EC2_SecGrp_SelectDialog < FXDialogBox
     @curr_item = ""
     @selected = false
     @type = type
+    @item_name = []
     title = "Select Security Group"
     super(owner, title, :opts => DECOR_ALL, :width => 300, :height => 200)
     itemlist = FXList.new(self, :opts => LIST_SINGLESELECT|LAYOUT_FILL)
@@ -20,19 +21,29 @@ class EC2_SecGrp_SelectDialog < FXDialogBox
     i=0
     if @type == "ec2"
        @ec2_main.environment.security_group.all.each do |r|
-           instances[i] = r[:aws_group_name]
+           if r['vpcId'] != nil and r['vpcId'] != ""
+              @item_name[i] = "#{r[:aws_group_name]} (#{r['vpcId']})"
+           else     
+              @item_name[i] = r[:aws_group_name]
+           end   
            i = i+1
        end
     end
-    instances = instances.sort_by { |x| x.downcase }
-    instances.each do |inst|
-       itemlist.appendItem(inst)
+    @item_name = @item_name.sort_by { |x| x.downcase }
+    @item_name.each do |e|
+       itemlist.appendItem(e)
     end
     itemlist.connect(SEL_COMMAND) do |sender, sel, data|
        selected_item = ""
        itemlist.each do |item|
           if item.selected?
-              selected_item = item.text
+             sa = (item.text).split"("
+	     if sa.size>1
+	       selected_item = sa[0].rstrip
+	       @vpc =sa[1][0..-2]
+	     else	     
+               selected_item = item.text
+             end 
           end
        end
        puts "item "+selected_item
@@ -44,16 +55,20 @@ class EC2_SecGrp_SelectDialog < FXDialogBox
   end
   
   def selected
-      return @selected
+     @selected
   end
     
   def type 
-      return @type
+    @type
   end 
     
   def sec_grp 
-     return  @curr_item
-  end 
+     @curr_item
+  end
   
+  def vpc
+     @vpc
+  end
+
   
 end

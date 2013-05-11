@@ -21,6 +21,7 @@ class EC2_EBSCreateDialog < FXDialogBox
     ebs_capacity = "GiB"
     ebs_zone = ""
     ebs_snap = snap_id.to_s
+    ebs_iops = 0
     ebs_name = ""
     ebs_description = ""
     @created = false
@@ -67,12 +68,13 @@ class EC2_EBSCreateDialog < FXDialogBox
   	      :opts => COMBOBOX_STATIC|COMBOBOX_NO_REPLACE|LAYOUT_RIGHT)
     if  @ec2_main.settings.openstack_rackspace	      
        volume_type.numVisible = 2
-       volume_type.appendItem("SATA");
-       volume_type.appendItem("SSD");
+       volume_type.appendItem("SATA")
+       volume_type.appendItem("SSD")
        ebs_type = "SATA"
     else
-       volume_type.numVisible = 1
-       volume_type.appendItem("Standard");    
+       volume_type.numVisible = 2
+       volume_type.appendItem("standard")
+       volume_type.appendItem("io1")
     end
     volume_type.connect(SEL_COMMAND) do |sender, sel, data|
        ebs_type = data
@@ -125,7 +127,19 @@ class EC2_EBSCreateDialog < FXDialogBox
           snap.text = it
           ebs_snap = it
        end	    
-    end               
+    end
+    FXLabel.new(frame1, "I/O Per Second" )
+    iops = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_INTEGER|LAYOUT_RIGHT)
+    iops.connect(SEL_COMMAND) do |sender, sel, data|
+      ebs_iops = data.to_i
+    end	    
+    FXLabel.new(frame1, "" )
+    FXLabel.new(frame1, "" )
+    FXLabel.new(frame1, "" )
+    FXLabel.new(frame1, "" )
+    FXLabel.new(frame1, "" )
+    FXLabel.new(frame1, "" )
+    FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "" )
     create = FXButton.new(frame1, "   &Create   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     FXLabel.new(frame1, "" )
@@ -149,7 +163,7 @@ class EC2_EBSCreateDialog < FXDialogBox
             if sa.size>1
 	       ebs_snap = sa[1].rstrip
   	    end
-            create_ebs(ebs_snap, ebs_size, ebs_zone, resource_tags, ebs_name, ebs_description, ebs_type)
+            create_ebs(ebs_snap, ebs_size, ebs_zone, resource_tags, ebs_name, ebs_description, ebs_type, ebs_iops)
             if @created == true
               self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
             end
@@ -158,9 +172,9 @@ class EC2_EBSCreateDialog < FXDialogBox
     end
   end 
   
-  def create_ebs(snap, size, zone, tags, name, description, type)
+  def create_ebs(snap, size, zone, tags, name, description, type, iops)
       begin 
-       r = @ec2_main.environment.volumes.create_volume(zone, size, snap, name, description, type)
+       r = @ec2_main.environment.volumes.create_volume(zone, size, snap, name, description, type, iops)
        @created = true
        vol = r[:aws_id] 
       rescue

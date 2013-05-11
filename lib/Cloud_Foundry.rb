@@ -29,7 +29,7 @@ def conn(type)
        @conn[type]
 	rescue
        reset_connection
-       puts "***Error on #{type} connection to cloudfoundry #{$!}"
+       puts "ERROR: on #{type} connection to cloudfoundry #{$!}"
        puts "check your keys in environment"
 	   nil
     end  	

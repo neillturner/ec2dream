@@ -5,11 +5,29 @@ class EC2_Launch
      platform = @ec2_main.settings.get("EC2_PLATFORM")
     if @launch['Image_Id'].text != nil and @launch['Image_Id'].text != ""
         server = @launch['Image_Id'].text
-    else 
+    else
+        puts "ERROR: Image ID not specified"
         error_message("Error","Image ID not specified")
         return
     end
-    answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm Launch","Confirm Launch of Server Image "+server)
+    vpc = nil 
+    if @launch['Subnet_Id'].text != nil and @launch['Subnet_Id'].text != ""
+          @ec2_main.environment.vpc.describe_subnets.each do |r|
+           if r['subnetId'] == @launch['Subnet_Id'].text
+             vpc = r['vpcId']
+           end  
+          end
+          if vpc == nil  
+              puts "ERROR: Subnet ID not found"
+              error_message("Launch Error","Subnet ID not found")
+              return          
+          end
+    end
+    if  vpc == nil
+       answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm Launch","Confirm Launch of Server Image #{server}")
+    else
+       answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm Launch","Confirm Launch of Server Image #{server} into #{vpc}")
+    end
     if answer == MBOX_CLICKED_YES
        launch_parm = Hash.new
        if platform == "eucalyptus"
@@ -42,8 +60,17 @@ class EC2_Launch
        sa.each do |s|
           g.push(s[0..s.length-1])
        end       
+       if @launch['Subnet_Id'].text != nil and @launch['Subnet_Id'].text != ""
+          gi = []
+          g.each do |gn|
+             sg = @ec2_main.serverCache.secGrps(gn,vpc)
+             gi.push(sg[:group_id]) if sg != nil
+          end
+          launch_parm['SecurityGroupId'] = gi
+       else             
+          launch_parm['SecurityGroup'] = g 
+       end       
        it = (@launch['Instance_Type'].text).downcase
-       launch_parm['SecurityGroup'] = g 
        if @launch['Availability_Zone'].text != nil and @launch['Availability_Zone'].text != ""
              launch_parm['Placement.AvailabilityZone']= @launch['Availability_Zone'].text
        end
@@ -84,6 +111,9 @@ class EC2_Launch
           else
             launch_parm['DisableApiTermination'] = true
           end
+          if @launch['Ebs_Optimized'].itemCurrent?(0)
+            launch_parm['EbsOptimized'] = true
+          end          
           if @launch['Image_Root_Device_Type'].text != nil and  @launch['Image_Root_Device_Type'].text == "ebs"
              if @launch['Instance_Initiated_Shutdown_Behavior'].itemCurrent?(1)
                 launch_parm['InstanceInitiatedShutdownBehavior'] = "terminate" 
@@ -127,42 +157,53 @@ class EC2_Launch
          return
        end
        instances = []
-       item.each do |r|
+        item.each do |r|
           if item_server == ""
               gi = launch_group_name(r)
               #if r[:groups][0][:group_name] == nil
               #  gi = r[:groups][0][:group_id]
              #else
              #   gi = r[:groups][0][:group_name]
-             #end   
-    	     item_server = gi+"/"+r[:aws_instance_id]
+             #end  
+             name = @launch['Name'].text
+             if name != nil and name != ""
+                item_server = name+"/"+r[:aws_instance_id]
+             else   
+    	        item_server = gi+"/"+r[:aws_instance_id]
+    	     end
           end
           puts "item server #{item_server}"
           instances.push(r[:aws_instance_id]) 
           #@ec2_main.serverCache.addInstance(r)
        end
        begin 
+          nickname_tag = @ec2_main.settings.get('AMAZON_NICKNAME_TAG')
+     	  if nickname_tag != nil and nickname_tag != ""
+     	     name = @launch['Name'].text
+     	     sleep 5 
+              instances.each do |s|
+                 if s != nil and s != ""
+                   ec2 = @ec2_main.environment.connection
+                   if ec2 != nil
+                        r = ec2.create_tags(s, {nickname_tag => name})
+                   end   
+                end 
+             end    	  
+     	  end
           if @resource_tags  != nil and @resource_tags.empty == false
              instances.each do |s| 
                 @resource_tags.assign(s)
              end
-          end
-          nickname_tag = @ec2_main.settings.get('AMAZON_NICKNAME_TAG')
-     	  if nickname_tag != nil and nickname_tag != ""
-     	     name = @launch['Name'].text
-             instances.each do |s|
-                ec2 = @ec2_main.environment.connection
-                if ec2 != nil
-                   r = ec2.create_tags(s, {nickname_tag => name})
-                end 
-             end    	  
-     	  end
+          end     	  
        rescue
           error_message("Create Tags Failed",$!)
           return
        end 
        if item_server != ""
-          @ec2_main.treeCache.refresh
+          @ec2_main.environment.servers.all(instances).each do |r|
+             @ec2_main.serverCache.addInstance(r)
+          end 
+         #@ec2_main.treeCache.refresh
           @ec2_main.server.load_server(item_server)
           @ec2_main.tabBook.setCurrent(1)
        end   
@@ -189,7 +230,7 @@ class EC2_Launch
       gn = ""
     end
     return gn
- end
+  end
  
  def request_spot_instance
      puts "launch.request_spot_instance"
@@ -259,10 +300,12 @@ class EC2_Launch
         if @launch['Monitoring_State'].itemCurrent?(1)
              launch_parm['LaunchSpecification.Monitoring.Enabled'] = true
         end
+        if @launch['Ebs_Optimized'].itemCurrent?(0)
+             launch_parm['LaunchSpecification.EbsOptimized'] = true
+        end        
         if @launch['Subnet_Id'].text != nil and @launch['Subnet_Id'].text != ""
           launch_parm['LaunchSpecification.SubnetId']= @launch['Subnet_Id'].text
         end        
-        
        # currently block mappings not supported on spot instance requests.
        # if @block_mapping != nil and @block_mapping.size>0
        #      launch_parm[:block_device_mappings] = @block_mapping
@@ -303,7 +346,9 @@ class EC2_Launch
  
  def load(profile)
    puts "Launch.load"
-   if  @ec2_main.settings.openstack
+   if profile!=nil and profile=="Create New Launch Profile"
+      clear_panel
+   elsif  @ec2_main.settings.openstack
       load_ops(profile)
    elsif @ec2_main.settings.cloudfoundry
       load_cfy(profile)
@@ -366,6 +411,7 @@ class EC2_Launch
         load_monitoring_state()
         load_boolean_state('Disable_Api_Termination')
         load_shutdown_behaviour('Instance_Initiated_Shutdown_Behavior')
+        load_boolean_state('Ebs_Optimized')
         load_panel('Additional_Info')
         load_panel('EC2_SSH_User')
         load_panel('EC2_SSH_Private_Key')
@@ -407,7 +453,7 @@ class EC2_Launch
             @image_bm.load_fog(r,@launch['Image_Block_Devices'])
           #end            
          rescue
-          puts "**Error Image not found"
+          puts "ERROR: Image not found"
           put('Image_Manifest',"*** Not Found ***")
           error_message("Error","Launch Profile: Image Id not found")
          end
@@ -474,6 +520,7 @@ class EC2_Launch
            load_monitoring_state()
            load_boolean_state('Disable_Api_Termination')
            load_shutdown_behaviour('Instance_Initiated_Shutdown_Behavior')
+           load_boolean_state('Ebs_Optimized')
            load_panel('Additional_Info')
            load_panel('EC2_SSH_User')
            load_panel('EC2_SSH_Private_Key')
@@ -568,6 +615,7 @@ class EC2_Launch
      clear_monitoring_state
      clear_boolean_state('Disable_Api_Termination')
      clear_shutdown_behaviour('Instance_Initiated_Shutdown_Behavior')
+     clear_boolean_state('Ebs_Optimized')
      clear('Additional_Info')
      clear('EC2_SSH_User')
      clear('EC2_SSH_Private_Key')
@@ -617,12 +665,16 @@ class EC2_Launch
      @profile = @launch['Name'].text
      if @profile == nil or @profile == ""
         error_message("Error","No Server Name specified") 
-     else 
+     else
+      save_launch('Image_Id')
       load_image
+      load_panel('Image_Manifest')
+      load_panel('Image_Architecture')
+      load_panel('Image_Visibility')
+      load_panel('Image_Root_Device_Type')      
       save_launch('Security_Group')
       save_launch('Chef_Node')
       save_launch('Addressing')
-      save_launch('Image_Id')
       save_launch('Image_Manifest')
       save_launch('Image_Architecture')
       save_launch('Image_Visibility')
@@ -640,6 +692,7 @@ class EC2_Launch
       save_monitoring_state()
       save_boolean_state('Disable_Api_Termination')
       save_shutdown_behaviour('Instance_Initiated_Shutdown_Behavior')
+      save_boolean_state('Ebs_Optimized')
       save_launch('Additional_Info')
       save_launch('EC2_SSH_User')
       save_launch('EC2_SSH_Private_Key')
@@ -672,6 +725,7 @@ class EC2_Launch
          puts "launch loaded false"
          @launch_loaded = false      
       end
+      @ec2_main.treeCache.refresh_launch
      end 
    end
    
@@ -686,7 +740,8 @@ class EC2_Launch
 		   if File.exists?(ft)
                   File.delete(fn)
                end
-              load(@profile)
+               clear_panel
+               @ec2_main.treeCache.refresh_launch
             end
          else
             error_message("Error","No Launch Profile for "+@profile+" to delete") 
@@ -698,7 +753,6 @@ class EC2_Launch
   def image_info
      puts "Launch.image_info" 
        img = @launch['Image_Id'].text
-       #ec2.describe_images([img]).each do |r|
          r = @ec2_main.environment.images.get(img)
          put('Image_Manifest',r['imageLocation'])
          put('Image_Architecture',r['architecture'])

@@ -9,7 +9,7 @@ include Fox
 
 class EC2_EIPAssociateDialog < FXDialogBox
 
-  def initialize(owner, eip_address)
+  def initialize(owner, eip_address, allocation_id=nil, domain='standard')
     puts "EIPAssociateDialog.initialize"
     @ec2_main = owner
     server_instance = ""
@@ -38,7 +38,7 @@ class EC2_EIPAssociateDialog < FXDialogBox
     FXLabel.new(frame1, "Server" )
     itemlist = FXComboBox.new(frame1, 35,
           	      :opts => COMBOBOX_NO_REPLACE|LAYOUT_RIGHT)
-    sa = sa = @ec2_main.serverCache.instance_running_names
+    sa = sa = @ec2_main.serverCache.instance_running_names(domain)
     i = 0
     while i<sa.length
       sia = (sa[i]).split"/"
@@ -72,7 +72,7 @@ class EC2_EIPAssociateDialog < FXDialogBox
          if server_instance == nil or server_instance == ""
            error_message("Error","Server not selected")
          else
-           associate_eip(eip_address, server_instance)
+           associate_eip(eip_address, server_instance, allocation_id)
            if @created == true
               self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
            end   
@@ -81,7 +81,7 @@ class EC2_EIPAssociateDialog < FXDialogBox
     end
   end 
   
-  def associate_eip(eip_address, server_instance)
+  def associate_eip(eip_address, server_instance, allocation_id=nil)
      answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm","Confirm Associate  of "+eip_address+" To Instance "+server_instance)
      sia = (server_instance).split"/" 
      if sia.size>1
@@ -89,7 +89,7 @@ class EC2_EIPAssociateDialog < FXDialogBox
      end 
      if answer == MBOX_CLICKED_YES
         begin 
-          r = @ec2_main.environment.addresses.associate(server_instance, eip_address)
+          r = @ec2_main.environment.addresses.associate(server_instance, eip_address, nil, allocation_id)
           @created = true
         rescue
           error_message("Asociate IP Address failed",$!)

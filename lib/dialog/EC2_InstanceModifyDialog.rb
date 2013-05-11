@@ -97,7 +97,22 @@ class EC2_InstanceModifyDialog < FXDialogBox
  	else   
  	   @server['Instance_Initiated_Shutdown_Behavior'].setCurrentItem(1)
  	end	
-	FXLabel.new(@frame1, "" )        
+	FXLabel.new(@frame1, "" )
+        FXLabel.new(@frame1, "  Source/Dest Check" )
+	@server['Source_Dest_Check'] = FXComboBox.new(@frame1, 15, :opts => COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
+	@server['Source_Dest_Check'].numVisible = 2      
+	@server['Source_Dest_Check'].appendItem("true")	
+	@server['Source_Dest_Check'].appendItem("false")
+	@server['Source_Dest_Check'].setCurrentItem(0)
+ 	source_dest_check = ""   # get_attribute(instance_id,"xxxxxxxxxxxxxxxxxxxx")
+	source_dest_check = source_dest_check.to_s
+        @orig_server['Source_Dest_Check'] = source_dest_check 	
+ 	if source_dest_check == "true"
+ 	   @server['Instance_Initiated_Shutdown_Behavior'].setCurrentItem(0)
+ 	else   
+ 	   @server['Instance_Initiated_Shutdown_Behavior'].setCurrentItem(1)
+ 	end	
+	FXLabel.new(@frame1, "" )	
 	FXLabel.new(@frame1, "Root Device Name" )        
         @server['Root_Device_Name'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
         @server['Root_Device_Name'].text = get_attribute(instance_id,"rootDeviceName")

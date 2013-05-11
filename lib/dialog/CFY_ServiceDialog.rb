@@ -15,7 +15,7 @@ class CFY_ServiceDialog < FXDialogBox
     begin 
        @item_name = @ec2_main.environment.cfy_service.find_all_services()
     rescue
-       puts "**Error getting services #{$!}"
+       puts "ERROR: getting services #{$!}"
     end     
     super(owner, "Select Service", :opts => DECOR_ALL, :width => 600, :height => 300)
     itemlist = FXList.new(self, :opts => LIST_SINGLESELECT|LAYOUT_FILL)

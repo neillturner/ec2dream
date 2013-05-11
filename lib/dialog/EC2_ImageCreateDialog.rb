@@ -106,7 +106,7 @@ class EC2_ImageCreateDialog < FXDialogBox
          elsif message.class.to_s.end_with?("::BadRequest")
             message = message.response_data.to_s   
          end         
-         puts("**ERROR** Create Image Failed #{message}")
+         puts("ERROR: Create Image Failed #{message}")
          return
       end
       if tags != nil and tags != ""

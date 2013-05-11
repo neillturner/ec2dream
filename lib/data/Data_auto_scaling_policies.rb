@@ -19,7 +19,7 @@ class Data_auto_scaling_policies
 	       data = Array.new
 	    end                
          rescue
-            puts "**Error getting all auto_scaling_policies  #{$!}"
+            puts "ERROR: getting all auto_scaling_policies  #{$!}"
          end
       end   
       return data

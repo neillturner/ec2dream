@@ -91,7 +91,7 @@ class Data_snapshots
              data = conn.describe_snapshots({:owner => owner, :filters => filter})
           end   
        rescue 
-          puts "**Error getting all snapshots  #{$!}"
+          puts "ERROR: getting all snapshots  #{$!}"
        end
     end   
     return data

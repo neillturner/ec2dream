@@ -19,7 +19,7 @@ class Data_scheduled_actions
 	       @data = Array.new
 	    end                  
          rescue
-            puts "**Error getting all scheduled actions  #{$!}"
+            puts "ERROR: getting all scheduled actions  #{$!}"
          end
       end   
       return @data

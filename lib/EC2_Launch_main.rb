@@ -201,6 +201,22 @@ class EC2_Launch
  	FXLabel.new(@frame1s, "Chef Node" )
  	@launch['Chef_Node'] = FXTextField.new(@frame1s, 21, nil, 0, :opts => FRAME_SUNKEN)
  	FXLabel.new(@frame1, "" )
+ 	FXLabel.new(@frame1, "Subnet Id" )
+ 	@frame1v = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
+ 	@launch['Subnet_Id'] = FXTextField.new(@frame1v, 20, nil, 0, :opts => FRAME_SUNKEN)
+ 	@launch['Subnet_Id_Button'] = FXButton.new(@frame1v, "", :opts => BUTTON_TOOLBAR)
+	@launch['Subnet_Id_Button'].icon = @magnifier
+	@launch['Subnet_Id_Button'].tipText = "Select Subnet"
+	@launch['Subnet_Id_Button'].connect(SEL_COMMAND) do
+	   dialog = EC2_SubnetDialog.new(@ec2_main)
+	   dialog.execute
+	   selected = dialog.selected
+	   put('Subnet_Id',selected) if selected != nil and selected != ""
+	end 	
+ 	FXLabel.new(@frame1v, "" )
+ 	FXLabel.new(@frame1v, "         Private IP  " )
+ 	@launch['Private_IP'] = FXTextField.new(@frame1v, 15, nil, 0, :opts => FRAME_SUNKEN)
+ 	FXLabel.new(@frame1, "" )	 	
  	FXLabel.new(@frame1, "Security_Groups" )
  	@launch['Security_Group'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN)
  	@launch['Security_Group_Button'] = FXButton.new(@frame1, "", :opts => BUTTON_TOOLBAR)
@@ -294,25 +310,7 @@ class EC2_Launch
                   end
               end   
         end		
-        FXLabel.new(@frame1, "Spot Price" )
-        @frame1b = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
- 	@launch['Spot_Price'] = FXTextField.new(@frame1b, 15, nil, 0, :opts => FRAME_SUNKEN)
- 	@launch['Spot_Price_Button'] = FXButton.new(@frame1b, "", :opts => BUTTON_TOOLBAR)
- 	@launch['Spot_Price_Button'].icon = @market_icon
-	@launch['Spot_Price_Button'].tipText = " CloudMarket Spot Prices "
-	@launch['Spot_Price_Button'].connect(SEL_COMMAND) do
-	   browser("http://thecloudmarket.com/stats#/spot_prices")
-	end
-	FXLabel.new(@frame1b, "    Addressing (Eucalyptus)" )
-	@launch['Addressing'] = FXTextField.new(@frame1b, 15, nil, 0, :opts => FRAME_SUNKEN)
- 	FXLabel.new(@frame1, "" )	
- 	FXLabel.new(@frame1, "Minimum Server Count" )
- 	@frame1c = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
- 	@launch['Minimum_Server_Count'] = FXTextField.new(@frame1c, 15, nil, 0, :opts => FRAME_SUNKEN)
- 	FXLabel.new(@frame1c, "" )
- 	FXLabel.new(@frame1c, "         Max Server Count  " )
- 	@launch['Maximum_Server_Count'] = FXTextField.new(@frame1c, 15, nil, 0, :opts => FRAME_SUNKEN)
- 	FXLabel.new(@frame1, "" )
+
  	FXLabel.new(@frame1, "Instance Type" )
  	@frame1d = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
  	@launch['Instance_Type'] = FXTextField.new(@frame1d, 15, nil, 0, :opts => FRAME_SUNKEN)
@@ -362,6 +360,25 @@ class EC2_Launch
 	@launch['Monitoring_State'].appendItem("enabled")
 	@launch['Monitoring_State'].setCurrentItem(0)
 	FXLabel.new(@frame1, "" )
+        FXLabel.new(@frame1, "Spot Price" )
+        @frame1b = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
+ 	@launch['Spot_Price'] = FXTextField.new(@frame1b, 15, nil, 0, :opts => FRAME_SUNKEN)
+ 	@launch['Spot_Price_Button'] = FXButton.new(@frame1b, "", :opts => BUTTON_TOOLBAR)
+ 	@launch['Spot_Price_Button'].icon = @market_icon
+	@launch['Spot_Price_Button'].tipText = " CloudMarket Spot Prices "
+	@launch['Spot_Price_Button'].connect(SEL_COMMAND) do
+	   browser("http://thecloudmarket.com/stats#/spot_prices")
+	end
+	FXLabel.new(@frame1b, "    Addressing (Eucalyptus)" )
+	@launch['Addressing'] = FXTextField.new(@frame1b, 15, nil, 0, :opts => FRAME_SUNKEN)
+ 	FXLabel.new(@frame1, "" )	
+ 	FXLabel.new(@frame1, "Minimum Server Count" )
+ 	@frame1c = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
+ 	@launch['Minimum_Server_Count'] = FXTextField.new(@frame1c, 15, nil, 0, :opts => FRAME_SUNKEN)
+ 	FXLabel.new(@frame1c, "" )
+ 	FXLabel.new(@frame1c, "         Max Server Count  " )
+ 	@launch['Maximum_Server_Count'] = FXTextField.new(@frame1c, 15, nil, 0, :opts => FRAME_SUNKEN)
+ 	FXLabel.new(@frame1, "" )	
         FXLabel.new(@frame1, "Disable Api Termination" )
         @frame1f = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
 	@launch['Disable_Api_Termination'] = FXComboBox.new(@frame1f, 15, :opts => COMBOBOX_STATIC|COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
@@ -370,19 +387,12 @@ class EC2_Launch
 	@launch['Disable_Api_Termination'].appendItem("false")
 	@launch['Disable_Api_Termination'].setCurrentItem(1)	
         FXLabel.new(@frame1f, "  Instance Init Shutdown" )
-	@launch['Instance_Initiated_Shutdown_Behavior'] = FXComboBox.new(@frame1f, 15, :opts => COMBOBOX_STATIC|COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
+	@launch['Instance_Initiated_Shutdown_Behavior'] = FXComboBox.new(@frame1f, 10, :opts => COMBOBOX_STATIC|COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
 	@launch['Instance_Initiated_Shutdown_Behavior'].numVisible = 2      
 	@launch['Instance_Initiated_Shutdown_Behavior'].appendItem("stop")	
 	@launch['Instance_Initiated_Shutdown_Behavior'].appendItem("terminate")
 	@launch['Instance_Initiated_Shutdown_Behavior'].setCurrentItem(0)
 	FXLabel.new(@frame1, "" )
- 	FXLabel.new(@frame1, "Subnet ID" )
- 	@frame1v = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
- 	@launch['Subnet_Id'] = FXTextField.new(@frame1v, 15, nil, 0, :opts => FRAME_SUNKEN)
- 	FXLabel.new(@frame1v, "" )
- 	FXLabel.new(@frame1v, "         Private IP  " )
- 	@launch['Private_IP'] = FXTextField.new(@frame1v, 15, nil, 0, :opts => FRAME_SUNKEN)
- 	FXLabel.new(@frame1, "" )	
  	FXLabel.new(@frame1, "User Data Text (Startup Command)")
  	@launch['User_Data'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN)
  	FXLabel.new(@frame1, "" )
@@ -448,10 +458,17 @@ class EC2_Launch
 	   end
         end	   
 	FXLabel.new(@frame1, "Win Admin Password" )
-	@launch['Win_Admin_Password'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN)
+	@launch['Win_Admin_Password'] = FXTextField.new(@frame1, 30, nil, 0, :opts => FRAME_SUNKEN)
 	FXLabel.new(@frame1, "" )
         FXLabel.new(@frame1, "Additional Info" )
-	@launch['Additional_Info'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN)
+        @frame1g = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
+	@launch['Additional_Info'] = FXTextField.new(@frame1g, 30, nil, 0, :opts => FRAME_SUNKEN)
+        FXLabel.new(@frame1g, "  Ebs Optimized" )
+	@launch['Ebs_Optimized'] = FXComboBox.new(@frame1g, 10, :opts => COMBOBOX_STATIC|COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
+	@launch['Ebs_Optimized'].numVisible = 2      
+	@launch['Ebs_Optimized'].appendItem("true")	
+	@launch['Ebs_Optimized'].appendItem("false")
+	@launch['Ebs_Optimized'].setCurrentItem(1)		
 	FXLabel.new(@frame1, "" )
 	FXLabel.new(@frame1, "Additional Block Devices")
 	@launch['Block_Devices'] = FXTable.new(@frame1,:height => 60, :opts => LAYOUT_FIX_HEIGHT|LAYOUT_FILL|TABLE_COL_SIZABLE|TABLE_ROW_SIZABLE|TABLE_READONLY  )
@@ -813,7 +830,7 @@ class EC2_Launch
 	      @ops_launch['User_Data_File'].text = dialog.filename
 	   end
 	end
-        @ops_launch['User_Data_File_Edit_Button'] = FXButton.new(@frame1y, "",:opts => BUTTON_TOOLBAR)
+        @ops_launch['User_Data_File_Edit_Button'] = FXButton.new(@frame4y, "",:opts => BUTTON_TOOLBAR)
 	@ops_launch['User_Data_File_Edit_Button'].icon = @edit
 	@ops_launch['User_Data_File_Edit_Button'].tipText = "  Edit Script  "
 	@ops_launch['User_Data_File_Edit_Button'].connect(SEL_COMMAND) do |sender, sel, data|
@@ -950,6 +967,5 @@ class EC2_Launch
  def launchPanel(item)
        load(item.text)
  end 
- 
  
 end

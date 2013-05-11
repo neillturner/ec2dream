@@ -18,9 +18,10 @@ require 'dialog/EC2_SnapDeleteDialog'
 require 'dialog/EC2_SnapSelectDialog'
 require 'dialog/EC2_SnapRegisterDialog'
 
+require 'dialog/EC2_EIPCreateDialog'
 require 'dialog/EC2_EIPDeleteDialog'
 require 'dialog/EC2_EIPAssociateDialog'
-require 'dialog/EC2_EIPDisassociateDialog'
+require 'dialog/EC2_EIPDisassociateDeleteDialog'
 
 require 'dialog/EC2_KeypairCreateDialog'
 require 'dialog/EC2_KeypairDeleteDialog'
@@ -125,6 +126,8 @@ class EC2_List
 	@role_name = ""
 	@user_name = ""
 	@group_id = ""
+	@cdn_distribution = ""
+	@curr_association_id = nil
 	@arrow_refresh = @ec2_main.makeIcon("arrow_redo.png")
 	@arrow_refresh.create 
 	@create = @ec2_main.makeIcon("new.png")
@@ -193,8 +196,11 @@ class EC2_List
 	@create_image_icon.create	
 	@link_break = @ec2_main.makeIcon("link_break.png")
 	@link_break.create
-    @help = @ec2_main.makeIcon("help.png")
-	@help.create	
+        @help = @ec2_main.makeIcon("help.png")
+	@help.create
+	@app_delete = @ec2_main.makeIcon("application_delete.png")
+	@app_delete.create
+	
 	
     tab1 = FXTabItem.new($ec2_main.tabBook, "  List  ")
   	page1 = FXVerticalFrame.new($ec2_main.tabBook, LAYOUT_FILL, :padding => 0)
@@ -225,14 +231,7 @@ class EC2_List
 	@create_button.icon = @create
 	@create_button.connect(SEL_COMMAND) do |sender, sel, data|
 	   case @type
-              when "IP Addresses"
- 		   begin 
-	              @ec2_main.environment.addresses.allocate
-	              load_sort(@type,@curr_sort)
-	           rescue
-	             error_message("Allocate IP Address failed",$!)
-	           end   
-            when "Images"
+        when "Images"
 	       dialog = EC2_ImageSelectDialog.new(@ec2_main,@search_type,@search_platform,@search_root,@search_search)
 	       dialog.execute
 	       @image_search =  dialog.search
@@ -549,6 +548,7 @@ class EC2_List
                      end
                   else
                      @curr_instance = find_value('instance_id',which.row)
+
                   end						 
 			   elsif @ec2_main.settings.amazon	  
 	              as = find_value('attachmentSet',which.row)
@@ -559,8 +559,11 @@ class EC2_List
 		             end
 				  else
                      @curr_instance = find_value('instanceId',which.row)
-                  end				  
- 		      else 
+                  end
+				  @curr_association_id = find_value('associationId',which.row)
+				  @curr_allocation_id = find_value('allocationId',which.row)
+                  @curr_domain = find_value('domain',which.row)				  
+  		      else 
 		        as = find_value('aws_instance_id',which.row)
 				if as == nil or as == ""
 				   as = find_value('instance_id',which.row)
@@ -571,6 +574,7 @@ class EC2_List
 			  end
 		when "Security Groups"	  
 		   @group_id = 	 find_value('groupId',which.row)
+		   @curr_vpc_id =  find_value('vpcId',which.row)
 	       when "Snapshots"
 	         @volumeSize  =  find_value('volumeSize',which.row) 
 	       when "Load Balancers"
@@ -587,6 +591,10 @@ class EC2_List
 	         @cf_parameters = find_value('parameters',which.row) 
            when "Stacks"
 	         @stack_id  =  find_value('StackId',which.row)
+			when "Distributions" 
+			 @cdn_distribution  = @curr_item
+			when "Users" 
+			 @user_name =  @curr_item
  	      end 	         
 	   else
 	      @curr_row = nil
@@ -596,6 +604,14 @@ class EC2_List
 	   end 
 	end 
   end 
+  
+  def convert_to_array_of_hashs(a,name)
+   x = []
+   a.each do |e|
+     x.push({name => e}) 
+   end 
+   x
+end
   
   def find_value(name,row)
    i=0
@@ -784,7 +800,7 @@ class EC2_List
               end
 			 end 
            rescue 
-              puts "**Error #{request} #{$!}"
+              puts "ERROR: #{request} #{$!}"
            end
         end
       end
@@ -904,7 +920,6 @@ class EC2_List
             i=i+1
          end  
          i = lists[0].length
-		 puts  "*** len #{i}"
          @table.setTableSize(i, table_size)
          set_table_titles(@data[0],@max_data_size)
          set_table_data(lists,table_size)

@@ -21,7 +21,7 @@ class Data_auto_scaling_activities
 	       data = Array.new
 	    end                  
          rescue
-            puts "**Error getting all auto_scaling_activities  #{$!}"
+            puts "ERROR: getting all auto_scaling_activities  #{$!}"
          end
       end   
       return data

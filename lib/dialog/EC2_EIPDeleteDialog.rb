@@ -9,14 +9,14 @@ include Fox
 
 class EC2_EIPDeleteDialog < FXDialogBox
 
-  def initialize(owner, curr_item)
+  def initialize(owner, curr_item, allocation_id=nil)
     @ec2_main = owner
     @delete_item = curr_item
     @deleted = false
      answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm delete","Confirm Release of IP Address "+@delete_item)
      if answer == MBOX_CLICKED_YES
   	   begin 
-              @ec2_main.environment.addresses.release(@delete_item)
+              @ec2_main.environment.addresses.release(@delete_item, allocation_id)
               @deleted = true
            rescue
              error_message("Release of IP Address failed",$!)

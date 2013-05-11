@@ -18,7 +18,7 @@ class CFY_TypeDialog < FXDialogBox
           @item_name.push(fwk_name)
        end    
     rescue
-       puts "**Error getting frameworks  #{$!}"
+       puts "ERROR: getting frameworks  #{$!}"
     end
     @item_name = @item_name.sort
     super(owner, "Select Service", :opts => DECOR_ALL, :width => 600, :height => 300)

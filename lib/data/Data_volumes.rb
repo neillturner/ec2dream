@@ -105,7 +105,7 @@ class Data_volumes
               data = conn.describe_volumes([],{:filters => filter})
           end   
        rescue
-          puts "**Error getting all volumes  #{$!}"
+          puts "ERROR: getting all volumes  #{$!}"
        end
     end   
     return data
@@ -134,7 +134,7 @@ class Data_volumes
   #       :aws_created_at => "2008-06-24T18:13:32.000Z",
   #       :aws_size       => 94}
   #  
-  def create_volume(availability_zone, size, snapshot_id = nil, name="", description="",type="")
+  def create_volume(availability_zone, size, snapshot_id = nil, name="", description="",type="", iops=0)
      data = {}
      conn = @ec2_main.environment.volume_connection
      if conn != nil
@@ -168,8 +168,12 @@ class Data_volumes
 	      data = {}
 	   end
 	elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
-	    response = conn.create_volume(availability_zone, size.to_i, snapshot_id)
-            if response.status == 200
+           options = {}
+           options['SnapshotId'] = snapshot_id if !snapshot_id.nil? and !snapshot_id.empty?
+           options['VolumeType'] = type if type != "" and type != "standard"
+           options['Iops'] = iops.to_i if type == "io1"
+	   response = conn.create_volume(availability_zone, size.to_i, options)
+           if response.status == 200
               response = response.body
               data[:zone] = response['availabilityZone']
 	      data[:aws_created_at] = response['createTime']
@@ -179,9 +183,9 @@ class Data_volumes
               data[:aws_id] = response['volumeId']
               data[:type] = response['volumeType']
               data[:iops] = response['iops']
-            else
+           else
               data = {}
-            end  	    
+           end  	    
         else   	   	   
            data  = conn.create_volume(snapshot_id, size, availability_zone)
         end

@@ -90,9 +90,9 @@ class EC2_Server
      answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm Start","Confirm Start of App "+name)
      if answer == MBOX_CLICKED_YES
          begin
-            puts "***"
+            puts "*****************************************************"
             puts "*** Starting app #{name} this can take a few minutes"
-            puts "***"
+            puts "*****************************************************"
             r = @ec2_main.environment.cfy_app.start(name)
          rescue
             error_message("Start App Failed",$!)

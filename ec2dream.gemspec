@@ -22,12 +22,12 @@
 
 Gem::Specification.new do |spec|
   spec.name = 'ec2dream'
-  spec.version = '3.6.1'
+  spec.version = '3.6.2'
   spec.authors = ['Neill Turner']
   spec.email = 'neillwturner@gmail.com'
   spec.executables = ["ec2dream"]
   spec.homepage = 'http://ec2dream.blogspot.com'
-  spec.summary = 'Visual Cloud Computing Admin for the Fog ruby cloud services library'
+  spec.summary = 'Build and Manage Cloud Servers......visually'
   spec.require_path = 'lib'
   spec.add_dependency('fxruby')
   spec.add_dependency('tzinfo')
@@ -35,18 +35,18 @@ Gem::Specification.new do |spec|
   spec.add_dependency('gchartrb')
   spec.add_dependency('pocketknife_ec2dream', '>= 0.1.5')
   spec.add_dependency('pocketknife_windows')
-  spec.add_dependency('fog', '>= 1.10.0')
+  spec.add_dependency('fog', '= 1.10.1')
   spec.add_dependency('cloudfoundry-client')
 
   spec.description = <<-EOF
 == DESCRIPTION:
 
-Visual Cloud Computing Admin for the Fog ruby cloud services library
+Build and Manage Cloud Servers......visually
 
 == FEATURES:
 
-EC2Dream is visual cloud computing admin for the Fog ruby cloud services library and combines Fog, Ruby, Chef and Git into an open source devops platform supporting:
-      Amazon AWS.
+EC2Dream combines Fog, Ruby, Chef and Git into an open source devops platform supporting:
+      Amazon AWS with full support for VPC, Autoscaling and ability to list most entities.
       Amazon compatible clouds:  Eucalyptus, CloudStack.
       Openstack Clouds:  Rackspace Cloud Servers and HP Cloud.
       Cloud Foundry and even Local Servers.

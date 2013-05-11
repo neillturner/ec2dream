@@ -54,9 +54,9 @@ def initialize(owner, tree)
 	@link_break.create
 	@refresh = @ec2_main.makeIcon("arrow_refresh.png")
 	@refresh.create
-	
 	@topmost_text = ""
-	
+	@vpc_serverBranch = {}
+	@launchBranch = nil
 end  
 
   def load(env)
@@ -64,9 +64,7 @@ end
      @env = env
      platform = @ec2_main.settings.get("EC2_PLATFORM")
      if @topmost == nil or (@topmost.class  == Fox::FXTreeItem and @topmost.text != "Loading......")
-	  #tr=Thread.new do
 	  @status = "loading"
-          #@tree.clearItems
           load_empty
           @tree.collapseTree(@environments)
           @conn = {} 
@@ -85,13 +83,23 @@ end
 		  if t[1]["menu"] == nil or  t[1]["menu"] != false      
                      if t[0] == "Servers" or t[0] == "Apps"
                         @serverBranch = @tree.appendItem(parent, t[0], @folder_open, @folder_closed)
+                        if  @ec2_main.settings.amazon 
+                          @ec2_main.environment.vpc.describe_vpcs.each do |r|
+                             @vpc_serverBranch[r['vpcId']] = @tree.appendItem(parent, r['vpcId'], @folder_open, @folder_closed)
+                          end
+                        end  
                      else
                         a = @tree.appendItem(parent, t[0], @folder_open, @folder_closed)
+                        @launchBranch = a if t[0] == "Launch"
                      end    
                   end
                end 
           end
           @ec2_main.serverCache.refreshServerTree(@tree, @serverBranch, @parallel, @light, @nolight, @connect, @disconnect) if @serverBranch != nil
+          @vpc_serverBranch.each do |vpcid,branch|
+             @ec2_main.serverCache.refreshVpcServerTree(@tree, branch, @parallel, @light, @nolight, @connect, @disconnect,vpcid)
+          end
+          refresh_launch
             if @ec2_main.environment.connection_failed
                @topmost.text = "Env - Error Connection failed"
             else
@@ -107,6 +115,8 @@ end
   def load_empty
              puts "tree.cache.load_empty"
              @tree.clearItems
+             @vpc_serverBranch = {}
+	     @launchBranch = nil
              @environments = @tree.appendItem(nil, "Environments", @doc_settings, @doc_settings) 
              @tree.expandTree(@environments)
              envs = nil
@@ -140,9 +150,19 @@ def refresh
        if @ec2_main.settings.amazon or @ec2_main.settings.openstack or @ec2_main.settings.cloudfoundry or @ec2_main.settings.cloudstack or @ec2_main.settings.eucalyptus 	
 	      @serverBranch.each do |a|
              @tree.removeItem(a)
-          end 	   
+          end 
+           @vpc_serverBranch.each do |vpcid,branch|
+               branch.each do |a|
+                  @tree.removeItem(a)
+               end   
+           
+           end
 	      @ec2_main.serverCache.refreshServerTree(@tree, @serverBranch, @parallel, @light, @nolight, @connect, @disconnect) if @serverBranch != nil
-		else
+	      @vpc_serverBranch.each do |vpcid,branch|
+	          @ec2_main.serverCache.refreshVpcServerTree(@tree, branch, @parallel, @light, @nolight, @connect, @disconnect,vpcid)
+              end
+           refresh_launch      
+	else
           refresh_env  
         end		
     end 
@@ -177,24 +197,60 @@ def refresh_env
              end 
     end 
 end 
- 	
- def addInstance(secGroup, instanceId)
-    r = @tree.prependItem(@serverBranch, "#{secGroup}/#{instanceId}", @connect, @connect)
-    @tree.selectItem(r)
+
+ def refresh_launch
+    puts "Tree.refresh_launch"	
+    if (@launchBranch != nil) and (@topmost == nil or (@topmost.class  == Fox::FXTreeItem and  @topmost.text != "Loading......"))
+ 	        @launchBranch.each do |a|
+                @tree.removeItem(a)
+              end 	   
+ 	      #   @tree.expandTree(@launchBranch)
+              profile_folder = "launch"
+     	     envs = nil
+              begin
+        		envs = Dir.entries(@ec2_main.settings.get_system('ENV_PATH')+"/"+profile_folder)
+     	     rescue
+        		error_message("Launch directory does not exist",$!)
+     	     end
+              if envs != nil
+                 envs.each do |e|
+                    if e.end_with?(".properties") 
+                       @tree.appendItem(@launchBranch, e[0..-12], @parallel, @parallel)
+                    end 
+                 end
+              end 
+     end 
+end 
+
+ # DONE 
+ def addInstance(secGroup, instanceId,vpc=nil)
+    if vpc == nil 
+       r = @tree.prependItem(@serverBranch, "#{secGroup}/#{instanceId}", @connect, @connect)
+       @tree.selectItem(r)
+    else 
+       r = @tree.prependItem(@vpc_serverBranch[vpc], "#{secGroup}/#{instanceId}", @connect, @connect)
+       @tree.selectItem(r)    
+    end
  end
  
- def addSecGrp(groupName)
-    @tree.prependItem(@serverBranch, groupName, @parallel, @parallel, groupName)
- end  
+  # TO DO add support for vpc - not used i think 
+ #def addSecGrp(groupName)
+ #   @tree.prependItem(@serverBranch, groupName, @parallel, @parallel, groupName)
+ #end  
  
- def delete_secGrp(groupName)
-     t = @tree.findItem(groupName)
+ # DONE. 
+ # need to figure out how to find tree items that are the same...
+ def delete_secGrp(groupName,vpc=nil)
+     start = @serverBranch if vpc == nil or vpc == ""
+     start = @vpc_serverBranch[vpc] if vpc != nil and vpc != ""
+     t = @tree.findItem(groupName,start)
      if t != nil 
         p = t.parent
         if p != nil
-           if p.text() == "Servers"
-              @tree.removeItem(t)
-           end
+           if (p.text() == "Servers" and (vpc == nil  or vpc == "")) or 
+              ((vpc != nil and vpc != "") and p.text() == vpc)
+                 @tree.removeItem(t)
+          end
         else
            puts "Security Group not found in tree" 
         end            

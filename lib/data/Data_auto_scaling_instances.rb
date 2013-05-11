@@ -24,7 +24,7 @@ class Data_auto_scaling_instances
                   data.push(r)
                end
          rescue
-            puts "**Error getting all auto_scaling_instances  #{$!}"
+            puts "ERROR: getting all auto_scaling_instances  #{$!}"
          end
       end   
       return data

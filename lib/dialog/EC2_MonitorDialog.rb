@@ -169,7 +169,7 @@ class EC2_MonitorDialog  < FXDialogBox
             end 
         end
        rescue
-          puts "*** Error finding Filesystem for DiskSpaceUtilization report"
+          puts "ERROR: finding Filesystem for DiskSpaceUtilization report"
        end
      end
      begin  
@@ -217,9 +217,9 @@ class EC2_MonitorDialog  < FXDialogBox
       #options[:dimentions] = @dimensions
       #options[:namespace] = namespace
       @response = @mon.get_metric_statistics(options)
-      #if debug 
-         puts "*** response #{@response}"
-      #end 
+      if debug 
+         puts "MONITOR DIALOG DEBUG: response #{@response}"
+      end 
          @max_data = 0
          @data = Array.new
          d = 0
