@@ -586,6 +586,8 @@ class EC2_Launch
       clear_cfy_panel
     elsif @ec2_main.settings.openstack
       clear_ops_panel
+    elsif @type == "as"  
+      clear_as_panel
     else
      @type = "ec2"
      @profile = ""

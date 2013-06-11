@@ -5,6 +5,7 @@ REM  chef_push  chef_node ec2_server_name [ssh_user]
 REM  
 REM  Env Variable EC2_SSH_PRIVATE_KEY private_key
 REM  Env Variable EC2_CHEF_REPOSITORY  chef_repository 
+REM  To set a chef version to install add -j 11.4.2 to the end of the pocketknife command 
 REM
 @echo on
 erase  "%EC2_CHEF_REPOSITORY%\nodes\%2.json" 

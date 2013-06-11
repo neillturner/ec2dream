@@ -10,12 +10,15 @@ class Data_tags
 
   # Retrieve a list tags for resource.
 
-  def all(resource)
+  def all(resource=nil,type=nil)
       data = []
+      filter = {}
+      filter['resource-id'] = resource if resource != nil 
+      filter['resource-type'] = type if resource != type 
       conn = @ec2_main.environment.connection
       if conn != nil
          begin 
-           response = conn.describe_tags({'resource-id' => resource})
+           response = conn.describe_tags(filter)
            if response.status == 200
               data = response.body['tagSet']
            else 

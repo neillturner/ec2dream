@@ -1,0 +1,54 @@
+{
+ "CloudWatch":{
+ "Volume Read Bytes (Bytes)":{
+   "measure":"VolumeReadBytes","unit":"Bytes","namespace":"AWS/EBS",
+   "dimensions" : {},
+   "statistics" : ["Sum"]
+ },
+ "Volume Write Bytes (Bytes)":{
+   "measure":"VolumeWriteBytes","unit":"Bytes","namespace":"AWS/EBS",
+   "dimensions" : {},
+   "statistics" : ["Sum"]
+ }, 
+ "Volume Read Ops (Count)":{
+   "measure":"VolumeReadOps","unit":"Count","namespace":"AWS/EBS",
+   "dimensions" : {},
+   "statistics" : ["Sum"]
+ },
+ "Volume Write Ops (Count)":{
+   "measure":"VolumeWriteOps","unit":"Count","namespace":"AWS/EBS",
+   "dimensions" : {},
+   "statistics" : ["Sum"]
+ },  
+ "Volume Total Read Time (Seconds)":{
+   "measure":"VolumeTotalReadTime","unit":"Seconds","namespace":"AWS/EBS",
+   "dimensions" : {},
+   "statistics" : ["Sum"]
+ },
+ "Volume Total Write Time (Seconds)":{
+   "measure":"VolumeTotalWriteTime","unit":"Seconds","namespace":"AWS/EBS",
+   "dimensions" : {},
+   "statistics" : ["Sum"]
+ },
+ "Volume Idle Time (Seconds)":{
+   "measure":"VolumeIdleTime","unit":"Seconds","namespace":"AWS/EBS",
+   "dimensions" : {},
+   "statistics" : ["Sum"]
+ },
+ "Volume Queue Length(Count)":{
+   "measure":"VolumeQueueLength","unit":"Count","namespace":"AWS/EBS",
+   "dimensions" : {},
+   "statistics" : ["Sum"]
+ },
+ "Volume Throughput Percentage (Percent)":{
+   "measure":"VolumeThroughputPercentage","unit":"Percent","namespace":"AWS/EBS",
+   "dimensions" : {},
+   "statistics" : ["Sum"]
+ },
+ "Volume Consumed Read Write Ops (Count)":{
+   "measure":"VolumeConsumedReadWriteOps","unit":"Count","namespace":"AWS/EBS",
+   "dimensions" : {},
+   "statistics" : ["Sum"]
+ }
+ }
+}

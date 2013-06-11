@@ -62,8 +62,13 @@ def conn(type)
          @conn[type] = Fog::AWS::ELB.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :region => region )
      when 'IAM'	
          @conn[type] = Fog::AWS::IAM.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY') )          
-   when 'Rds'
-         @conn[type] = Fog::AWS::Rds.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :region => region )       
+     when 'Rds'
+         @conn[type] = Fog::AWS::Rds.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :region => region ) 
+     when 'SES'	
+         @conn[type] = Fog::AWS::SES.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY') )          
+     when 'SNS'	
+         @conn[type] = Fog::AWS::SNS.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY') )                   
+         
      else 
         nil
     end

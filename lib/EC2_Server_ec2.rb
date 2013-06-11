@@ -29,6 +29,7 @@
        end
        clear('EC2_SSH_User')
        clear('Win_Admin_Password')
+       clear('Command')
        clear('Ami_Launch_Index')
        clear('Kernel_Id')
        clear('Ramdisk_Id')
@@ -87,7 +88,7 @@
     	 @server['Private_IP'].text = r['privateIpAddress']
     	 @server['Instance_Type'].text = r['instanceType']
     	 @server['Availability_Zone'].text = r['placement']['availabilityZone']
-    	 @server['Launch_Time'].text = r['launchTime'].to_s
+    	 @server['Launch_Time'].text = convert_time(r['launchTime'])
     	 if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
             @server['EC2_SSH_Private_Key'].text = get_pk
          else
@@ -107,6 +108,11 @@
     	   else
     	       @server['Win_Admin_Password'].text = ""
     	   end
+    	 end
+    	 if @command_stack[instance_id] != nil and @command_stack[instance_id] != ""
+    	   @server['Command'].text = @command_stack[instance_id]
+    	 else 
+    	   @server['Command'].text = ""
     	 end
     	 if r['monitoring']['state'] != nil and r['monitoring']['state'] == true
     	    @server['Monitoring_State'].text = "detailed"
@@ -158,7 +164,7 @@
           i = 0
           @block_mapping.each do |m|
             if m!= nil 
-               @server['Block_Devices'].setItemText(i, 0, "#{m['deviceName']};#{m['volumeId']};#{m['attachTime']};#{m['status']};#{m['deleteOnTermination']}")
+               @server['Block_Devices'].setItemText(i, 0, "#{m['deviceName']};#{m['volumeId']};#{convert_time(m['attachTime'])};#{m['status']};#{m['deleteOnTermination']}")
                @server['Block_Devices'].setItemJustify(i, 0, FXTableItem::LEFT)
                i = i+1
     	    end 

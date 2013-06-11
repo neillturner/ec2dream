@@ -37,7 +37,7 @@ def chef(server, address,  chef_node, ssh_user, private_key, password, platform=
               return false
            end
            if ec2_server_name == nil or ec2_server_name == ""
-              error_message("No Public DSN","This Server does not have a Public DSN")
+              error_message("No Public of Private DSN","This Server does not have a Public or Private DSN")
               return false
            end
            short_name = ec2_server_name

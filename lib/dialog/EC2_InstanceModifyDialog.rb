@@ -14,7 +14,9 @@ class EC2_InstanceModifyDialog < FXDialogBox
         @modified = false
         @orig_server = {}
         @server = {}
-        super(owner, "Modify Instance", :opts => DECOR_ALL, :width => 600, :height => 270)
+        @ec2_main.serverCache.refresh(instance_id)
+        @cache = @ec2_main.serverCache.instance(instance_id)
+        super(owner, "Modify Instance", :opts => DECOR_ALL, :width => 600, :height => 350)
         @page1 = FXVerticalFrame.new(self, LAYOUT_FILL, :padding => 0)
         @frame1 = FXMatrix.new(@page1, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
         FXLabel.new(@frame1, "Instance ID" )
@@ -74,7 +76,7 @@ class EC2_InstanceModifyDialog < FXDialogBox
 	@server['Disable_Api_Termination'].appendItem("true")	
 	@server['Disable_Api_Termination'].appendItem("false")
 	@server['Disable_Api_Termination'].setCurrentItem(0)
- 	disable_api = ""  # get_attribute(instance_id,"disableApiTermination")
+ 	disable_api = get_attribute(instance_id,"disableApiTermination")
 	disable_api = disable_api.to_s
         @orig_server['Disable_Api_Termination'] = disable_api 	
  	if disable_api == "true"
@@ -89,7 +91,7 @@ class EC2_InstanceModifyDialog < FXDialogBox
 	@server['Instance_Initiated_Shutdown_Behavior'].appendItem("stop")	
 	@server['Instance_Initiated_Shutdown_Behavior'].appendItem("terminate")
 	@server['Instance_Initiated_Shutdown_Behavior'].setCurrentItem(0)
- 	instance_init_shut = ""   # get_attribute(instance_id,"instanceInitiatedShutdownBehavior")
+ 	instance_init_shut = get_attribute(instance_id,"instanceInitiatedShutdownBehavior")
 	instance_init_shut = instance_init_shut.to_s
         @orig_server['Instance_Initiated_Shutdown_Behavior'] = instance_init_shut 	
  	if instance_init_shut == "stop"
@@ -104,7 +106,7 @@ class EC2_InstanceModifyDialog < FXDialogBox
 	@server['Source_Dest_Check'].appendItem("true")	
 	@server['Source_Dest_Check'].appendItem("false")
 	@server['Source_Dest_Check'].setCurrentItem(0)
- 	source_dest_check = ""   # get_attribute(instance_id,"xxxxxxxxxxxxxxxxxxxx")
+ 	source_dest_check = get_attribute(instance_id,"sourceDestCheck")
 	source_dest_check = source_dest_check.to_s
         @orig_server['Source_Dest_Check'] = source_dest_check 	
  	if source_dest_check == "true"
@@ -166,7 +168,7 @@ class EC2_InstanceModifyDialog < FXDialogBox
  def modify_attribute(instance,attr,value,orig_value)
     if orig_value != value
           begin
-             #ec2.modify_instance_attribute(instance,attr,value)
+             puts "attr #{attr} value #{value} orig_value #{orig_value}"
              if attr == 'DisableApiTermination.Value'
                bvalue = false
                bvalue = true if attr == 'DisableApiTermination.Value' and value == "true"
@@ -184,16 +186,12 @@ class EC2_InstanceModifyDialog < FXDialogBox
  
  def get_attribute(instance,attr)
      value = ""
-        begin
-          #r = ec2.describe_instance_attribute(instance,attr)
-          r = r = @ec2_main.serverCache.instance(instance)
-          #r = @ec2_main.environment.servers.describe_instance_attribute(instance,attr)
-          if r != nil and r != ""
-             value = r[attr] if r[attr] != nil
-          end   
-        rescue
-          error_message("Get Instance Attribute Failed",$!)
-        end  
+     if @cache != nil and @cache != ""
+        value = @cache[attr] if @cache[attr] != nil
+        puts "instance attribute #{attr} not found" if @cache[attr] == nil
+     else
+        error_message("Instance Error","Instance #{instance} not found")
+     end   
      return value
  end
  

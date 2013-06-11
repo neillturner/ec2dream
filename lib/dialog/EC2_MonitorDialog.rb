@@ -3,9 +3,18 @@ require 'google_chart'
 require 'open-uri'
 require 'rubygems'
 require 'net/http'
-
+require 'common/convert_time'
 include Fox
 
+#class DateTime
+#  def localtime
+#    new_offset(DateTime.now.offset)
+#  end
+#
+#  def utc
+#    new_offset(Rational(0, 24))
+#  end
+#end
 
 class Hours
    attr_reader :value
@@ -58,9 +67,10 @@ end
 
 class EC2_MonitorDialog  < FXDialogBox
 
-  def initialize(owner, instanceId, groupName, report, config)
-
-    puts "EC2_MonitorDialog.initialize"
+  def initialize(owner, dimension_value, groupName, report, config, dimension_type="InstanceId")
+    @debug = false 
+    puts "EC2_MonitorDialog.initialize dimension_value #{dimension_value} groupName #{groupName} report #{report} config #{config} dimension_type #{dimension_type}" if @debug
+    puts "EC2_MonitorDialog.initialize dimension_value #{dimension_value} groupName #{groupName} report #{report} dimension_type #{dimension_type}" if !@debug    
     @ec2_main = owner
     @env = ""
     @msg = ""
@@ -68,12 +78,21 @@ class EC2_MonitorDialog  < FXDialogBox
     @created = false
     @mon = @ec2_main.environment.cloud_watch
     @config = config
+    @dimension_type = dimension_type
     report_count=0
     @config["CloudWatch"].each do |report|
        report_count=report_count+1
     end  
-    height=((report_count/2.0).round)*167 
-    super(owner, "Monitoring", :opts => DECOR_ALL, :width => 800, :height => height)
+    if report_count <=8
+       width = 800
+       height=((report_count/2.0).round)*167 
+       graphs_per_line = 2
+    else 
+       width = 1200
+       height=((report_count/3.0).ceil)*150+70
+       graphs_per_line = 3
+    end
+    super(owner, "#{dimension_type} Monitoring", :opts => DECOR_ALL, :width => width, :height => height)
 
     @mainFrame = FXVerticalFrame.new(self,LAYOUT_SIDE_TOP|LAYOUT_FILL_X|LAYOUT_FILL_Y|PACK_UNIFORM_WIDTH)
     
@@ -81,85 +100,95 @@ class EC2_MonitorDialog  < FXDialogBox
     @title = FXLabel.new(@titleFrame, "",nil,:opts => LAYOUT_CENTER_X|JUSTIFY_TOP)
     @title.font = FXFont.new(@ec2_main.app, "Arial",12,FXFont::Bold)
     
-    @topFrame = FXMatrix.new(@mainFrame, 2, MATRIX_BY_COLUMNS|LAYOUT_FILL)
-   
-    
-    @stats = ["Minimum","Maximum","Average"]
+    @topFrame = FXMatrix.new(@mainFrame, graphs_per_line, MATRIX_BY_COLUMNS|LAYOUT_FILL)
+
     @dimensions = {}
-    @dimensions["InstanceId"]=instanceId
-    puts "Report #{report}"
+    @dimensions[@dimension_type]=dimension_value
+
+    report = "Today" if report == nil or report == ""
+    @title.text = "Graphs for #{groupName}/#{dimension_value} " if groupName != nil and groupName != ""
+    @title.text = "Graphs for AutoScaling Group #{dimension_value} " if @dimension_type == "AutoScalingGroupName"
+    @title.text = "Graphs for Load Balancer #{dimension_value} " if @dimension_type == "LoadBalancerName"
     if report == "Last Fortnight"
 	@end_date = Date.today()
         @end_month = @end_date.strftime("%b")
         @start_date = @end_date - 13
         @start_month = @start_date.strftime("%b")
         puts "Fornight Report from #{@start_date} to #{@end_date}"
-        @title.text = "Graphs for #{groupName}/#{instanceId} from "+@start_date.strftime("%b %d")+" to "+@end_date.strftime("%b %d")+" (Daily, Times in UTC)"       
-        getStatsReports(groupName,instanceId,"Fortnight")
-    else if report == "Last Hour"
- 	    @end_date = DateTime.now.new_offset(0)
- 	    @start_date = @end_date - 1.hours 
- 	    puts "Last 1 Hour for #{@start_date} to #{@end_date}"
- 	    @title.text = "Graphs for #{groupName}/#{instanceId} "+@start_date.strftime("%b %d %H:%M")+"-"+@end_date.strftime("%b %d %H:%M")+" (Times in UTC)"
- 	    getStatsReports(groupName,instanceId,"Hourly")
-         else if report == "Last 3 Hours"
-		@end_date = DateTime.now.new_offset(0)
-	        @start_date = @end_date - 3.hours 
- 	        puts "Last 3 Hours for #{@start_date} to #{@end_date}"
- 	        @title.text = "Graphs for #{groupName}/#{instanceId} "+@start_date.strftime("%b %d %H:%M")+"-"+@end_date.strftime("%b %d %H:%M")+" (Times in UTC)"
- 	        getStatsReports(groupName,instanceId,"Three Hourly")
-              else if report == "Last 12 Hours"
- 		     @end_date = DateTime.now.new_offset(0)
- 	             @start_date = @end_date - 0.5 
-  	             puts "Last 12 Hours for #{@start_date} to #{@end_date}"
-  	             @title.text = "Graphs for #{groupName}/#{instanceId} "+@start_date.strftime("%b %d %H:%M")+"-"+@end_date.strftime("%b %d %H:%M")+" (Times in UTC)"
- 	             getStatsReports(groupName,instanceId,"Twelve Hourly")
-                   else
-            	       d = Date.today
-		       if report == "Today"
-		       # default
-		       else if report == "Yesterday"
-               		       d = d - 1
-            		    else
-            		       d = Date.parse(report)
-            		    end   
-                       end
-       		       @start_date = DateTime.new(d.year,d.month,d.day,1)
-       		       @end_date = DateTime.new(d.year,d.month,d.day,24)
-       		       puts "Daily Report for #{@start_date} to #{@end_date}"
-       		       @title.text = "Graphs for #{groupName}/#{instanceId} for "+@start_date.strftime("%b %d")+" (Times in UTC)"                   
-                       getStatsReports(groupName,instanceId,"Daily")
-                   end
-              end     
-         end
+        @title.text = @title.text+"from "+@start_date.strftime("%b %d")+" to "+@end_date.strftime("%b %d")+" (Daily, Times in UTC)"       
+        getStatsReports(groupName,dimension_value,"Fortnight")
+    elsif report == "Last Hour"
+ 	@end_date = DateTime.now.new_offset(0)
+ 	@start_date = @end_date - 1.hours 
+ 	puts "Last 1 Hour for #{@start_date} to #{@end_date}"
+  	@title.text = @title.text+@start_date.strftime("%b %d %H:%M")+"-"+@end_date.strftime("%b %d %H:%M")+" (Times in UTC)"
+ 	getStatsReports(groupName,dimension_value,"Hourly")
+    elsif report == "Last 3 Hours"
+	@end_date = DateTime.now.new_offset(0)
+	@start_date = @end_date - 3.hours 
+ 	puts "Last 3 Hours for #{@start_date} to #{@end_date}"
+ 	@title.text = @title.text+@start_date.strftime("%b %d %H:%M")+"-"+@end_date.strftime("%b %d %H:%M")+" (Times in UTC)"
+ 	getStatsReports(groupName,dimension_value,"Three Hourly")
+   elsif report == "Last 12 Hours"
+ 	@end_date = DateTime.now.new_offset(0)
+ 	@start_date = @end_date - 0.5 
+  	puts "Last 12 Hours for #{@start_date} to #{@end_date}"
+  	@title.text = @title.text+@start_date.strftime("%b %d %H:%M")+"-"+@end_date.strftime("%b %d %H:%M")+" (Times in UTC)"
+ 	getStatsReports(groupName,dimension_value,"Twelve Hourly")
+   elsif report == "Last 24 Hours"
+ 	@end_date = DateTime.now.new_offset(0)
+ 	@start_date = @end_date - 1 
+  	puts "Last 24 Hours for #{@start_date} to #{@end_date}"
+  	@title.text = @title.text+@start_date.strftime("%b %d %H:%M")+"-"+@end_date.strftime("%b %d %H:%M")+" (Times in UTC)"
+ 	getStatsReports(groupName,dimension_value,"24 Hourly") 	
+   else
+        d = Date.today
+	if report == "Today"
+	   # default
+	elsif report == "Yesterday"
+           d = d - 1
+        else
+           d = Date.parse(report)
+        end   
+      	@start_date = DateTime.new(d.year,d.month,d.day,1)
+       	@end_date = DateTime.new(d.year,d.month,d.day,24)
+       	puts "Daily Report for #{@start_date} to #{@end_date}"
+       	@title.text = @title.text+"for "+@start_date.strftime("%b %d")+" (Times in UTC)"                   
+        getStatsReports(groupName,dimension_value,"Daily")
     end
     @msgFrame = FXHorizontalFrame.new(@mainFrame,LAYOUT_CENTER_Y|LAYOUT_FILL_X|PACK_UNIFORM_WIDTH)
     @msg = FXLabel.new(@msgFrame, "",nil,:opts => LAYOUT_CENTER_X|JUSTIFY_TOP)
-    @msg.text = "* Graphs only available when Amazon CloudWatch Monitoring Scripts installed on instance"
+    @msg.text = "* Graphs only available when Amazon CloudWatch Monitoring Scripts installed on instance" if  @dimension_type == "InstanceId"
+    @msg.text = "* Graphs only available when Provisioned IOPS Used" if  @dimension_type == "VolumeId"
   end  
   
-  def getStatsReports(groupName,instanceId,duration)
+  def getStatsReports(groupName,dimension_value,duration)
      @config["CloudWatch"].each do |report|
+       #if report[0].start_with? "Request" # for debugging
         title=report[0]
         parms=report[1]
-        getStats(title,parms['namespace'],parms['measure'],parms['unit'],parms['dimensions'],groupName,instanceId,duration,true)
+        @stats = ["Minimum","Maximum","Average"] 
+        @stats = parms['statistics'] if parms['statistics'] != nil
+        getStats(title,parms['namespace'],parms['measure'],parms['unit'],parms['dimensions'],groupName,dimension_value,duration,@debug)
 	if @msg != nil and @msg != ""
 	  return 
-        end  
+        end
+       #end 
      end   
   end   
   
-  def getStats(title,namespace,measure,unit,dimensions,groupName,instanceId,duration,debug)
+  def getStats(title,namespace,measure,unit,dimensions,groupName,dimension_value,duration,debug)
       if measure == "DiskSpaceUtilization"
         begin
          @dev = ""
          options = {}
          options["MetricName"]  = measure
          options["Namespace"]  = namespace
-         options["Dimensions"]  = [{"Name" => "InstanceId","Value" => instanceId}] 
+         options["Dimensions"]  = [{"Name" => @dimension_type,"Value" => dimension_value}] 
          dimensions.each do |d|
            options["Dimensions"].push(d)
-         end  
+         end 
+         puts "list metrics #{options}" if debug 
          @response = @mon.list_metrics(options)
          @response[0]['Dimensions'].each do |m|
             if m['Name'] == "Filesystem"
@@ -174,13 +203,13 @@ class EC2_MonitorDialog  < FXDialogBox
      end
      begin  
       if debug 
-         puts "getStats #{namespace} #{measure} #{duration} #{instanceId}"
+         puts "getStats #{namespace} #{measure} #{duration} #{dimension_value}"
       end   
       period = 3600
       case duration
         when "Fortnight"
            period = 86400
-        when "Daily" 
+        when "Daily","24 Hourly" 
            perod=3600
         when "Three Hourly"
            period=900
@@ -192,13 +221,14 @@ class EC2_MonitorDialog  < FXDialogBox
       #puts "period #{period}"
       options = {}
       options["Statistics"] = @stats
+      options["Statistics"] =["Sum"] if unit == "Count"
       options["StartTime" ]     = @start_date
       options["EndTime" ]      = @end_date
       options["Period" ]          = period
       options["Unit" ]             = unit
       options["MetricName"]  = measure
       options["Namespace"]  = namespace
-      options["Dimensions"]  = [{"Name" => "InstanceId","Value" => instanceId}] 
+      options["Dimensions"]  = [{"Name" => @dimension_type,"Value" => dimension_value}] 
       if !dimensions.empty?
          dimensions.each do |d|
             options["Dimensions"].push(d)
@@ -207,19 +237,9 @@ class EC2_MonitorDialog  < FXDialogBox
       if measure == "DiskSpaceUtilization" and @dev != nil and @dev != ""
          options["Dimensions"].push({"Name" => "Filesystem","Value" => @dev})
       end
-      #options = {}
-      #options[:measure_name] = measure
-      #options[:statistics] = @stats
-      #options[:start_time] = @start_date
-      #options[:end_time] = @end_date
-      #options[:unit] = unit
-      #options[:period] = period
-      #options[:dimentions] = @dimensions
-      #options[:namespace] = namespace
+      #puts "get_metric_statistics #{options}"  if debug 
       @response = @mon.get_metric_statistics(options)
-      if debug 
-         puts "MONITOR DIALOG DEBUG: response #{@response}"
-      end 
+         puts "MONITOR DIALOG DEBUG: response #{@response}" if debug 
          @max_data = 0
          @data = Array.new
          d = 0
@@ -233,9 +253,9 @@ class EC2_MonitorDialog  < FXDialogBox
             r.each do |key, value|
                 if debug
                    if key == "Timestamp"
-         	      puts "#{key} = #{value} ---------------------------------------"
+         	      puts "key: #{key} value: #{value} --------------------------"
          	   else
-         	      puts "#{key} = #{value}"
+         	      puts "key: #{key} value: #{value}"
          	   end
          	end   
          	if key.to_s == "Average"
@@ -256,7 +276,13 @@ class EC2_MonitorDialog  < FXDialogBox
          	      s[:min] = s[:min]/60
          	   end 	 	   
          	end
-         	if key.to_s == "Average" or key.to_s == "Maximum" or key.to_s == "Average"
+                if key.to_s == "Sum"
+	 	   s[:sum] = value.to_f
+		   if unit == "Bytes"
+         	      s[:sum] = s[:sum]/60
+         	   end 	 	   
+         	end         	
+         	if key.to_s == "Average" or key.to_s == "Maximum" or key.to_s == "Average" or key.to_s == "Sum"
          	   if unit == "Bytes"
          	      if value.to_i > @max_data*60
          	         @max_data =  (value.to_i)/60
@@ -284,7 +310,7 @@ class EC2_MonitorDialog  < FXDialogBox
          	end
                 if key.to_s == "Timestamp" and duration == "Hourly"
                    if debug 
-                      puts "Value #{value}"
+                      puts "Hourly Timestamp Value #{value}"
                    end   
                    d =  DateTime.parse(value.to_s)
                    diff = d - @start_date
@@ -292,7 +318,8 @@ class EC2_MonitorDialog  < FXDialogBox
                    s[:key] = (diff.to_i)+1
                    if debug
                       puts "diff #{diff} #{(diff.to_i)+1}"
-                   end   
+                   end 
+                   s[:key] = 0 if diff<0
                 end
                 if key.to_s == "Timestamp" and duration == "Three Hourly"
                    d =  DateTime.parse(value.to_s)
@@ -301,7 +328,8 @@ class EC2_MonitorDialog  < FXDialogBox
                    s[:key] = (diff.to_i)+1
                    if debug 
                       puts "diff #{diff} #{(diff.to_i)+1}"
-                   end   
+                   end 
+                   s[:key] = 0 if diff<0
                 end
                 if key.to_s == "Timestamp" and duration == "Twelve Hourly"
                    d =  DateTime.parse(value.to_s)
@@ -310,10 +338,21 @@ class EC2_MonitorDialog  < FXDialogBox
                    s[:key] = (diff.to_i)+1
                    if debug 
                       puts "diff #{diff} #{(diff.to_i)+1}"
-                   end   
-                end                
+                   end 
+                   s[:key] = 0 if diff<0
+                end 
+		if key.to_s == "Timestamp" and duration == "24 Hourly"
+                   d =  DateTime.parse(value.to_s)
+                   diff = d - @start_date
+                   diff = diff*24
+                   s[:key] = (diff.to_i)+1
+                   if debug 
+                      puts "diff #{diff} #{(diff.to_i)+1}"
+                   end 
+                   s[:key] = 0 if diff<0		
+         	end                
   	    end
-  	    @data << s
+   	    @data << s
   	    
       end       
      rescue
@@ -323,19 +362,22 @@ class EC2_MonitorDialog  < FXDialogBox
    begin 
     f = FXImageFrame.new(@topFrame, nil, :opts => LAYOUT_FILL)
     if duration == "Fortnight"
-       f.image = FXPNGImage.new(app, open(fortnight_line_chart(title,measure,groupName,instanceId,debug).to_escaped_url, "rb").read)
+       f.image = FXPNGImage.new(app, open(fortnight_line_chart(title,measure,groupName,dimension_value,debug).to_escaped_url, "rb").read)
     end
     if duration == "Daily"
-       f.image = FXPNGImage.new(app, open(daily_line_chart(title,measure,groupName,instanceId,debug).to_escaped_url, "rb").read)
+       f.image = FXPNGImage.new(app, open(daily_line_chart(title,measure,groupName,dimension_value,debug).to_escaped_url, "rb").read)
     end
+    if duration == "24 Hourly"
+       f.image = FXPNGImage.new(app, open(twenty_four_hourly_line_chart(title,measure,groupName,dimension_value,debug).to_escaped_url, "rb").read)
+    end    
     if duration == "Hourly"
-       f.image = FXPNGImage.new(app, open(hourly_line_chart(title,measure,groupName,instanceId,debug).to_escaped_url, "rb").read)
+       f.image = FXPNGImage.new(app, open(hourly_line_chart(title,measure,groupName,dimension_value,debug).to_escaped_url, "rb").read)
     end
     if duration == "Three Hourly"
-       f.image = FXPNGImage.new(app, open(three_hourly_line_chart(title,measure,groupName,instanceId,debug).to_escaped_url, "rb").read)
+       f.image = FXPNGImage.new(app, open(three_hourly_line_chart(title,measure,groupName,dimension_value,debug).to_escaped_url, "rb").read)
     end
     if duration == "Twelve Hourly"
-       f.image = FXPNGImage.new(app, open(twelve_hourly_line_chart(title,measure,groupName,instanceId,debug).to_escaped_url, "rb").read)
+       f.image = FXPNGImage.new(app, open(twelve_hourly_line_chart(title,measure,groupName,dimension_value,debug).to_escaped_url, "rb").read)
     end 
    rescue
      puts "ERROR: Failed  "+$!.to_s
@@ -345,7 +387,7 @@ class EC2_MonitorDialog  < FXDialogBox
   end
   
 
-def fortnight_line_chart(title,measure,groupName,instanceId,debug) 
+def fortnight_line_chart(title,measure,groupName,dimension_value,debug) 
 
   d = DateTime.now()
   x_axis_labels = Array.new
@@ -361,25 +403,26 @@ def fortnight_line_chart(title,measure,groupName,instanceId,debug)
   series_1_xy = []
   series_2_xy = []
   series_3_xy = []
+  series_4_xy = []
 
   @data = @data.sort_by {|r| r[:key]}
   i =0
   @data.each do |r|
-    series_1_xy[i] = [r[:key], r[:avg] ]
-    series_2_xy[i] = [r[:key], r[:max] ]
-    series_3_xy[i] = [r[:key], r[:min] ]
-    if debug 
-        puts "avg - #{i}   [#{r[:key]},#{r[:avg]}]"
-        puts "max - #{i}   [#{r[:key]},#{r[:max]}]"
-        puts "min - #{i}   [#{r[:key]},#{r[:min]}]"
-    end    
+    series_1_xy[i] = [r[:key], r[:avg] ] if r[:avg] != nil
+    series_2_xy[i] = [r[:key], r[:max] ] if r[:max] != nil
+    series_3_xy[i] = [r[:key], r[:min] ] if r[:min] != nil
+    series_4_xy[i] = [r[:key], r[:sum] ] if r[:sum] != nil
+    if debug
+       puts "avg - #{i} [#{r[:key]},#{r[:avg]}] max - #{i}   [#{r[:key]},#{r[:max]}] min - #{i}   [#{r[:key]},#{r[:min]}] sum - #{i}   [#{r[:key]},#{r[:sum]}] "
+    end   
     i=i+1
   end  
 
   GoogleChart::LineChart.new('380x140', title, true) do  |lcxy|
-    lcxy.data "Max", series_2_xy, '0404B4'
-    lcxy.data "Avg", series_1_xy, '458B00'
-    lcxy.data "Min", series_3_xy, 'B40404'
+    lcxy.data("Max", series_2_xy, '0404B4') if !series_2_xy.empty?
+    lcxy.data("Avg", series_1_xy, '458B00') if !series_1_xy.empty?
+    lcxy.data("Min", series_3_xy, 'B40404') if !series_3_xy.empty?
+    lcxy.data("Sum", series_4_xy, '0404B4') if !series_4_xy.empty?
     lcxy.max_value [13,@max_data]
     lcxy.data_encoding = :text
     lcxy.axis :x, :labels => x_axis_labels
@@ -392,11 +435,11 @@ def fortnight_line_chart(title,measure,groupName,instanceId,debug)
 
  end
 
-def daily_line_chart(title,measure,groupName,instanceId,debug) 
+def daily_line_chart(title,measure,groupName,dimension_value,debug) 
   
   d = DateTime.now()
   x_axis_labels = Array.new
-  i=1 
+  i=0 
   while i <25
     x_axis_labels[i] = i
    i=i+1
@@ -407,25 +450,27 @@ def daily_line_chart(title,measure,groupName,instanceId,debug)
   series_1_xy = []
   series_2_xy = []
   series_3_xy = []
+  series_4_xy = []
   
   @data = @data.sort_by {|r| r[:key]}
   i =0
   @data.each do |r|
-    series_1_xy[i] = [r[:key], r[:avg] ]
-    series_2_xy[i] = [r[:key], r[:max] ]
-    series_3_xy[i] = [r[:key], r[:min] ]
+    series_1_xy[i] = [r[:key], r[:avg] ] if r[:avg] != nil
+    series_2_xy[i] = [r[:key], r[:max] ] if r[:max] != nil
+    series_3_xy[i] = [r[:key], r[:min] ] if r[:min] != nil
+    series_4_xy[i] = [r[:key], r[:sum] ] if r[:sum] != nil
     if debug
-       puts "avg - #{i}   [#{r[:key]},#{r[:avg]}]"
-       puts "max - #{i}   [#{r[:key]},#{r[:max]}]"
-       puts "min - #{i}   [#{r[:key]},#{r[:min]}]"
+       puts "avg - #{i} [#{r[:key]},#{r[:avg]}] max - #{i}   [#{r[:key]},#{r[:max]}] min - #{i}   [#{r[:key]},#{r[:min]}] sum - #{i}   [#{r[:key]},#{r[:sum]}] "
     end   
     i=i+1
   end  
  
   GoogleChart::LineChart.new('380x140', title, true) do  |lcxy|
-    lcxy.data "Max", series_2_xy, '0404B4'
-    lcxy.data "Avg", series_1_xy, '458B00'
-    lcxy.data "Min", series_3_xy, 'B40404'
+    puts " series_2_xy #{series_2_xy}"
+    lcxy.data("Max", series_2_xy, '0404B4') if !series_2_xy.empty?
+    lcxy.data("Avg", series_1_xy, '458B00') if !series_1_xy.empty?
+    lcxy.data("Min", series_3_xy, 'B40404') if !series_3_xy.empty?
+    lcxy.data("Sum", series_4_xy, '0404B4') if !series_4_xy.empty?
     lcxy.max_value [24,@max_data]
     lcxy.data_encoding = :text
     lcxy.axis :x, :labels => x_axis_labels
@@ -433,12 +478,12 @@ def daily_line_chart(title,measure,groupName,instanceId,debug)
     lcxy.grid :x_step => 4.2, :y_step => 10, :length_segment => 1, :length_blank => 3
     if debug
        puts lcxy.to_url
-    end   
+    end 
    end 
   
 end
 
-def hourly_line_chart(title,measure,groupName,instanceId,debug) 
+def hourly_line_chart(title,measure,groupName,dimension_value,debug) 
   m = @start_date.min()
   h = @start_date.hour()
   x_axis_labels = Array.new
@@ -469,25 +514,27 @@ def hourly_line_chart(title,measure,groupName,instanceId,debug)
   series_1_xy = []
   series_2_xy = []
   series_3_xy = []
+  series_4_xy = []
   
   @data = @data.sort_by {|r| r[:key]}
   i =0
   @data.each do |r|
-    series_1_xy[i] = [r[:key], r[:avg] ]
-    series_2_xy[i] = [r[:key], r[:max] ]
-    series_3_xy[i] = [r[:key], r[:min] ]
+    series_1_xy[i] = [r[:key], r[:avg] ] if r[:avg] != nil
+    series_2_xy[i] = [r[:key], r[:max] ] if r[:max] != nil
+    series_3_xy[i] = [r[:key], r[:min] ] if r[:min] != nil
+    series_4_xy[i] = [r[:key], r[:sum] ] if r[:sum] != nil
     if debug
-       puts "avg - #{i}   [#{r[:key]},#{r[:avg]}]"
-       puts "max - #{i}   [#{r[:key]},#{r[:max]}]"
-       puts "min - #{i}   [#{r[:key]},#{r[:min]}]"
+       puts "avg - #{i} [#{r[:key]},#{r[:avg]}] max - #{i}   [#{r[:key]},#{r[:max]}] min - #{i}   [#{r[:key]},#{r[:min]}] sum - #{i}   [#{r[:key]},#{r[:sum]}] "
     end   
     i=i+1
   end
   
+  
   GoogleChart::LineChart.new('380x140', title, true) do  |lcxy|
-    lcxy.data "Max", series_2_xy, '0404B4' 
-    lcxy.data "Avg", series_1_xy, '458B00'
-    lcxy.data "Min", series_3_xy, 'B40404'
+    lcxy.data("Max", series_2_xy, '0404B4') if !series_2_xy.empty?
+    lcxy.data("Avg", series_1_xy, '458B00') if !series_1_xy.empty?
+    lcxy.data("Min", series_3_xy, 'B40404') if !series_3_xy.empty?
+    lcxy.data("Sum", series_4_xy, '0404B4') if !series_4_xy.empty?
     lcxy.max_value [11,@max_data]
     lcxy.data_encoding = :text
     lcxy.axis :x, :labels => x_axis_labels
@@ -500,7 +547,7 @@ def hourly_line_chart(title,measure,groupName,instanceId,debug)
   
 end
 
-def three_hourly_line_chart(title,measure,groupName,instanceId,debug) 
+def three_hourly_line_chart(title,measure,groupName,dimension_value,debug) 
   m = @start_date.min()
   h = @start_date.hour()
   x_axis_labels = Array.new
@@ -534,25 +581,26 @@ def three_hourly_line_chart(title,measure,groupName,instanceId,debug)
   series_1_xy = []
   series_2_xy = []
   series_3_xy = []
+  series_4_xy = []
   
   @data = @data.sort_by {|r| r[:key]}
   i =0
   @data.each do |r|
-    series_1_xy[i] = [r[:key], r[:avg] ]
-    series_2_xy[i] = [r[:key], r[:max] ]
-    series_3_xy[i] = [r[:key], r[:min] ]
+    series_1_xy[i] = [r[:key], r[:avg] ] if r[:avg] != nil
+    series_2_xy[i] = [r[:key], r[:max] ] if r[:max] != nil
+    series_3_xy[i] = [r[:key], r[:min] ] if r[:min] != nil
+    series_4_xy[i] = [r[:key], r[:sum] ] if r[:sum] != nil
     if debug
-       puts "#{measure}#{groupName} avg - #{i}   [#{r[:key]},#{r[:avg]}]"
-       puts "#{measure}#{groupName} max - #{i}   [#{r[:key]},#{r[:max]}]"
-       puts "#{measure}#{groupName} min - #{i}   [#{r[:key]},#{r[:min]}]"
+       puts "avg - #{i} [#{r[:key]},#{r[:avg]}] max - #{i}   [#{r[:key]},#{r[:max]}] min - #{i}   [#{r[:key]},#{r[:min]}] sum - #{i}   [#{r[:key]},#{r[:sum]}] "
     end   
     i=i+1
   end
   
   GoogleChart::LineChart.new('380x140', title, true) do  |lcxy|
-    lcxy.data "Max", series_2_xy, '0404B4'
-    lcxy.data "Avg", series_1_xy, '458B00'
-    lcxy.data "Min", series_3_xy, 'B40404'
+    lcxy.data("Max", series_2_xy, '0404B4') if !series_2_xy.empty?
+    lcxy.data("Avg", series_1_xy, '458B00') if !series_1_xy.empty?
+    lcxy.data("Min", series_3_xy, 'B40404') if !series_3_xy.empty?
+    lcxy.data("Sum", series_4_xy, '0404B4') if !series_4_xy.empty?
     lcxy.max_value [11,@max_data]
     lcxy.data_encoding = :text
     lcxy.axis :x, :labels => x_axis_labels
@@ -565,11 +613,11 @@ def three_hourly_line_chart(title,measure,groupName,instanceId,debug)
   
 end
 
-def twelve_hourly_line_chart(title,measure,groupName,instanceId,debug) 
+def twelve_hourly_line_chart(title,measure,groupName,dimension_value,debug) 
   m = @start_date.min()
   h = @start_date.hour()
   x_axis_labels = Array.new
-  i=1 
+  i=0 
   while i <25
    if i%2 != 0
       x_axis_labels[i] = h
@@ -589,43 +637,82 @@ def twelve_hourly_line_chart(title,measure,groupName,instanceId,debug)
   end 
   
   y_axis_labels = create_y_axis_labels()
-  #if @max_data < 10 
-  #  @max_data = 10
-  #end  
-  #y_axis_labels = (0..10).to_a.collect do |v|
-  #  #val = 10 * v
-  #  if v ==5
-  #    (@max_data/2).to_s
-  #  else if v == 10
-  #    @max_data.to_s
-  #    else
-  #      nil
-  #    end  
-  #  end
-  #end
   
   series_1_xy = []
   series_2_xy = []
   series_3_xy = []
+  series_4_xy = []
   
   @data = @data.sort_by {|r| r[:key]}
   i =0
   @data.each do |r|
-    series_1_xy[i] = [r[:key], r[:avg] ]
-    series_2_xy[i] = [r[:key], r[:max] ]
-    series_3_xy[i] = [r[:key], r[:min] ]
+    series_1_xy[i] = [r[:key], r[:avg] ] if r[:avg] != nil
+    series_2_xy[i] = [r[:key], r[:max] ] if r[:max] != nil
+    series_3_xy[i] = [r[:key], r[:min] ] if r[:min] != nil
+    series_4_xy[i] = [r[:key], r[:sum] ] if r[:sum] != nil
     if debug
-       puts "avg - #{i}   [#{r[:key]},#{r[:avg]}]"
-       puts "max - #{i}   [#{r[:key]},#{r[:max]}]"
-       puts "min - #{i}   [#{r[:key]},#{r[:min]}]"
+       puts "avg - #{i} [#{r[:key]},#{r[:avg]}] max - #{i}   [#{r[:key]},#{r[:max]}] min - #{i}   [#{r[:key]},#{r[:min]}] sum - #{i}   [#{r[:key]},#{r[:sum]}] "
     end   
     i=i+1
   end
   
   GoogleChart::LineChart.new('380x140', title, true) do  |lcxy|
-    lcxy.data "Max", series_2_xy, '0404B4'
-    lcxy.data "Avg", series_1_xy, '458B00'
-    lcxy.data "Min", series_3_xy, 'B40404'
+    lcxy.data("Max", series_2_xy, '0404B4') if !series_2_xy.empty?
+    lcxy.data("Avg", series_1_xy, '458B00') if !series_1_xy.empty?
+    lcxy.data("Min", series_3_xy, 'B40404') if !series_3_xy.empty?
+    lcxy.data("Sum", series_4_xy, '0404B4') if !series_4_xy.empty?
+    lcxy.max_value [24,@max_data]
+    lcxy.data_encoding = :text
+    lcxy.axis :x, :labels => x_axis_labels
+    lcxy.axis :y, :labels => y_axis_labels
+    lcxy.grid :x_step => 4.2, :y_step => 10, :length_segment => 1, :length_blank => 3
+    if debug
+       puts lcxy.to_url
+    end   
+   end 
+  
+end
+
+def twenty_four_hourly_line_chart(title,measure,groupName,dimension_value,debug) 
+  #m = @start_date.min()
+  h = @start_date.hour()
+  x_axis_labels = Array.new
+  i=0 
+  while i <25
+      x_axis_labels[i] = h
+      if h <23
+        h = h+1
+      else
+        h = 0
+      end
+      i=i+1
+  end 
+  
+  y_axis_labels = create_y_axis_labels()
+  
+  series_1_xy = []
+  series_2_xy = []
+  series_3_xy = []
+  series_4_xy = []
+  
+  @data = @data.sort_by {|r| r[:key]}
+  i =0
+  @data.each do |r|
+    series_1_xy[i] = [r[:key], r[:avg] ] if r[:avg] != nil
+    series_2_xy[i] = [r[:key], r[:max] ] if r[:max] != nil
+    series_3_xy[i] = [r[:key], r[:min] ] if r[:min] != nil
+    series_4_xy[i] = [r[:key], r[:sum] ] if r[:sum] != nil
+    if debug
+       puts "avg - #{i} [#{r[:key]},#{r[:avg]}] max - #{i}   [#{r[:key]},#{r[:max]}] min - #{i}   [#{r[:key]},#{r[:min]}] sum - #{i}   [#{r[:key]},#{r[:sum]}] "
+    end   
+    i=i+1
+  end
+  
+  GoogleChart::LineChart.new('380x140', title, true) do  |lcxy|
+    lcxy.data("Max", series_2_xy, '0404B4') if !series_2_xy.empty?
+    lcxy.data("Avg", series_1_xy, '458B00') if !series_1_xy.empty?
+    lcxy.data("Min", series_3_xy, 'B40404') if !series_3_xy.empty?
+    lcxy.data("Sum", series_4_xy, '0404B4') if !series_4_xy.empty?
     lcxy.max_value [24,@max_data]
     lcxy.data_encoding = :text
     lcxy.axis :x, :labels => x_axis_labels

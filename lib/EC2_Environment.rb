@@ -117,6 +117,8 @@ class EC2_Environment < FXImageFrame
            @settings.load
            @treeCache = @ec2_main.treeCache
            @treeCache.load(@env)
+           @ec2_main.list.clear
+           @ec2_main.list.load("Instance Status") if @settings.amazon
            @ec2_main.app.forceRefresh
    end     
      
@@ -362,7 +364,7 @@ def cf_connection
   end 
   
   def vpc
-          puts "environment.vpcb"
+          puts "environment.vpc"
           if @data_vpc != nil
             return @data_vpc
          else

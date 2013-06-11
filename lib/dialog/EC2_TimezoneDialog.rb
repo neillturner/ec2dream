@@ -2,7 +2,6 @@ require 'rubygems'
 require 'fox16'
 require 'net/http'
 require 'resolv'
-require 'tzinfo'
 
 include Fox
 
@@ -12,15 +11,10 @@ class EC2_TimezoneDialog < FXDialogBox
     puts "TimezoneDialog.initialize"
     @ec2_main = owner
     @curr_item = ""
-    @item_name = TZInfo::Timezone.all()
-    i=0
     super(owner, "Select Timezone", :opts => DECOR_ALL, :width => 400, :height => 200)
     itemlist = FXList.new(self, :opts => LIST_SINGLESELECT|LAYOUT_FILL)
-    @item_name.each do |e|
-       e = e.to_s
-       e = e.sub(" - ","/")
-       itemlist.appendItem(e)
-    end 
+    itemlist.appendItem("UTC")
+    itemlist.appendItem("Local")
     itemlist.connect(SEL_COMMAND) do |sender, sel, data|
        selected_item = ""
        itemlist.each do |item|

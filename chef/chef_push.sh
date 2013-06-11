@@ -3,6 +3,7 @@
 #  Customized pocketknife to run chef-solo on remote node
 #
 #  chef_push chef_repository chef_node ec2_server_name private_key [ssh_user]
+#  To set a chef version to install add -j <version> to the end of the pocketknife command where <version> is 11.4.2 for example
 #
 del  $1/nodes/$3.json 
 cp 1/nodes/$2.json" $1\nodes\$3.json 

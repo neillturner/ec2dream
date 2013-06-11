@@ -101,7 +101,9 @@ class AS_AlarmEditDialog < FXDialogBox
     end	    
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "Dimensions")
-    dimensions = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN)
+    frame1d = FXHorizontalFrame.new(frame1,LAYOUT_FILL_X, :padding => 0)
+    dimensions = FXTextField.new(frame1d, 40, nil, 0, :opts => FRAME_SUNKEN)
+    FXLabel.new(frame1d, "       use Name=Value" )
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "Evaluation Periods")
     evaluation_periods = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN)
@@ -171,7 +173,7 @@ class AS_AlarmEditDialog < FXDialogBox
     FXLabel.new(frame1, "" )
     frame2 = FXHorizontalFrame.new(page1,LAYOUT_FILL, :padding => 0)
     FXLabel.new(frame1, "" )
-    save = FXButton.new(frame2, "   &Save   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
+    save = FXButton.new(frame2, "   &Save   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X|BUTTON_INITIAL)
     FXLabel.new(frame1, "" )
     save.connect(SEL_COMMAND) do |sender, sel, data|
        if alarm_name.text == nil or alarm_name.text == ""
@@ -254,7 +256,7 @@ class AS_AlarmEditDialog < FXDialogBox
                      namespace.text = r['Namespace']
                      ok_actions.text = r['OKActions']      
                      period.text = r['Period'].to_s
-                     if r['ActionsEnabled'] == true
+                     if r['ActionsEnabled'] == "true"
                         actions_enabled.setCurrentItem(0)
                         actions_enabled_value = "True"
                      else

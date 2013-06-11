@@ -1,0 +1,36 @@
+{
+ "CloudWatch":{
+ "Latency (Seconds)":{
+   "measure":"Latency","unit":"Seconds","namespace":"AWS/ELB",
+   "dimensions" : {}
+ },
+ "RequestCount (Count)":{
+   "measure":"RequestCount","unit":"Count","namespace":"AWS/ELB",
+   "dimensions" : {}
+ },
+ "HTTPCode ELB 4XX (Count)":{
+   "measure":"HTTPCode_ELB_4XX","unit":"Count","namespace":"AWS/ELB",
+   "dimensions" : {}
+ },
+ "HTTPCode ELB 5XX (Count)":{
+   "measure":"HTTPCode_ELB_5XX","unit":"Count","namespace":"AWS/ELB",
+   "dimensions" : {}
+ },
+ "HTTPCode Backend 2XX(Count)":{
+   "measure":"HTTPCode_Backend_2XX","unit":"Count","namespace":"AWS/ELB",
+   "dimensions" : {}
+ },
+ "HTTPCode Backend 3XX (Count)":{
+   "measure":"HTTPCode_Backend_3XX","unit":"Count","namespace":"AWS/ELB",
+   "dimensions" : {}
+ },
+ "HTTPCode Backend 4XX (Count)":{
+   "measure":"HTTPCode_Backend_4XX","unit":"Count","namespace":"AWS/ELB",
+   "dimensions" : {}
+ },
+ "HTTPCode Backend 5XX (Count)":{
+   "measure":"HTTPCode_Backend_5XX","unit":"Count","namespace":"AWS/ELB",
+   "dimensions" : {}
+ }
+ }
+}

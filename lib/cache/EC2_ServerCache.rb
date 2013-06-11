@@ -15,6 +15,7 @@ def initialize(owner, tree)
         @sg_active_instances = {}
         @securityGrps = []
         @secGrps = {}
+        @secGrps_tags = {}
 	@light 	   = @ec2_main.makeIcon("server.png")
 	@light.create
 	@nolight 	   = @ec2_main.makeIcon("stop.png")
@@ -56,23 +57,21 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
     else 
        puts "ServerCache.refreshVpcServerTree"
        @vpc_serverList[vpc]= {}
-       @vpc_securityGrps[vpc] = []
-       @vpc_secGrps[vpc] = {}
-       eip = {}
-       @ec2_main.environment.security_group.all('vpc-id'=>vpc).each do |r|
-          gp = r[:aws_group_name]
-          #puts "*** secgp #{gp}"
-          #puts "*** r #{r}"
-          if gp != nil and gp != ""
-             @vpc_secGrps[vpc][gp]=r
-             @vpc_securityGrps[vpc].push(gp)
-          end   
-       end
-       @ec2_main.environment.addresses.all.each do |r|
-          if r[:instance_id] != nil and r[:instance_id] != ""
-             eip[r[:instance_id]] = r[:public_ip]
-          end
-       end
+       #@vpc_securityGrps[vpc] = []
+       #@vpc_secGrps[vpc] = {}
+       #eip = {}
+       #@ec2_main.environment.security_group.all('vpc-id'=>vpc).each do |r|
+       #   gp = r[:aws_group_name]
+       #   if gp != nil and gp != ""
+       #      @vpc_secGrps[vpc][gp]=r
+       #      @vpc_securityGrps[vpc].push(gp)
+       #   end   
+       #end
+       #@ec2_main.environment.addresses.all.each do |r|
+       #   if r[:instance_id] != nil and r[:instance_id] != ""
+       #      eip[r[:instance_id]] = r[:public_ip]
+       #   end
+       #end
        @vpc_securityGrps[vpc] = @vpc_securityGrps[vpc].sort_by { |x| x.downcase }
        i=0
        @vpc_securityGrps[vpc].each do |s|
@@ -85,8 +84,8 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
        i=0
        @ec2_main.environment.servers.all([],{'vpc-id'=>vpc}).each do |r|
          instance_id = r[:aws_instance_id]
-         if eip[instance_id] != nil
-           r[:public_ip] = eip[instance_id]
+         if @eip[instance_id] != nil
+           r[:public_ip] = @eip[instance_id]
          end 
          gn = group_name(r)
          if r['name'] == nil or r['name'] == ""
@@ -185,17 +184,33 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
         @serverList= {}
         @securityGrps = []
         @secGrps = {}
-        eip = {}
+        
+        @vpc_securityGrps = {}
+        @vpc_secGrps = {}
+        @eip = {}
+        load_secGrps_tags
         @ec2_main.environment.security_group.all.each do |r|
-           gp = r[:aws_group_name]
-            if gp != nil and gp != "" and (r['vpcId'] == nil or r['vpcId']=="")
-              @secGrps[gp]=r
-              @securityGrps.push(gp)
+            if r['groupId'] != nil 
+                r['tagSet'] =  @secGrps_tags[r['groupId']]
+            end     
+            gp = r[:aws_group_name]
+            if gp != nil and gp != "" 
+              if (r['vpcId'] == nil or r['vpcId']=="")
+                  @secGrps[gp]=r
+                  @securityGrps.push(gp)
+              else 
+                  vpc = r['vpcId']
+                  @vpc_securityGrps[vpc] = [] if @vpc_securityGrps[vpc] == nil 
+                  @vpc_secGrps[vpc] = {}      if  @vpc_secGrps[vpc] == nil 
+ 	          @vpc_secGrps[vpc][gp]=r
+	          @vpc_securityGrps[vpc].push(gp)
+              end
+              
            end   
         end
         @ec2_main.environment.addresses.all.each do |r|
            if r[:instance_id] != nil and r[:instance_id] != ""
-              eip[r[:instance_id]] = r[:public_ip]
+              @eip[r[:instance_id]] = r[:public_ip]
            end
         end
         @securityGrps = @securityGrps.sort_by { |x| x.downcase }
@@ -212,8 +227,8 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
         @ec2_main.environment.servers.all.each do |r|
             if r['vpcId'] == nil or r['vpcId']==""
               instance_id = r[:aws_instance_id]
-              if eip[instance_id] != nil
-                 r[:public_ip] = eip[instance_id]
+              if @eip[instance_id] != nil
+                 r[:public_ip] = @eip[instance_id]
               end 
               gn = group_name(r)
               if r['name'] == nil or r['name'] == ""
@@ -462,8 +477,12 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
              return @secGrps[group_name]
           else
 	     i=0 
+	     load_secGrps_tags 
 	     @ec2_main.environment.security_group.all.each do |r|
                if r[:aws_group_name] == group_name and (r['vpcId']=nil or r['vpcId']=="")
+	           if r['groupId'] != nil 
+                      r['tagSet'] =  @secGrps_tags[r['groupId']]
+                   end                 
 	           @secGrps[r[:aws_group_name]]=r
 	           @ec2_main.treeCache.addSecGrp(group_name)
 	        end
@@ -475,8 +494,12 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
              return @vpc_secGrps[vpc][group_name]
           else
 	     i=0 
+	     load_secGrps_tags 
 	     @ec2_main.environment.security_group.all({'vpc-id'=>vpc}).each do |r|
-               if r[:aws_group_name] == group_name
+                if r[:aws_group_name] == group_name
+	           if r['groupId'] != nil 
+                      r['tagSet'] =  @secGrps_tags[r['groupId']]
+                   end                 
                    @vpc_secGrps[vpc][r[:aws_group_name]]=r
 	           # TO DO
 	           #@ec2_main.treeCache.addSecGrp(group_name)
@@ -492,9 +515,13 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
     puts "ServerCache.refresh_secGrps(#{group_name},#{vpc})"
     filter = nil 
     filter = {'vpc-id' => vpc}  if vpc != nil and vpc !=""
+    load_secGrps_tags
     if filter == nil  
        @ec2_main.environment.security_group.all.each do |r|
           if r[:aws_group_name] == group_name and (r['vpcId']==nil or r['vpcId']=="")
+	     if r['groupId'] != nil 
+                r['tagSet'] =  @secGrps_tags[r['groupId']]
+             end           
 	     @secGrps[r[:aws_group_name]]=r
           end 
        end      
@@ -502,6 +529,9 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
     else
        @ec2_main.environment.security_group.all(filter).each do |r|
            if r[:aws_group_name] == group_name
+             if r['groupId'] != nil 
+                r['tagSet'] =  @secGrps_tags[r['groupId']]
+             end            
 	     @vpc_secGrps[vpc][r[:aws_group_name]]=r
           end 
        end      
@@ -518,6 +548,15 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
        @vpc_secGrps[vpc].delete(group_name)
      end
   end
+  
+  def load_secGrps_tags
+     puts "SecGrps.load_secGrps_tags"
+     @secGrps_tags = {}
+     @ec2_main.environment.tags.all(nil,'security-group').each do |r|
+            @secGrps_tags[r['resourceId']] = {} if @secGrps_tags[r['resourceId']] == nil
+            @secGrps_tags[r['resourceId']][r['key']] = r['value']
+     end
+  end   
   
   # DONE - can figure out vpc from r['vpcId']
   def addInstance(r)

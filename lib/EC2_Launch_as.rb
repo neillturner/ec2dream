@@ -35,6 +35,11 @@ class EC2_Launch
 		@as_launch['Kernel_Id'].text  = r[:kernel_id]
 		@as_launch['Ramdisk_Id'].text = r[:ramdisk_id]
 		@as_launch['UserData'].text = r[:user_data]
+		if r[:user_data]!=nil and r[:user_data]!=""
+		   @as_launch['UserData'].text = Base64.decode64(r[:user_data])
+		else
+		   @as_launch['UserData'].text = ""
+		end
 		@as_launch['Instance_Type'].text = r[:instance_type]
 		@as_launch['KeyName'].text = r[:key_name]
 		if r[:instance_monitoring] == true
@@ -97,8 +102,7 @@ class EC2_Launch
 	   r['RamdiskId'] = @as_launch['Ramdisk_Id'].text
 	end
 	if @as_launch['UserData'].text != nil and @as_launch['UserData'].text != ""
-	   # workaround fog base encode by decoding first.
-	   r['UserData'] = Base64.decode64(@as_launch['UserData'].text)
+	   r['UserData'] = @as_launch['UserData'].text
 	end
 	r['KeyName'] = @as_launch['KeyName'].text
 	if @as_bm.size > 0
@@ -131,6 +135,7 @@ class EC2_Launch
            if answer == MBOX_CLICKED_YES
              #as.delete_launch_configuration(launch_configuration_name)
              @ec2_main.environment.launch_configurations.delete_launch_configuration(@profile)
+             clear_panel
            end  
          else
            error_message("Error","No DB Launch Profile for "+@profile+" to delete") 

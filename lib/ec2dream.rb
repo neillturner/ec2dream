@@ -1,8 +1,6 @@
 #!/usr/bin/ruby
 $LOAD_PATH << ENV['EC2DREAM_HOME'] 
-
 puts $LOAD_PATH
-
 
 require 'EC2_Main'
 

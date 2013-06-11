@@ -3,6 +3,8 @@ require 'fox16'
 require 'net/http'
 require 'resolv'
 require 'common/error_message'
+require 'dialog/AS_CapacityDialog'
+
 
 include Fox
 
@@ -16,19 +18,23 @@ class AS_InstancesDialog < FXDialogBox
     	@curr_instance = ""
         @decrement_capacity = true
     	@curr_row = nil
-     	super(owner, "Instances for #{as_group}", :opts => DECOR_ALL, :width => 800, :height => 310)
+    	@viewstack = @ec2_main.makeIcon("viewstack.png")
+	@viewstack.create
+	@curr_desired_capacity = "0"
+     	super(owner, "Instances for #{as_group}", :opts => DECOR_ALL, :width => 850, :height => 310)
     	@frame1 = FXMatrix.new(self, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
     	FXLabel.new(@frame1, "Auto Scaling Group" )
 	@as_group_name = FXTextField.new(@frame1, 90, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_READONLY)
 	@as_group_name.text = @as_name
     	FXLabel.new(@frame1, "" )
-      FXLabel.new(@frame1, "Decrement Desired Capacity" )
-	decrement_desired_capacity = FXComboBox.new(@frame1, 15, :opts => COMBOBOX_STATIC|COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
+        FXLabel.new(@frame1, "Decrement Desired Capacity" )
+        @frame1a = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
+	decrement_desired_capacity = FXComboBox.new(@frame1a, 15, :opts => COMBOBOX_STATIC|COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
 	decrement_desired_capacity.numVisible = 2      
 	decrement_desired_capacity.appendItem("True")	
 	decrement_desired_capacity.appendItem("False")
 	decrement_desired_capacity.setCurrentItem(0)
-      FXLabel.new(@frame1, "" )
+        FXLabel.new(@frame1, "" )
         FXLabel.new(@frame1, "Instances")
     	@as_instances = FXTable.new(@frame1,:height => 200, :opts => LAYOUT_FIX_HEIGHT|LAYOUT_FILL|TABLE_READONLY  )
         @header1 = @as_instances.columnHeader
@@ -75,6 +81,17 @@ class AS_InstancesDialog < FXDialogBox
 	@refresh_button.connect(SEL_UPDATE) do |sender, sel, data|
 	   sender.enabled = true
 	end
+	@capacity_button = FXButton.new(@frame1z, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
+	@capacity_button.icon = @viewstack
+	@capacity_button.tipText = " Set Desired Capacity "
+	@capacity_button.connect(SEL_COMMAND) do |sender, sel, data|
+	   dialog = AS_CapacityDialog.new(@ec2_main, @as_name, @curr_desired_capacity)
+           dialog.execute
+ 	end 
+	@capacity_button.connect(SEL_UPDATE) do |sender, sel, data|
+	   sender.enabled = true
+	end 	
+	
 	FXLabel.new(@frame1, "" )
 	FXLabel.new(@frame1, "" )
 	FXLabel.new(@frame1, "" )	
@@ -101,6 +118,7 @@ class AS_InstancesDialog < FXDialogBox
   def describe_instances(as_group)
          begin 
             r = @ec2_main.environment.auto_scaling_groups.get(as_group)
+            @curr_desired_capacity  = r[:desired_capacity].to_s
   	    load_instances_table(r[:instances])
           rescue
             error_message("Describe Auto Scaling Groups Failed",$!)

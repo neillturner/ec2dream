@@ -169,8 +169,9 @@ def refresh
 end 
 
 def refresh_env
-   puts "Tree.refesh_env"	
-   if @topmost == nil or (@topmost.class  == Fox::FXTreeItem and  @topmost.text != "Loading......")	
+   puts "Tree.refresh_env"	
+   if @topmost == nil or (@topmost.class  == Fox::FXTreeItem and  @topmost.text != "Loading......")
+      #command = Thread.new do
 	        @environments.each do |a|
                @tree.removeItem(a)
              end 	   
@@ -195,6 +196,7 @@ def refresh_env
                    end 
                 end
              end 
+       #end      
     end 
 end 
 

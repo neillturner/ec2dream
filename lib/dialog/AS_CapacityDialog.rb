@@ -24,7 +24,7 @@ class AS_CapacityDialog < FXDialogBox
     FXLabel.new(frame1, "" )
     desired_capacity.text = capacity
     frame2 = FXHorizontalFrame.new(page1,LAYOUT_FILL, :padding => 0)
-    update = FXButton.new(frame2, "   &Update   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
+    update = FXButton.new(frame2, "   &Update   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X|BUTTON_INITIAL)
     update.connect(SEL_COMMAND) do |sender, sel, data|
 	  begin 
              #as.set_desired_capacity(@as_name, desired_capacity.text )

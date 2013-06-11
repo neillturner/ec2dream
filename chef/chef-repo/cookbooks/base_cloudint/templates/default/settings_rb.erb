@@ -1,0 +1,15 @@
+#
+# EC2 Settings for ruby scripts
+# add any extra settings here
+#
+class Settings
+  def Settings.AMAZON_PUBLIC_KEY
+    return '<%= @node[:base][:amazon_access_key_id] %>'
+  end
+  def Settings.AMAZON_PRIVATE_KEY
+      return '<%= @node[:base][:amazon_secret_access_key] %>'
+  end
+  def Settings.REGION
+      return '<%= @node[:base][:ec2_url] %>'
+  end    
+end  

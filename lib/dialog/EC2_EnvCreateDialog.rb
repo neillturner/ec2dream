@@ -84,6 +84,18 @@ class EC2_EnvCreateDialog < FXDialogBox
           @eucazipfile.text = eucazip
         end
     }
+    #FXLabel.new(frame2, "")
+    FXLabel.new(frame2, "")
+    FXLabel.new(frame2, "")
+    FXLabel.new(frame2, "")
+    FXLabel.new(frame2, "")
+    FXLabel.new(frame2, "NOTE: Eucalyptus version 3.3 and earlier are supported")
+    FXLabel.new(frame2, "")
+    FXLabel.new(frame2, "")
+    FXLabel.new(frame2, "")
+    FXLabel.new(frame2, "")
+    FXLabel.new(frame2, "")
+    FXLabel.new(frame2, "")    
     
     #
     # openstack
@@ -225,8 +237,22 @@ class EC2_EnvCreateDialog < FXDialogBox
     #if ENV['EC2_URL'] != nil and ENV['EC2_URL'] != ""
     #    @cloudstack_url.text =  ENV['EC2_URL']
     #else
-        @cloudstack_url.text = "http://cloud-bridge-hostname:8090/bridge"     
+        # @cloudstack_url.text = "http://cloud-bridge-hostname:8090/bridge"  # cloudstack 4.0
+        @cloudstack_url.text = "http://localhost:7080/awsapi"                # cloudstack 4.1  
+        
     #end
+    FXLabel.new(frame6, "")
+    FXLabel.new(frame6, "")
+    FXLabel.new(frame6, "")
+    FXLabel.new(frame6, "")
+    FXLabel.new(frame6, "")
+    FXLabel.new(frame6, "NOTE: Cloudstack 4.1 is supported by default. To change the version edit")
+    FXLabel.new(frame6, "")
+    FXLabel.new(frame6, "")
+    FXLabel.new(frame6, "the file cloudstack.rb in the lib folder to set the correct AWS API Version")
+    FXLabel.new(frame6, "")
+    FXLabel.new(frame6, "")
+    FXLabel.new(frame6, "")
     
     #
     # cloudfoundry

@@ -1,5 +1,0 @@
-log_level   :info
-log_location    STDOUT
-chef_server_url "https://api.opscode.com/organizations/<%= @node[:base_hosted][:organization] %>"
-validation_client_name "<%= @node[:base_hosted][:organization] %>-validator"
-validation_key  "C:/chef/<%= @node[:base_hosted][:organization] %>-validator.pem"

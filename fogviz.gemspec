@@ -22,26 +22,26 @@
 
 Gem::Specification.new do |spec|
   spec.name = 'fogviz'
-  spec.version = '3.6.2'
+  spec.version = '3.6.3'
   spec.authors = ['Neill Turner']
   spec.email = 'neillwturner@gmail.com'
   spec.executables = ["fogviz"]
   spec.homepage = 'http://ec2dream.blogspot.com'
-  spec.summary = 'Build and Manage Cloud Servers......visually'
+  spec.summary = 'Build and Manage Cloud Servers......visually with chef'
   spec.require_path = 'lib'
   spec.add_dependency('fxruby')
   spec.add_dependency('tzinfo')
   spec.add_dependency('rubyzip')
   spec.add_dependency('gchartrb')
-  spec.add_dependency('pocketknife_ec2dream', '>= 0.1.5')
+  spec.add_dependency('pocketknife_ec2dream', '>= 0.1.9')
   spec.add_dependency('pocketknife_windows')
-  spec.add_dependency('fog', '= 1.10.1')
+  spec.add_dependency('fog', '= 1.12.1')
   spec.add_dependency('cloudfoundry-client')
 
   spec.description = <<-EOF
 == DESCRIPTION:
 
-Build and Manage Cloud Servers......visually
+Build and Manage Cloud Servers......visually with chef
 
 == FEATURES:
 

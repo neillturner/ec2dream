@@ -10,7 +10,7 @@ class CF_DeleteDialog < FXDialogBox
      @ec2_main = owner
      @delete_item = curr_item
      @deleted = false
-     answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm delete","Confirm delete of Stack "+@delete_item)
+     answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm delete","Confirm delete of Configuration #{@delete_item}, The template file will not be deleted" )
      if answer == MBOX_CLICKED_YES
         folder = "cf_templates"
         cf = EC2_Properties.new
@@ -18,7 +18,7 @@ class CF_DeleteDialog < FXDialogBox
            begin      
               @deleted = cf.delete(folder, @delete_item)
               if @deleted == false
-                 error_message("Stack Deletion failed","Stack Deletion failed")
+                 error_message("Configuration Deletion failed","Configuration Deletion failed")
               end
            rescue
              error_message("Stack Deletion failed",$!)

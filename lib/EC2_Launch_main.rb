@@ -93,13 +93,13 @@ class EC2_Launch
 	end
 	@save_button.connect(SEL_UPDATE) do |sender, sel, data|
             sender.enabled = true
-	    if @type == "as"
-	       if  @launch_loaded
-	          sender.enabled = false
-	       else
-	          sender.enabled = true
-	       end
-	    end   
+	    #if @type == "as"
+	    #   if  @launch_loaded
+	    #      sender.enabled = false
+	    #   else
+	    #      sender.enabled = true
+	    #   end
+	    #end   
 	end
 	@delete_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@delete_button.icon = @delete
@@ -110,14 +110,13 @@ class EC2_Launch
 	    elsif @type == "ops"
 	       ops_delete	       
 	    elsif @type == "cfy"
-	       cfy_delete	       
+	       cfy_delete
+	    elsif @type == "as"   
+	       as_delete
 	    end
 	end
 	@delete_button.connect(SEL_UPDATE) do |sender, sel, data|
 	   enable_if_launch_loaded(sender)
-	   if @type == "as"  
-	      sender.enabled = false
-	   end
 	end
 	
 	@launch_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
@@ -170,12 +169,21 @@ class EC2_Launch
 	@select_button.icon = @magnifier
 	@select_button.tipText = "  Select Launch Profile  "
 	@select_button.connect(SEL_COMMAND) do |sender, sel, data|
-	   dialog = EC2_LaunchDialog.new(owner,@type)
-	   dialog.execute
-	   if dialog.selected != nil and dialog.selected != ""
-	      selected = dialog.selected
-              load(selected)
-	   end	
+	   if @type == "as"
+	      dialog = AS_LaunchConfigurationDialog.new(owner)
+	      dialog.execute
+	      if dialog.selected != nil and dialog.selected != ""
+	         selected = dialog.selected
+                 load_as(selected)
+	      end		      
+	   else   
+	      dialog = EC2_LaunchDialog.new(owner,@type)
+	      dialog.execute
+	      if dialog.selected != nil and dialog.selected != ""
+	         selected = dialog.selected
+                 load(selected)
+	      end
+	   end    	   
 	end	
 	@select_button.connect(SEL_UPDATE) do |sender, sel, data|
 	   sender.enabled = true
@@ -603,7 +611,8 @@ class EC2_Launch
  	#@as_launch['IamInstanceProfile'] = FXTextField.new(@frame3, 60, nil, 0, :opts => FRAME_SUNKEN)
  	#FXLabel.new(@frame3, "" )  	
 	FXLabel.new(@frame3, "UserData" )
- 	@as_launch['UserData'] = FXTextField.new(@frame3, 60, nil, 0, :opts => FRAME_SUNKEN)
+ 	#@as_launch['UserData'] = FXTextField.new(@frame3, 60, nil, 0, :opts => FRAME_SUNKEN)
+ 	@as_launch['UserData'] = FXText.new(@frame3, :height => 150, :opts => LAYOUT_FIX_HEIGHT|TEXT_WORDWRAP|LAYOUT_FILL, :padding => 0)
  	FXLabel.new(@frame3, "" )
    	FXLabel.new(@frame3, "Instance Type" )
    	@frame3d = FXHorizontalFrame.new(@frame3,LAYOUT_FILL_X, :padding => 0)

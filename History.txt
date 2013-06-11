@@ -1,3 +1,8 @@
+Version 3.6.3  June 2013
+------------------------
+various bug fixes. Cloudwatch graphs for autoscaling groups, elb, ability to run a remote command from the server tab. 
+autoscaling launch configuration editing now works. performance improves. tags for autoscaling groups.
+
 Version 3.6.2  May 2013
 -----------------------
 Extensive changes to support Amazon AWS VPCs.
@@ -10,7 +15,7 @@ Version 3.6.1 April 2013
 fix bugs in create environment.
 enhancements to cloudwatch graphs and abilty to configure via json file. 
 
-Version 3.6.0 April 2013
+Version 3.6.0 March 2013
 ------------------------
 Switch back to standard fog gem as bugs fixed.
 Re-architect list processng to be dynamic and extensible. 
@@ -21,11 +26,11 @@ complete migration from right_aws to fog.
 drop right_aws.
 
 
-Version 3.5.2 March 2013
+Version 3.5.3 Feb 2013
 ------------------------
 Correct create Environment
  
-Version 3.5.2 March 2013
+Version 3.5.2 Feb 2013
 ------------------------
 Environments in tree 
 Servers under Security Groups in tree

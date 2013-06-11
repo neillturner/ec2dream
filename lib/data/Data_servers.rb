@@ -342,9 +342,7 @@ class Data_servers
            min_count =  options['MinCount']
            max_count =  options['MaxCount']
            response = conn.run_instances(name, min_count, max_count, options)
-           puts  "*** response #{response}"
-           puts  "*** response.body  #{response.body}"
-           if response.status == 200
+            if response.status == 200
               data = []
  	      rs = response.body
 	      gs=rs['groupSet']

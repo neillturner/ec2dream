@@ -1,0 +1,36 @@
+{
+ "CloudWatch":{
+ "CPU Utilisation (Percent)":{
+   "measure":"CPUUtilization","unit":"Percent","namespace":"AWS/EC2",
+   "dimensions" : {}
+ },
+ "Network In (Bytes/Sec)":{
+   "measure":"NetworkIn","unit":"Bytes","namespace":"AWS/EC2",
+   "dimensions" : {}
+ },
+ "Network Out (Bytes/Sec)":{
+   "measure":"NetworkOut","unit":"Bytes","namespace":"AWS/EC2",
+   "dimensions" : {}
+ },
+ "Disk Reads (Bytes/Sec)":{
+   "measure":"DiskReadBytes","unit":"Bytes","namespace":"AWS/EC2",
+   "dimensions" : {}
+ },
+ "Disk Writes (Bytes/Sec)":{
+   "measure":"DiskWriteBytes","unit":"Bytes","namespace":"AWS/EC2",
+   "dimensions" : {}
+ },
+ "Status Check Failed (Count)":{
+   "measure":"StatusCheckFailed","unit":"Count","namespace":"AWS/EC2",
+   "dimensions" : {}
+ },
+ "Status Check Failed Instance (Count)":{
+   "measure":"StatusCheckFailed_Instance","unit":"Count","namespace":"AWS/EC2",
+   "dimensions" : {}
+ },
+ "Status Check Failed System (Count)":{
+   "measure":"StatusCheckFailed_System","unit":"Count","namespace":"AWS/EC2",
+   "dimensions" : {}
+ }
+ }
+}

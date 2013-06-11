@@ -65,6 +65,7 @@ class Data_auto_scaling_groups
                   r[:placement_group] = y.placement_group
 	          r[:suspended_processes] = y.suspended_processes
                   r[:vpc_zone_identifier] = y.vpc_zone_identifier
+                  r[:tags] = y.tags
 		  return r
       else 
          raise "Connection Error"

@@ -52,7 +52,7 @@ class AS_BlockMappingEditDialog < FXDialogBox
        FXLabel.new(frame1, "" )    
 
     FXLabel.new(frame1, "" )
-    save = FXButton.new(frame1, "   &Return   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_LEFT)
+    save = FXButton.new(frame1, "   &Return   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_LEFT|BUTTON_INITIAL)
     FXLabel.new(frame1, "" )
     save.connect(SEL_COMMAND) do |sender, sel, data|
        @bm[:device_name] = device_name.text

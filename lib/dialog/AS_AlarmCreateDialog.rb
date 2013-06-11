@@ -171,7 +171,7 @@ class AS_AlarmCreateDialog < FXDialogBox
     FXLabel.new(frame1, "" )
     frame2 = FXHorizontalFrame.new(page1,LAYOUT_FILL, :padding => 0)
     FXLabel.new(frame1, "" )
-    save = FXButton.new(frame2, "   &Save   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
+    save = FXButton.new(frame2, "   &Save   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X|BUTTON_INITIAL)
     FXLabel.new(frame1, "" )
     save.connect(SEL_COMMAND) do |sender, sel, data|
        if alarm_name.text == nil or alarm_name.text == ""

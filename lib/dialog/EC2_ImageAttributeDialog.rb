@@ -108,7 +108,7 @@ class EC2_ImageAttributeDialog < FXDialogBox
 	block_devices = FXText.new(frame1, :height => 60, :opts => LAYOUT_FIX_HEIGHT|TEXT_WORDWRAP|LAYOUT_FILL|TEXT_READONLY, :padding => 0)
 
         frame2 = FXHorizontalFrame.new(page1,LAYOUT_FILL, :padding => 0)
-        return_button = FXButton.new(frame2, "   &Return   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
+        return_button = FXButton.new(frame2, "   &Return   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X|BUTTON_INITIAL)
         return_button.connect(SEL_COMMAND) do |sender, sel, data|
            self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
         end
@@ -199,18 +199,6 @@ class EC2_ImageAttributeDialog < FXDialogBox
         return r 
   end
   
- # def get_image_launch_permissions(image_id)
- #       r = {}
- # 	   begin
- #             r = @ec2_main.environment.images.get_attribute(image_id)
- #          rescue
-  #           puts "describe_image_attribute #{image_id} #{$!.to_s}"
-#	     r = nil 
-#             #error_message("Image Attributes not found",$!.to_s)
-#           end
-#        return r 
-#  end
-
   def success
    @false
   end 

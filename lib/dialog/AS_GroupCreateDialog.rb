@@ -175,7 +175,7 @@ class AS_GroupCreateDialog < FXDialogBox
         FXLabel.new(frame1, "" )
 
         FXLabel.new(frame1, "" )
-        create = FXButton.new(frame1, "   &Save   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
+        create = FXButton.new(frame1, "   &Save   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X|BUTTON_INITIAL)
         FXLabel.new(frame1, "" )
         create.connect(SEL_COMMAND) do |sender, sel, data|
            if auto_scaling_group_name.text == nil or auto_scaling_group_name.text == ""

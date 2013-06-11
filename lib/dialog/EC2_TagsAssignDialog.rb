@@ -9,9 +9,10 @@ include Fox
 
 class EC2_TagsAssignDialog < FXDialogBox
 
-  def initialize(owner, resource)
+  def initialize(owner, resource, resource_type="instance",alt_resource=nil)
     puts "TagsAssignDialog.initialize"
     @ec2_main = owner
+    resource = alt_resource if alt_resource != nil 
     sa = (resource).split("/")
     @resource_id = resource 
     if sa.size>1
@@ -21,7 +22,7 @@ class EC2_TagsAssignDialog < FXDialogBox
     if @nickname_tag == nil
        @nickname_tag = ""
     end  
-    resource_tags = get_tags(@resource_id)
+    resource_tags = get_tags(@resource_id,resource_type)
     @tags = {}
     @saved = false
     @deleted = false
@@ -266,6 +267,10 @@ class EC2_TagsAssignDialog < FXDialogBox
           @tags["value#{i}"].text=v
        end   
     end
+   end
+   if @tags['key1'].text == nil or @tags['key1'].text == ""
+       @tags['key1'].text = @nickname_tag
+       @tags['value1'].text = ""
    end 
     frame2 = FXHorizontalFrame.new(page1,LAYOUT_FILL, :padding => 0)
     return_button = FXButton.new(frame2, "   &Return   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
@@ -274,8 +279,8 @@ class EC2_TagsAssignDialog < FXDialogBox
     end
   end 
   
-  def get_tags(resource_id)
-          data = @ec2_main.environment.tags.all(resource_id)
+  def get_tags(resource_id, resource_type)
+          data = @ec2_main.environment.tags.all(resource_id,resource_type)
           ta = {}
     	  if data != nil
     	     data.each do |aws_tag|

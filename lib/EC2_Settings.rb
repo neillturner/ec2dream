@@ -506,11 +506,6 @@ class EC2_Settings
               r = @system_properties[key]
             end  
          end
-         #if r != nil 
-         #   puts "Settings.get_system return "+r
-         #else
-         #   puts "Settings.get_system return nil"
-         #end   
          return r
     end
     

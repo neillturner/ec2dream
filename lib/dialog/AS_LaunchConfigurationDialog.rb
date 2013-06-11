@@ -12,7 +12,7 @@ class AS_LaunchConfigurationDialog < FXDialogBox
     puts "ASLaunchConfigurationDialog.initialize"
     @ec2_main = owner
     @curr_item = ""
-    @item_name = Array.new
+    @item_name = []
        i=0
        begin 
           #as.describe_launch_configurations.each do |r|

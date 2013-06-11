@@ -66,6 +66,15 @@ class EC2_ResourceTags
                  nickname_value = v
               end   
             end
+            # if no name use the autoscaling group name
+            if nickname_value == nil or nickname_value == "" 
+ 		@tags.each_pair do |k,v|
+              	   #puts "k #{k} v #{v}"
+              	   if k == "aws:autoscaling:groupName"
+                     nickname_value = v
+                   end   
+                end           
+            end
          end
      end    
      return nickname_value
@@ -96,8 +105,10 @@ class EC2_ResourceTags
        end
        return false
     rescue
-       puts("Error loading tags from #{fn} #{$!.to_s}")
        @tags = {}
+       message = $!.to_s
+       return false if message.start_with? "No such file or directory"
+       puts("Error loading tags from #{fn} #{message}")
        return false
     end   
   end 

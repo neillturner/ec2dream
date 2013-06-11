@@ -7,6 +7,7 @@ class EC2_Server
         @type = ""
         @appname = ""
         @windows_admin_pw = {}
+        @command_stack = {}
         @ops_public_addr = {}
         @ops_admin_pw = {}
         @ec2_ssh_private_key = {}
@@ -71,7 +72,9 @@ class EC2_Server
 	@create = @ec2_main.makeIcon("new.png")
 	@create.create	
 	@delete = @ec2_main.makeIcon("kill.png")
-	@delete.create	
+	@delete.create
+	@chart = @ec2_main.makeIcon("chart_stock.png")
+	@chart.create
         tab2 = FXTabItem.new(@ec2_main.tabBook, " Server ")
         @page1 = FXVerticalFrame.new(@ec2_main.tabBook, LAYOUT_FILL, :padding => 0)
         page1a = FXHorizontalFrame.new(@page1,LAYOUT_FILL_X, :padding => 0)
@@ -95,7 +98,10 @@ class EC2_Server
 	@refresh_button.connect(SEL_UPDATE) do |sender, sel, data|
 	   enable_if_env_set(sender)
 	end
-	@putty_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
+	@putty_button = FXButton.new(page1a," ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
+	#|LAYOUT_FIX_WIDTH|LAYOUT_FIX_HEIGHT)
+	#@putty_button.width=30
+	#@putty_button.height=30
 	@putty_button.icon = @monitor
         @putty_button.tipText = " SSH "
 	@putty_button.connect(SEL_COMMAND) do |sender, sel, data|
@@ -312,43 +318,23 @@ class EC2_Server
 	@chef_button.connect(SEL_UPDATE) do |sender, sel, data|
            enable_if_ec2_server_loaded(sender)	
 	end
-        @graphs = FXComboBox.new(page1a, 15,
-	      :opts => COMBOBOX_NO_REPLACE|LAYOUT_RIGHT)
-	@graphs.numVisible = 12      
-	@graphs.appendItem("")	
-	@graphs.appendItem("Last Hour")
-	@graphs.appendItem("Last 3 Hours")
-	@graphs.appendItem("Last 12 Hours")
-	@graphs.appendItem("Today")
-	@graphs.appendItem("Yesterday")
-	@graphs.appendItem("Last Fortnight")
-	d = Date.today()
-	d = d-2
-	i = 0
-	while i < 12  
-	 @graphs.appendItem(d.strftime("%a %b %d %Y"))
-	 d = d-1
-	 i = i+1
-	end 
-	@graphs.connect(SEL_COMMAND) do |sender, sel, data|
-	   if @ec2_main.settings.get("EC2_PLATFORM") == "amazon"
-	        if @amazon_cloudwatch == nil 
-                   cloudwatch_data = File.read("#{ENV['EC2DREAM_HOME']}/lib/amazon_cloudwatch.json")
-                   @amazon_cloudwatch = JSON.parse(cloudwatch_data)
-                   cloudwatch_data = File.read("#{ENV['EC2DREAM_HOME']}/lib/amazon_windows_cloudwatch.json")
-                   @amazon_windows_cloudwatch = JSON.parse(cloudwatch_data)
-                end
-                if @server['Platform'].text == "windows"
-		   dialog = EC2_MonitorDialog.new(@ec2_main,@server['Instance_ID'].text,@secgrp,data,@amazon_windows_cloudwatch)
-	       	   dialog.execute
-	       	else
-		   dialog = EC2_MonitorDialog.new(@ec2_main,@server['Instance_ID'].text,@secgrp,data,@amazon_cloudwatch)
-	       	   dialog.execute
-	        end	   
-	   end    	
-        end
-        FXLabel.new(page1a, "Graphs",:opts => LAYOUT_RIGHT )
-  	
+	@graph_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
+	@graph_button.icon = @chart
+	@graph_button.tipText = " Monitoring Graphs "
+	@graph_button.connect(SEL_COMMAND) do |sender, sel, data|
+	   if @type == "ec2"
+	      dialog = EC2_MonitorSelectDialog.new(@ec2_main,@server['Instance_ID'].text,"InstanceId",@secgrp,@server['Platform'].text)
+              dialog.execute
+           end 
+ 	end 	
+	@graph_button.connect(SEL_UPDATE) do |sender, sel, data|
+	    if @type == "ec2" 
+	       sender.enabled = true
+	    else
+	       sender.enabled = false
+	    end 	
+	end	
+ 	
 	@frame1 = FXMatrix.new(@page1, 3, MATRIX_BY_COLUMNS|LAYOUT_FILL)
  	FXLabel.new(@frame1, "Security Groups" )
         @frame1s = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
@@ -381,8 +367,25 @@ class EC2_Server
 	end
  	FXLabel.new(@frame1, "Tags" )
  	@server['Tags'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
-        FXLabel.new(@frame1, "" )
-
+	@server['Tags_button'] = FXButton.new(@frame1, " ",:opts => BUTTON_TOOLBAR)
+	@server['Tags_button'].icon = @tag_red
+	@server['Tags_button'].tipText = "  Edit Tags  "
+	@server['Tags_button'].connect(SEL_COMMAND) do |sender, sel, data|
+	    @curr_item = @server['Instance_ID'].text
+            if @curr_item == nil or @curr_item == ""
+               error_message("No Instance Id","No Instance Id to modify attributes")
+            else	    
+               dialog = EC2_TagsAssignDialog.new(@ec2_main,@curr_item)
+               dialog.execute
+               if dialog.saved
+		  s = currentInstance
+	          if s != nil and s != ""
+	             @ec2_main.serverCache.refresh(s)	    
+	    	     load(s)
+	          end               
+               end   
+	    end             
+        end
  	FXLabel.new(@frame1, "Image Id" )
  	@server['Image_ID'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
  	@frame1a = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
@@ -406,8 +409,11 @@ class EC2_Server
            browser("http://thecloudmarket.com/image/#{@server['Image_ID'].text}")
 	end
  	FXLabel.new(@frame1, "State" )
- 	@server['State'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
+ 	@frame1j = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
+ 	@server['State'] = FXTextField.new(@frame1j, 20, nil, 0, :opts => TEXTFIELD_READONLY)
  	@server['State'].font = FXFont.new(@ec2_main.app, "Arial", 8, :weight => FXFont::ExtraBold)
+ 	FXLabel.new(@frame1j, "       Launch Time" )
+	@server['Launch_Time'] = FXTextField.new(@frame1j, 25, nil, 0, :opts => TEXTFIELD_READONLY)
  	FXLabel.new(@frame1, "" )
  	FXLabel.new(@frame1, "Public DSN" )
  	@server['Public_DSN'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
@@ -439,9 +445,9 @@ class EC2_Server
  	FXLabel.new(@frame1c, "         Monitoring State" )
 	@server['Monitoring_State'] = FXTextField.new(@frame1c, 20, nil, 0, :opts => TEXTFIELD_READONLY)
 	FXLabel.new(@frame1, "" )    	 	
-	FXLabel.new(@frame1, "Launch Time" )
-	@server['Launch_Time'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
-	FXLabel.new(@frame1, "" )
+	#FXLabel.new(@frame1, "Launch Time" )
+	#@server['Launch_Time'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
+	#FXLabel.new(@frame1, "" )
 	if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
 	   FXLabel.new(@frame1, "EC2 SSH Private Key" )
  	   @server['EC2_SSH_Private_Key'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
@@ -568,6 +574,16 @@ class EC2_Server
 	@server['Win_Admin_Password_Button2'].connect(SEL_COMMAND) do
 	   dialog = EC2_ShowPasswordDialog.new(@ec2_main,"Win Admin Password",@server['Win_Admin_Password'].text)
            dialog.execute	
+	end         
+	FXLabel.new(@frame1, "Remote Command" ) 
+	@server['Command'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+        @server['Command_Button'] = FXButton.new(@frame1, "", :opts => BUTTON_TOOLBAR)
+	@server['Command_Button'].icon = @start_icon
+	@server['Command_Button'].tipText = "Run Command on Server"
+	@server['Command_Button'].connect(SEL_COMMAND) do
+	   instance_id = @server['Instance_ID'].text
+           @command_stack[instance_id] = @server['Command'].text
+	   run_command	
 	end 
 	FXLabel.new(@frame1, "AMI Launch Index" )    	 
         @server['Ami_Launch_Index'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
@@ -663,8 +679,11 @@ class EC2_Server
             end
 	end
  	FXLabel.new(@frame3, "State" )
- 	@ops_server['State'] = FXTextField.new(@frame3, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+ 	@frame3j = FXHorizontalFrame.new(@frame3,LAYOUT_FILL_X, :padding => 0)
+ 	@ops_server['State'] = FXTextField.new(@frame3j, 25, nil, 0, :opts => TEXTFIELD_READONLY)
  	@ops_server['State'].font = FXFont.new(@ec2_main.app, "Arial", 8, :weight => FXFont::ExtraBold)
+	FXLabel.new(@frame3j, "       Launch Time" )
+	@ops_server['Launch_Time'] = FXTextField.new(@frame3j, 25, nil, 0, :opts => TEXTFIELD_READONLY)
  	FXLabel.new(@frame3, "" )
  	FXLabel.new(@frame3, "Addresses" )
  	@ops_server['Addresses'] = FXTextField.new(@frame3, 60, nil, 0, :opts => TEXTFIELD_READONLY)
@@ -690,9 +709,6 @@ class EC2_Server
  	FXLabel.new(@frame3, "Availability Zone")
  	@ops_server['Availability_Zone'] = FXTextField.new(@frame3, 25, nil, 0, :opts => TEXTFIELD_READONLY) 	
 	FXLabel.new(@frame3, "" )
-	FXLabel.new(@frame3, "Launch Time" )
-	@ops_server['Launch_Time'] = FXTextField.new(@frame3, 60, nil, 0, :opts => TEXTFIELD_READONLY)
-	FXLabel.new(@frame3, "" )	
 	FXLabel.new(@frame3, "Key Name" )
  	@ops_server['Key_Name'] = FXTextField.new(@frame3, 25, nil, 0, :opts => TEXTFIELD_READONLY)
  	FXLabel.new(@frame3, "" )
@@ -1304,4 +1320,32 @@ class EC2_Server
             private_key = get_pk
 	    chef(server, address,  chef_node, user, private_key, password, platform)
      end
+     
+    def run_command
+            server = currentServer
+            address = @server['Public_IP'].text
+            command = ""
+            password =""
+            platform = ""
+            if @type == "ops"
+               if @ops_server['Command'].text != nil and @ops_server['Command'].text != ""
+                  command = @ops_server['Command'].text
+               end
+               user = @ec2_main.launch.ops_get("SSH_User")
+               password = @ops_server['Admin_Password'].text
+ 	    else
+               if @server['Command'].text != nil and @server['Command'].text != ""
+                  command = @server['Command'].text
+               end
+               user = @ec2_main.launch.get("EC2_SSH_User")
+               platform = @server['Platform'].text
+               if platform == "windows" and @server['Win_Admin_Password'].text != ""
+                  password = @server['Win_Admin_Password'].text
+               end 
+            end 
+            private_key = get_pk
+	    command_runner(server, address, command, user, private_key, password, platform)
+     end     
+     
+     
  end

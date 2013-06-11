@@ -160,9 +160,10 @@ class EC2_SecGrp
         @tag_button.icon = @tag_red
         @tag_button.tipText = "Edit Tags"
         @tag_button.connect(SEL_COMMAND) do
-            dialog = EC2_TagsAssignDialog.new(@ec2_main,@secgrp['group_id'])
+            dialog = EC2_TagsAssignDialog.new(@ec2_main,@secgrp['group_id'],'security-group')
             dialog.execute
             if dialog.saved
+               @ec2_main.serverCache.refresh_secGrps(@secgrp['Security_Group'],@secgrp['vpc_id'])
                load(@secgrp['Security_Group'],@secgrp['vpc_id']) 
 	    end             
         end
@@ -226,20 +227,27 @@ class EC2_SecGrp
        @sec_group_ids = {}
        x = @ec2_main.serverCache.secGrps(sg,vpc)
        if x != nil
-             data = @ec2_main.environment.tags.all(x[:group_id])
-    	     ta = {}
-    	     if data != nil
-    	        data.each do |aws_tag|
-    	           ta[aws_tag['key']] = aws_tag['value']
-    	        end
-    	     end
-     	     if ta.size>0
-   	        @secgrp_tags = EC2_ResourceTags.new(@ec2_main,ta,nil)
-    	        @secgrp_tags_text = @secgrp_tags.show
-    	     else
-    	        @secgrp_tags = nil
+	     if x['tagSet'] != nil and x['tagSet'].to_s != "{}"
+    	     	@secgrp_tags = EC2_ResourceTags.new(@ec2_main,x['tagSet'],nil)
+   	        @secgrp_tags_text = @secgrp_tags.show
+   	     else
+   	        @secgrp_tags = nil
     	        @secgrp_tags_text =""
-    	     end            
+   	     end          
+             #data = @ec2_main.environment.tags.all(x[:group_id])
+    	     #ta = {}
+    	     #if data != nil
+    	     #   data.each do |aws_tag|
+    	     #      ta[aws_tag['key']] = aws_tag['value']
+    	     #    end
+    	     #end
+     	     #if ta.size>0
+   	     #   @secgrp_tags = EC2_ResourceTags.new(@ec2_main,ta,nil)
+    	     #   @secgrp_tags_text = @secgrp_tags.show
+    	     #else
+    	     #   @secgrp_tags = nil
+    	     #   @secgrp_tags_text =""
+    	     #end            
              @secgrp['Description'] = x[:aws_description]
              @top.setItemText(1, 1, x[:aws_description])
              @top.setItemJustify(1, 1, FXTableItem::LEFT)

@@ -49,7 +49,7 @@ class EC2_Main < FXMainWindow
     $ec2_main = self
     @initial_startup = false
     @app = app
-    super(app, "#{product} v3.6.2 - Build and Manage Cloud Servers...visually", :opts => DECOR_ALL, :width => 900, :height => 650)
+    super(app, "#{product} v3.6.3 - Build and Manage Cloud Servers...visually with chef", :opts => DECOR_ALL, :width => 900, :height => 650)
 
     # Status bar
     status = FXStatusBar.new(self,
@@ -98,11 +98,9 @@ class EC2_Main < FXMainWindow
     
      # need to cope with case of no system.properties file and the value not set. 
      @environment.initial_load 
-    
      @tree.connect(SEL_SELECTED) do |sender, sel, item|
          tree_process(item)
      end 
-     
   end
  
   def tree_process(item)

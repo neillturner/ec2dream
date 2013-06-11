@@ -6,6 +6,7 @@ require 'resolv'
 require 'dialog/ELB_Dialog'
 require 'dialog/EC2_AvailZoneDialog'
 require 'dialog/AS_LaunchConfigurationDialog'
+require 'dialog/AS_TagsAssignDialog'
 require 'common/error_message'
 
 include Fox
@@ -31,8 +32,10 @@ class AS_GroupEditDialog < FXDialogBox
 	@kill.create
 	@add = @ec2_main.makeIcon("add.png")
 	@add.create
-      @magnifier = @ec2_main.makeIcon("magnifier.png")
-      @magnifier.create
+        @magnifier = @ec2_main.makeIcon("magnifier.png")
+        @magnifier.create
+        @edit = @ec2_main.makeIcon("application_edit.png")
+        @edit.create
     	super(owner, @title, :opts => DECOR_ALL, :width => 650, :height => 450)
     	frame1 = FXMatrix.new(self, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
     	FXLabel.new(frame1, "" )
@@ -74,7 +77,7 @@ class AS_GroupEditDialog < FXDialogBox
               load_az_table
 	   end   	
         end
-      az_create_button.connect(SEL_UPDATE) do |sender, sel, data|
+        az_create_button.connect(SEL_UPDATE) do |sender, sel, data|
 	    sender.enabled = true
 	end
 	az_delete_button = FXButton.new(page1a, " ",:opts => BUTTON_TOOLBAR)
@@ -92,22 +95,41 @@ class AS_GroupEditDialog < FXDialogBox
 	az_delete_button.connect(SEL_UPDATE) do |sender, sel, data|
 	       sender.enabled = true
 	end
-
+        FXLabel.new(frame1, "Tags")
+    	tags = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_READONLY)
+    	page1t = FXHorizontalFrame.new(frame1,LAYOUT_FILL_X, :padding => 0)
+    	FXLabel.new(page1t, " ",:opts => LAYOUT_LEFT )
+    	tags_button = FXButton.new(page1t, " ",:opts => BUTTON_TOOLBAR)
+	tags_button.icon = @edit
+	tags_button.tipText = "  Edit Tags "
+	tags_button.connect(SEL_COMMAND) do |sender, sel, data|
+	   dialog = AS_TagsAssignDialog.new(@ec2_main,auto_scaling_group_name.text)
+	   dialog.execute
+	   if dialog.saved
+	       item = dialog.item
+               tags.text = ""
+               item.each do |y|
+                  tags.text = tags.text + "#{y['Key']}=#{y['Value']}"
+                  tags.text = tags.text + "(Propagate) " if y['PropagateAtLaunch'] = true
+                  tags.text = tags.text + " " if y['PropagateAtLaunch'] = false
+               end	       
+	   end   	
+        end
     	FXLabel.new(frame1, "Min Size" )
     	min_size = FXTextField.new(frame1, 15, nil, 0, :opts => FRAME_SUNKEN)
 	min_size.text = "1" 
 	FXLabel.new(frame1, "" )
 	FXLabel.new(frame1, "Max Size" )
     	max_size = FXTextField.new(frame1, 15, nil, 0, :opts => FRAME_SUNKEN)
-	max_size.text = "1" 
+	max_size.text = "2" 
 	FXLabel.new(frame1, "" )
 	FXLabel.new(frame1, "Cooldown (secs)" )
     	cooldown = FXTextField.new(frame1, 15, nil, 0, :opts => FRAME_SUNKEN)
-        cooldown.text = "0"
+        cooldown.text = ""
         FXLabel.new(frame1, "" )
 	FXLabel.new(frame1, "Desired Capacity" )
     	desired_capacity = FXTextField.new(frame1, 15, nil, 0, :opts => FRAME_SUNKEN)
-        desired_capacity.text = "0"         
+        desired_capacity.text = ""         
 	FXLabel.new(frame1, "" )
 	FXLabel.new(frame1, "Health Grace Period (secs)" )
     	health_check_grace_period = FXTextField.new(frame1, 15, nil, 0, :opts => FRAME_SUNKEN)
@@ -214,11 +236,17 @@ class AS_GroupEditDialog < FXDialogBox
         		auto_scaling_group_name.text = r[:auto_scaling_group_name]
         		launch_configuration_name.text = r[:launch_configuration_name]
                         @az_table = r[:availability_zones]
+                        tags.text = ""
+                        r[:tags].each do |y|
+                           tags.text = tags.text + "#{y['Key']}=#{y['Value']}"
+                           tags.text = tags.text + "(Propagate) " if y['PropagateAtLaunch'] = true
+                           tags.text = tags.text + " " if y['PropagateAtLaunch'] = false
+                        end   
 			min_size.text = r[:min_size].to_s
 			max_size.text = r[:max_size].to_s
 			cooldown.text = r[:cooldown].to_s
 			@elb_table = r[:load_balancer_names]
-                        desired_capacity.text = r[:desired_capacity].to_s 
+                        #desired_capacity.text = r[:desired_capacity].to_s 
  		        health_check_grace_period.text = r[:health_check_grace_period].to_s
  		        health_check_type.text = r[:health_check_type]
                         placement_group.text = r[:placement_group]

@@ -4,7 +4,6 @@ require 'fog'
 require 'net/http'
 require 'resolv'
 require 'date'
-require 'tzinfo'
 
 require 'dialog/EC2_SecGrp_CreateDialog'
 
@@ -200,7 +199,8 @@ class EC2_List
 	@help.create
 	@app_delete = @ec2_main.makeIcon("application_delete.png")
 	@app_delete.create
-	
+	@chart = @ec2_main.makeIcon("chart_stock.png")
+	@chart.create
 	
     tab1 = FXTabItem.new($ec2_main.tabBook, "  List  ")
   	page1 = FXVerticalFrame.new($ec2_main.tabBook, LAYOUT_FILL, :padding => 0)
@@ -422,24 +422,24 @@ class EC2_List
 	@tags_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@tags_button.icon = @tag_red	
 	@tags_button.connect(SEL_COMMAND) do |sender, sel, data|
-        if @config["dialog"][7] == "EC2_TagsAssignDialog"  
-	          if @curr_item == nil or @curr_item == ""
-                  error_message("No #{@type} Selected","No #{@type} selected to edit tags")
-               else
-                  tags = []
-                  resource_key = @curr_item
-                  if @type == "Security Groups"
-                     resource_key = @group_id
-                  end
-                  dialog =  EC2_TagsAssignDialog.new(@ec2_main,resource_key)
-                  dialog.execute
-		          if dialog.saved 
-		             load_sort(@type,@curr_sort)
-                  end
-               end  
-        else
+        #if @config["dialog"][7] == "EC2_TagsAssignDialog"  
+	    #      if @curr_item == nil or @curr_item == ""
+        #          error_message("No #{@type} Selected","No #{@type} selected to edit tags")
+        #       else
+        #          tags = []
+        #          resource_key = @curr_item
+        #          if @type == "Security Groups"
+        #             resource_key = @group_id
+        #          end
+        #         dialog =  EC2_TagsAssignDialog.new(@ec2_main,resource_key)
+        #          dialog.execute
+		#          if dialog.saved 
+		#             load_sort(@type,@curr_sort)
+        #          end
+        #       end  
+        #else
                call_dialog(7)
-  	    end  
+  	    #end  
 	end
 	@tags_button.connect(SEL_UPDATE) do |sender, sel, data|	
 	   if @loaded and @config['icon'] != nil and @config['icon'][7] != "" 
@@ -528,8 +528,11 @@ class EC2_List
 	     load_sort_reload(@type,@curr_sort,false,@connection)
 	end
 	@table.connect(SEL_COMMAND) do |sender, sel, which|
-	   if which.col == 0
+	   #if which.col == 0
+	      @curr_image_type = ""
+	      @curr_size = ""
 	      @curr_row = which.row
+		  @table.selectRow(@curr_row)
 	      @curr_item = @table.getItemText(which.row,0).to_s
 		  puts "item selected #{@curr_item}  type #{@type}"
 	      case @type
@@ -596,12 +599,12 @@ class EC2_List
 			when "Users" 
 			 @user_name =  @curr_item
  	      end 	         
-	   else
-	      @curr_row = nil
-	      @curr_item = ""
-	      @curr_image_type = ""
-	      @curr_size = ""
-	   end 
+	  # else
+	  #    @curr_row = nil
+	  #    @curr_item = ""
+	  #    @curr_image_type = ""
+	  #    @curr_size = ""
+	  # end 
 	end 
   end 
   
@@ -774,7 +777,9 @@ end
               else 
                  cmd = "conn.#{request}"
               end 
+              #    puts "CMD #{cmd}"
  	          response = eval(cmd)
+ 	          # puts "RESPONSE.BODY #{response.body}"
 			  if @ec2_main.settings.cloudfoundry 
 			    @data = response
 			  else
@@ -860,7 +865,8 @@ end
                   elsif rk.kind_of?(EC2_ResourceTags)   
                      item = rk.show   
                   else 
-                     item = rk.to_s
+                     item = rk.to_s if (rk.class).to_s != "Fog::Time"
+					 item = convert_time(rk) if (rk.class).to_s == "Fog::Time"
                   end   
                   lists[j][i] = item
                   @max_data_size[k] = item.length if  @max_data_size[k] == nil or item.length >  @max_data_size[k]
@@ -904,11 +910,13 @@ end
                      elsif v.kind_of?(EC2_ResourceTags)   
                         item = v.show                       
                      else 
-                        item = v.to_s
+                        #item = v.to_s
+						item = v.to_s if (v.class).to_s != "Fog::Time"
+					    item = convert_time(v) if (v.class).to_s == "Fog::Time"
                      end 
                      data_index = @data_title.index(k.to_s)
                      if data_index != nil 
-                        lists[data_index+@config['keys'].size][i] = item                  
+                        lists[data_index+@config['keys'].size][i] = item  
                         @max_data_size[k] = item.length if  @max_data_size[k] == nil or item.length >  @max_data_size[k]
                      end
                      j=j+1
@@ -947,7 +955,7 @@ end
   	    k = 0 
   	    #puts "*** table_data #{k} #{i} #{lists[k][i]}"
             while k < table_size
-   	       @table.setItemText(i, k, lists[k][i].to_s)
+   	           @table.setItemText(i, k, lists[k][i].to_s)
     	       @table.setItemJustify(i, k, FXTableItem::LEFT)
     	       k = k+1
     	    end                        
