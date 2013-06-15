@@ -10,6 +10,7 @@
                if putty_key  != nil and putty_key != "" 
 	             c = "cmd.exe /c \@start \"\" /b \""+ENV['EC2DREAM_HOME']+"/putty/putty.exe\" -ssh "+s+" -i "+"\""+putty_key+"\""+" -l "+user
 	          else 
+	             puts "WARNING: no Putty Private Key specified" 
 	             c = "cmd.exe /c \@start \"\" /b \""+ENV['EC2DREAM_HOME']+"/putty/putty.exe\" -ssh "+s+" -pw "+"\""+password+"\""+" -l "+user
 	          end 
 	          puts c
@@ -18,6 +19,9 @@
 	          te = "xterm"
                  if $ec2_main.settings.get_system('TERMINAL_EMULATOR') != nil and $ec2_main.settings.get_system('TERMINAL_EMULATOR') != ""
 	             te = $ec2_main.settings.get_system('TERMINAL_EMULATOR')
+	          end 
+	          if private_key == nil or private_key == ""
+	            puts "WARNING: no SSH Private Key specified" 
 	          end 
 	          if RUBY_PLATFORM.index("linux") != nil
 	             if te == "xterm"

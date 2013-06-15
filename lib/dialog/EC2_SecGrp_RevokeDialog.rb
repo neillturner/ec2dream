@@ -9,7 +9,7 @@ include Fox
 
 class EC2_SecGrp_RevokeDialog < FXDialogBox
 
-  def initialize(owner, current_group, protocol, from_port, to_port, ip_address_or_group, rule_id=0, current_group_id=nil, auth_group_id)
+  def initialize(owner, current_group, protocol, from_port, to_port, ip_address_or_group, rule_id=0, current_group_id=nil, auth_group_id=nil)
     @ec2_main = owner
     @deleted = false
     message = "Confirm revoke of #{protocol} #{from_port} #{to_port} #{ip_address_or_group}"

@@ -1,3 +1,12 @@
+Version 3.6.5  June 2013
+------------------------
+fixes mac running chef solo. 
+
+Version 3.6.4  June 2013
+------------------------
+fixes for Ruby 187 and mac terminal emulation. 
+
+
 Version 3.6.3  June 2013
 ------------------------
 various bug fixes. Cloudwatch graphs for autoscaling groups, elb, ability to run a remote command from the server tab. 

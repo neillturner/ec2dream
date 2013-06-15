@@ -60,6 +60,7 @@ def chef(server, address,  chef_node, ssh_user, private_key, password, platform=
    	         c = "#{ENV['EC2DREAM_HOME']}/chef/chef_push.sh #{chef_repository} #{chef_node} #{ec2_server_name} #{private_key} #{ssh_user}"
    	         puts c
    	         system(c)
+   	         puts "return message #{$?}"
    	      end
              else
     	        # handle windows servers (only from windows clients)

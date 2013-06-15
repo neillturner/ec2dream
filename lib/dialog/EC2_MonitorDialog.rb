@@ -2,19 +2,11 @@ require 'fox16'
 require 'google_chart'
 require 'open-uri'
 require 'rubygems'
+require 'date'
 require 'net/http'
 require 'common/convert_time'
 include Fox
 
-#class DateTime
-#  def localtime
-#    new_offset(DateTime.now.offset)
-#  end
-#
-#  def utc
-#    new_offset(Rational(0, 24))
-#  end
-#end
 
 class Hours
    attr_reader :value
@@ -69,8 +61,8 @@ class EC2_MonitorDialog  < FXDialogBox
 
   def initialize(owner, dimension_value, groupName, report, config, dimension_type="InstanceId")
     @debug = false 
-    puts "EC2_MonitorDialog.initialize dimension_value #{dimension_value} groupName #{groupName} report #{report} config #{config} dimension_type #{dimension_type}" if @debug
-    puts "EC2_MonitorDialog.initialize dimension_value #{dimension_value} groupName #{groupName} report #{report} dimension_type #{dimension_type}" if !@debug    
+    puts "EC2_MonitorDialog.initialize dimension_value #{dimension_value} groupName #{groupName} report #{report} dimension_type #{dimension_type}"
+    puts "config #{config}" if @debug
     @ec2_main = owner
     @env = ""
     @msg = ""
@@ -80,7 +72,7 @@ class EC2_MonitorDialog  < FXDialogBox
     @config = config
     @dimension_type = dimension_type
     report_count=0
-    @config["CloudWatch"].each do |report|
+    @config["CloudWatch"].each do |r|
        report_count=report_count+1
     end  
     if report_count <=8
@@ -237,7 +229,7 @@ class EC2_MonitorDialog  < FXDialogBox
       if measure == "DiskSpaceUtilization" and @dev != nil and @dev != ""
          options["Dimensions"].push({"Name" => "Filesystem","Value" => @dev})
       end
-      #puts "get_metric_statistics #{options}"  if debug 
+      puts "get_metric_statistics #{options}"  if debug 
       @response = @mon.get_metric_statistics(options)
          puts "MONITOR DIALOG DEBUG: response #{@response}" if debug 
          @max_data = 0

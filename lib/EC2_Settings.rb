@@ -10,6 +10,7 @@ require 'dialog/EC2_PlatformsDialog'
 require 'dialog/EC2_TimezoneDialog'
 require 'dialog/EC2_ShowPasswordDialog'
 require 'dialog/EC2_SystemDialog'
+require 'dialog/EC2_TerminalsDialog'
 require 'common/error_message'
 require 'common/read_properties'
 require 'common/save_properties'
@@ -210,12 +211,19 @@ class EC2_Settings
         FXLabel.new(frame1, "" )
 	if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil  
 	   FXLabel.new(frame1, "TERMINAL_EMULATOR" )
-           @settings['TERMINAL_EMULATOR'] = FXComboBox.new(frame1, 15, :opts => COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
-           @settings['TERMINAL_EMULATOR'].numVisible = 2      
-           @settings['TERMINAL_EMULATOR'].appendItem("xterm")	
-           @settings['TERMINAL_EMULATOR'].appendItem("terminator")
-           @settings['TERMINAL_EMULATOR'].setCurrentItem(0)
-           FXLabel.new(frame1, "" )
+           @settings['TERMINAL_EMULATOR'] = FXTextField.new(frame1, 20, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+           @settings['TERMINAL_EMULATOR'].text = "xterm"
+	   @settings['TERMINAL_EMULATOR_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
+	   @settings['TERMINAL_EMULATOR_BUTTON'].icon = @magnifier
+	   @settings['TERMINAL_EMULATOR_BUTTON'].tipText = "Select..."
+	   @settings['TERMINAL_EMULATOR_BUTTON'].connect(SEL_COMMAND) do
+              dialog = EC2_TerminalsDialog.new(@ec2_main)
+              dialog.execute
+              it = dialog.selected
+              if it != nil and it != ""
+                 @settings['EC2_PLATFORM'].text = it
+              end	    
+           end                
         end
         FXLabel.new(frame1, "EXTERNAL_EDITOR" )
 	@settings['EXTERNAL_EDITOR'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
@@ -291,13 +299,8 @@ class EC2_Settings
         load_panel('CHEF_REPOSITORY')
         load_panel('AVAILABILITY_ZONE')
         load_panel('AMAZON_NICKNAME_TAG')
-        term_emul = get_system('TERMINAL_EMULATOR')
         if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
-           if term_emul == "terminator"
-              @settings['TERMINAL_EMULATOR'].setCurrentItem(1)
-           else
-              @settings['TERMINAL_EMULATOR'].setCurrentItem(0)
-           end
+           load_panel('TERMINAL_EMULATOR')
         end   
         @settings['EXTERNAL_EDITOR'].text = get_system('EXTERNAL_EDITOR')
         @settings['EXTERNAL_BROWSER'].text = get_system('EXTERNAL_BROWSER')
@@ -336,7 +339,7 @@ class EC2_Settings
        clear('PUTTY_PRIVATE_KEY')
     end
     if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil   
-       @settings['TERMINAL_EMULATOR'].setCurrentItem(0)
+       @settings['TERMINAL_EMULATOR'].text = "xterm"
     end   
     clear('CLOUD_ADMIN_URL')
   end 
@@ -448,11 +451,7 @@ class EC2_Settings
   
   def save_system_screen_values
      if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
-        if @settings['TERMINAL_EMULATOR'].itemCurrent?(1)
-           put_system("TERMINAL_EMULATOR","terminator")
-        else
-           put_system("TERMINAL_EMULATOR","xterm")
-        end   
+        put_system("TERMINAL_EMULATOR",@settings["TERMINAL_EMULATOR"].text)
      end
      put_system("EXTERNAL_EDITOR",@settings["EXTERNAL_EDITOR"].text)
      put_system("EXTERNAL_BROWSER",@settings["EXTERNAL_BROWSER"].text)

@@ -4,7 +4,7 @@ require 'fox16'
 require 'net/http'
 require 'resolv'
 require 'common/error_message'
-require 'dialog/ELB_ListenerEditdialog'
+require 'dialog/ELB_ListenerEditDialog'
 require 'dialog/EC2_AvailZoneDialog'
 
 include Fox

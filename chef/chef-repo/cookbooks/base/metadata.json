@@ -9,7 +9,7 @@
     "ubuntu": ">= 0.0.0"
   },
   "dependencies": {
-    "aws": ">= 0.100.6",
+    "aws": ">= 0.100.6"
   },
   "recommendations": {
   },

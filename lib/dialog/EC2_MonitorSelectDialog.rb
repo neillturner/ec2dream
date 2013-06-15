@@ -2,6 +2,7 @@ require 'rubygems'
 require 'fox16'
 require 'net/http'
 require 'resolv'
+require 'date'
 require 'dialog/EC2_MonitorDialog'
 
 include Fox
