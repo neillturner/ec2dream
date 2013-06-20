@@ -3,7 +3,6 @@ require 'fox16'
 require 'net/http'
 require 'resolv'
 require 'fileutils'
-#require 'ftools'
 
 include Fox
 

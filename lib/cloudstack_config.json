@@ -2,6 +2,18 @@
  "Cloud":{
    "Compute":{
     "Launch": {},
+    "Vagrant":{
+          "request":"",
+          "name":"vagrant",
+          "response": "",
+          "response_code": 200,
+          "action": ["create","delete", "edit","vagrant up","","vagrant destroy","","",""],
+          "icon": ["@create","@delete","@edit","@rocket","@csv","@disconnect","","",""],
+          "tooltip":[" Create Vagrantfile ","  Delete Vagrantfile "," Edit Vagrantfile "," vagrant up "," Csv Data "," vagrant destroy ","","",""],
+          "dialog":["VAG_CreateDialog","VAG_DeleteDialog","edit(@vagrant_file)","VAG_UpDialog","","VAG_DestroyDialog","","",""],
+          "dialog_parm": ["","","","","","","","",""], 
+          "keys": []
+    },  	    
     "Security Groups":{
       "request":"describe_security_groups",
       "name":"security_group",

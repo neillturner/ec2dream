@@ -1,11 +1,11 @@
-Fogviz - Build and Manage EC2 Servers Version 3.6.5 -  June 2013 
+Fogviz - Build and Manage EC2 Servers Version 3.6.6 -  June 2013 
 -----------------------------------------------------------------
 
 Fogviz is visual cloud computing admin for the Fog ruby cloud services library and combines Fog, Ruby, Chef and Git into an open source devops platform supporting:
       Amazon AWS.
       Amazon compatible clouds:  Eucalyptus, CloudStack.
       Openstack Clouds:  Rackspace Cloud Servers and HP Cloud.
-      Cloud Foundry and even Local Servers.
+      Cloud Foundry and even Local Servers and Vagrant.
 
 It uses Chef Solo to install software and applications via "one click" and Hosted Chef particularly for production environments.
 

@@ -546,6 +546,7 @@ class EC2_EnvCreateDialog < FXDialogBox
   	      settings.put('CLOUD_ADMIN_URL',"http://aws.amazon.com/ec2/")
   	   end  
   	   settings.put('CHEF_REPOSITORY',"#{ENV['EC2DREAM_HOME']}/chef/chef-repo")
+  	   settings.put('VAGRANT_REPOSITORY',"#{ENV['EC2DREAM_HOME']}/chef/vagrant")
            settings.save
   end
   

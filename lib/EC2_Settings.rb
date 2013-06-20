@@ -206,6 +206,18 @@ class EC2_Settings
 	      @settings['CHEF_REPOSITORY'].text = dialog.directory
            end
 	end	
+	FXLabel.new(frame1, "VAGRANT_REPOSITORY" )
+ 	@settings['VAGRANT_REPOSITORY'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+ 	@settings['VAGRANT_REPOSITORY_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
+	@settings['VAGRANT_REPOSITORY_BUTTON'].icon = @magnifier
+	@settings['VAGRANT_REPOSITORY_BUTTON'].tipText = "Browse..."
+	@settings['VAGRANT_REPOSITORY_BUTTON'].connect(SEL_COMMAND) do
+	   dialog = FXDirDialog.new(frame1, "Select Vagrant Repository Directory")
+           dialog.directory = "#{ENV['EC2DREAM_HOME']}/chef/vagrant"
+	   if dialog.execute != 0
+	      @settings['VAGRANT_REPOSITORY'].text = dialog.directory
+           end
+	end		
 	FXLabel.new(frame1, "CLOUD_ADMIN_URL" )
 	@settings['CLOUD_ADMIN_URL'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
         FXLabel.new(frame1, "" )
@@ -297,6 +309,11 @@ class EC2_Settings
         load_panel('AMAZON_ACCESS_KEY_ID')
         load_panel('AMAZON_SECRET_ACCESS_KEY')
         load_panel('CHEF_REPOSITORY')
+        load_panel('VAGRANT_REPOSITORY')
+        if @settings['VAGRANT_REPOSITORY'].text == nil or @settings['VAGRANT_REPOSITORY'].text == "" 
+           @properties['VAGRANT_REPOSITORY']  = "#{ENV['EC2DREAM_HOME']}/chef/vagrant"
+           @settings['VAGRANT_REPOSITORY'].text = "#{ENV['EC2DREAM_HOME']}/chef/vagrant"
+        end   
         load_panel('AVAILABILITY_ZONE')
         load_panel('AMAZON_NICKNAME_TAG')
         if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
@@ -322,7 +339,7 @@ class EC2_Settings
   
   def clear_panel
     clear('ENV_NAME')
-	clear('REPOSITORY_LOCATION')
+    clear('REPOSITORY_LOCATION')
     clear('EC2_PLATFORM')	
     clear('EC2_URL')
     clear('EC2_SSH_PRIVATE_KEY')
@@ -330,6 +347,7 @@ class EC2_Settings
     clear('AMAZON_ACCESS_KEY_ID')
     clear('AMAZON_SECRET_ACCESS_KEY')
     clear('CHEF_REPOSITORY')
+    clear('VAGRANT_REPOSITORY')
     clear('AVAILABILITY_ZONE')
     clear('AMAZON_NICKNAME_TAG')
     clear('EXTERNAL_EDITOR')
@@ -438,6 +456,7 @@ class EC2_Settings
      save_setting("AMAZON_ACCESS_KEY_ID")
      save_setting("AMAZON_SECRET_ACCESS_KEY")
      save_setting("CHEF_REPOSITORY")
+     save_setting("VAGRANT_REPOSITORY")
      save_setting("AVAILABILITY_ZONE")
      save_setting("AMAZON_NICKNAME_TAG")
      if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil

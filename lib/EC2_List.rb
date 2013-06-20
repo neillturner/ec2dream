@@ -78,6 +78,12 @@ require 'dialog/LOC_CreateDialog'
 require 'dialog/LOC_EditDialog'
 require 'dialog/LOC_DeleteDialog'
 
+require 'dialog/VAG_CreateDialog'
+require 'dialog/VAG_DeleteDialog'
+require 'dialog/VAG_UpDialog'
+require 'dialog/VAG_DestroyDialog'
+
+
 require 'dialog/CF_CreateDialog'
 require 'dialog/CF_EditDialog'
 require 'dialog/CF_DeleteDialog'
@@ -155,6 +161,8 @@ class EC2_List
 	@events.create
 	@delete_icon = @ec2_main.makeIcon("kill.png")
 	@delete_icon.create
+	@disconnect = @ec2_main.makeIcon("disconnect.png")
+	@disconnect.create	
 	@delete = @ec2_main.makeIcon("kill.png")
 	@delete.create	
 	@stop_icon = @ec2_main.makeIcon("cancel.png")
@@ -598,6 +606,8 @@ class EC2_List
 			 @cdn_distribution  = @curr_item
 			when "Users" 
 			 @user_name =  @curr_item
+			when "Vagrant"
+	         @vagrant_file  =  find_value('Vagrantfile',which.row) 
  	      end 	         
 	  # else
 	  #    @curr_row = nil
@@ -753,7 +763,22 @@ end
                       i = i+1
                    end
                 end	
-		end	
+		end
+      elsif type == "Vagrant"	
+             begin
+                envs = Dir.entries($ec2_main.settings.get("VAGRANT_REPOSITORY"))
+             rescue
+                error_message("Vagrant Repository does not exist",$!)
+				return
+             end
+             if reload == true
+                @data = []
+                envs.each do |r|
+				   vf = "#{$ec2_main.settings.get('VAGRANT_REPOSITORY')}/#{r}/Vagrantfile"
+                   @data.push({"server" => r, "Vagrantfile" => vf  }) if r != '.' and r != '..'
+                end
+             end				 
+	 
       elsif type == "Templates"	
          cf = EC2_Properties.new
          if cf != nil 

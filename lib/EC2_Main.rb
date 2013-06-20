@@ -20,7 +20,7 @@ require 'cache/EC2_ImageCache'
 require 'Amazon'
 require 'Hp'
 require 'Rackspace'
-require 'Openstack'
+require 'OpenStack'
 require 'Eucalyptus'
 require 'CloudStack'
 require 'Cloud_Foundry'
@@ -49,7 +49,7 @@ class EC2_Main < FXMainWindow
     $ec2_main = self
     @initial_startup = false
     @app = app
-    super(app, "#{product} v3.6.5 - Build and Manage Cloud Servers...visually with chef", :opts => DECOR_ALL, :width => 900, :height => 650)
+    super(app, "#{product} v3.6.6 - Build and Manage Cloud Servers...visually with chef", :opts => DECOR_ALL, :width => 900, :height => 650)
 
     # Status bar
     status = FXStatusBar.new(self,

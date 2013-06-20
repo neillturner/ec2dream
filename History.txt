@@ -1,3 +1,7 @@
+Version 3.6.6  June 2013
+------------------------
+Add support for vagrant. fixes for linux. 
+
 Version 3.6.5  June 2013
 ------------------------
 fixes mac running chef solo. 
