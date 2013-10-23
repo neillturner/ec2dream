@@ -135,7 +135,7 @@ class EC2_Environment < FXImageFrame
            @settings.save_system
         end
         #show_repository_loc
-
+        @settings.get_system('REPOSITORY_LOCATION')
         @server = @ec2_main.server
 	@server.clear_panel
 	@launch = @ec2_main.launch

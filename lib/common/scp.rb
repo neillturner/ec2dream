@@ -1,4 +1,4 @@
-def scp(server, address, user, private_key, putty_key, password)
+def scp(server, address, user, private_key, putty_key, password, local_port=nil)
          s = server
 	   if address != nil and address != ""
 	      s = address
@@ -7,9 +7,13 @@ def scp(server, address, user, private_key, putty_key, password)
 	      user = "root"
 	   end	   
            if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
-               if putty_key  != nil and putty_key != "" 
+                  if local_port != nil and local_port != ""
+                     puts "WARNING: accessing server via ssh tunnel"
+                     c = "cmd.exe /c \@start \"\" /b \""+ENV['EC2DREAM_HOME']+"/winscp/winscp.exe\" sftp://#{user}@localhost:#{local_port}  /privatekey="+"\"#{putty_key}\""
+                  elsif putty_key  != nil and putty_key != "" 
                   c = "cmd.exe /c \@start \"\" /b \""+ENV['EC2DREAM_HOME']+"/winscp/winscp.exe\" sftp://#{user}@#{s}  /privatekey="+"\"#{putty_key}\""
 	         else
+	            puts "WARNING: no Putty Private Key specified" 
 	           # the password parameter doesn't seem to work so have to manually re-enter password
 	            c = "cmd.exe /c \@start \"\" /b \""+ENV['EC2DREAM_HOME']+"/winscp/winscp.exe\" sftp://#{user}@#{s}  /password="+"\"#{password}\""  
 	         end

@@ -118,11 +118,8 @@ class Data_addresses
        data = nil
        conn = @ec2_main.environment.connection
        if conn != nil
-          if  @ec2_main.settings.amazon
-             pool = "standard" if pool == nil 
+          if  !@ec2_main.settings.openstack
              data = conn.allocate_address(pool) 
-          elsif  !@ec2_main.settings.openstack
-             data = conn.allocate_address({}) 
           else
              if pool == nil 
                 data = conn.allocate_address

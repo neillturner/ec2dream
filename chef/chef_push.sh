@@ -11,9 +11,16 @@ echo "***************************"
 rm  $1/nodes/$3.json 
 cp $1/nodes/$2.json $1/nodes/$3.json 
 cd $1
-if [ "$5" == "" ]; then
+if [ "$5" = "" ]; then
+ echo "pocketknife -ivk $4 $3"
  pocketknife -ivk $4 $3
 else
- pocketknife -ivk $4 -s $5 $3 
+ if [ "$6" = "" ]; then
+    echo "pocketknife -ivk $4 -s $5 $3"
+    pocketknife -ivk $4 -s $5 $3 
+ else
+    echo "pocketknife -ivk $4 -s $5 -l $6 $3"
+    pocketknife -ivk $4 -s $5 -l $6 $3 
+ fi 
 fi  
 rm  $1/nodes/$3.json 

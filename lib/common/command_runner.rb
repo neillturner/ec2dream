@@ -1,4 +1,4 @@
-def command_runner(server, address, command, ssh_user, private_key, password, platform="")
+def command_runner(server, address, command, ssh_user, private_key, password, platform="", local_port="")
            if private_key == nil or private_key == ""  and (password == nil or password == "")
               error_message("No ec2 ssh private key","No EC2_SSH_PRIVATE_KEY specified")
               return false
@@ -24,7 +24,11 @@ def command_runner(server, address, command, ssh_user, private_key, password, pl
                  if private_key != nil
 		    private_key = private_key.gsub('/','\\') 
                  end
-                 c = "start \"run command on #{ec2_server_name}\" cmd.exe /k ruby \"#{ENV['EC2DREAM_HOME']}/lib/common/command_rye.rb\" #{ec2_server_name} -u #{ssh_user} -k \"#{private_key}\" -c \"#{command}\""
+                 if local_port != nil and local_port != ""
+                    c = "start \"run command on #{ec2_server_name}\" cmd.exe /k ruby \"#{ENV['EC2DREAM_HOME']}/lib/common/command_rye.rb\" localhost -l #{local_port} -u #{ssh_user} -k \"#{private_key}\" -c \"#{command}\""
+                 else
+                    c = "start \"run command on #{ec2_server_name}\" cmd.exe /k ruby \"#{ENV['EC2DREAM_HOME']}/lib/common/command_rye.rb\" #{ec2_server_name} -u #{ssh_user} -k \"#{private_key}\" -c \"#{command}\""
+                 end
                  puts c
    	         system(c)
    	      else

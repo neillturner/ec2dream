@@ -1,4 +1,4 @@
-def chef(server, address,  chef_node, ssh_user, private_key, password, platform="")
+def chef(server, address,  chef_node, ssh_user, private_key, password, platform="", local_port="")
            # private_key = @ec2_main.settings.get('EC2_SSH_PRIVATE_KEY')    
            #chef_node = @secgrp
            #if @server['Chef_Node'].text != nil and @server['Chef_Node'].text != ""
@@ -53,11 +53,14 @@ def chef(server, address,  chef_node, ssh_user, private_key, password, platform=
               if RUBY_PLATFORM.index("mswin") != nil  or RUBY_PLATFORM.index("i386-mingw32") != nil
                  ENV["EC2_CHEF_REPOSITORY"] = chef_repository
                  ENV["EC2_SSH_PRIVATE_KEY"] = private_key
-                 c = "cmd.exe /c \@start \"chef-solo #{chef_node} #{ec2_server_name}\" \"#{ENV['EC2DREAM_HOME']}/chef/chef_push.bat\"  #{chef_node} #{ec2_server_name} #{ssh_user}"
+                 if local_port == nil or local_port == ""
+                    ssh_user = "root" if ssh_user == nil or ssh_user == ""
+                 end   
+                 c = "cmd.exe /c \@start \"chef-solo #{chef_node} #{ec2_server_name}\" \"#{ENV['EC2DREAM_HOME']}/chef/chef_push.bat\"  #{chef_node} #{ec2_server_name} #{ssh_user} #{local_port}"
    	         puts c
    	         system(c)
    	      else
-   	         c = "#{ENV['EC2DREAM_HOME']}/chef/chef_push.sh #{chef_repository} #{chef_node} #{ec2_server_name} #{private_key} #{ssh_user}"
+   	         c = "#{ENV['EC2DREAM_HOME']}/chef/chef_push.sh #{chef_repository} #{chef_node} #{ec2_server_name} #{private_key} #{ssh_user}  #{local_port}"
    	         puts c
    	         system(c)
    	         puts "return message #{$?}"
@@ -67,7 +70,8 @@ def chef(server, address,  chef_node, ssh_user, private_key, password, platform=
 		if RUBY_PLATFORM.index("mswin") != nil  or RUBY_PLATFORM.index("i386-mingw32") != nil
                   ENV["EC2_CHEF_REPOSITORY"] = chef_repository
                   ENV["EC2_SSH_PASSWORD"] = password
-                  c = "cmd.exe /c \@start \"chef-solo #{chef_node} #{ec2_server_name}\" \"#{ENV['EC2DREAM_HOME']}/chef/chef_push_win.bat\"  #{chef_node} #{ec2_server_name} #{ssh_user}"
+                  ssh_user = "root" if local_port == nil or local_port == ""
+                  c = "cmd.exe /c \@start \"chef-solo #{chef_node} #{ec2_server_name}\" \"#{ENV['EC2DREAM_HOME']}/chef/chef_push_win.bat\"  #{chef_node} #{ec2_server_name} #{ssh_user} #{local_port}"
     	          puts c
     	          system(c)
     	        end   	      

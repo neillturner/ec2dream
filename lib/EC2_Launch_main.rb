@@ -4,6 +4,7 @@ class EC2_Launch
         @ec2_main = owner
         @profile = ""
         @properties = {}
+        @bastion = {}
         @block_mapping = EC2_Block_Mapping.new
         @image_bm = EC2_Block_Mapping.new
         @as_bm = EC2_Block_Mapping.new
@@ -39,6 +40,8 @@ class EC2_Launch
 	@market_icon.create
 	@create = @ec2_main.makeIcon("new.png")
 	@create.create
+	@tunnel = @ec2_main.makeIcon("tunnel.png")
+	@tunnel.create
         tab = FXTabItem.new(@ec2_main.tabBook, " Launch ")
         page1 = FXVerticalFrame.new(@ec2_main.tabBook, LAYOUT_FILL, :padding => 0)
         #
@@ -226,8 +229,9 @@ class EC2_Launch
  	@launch['Private_IP'] = FXTextField.new(@frame1v, 15, nil, 0, :opts => FRAME_SUNKEN)
  	FXLabel.new(@frame1, "" )	 	
  	FXLabel.new(@frame1, "Security_Groups" )
- 	@launch['Security_Group'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN)
- 	@launch['Security_Group_Button'] = FXButton.new(@frame1, "", :opts => BUTTON_TOOLBAR)
+ 	@frame1x = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
+ 	@launch['Security_Group'] = FXTextField.new(@frame1x, 20, nil, 0, :opts => FRAME_SUNKEN)
+ 	@launch['Security_Group_Button'] = FXButton.new(@frame1x, "", :opts => BUTTON_TOOLBAR)
 	@launch['Security_Group_Button'].icon = @magnifier
 	@launch['Security_Group_Button'].tipText = "Select Security Group"
 	@launch['Security_Group_Button'].connect(SEL_COMMAND) do
@@ -238,6 +242,10 @@ class EC2_Launch
 	      put('Security_Group',selected)
 	   end   
 	end
+	FXLabel.new(@frame1x, "" )
+	FXLabel.new(@frame1x, "Puppet Manifest" )
+	@launch['Puppet_Manifest'] = FXTextField.new(@frame1x, 17, nil, 0, :opts => FRAME_SUNKEN)
+ 	FXLabel.new(@frame1, "" )
  	FXLabel.new(@frame1, "Tags" )
         @launch['Tags'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_READONLY)
         @launch['Tags_Button'] = FXButton.new(@frame1, "", :opts => BUTTON_TOOLBAR)
@@ -401,12 +409,12 @@ class EC2_Launch
 	@launch['Instance_Initiated_Shutdown_Behavior'].appendItem("terminate")
 	@launch['Instance_Initiated_Shutdown_Behavior'].setCurrentItem(0)
 	FXLabel.new(@frame1, "" )
- 	FXLabel.new(@frame1, "User Data Text (Startup Command)")
- 	@launch['User_Data'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN)
- 	FXLabel.new(@frame1, "" )
-	FXLabel.new(@frame1, "User Data File (Startup Script)")
- 	@launch['User_Data_File'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN)
- 	@frame1y = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
+ 	FXLabel.new(@frame1, "User Data Text (Startup Cmd)")
+ 	@frame1ud = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
+ 	@launch['User_Data'] = FXTextField.new(@frame1ud, 15, nil, 0, :opts => FRAME_SUNKEN)
+	FXLabel.new(@frame1ud, "User Data File (Startup Script)")
+ 	@launch['User_Data_File'] = FXTextField.new(@frame1ud, 15, nil, 0, :opts => FRAME_SUNKEN)
+ 	@frame1y = FXHorizontalFrame.new(@frame1ud,LAYOUT_FILL_X, :padding => 0)
 	@launch['User_Data_File_Button'] = FXButton.new(@frame1y, "", :opts => BUTTON_TOOLBAR)
 	@launch['User_Data_File_Button'].icon = @magnifier
 	@launch['User_Data_File_Button'].tipText = "Browse..."
@@ -430,12 +438,11 @@ class EC2_Launch
 	   puts "#{editor} #{fn}"
 	   system editor+" "+fn
 	end 
-	FXLabel.new(@frame1, "Override EC2 SSH User" )
-	@launch['EC2_SSH_User'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
-	FXLabel.new(@frame1, "" )	
-	FXLabel.new(@frame1, "Override EC2 SSH Private Key" )
-	@launch['EC2_SSH_Private_Key'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
-	@launch['EC2_SSH_Private_Key_Button'] = FXButton.new(@frame1, "", :opts => BUTTON_TOOLBAR)
+        FXLabel.new(@frame1, "" )
+	FXLabel.new(@frame1, "EC2 SSH Private Key" )
+	@frame1pk = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
+	@launch['EC2_SSH_Private_Key'] = FXTextField.new(@frame1pk, 20, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+	@launch['EC2_SSH_Private_Key_Button'] = FXButton.new(@frame1pk, "", :opts => BUTTON_TOOLBAR)
 	@launch['EC2_SSH_Private_Key_Button'].icon = @magnifier
 	@launch['EC2_SSH_Private_Key_Button'].tipText = "Browse..."
 	@launch['EC2_SSH_Private_Key_Button'].connect(SEL_COMMAND) do
@@ -449,9 +456,9 @@ class EC2_Launch
 	   end
 	end
         if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil	
-	   FXLabel.new(@frame1, "Override Putty Private Key" )
-	   @launch['Putty_Private_Key'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
-	   @launch['Putty_Private_Key_Button'] = FXButton.new(@frame1, "", :opts => BUTTON_TOOLBAR)
+	   FXLabel.new(@frame1pk, "Putty Private Key" )
+	   @launch['Putty_Private_Key'] = FXTextField.new(@frame1pk, 20, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+	   @launch['Putty_Private_Key_Button'] = FXButton.new(@frame1pk, "", :opts => BUTTON_TOOLBAR)
 	   @launch['Putty_Private_Key_Button'].icon = @magnifier
 	   @launch['Putty_Private_Key_Button'].tipText = "Browse..."
 	   @launch['Putty_Private_Key_Button'].connect(SEL_COMMAND) do
@@ -464,9 +471,31 @@ class EC2_Launch
 	         @launch['Putty_Private_Key'].text = dialog.filename
 	      end
 	   end
-        end	   
-	FXLabel.new(@frame1, "Win Admin Password" )
-	@launch['Win_Admin_Password'] = FXTextField.new(@frame1, 30, nil, 0, :opts => FRAME_SUNKEN)
+        end
+        FXLabel.new(@frame1, "" )
+	FXLabel.new(@frame1, "EC2 SSH User" )
+	@frame1su = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
+	@launch['EC2_SSH_User'] = FXTextField.new(@frame1su, 20, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+	FXLabel.new(@frame1su, "Win Admin Password" )
+	@launch['Win_Admin_Password'] = FXTextField.new(@frame1su, 20, nil, 0, :opts => FRAME_SUNKEN)
+	FXLabel.new(@frame1, "" )
+ 	FXLabel.new(@frame1, "Local Port (SSH Tunneling)" )
+ 	@frame1su = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
+	@launch['Local_Port'] = FXTextField.new(@frame1su, 20, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+	@launch['Local_Port_Button'] = FXButton.new(@frame1su, "", :opts => BUTTON_TOOLBAR)
+	@launch['Local_Port_Button'].icon = @tunnel
+	@launch['Local_Port_Button'].tipText = "  Configure Bastion Host  "
+	@launch['Local_Port_Button'].connect(SEL_COMMAND) do
+	   dialog = EC2_BastionEditDialog.new(@ec2_main,@bastion)
+	   dialog.execute
+	   if dialog.saved 
+	      r = dialog.selected
+	      if r != nil and r != ""
+	         @bastion=r
+	         save
+              end   
+	   end   
+	end
 	FXLabel.new(@frame1, "" )
         FXLabel.new(@frame1, "Additional Info" )
         @frame1g = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)

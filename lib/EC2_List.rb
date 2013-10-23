@@ -97,6 +97,7 @@ require 'common/chef'
 require 'common/edit'
 require 'common/scp'
 require 'common/ssh'
+require 'common/ssh_tunnel'
 require 'common/remote_desktop'
 require 'common/error_message'
 require 'common/convert_time'
@@ -209,6 +210,10 @@ class EC2_List
 	@app_delete.create
 	@chart = @ec2_main.makeIcon("chart_stock.png")
 	@chart.create
+        @puppet = @ec2_main.makeIcon("puppet.png")
+	@puppet.create	
+	@tunnel = @ec2_main.makeIcon("tunnel.png")
+	@tunnel.create
 	
     tab1 = FXTabItem.new($ec2_main.tabBook, "  List  ")
   	page1 = FXVerticalFrame.new($ec2_main.tabBook, LAYOUT_FILL, :padding => 0)
@@ -317,12 +322,16 @@ class EC2_List
 	    case @type
  	    when "Local Servers"
 		if @curr_item == nil or @curr_item == ""
-                  error_message("No Server selected","No Server selected to ssh")
+                  error_message("No Server selected","No Server selected to ssh or rdp")
                 else
                   loc = EC2_Properties.new
                   r = loc.get('loc_server',@curr_item)
                   if r['server'] != nil and r['server'] != ""
-                     ssh(r['server'], r['address'], r['ssh_user'], r['ssh_key'], r['putty_key'], r['ssh_password'])
+                     if r['windows_server'] == 'true' 
+                        remote_desktop(r['server'], r['ssh_password'], r['ssh_user'], nil,r['local_port'])
+                     else
+                        ssh(r['server'], r['address'], r['ssh_user'], r['ssh_key'], r['putty_key'], r['ssh_password'],r['local_port'])
+                     end   
                   end   
                 end 
              else
@@ -382,7 +391,7 @@ class EC2_List
                   loc = EC2_Properties.new
                   r = loc.get('loc_server',@curr_item)
                   if r['server'] != nil and r['server'] != ""
-                     scp(r['server'], r['address'], r['ssh_user'], r['ssh_key'], r['putty_key'], r['ssh_password'])
+                     scp(r['server'], r['address'], r['ssh_user'], r['ssh_key'], r['putty_key'], r['ssh_password'],r['local_port'])
                   end                   
                 end
             else
@@ -411,8 +420,12 @@ class EC2_List
                   loc = EC2_Properties.new
                   r = loc.get('loc_server',@curr_item)
                   if r['server'] != nil and r['server'] != ""
-                     chef(r['server'], r['address'], r['chef_node'], r['ssh_user'], r['ssh_key'], r['ssh_password'])
-                  end   
+                     platform = ""
+                     if r['windows_server'] == 'true' 
+                        platform == "windows"
+                     end 
+                     chef(r['server'], r['address'], r['chef_node'], r['ssh_user'], r['ssh_key'], r['ssh_password'],platform,r['local_port'])
+                   end   
                 end
              else
 			   call_dialog(6)
@@ -430,24 +443,24 @@ class EC2_List
 	@tags_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@tags_button.icon = @tag_red	
 	@tags_button.connect(SEL_COMMAND) do |sender, sel, data|
-        #if @config["dialog"][7] == "EC2_TagsAssignDialog"  
-	    #      if @curr_item == nil or @curr_item == ""
-        #          error_message("No #{@type} Selected","No #{@type} selected to edit tags")
-        #       else
-        #          tags = []
-        #          resource_key = @curr_item
-        #          if @type == "Security Groups"
-        #             resource_key = @group_id
-        #          end
-        #         dialog =  EC2_TagsAssignDialog.new(@ec2_main,resource_key)
-        #          dialog.execute
-		#          if dialog.saved 
-		#             load_sort(@type,@curr_sort)
-        #          end
-        #       end  
-        #else
-               call_dialog(7)
-  	    #end  
+           case @type
+  	    when "Local Servers"
+		if @curr_item == nil or @curr_item == ""
+                  error_message("No Server selected","No Server selected to run puppet")
+                else
+                  loc = EC2_Properties.new
+                  r = loc.get('loc_server',@curr_item)
+                  if r['server'] != nil and r['server'] != ""
+                     platform = ""
+                     if r['windows_server'] == 'true' 
+                        platform == "windows"
+                     end 
+                     puppet(r['server'], r['address'], r['puppet_manifest'], r['ssh_user'], r['ssh_key'], r['ssh_password'],platform,r['local_port'])
+                  end   
+                end
+             else
+			   call_dialog(7)
+             end	
 	end
 	@tags_button.connect(SEL_UPDATE) do |sender, sel, data|	
 	   if @loaded and @config['icon'] != nil and @config['icon'][7] != "" 
@@ -464,6 +477,16 @@ class EC2_List
 	    case @type
           when "Images"
             # to do 
+  	  when "Local Servers"
+		if @curr_item == nil or @curr_item == ""
+                  error_message("No Server selected","No Server selected to ssh tunnel ")
+                else
+                  loc = EC2_Properties.new
+                  r = loc.get('loc_server',@curr_item)
+                  if r['server'] != nil and r['server'] != ""
+                     ssh_tunnel(r['server'], r['address'], r['ssh_user'], r['ssh_key'], r['putty_key'], r['ssh_password'], r['address_port'], r['local_port'], r['bastion_host'], r['bastion_port'], r['bastion_user'], r['bastion_ssh_key'], r['bastion_putty_key'])
+                  end   
+                end            
           else
             if @config["dialog"][8] == "EC2_TagsFilterDialog"
                dialog = EC2_TagsFilterDialog.new(@ec2_main,@type,@tags_filter[@config["name"]])

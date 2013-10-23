@@ -22,38 +22,41 @@
 
 Gem::Specification.new do |spec|
   spec.name = 'fogviz'
-  spec.version = '3.6.6'
+  spec.version = '3.6.7'
   spec.authors = ['Neill Turner']
   spec.email = 'neillwturner@gmail.com'
   spec.executables = ["fogviz"]
   spec.homepage = 'http://ec2dream.blogspot.com'
-  spec.summary = 'Build and Manage Cloud Servers......visually with chef'
+  spec.summary = 'Build and Manage Cloud Servers'
   spec.require_path = 'lib'
   spec.add_dependency('fxruby')
-  spec.add_dependency('tzinfo')
   spec.add_dependency('rubyzip')
   spec.add_dependency('gchartrb')
-  spec.add_dependency('pocketknife_ec2dream', '>= 0.1.9')
-  spec.add_dependency('pocketknife_windows')
+  spec.add_dependency('pocketknife_ec2dream', '>= 0.1.10')
+  spec.add_dependency('pocketknife_puppet', '>= 0.1.10')
+  spec.add_dependency('pocketknife_windows', '>= 0.1.10')
   spec.add_dependency('fog', '= 1.12.1')
   spec.add_dependency('cloudfoundry-client')
 
   spec.description = <<-EOF
 == DESCRIPTION:
 
-Build and Manage Cloud Servers......visually with chef
+Build and Manage Cloud Servers
 
 == FEATURES:
 
-Fogviz combines Fog, Ruby, Chef and Git into an open source devops platform supporting:
+Fogviz combines Fog, Ruby into a visual open source devops platform supporting:
       Amazon AWS with full support for VPC, Autoscaling and ability to list most entities.
       Amazon compatible clouds:  Eucalyptus, CloudStack.
       Openstack Clouds:  Rackspace Cloud Servers and HP Cloud.
       Cloud Foundry and even Local Servers.
+      Chef and Puppet.
+
 EOF
 
     candidates = Dir.glob("{lib}/**/*") +  ['History.txt', 'README.txt', 'ec2dream.ico', 'ec2dream.bmp' , 'fogviz.gemspec']
     candidates = candidates + Dir.glob("{chef}/**/*")
+    candidates = candidates + Dir.glob("{puppet}/**/*")
     candidates = candidates +  Dir.glob("{launchrdp}/*")
     candidates = candidates +  Dir.glob("{putty}/*")
     candidates = candidates +  Dir.glob("{rackspace}/*")

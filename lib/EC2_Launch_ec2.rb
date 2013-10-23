@@ -365,6 +365,7 @@ class EC2_Launch
       @launch['Name'].text = @profile
       @launch['Name'].enabled = false
       @launch['Chef_Node'].text = @profile
+      @launch['Puppet_Manifest'].text = 'init.pp'
       @launch['Image_Id'].enabled = true
       @launch['Image_Id_Button'].enabled = true
       fn = @ec2_main.settings.get_system('ENV_PATH')+"/"+@profile_folder+"/"+@profile+".properties"
@@ -392,6 +393,7 @@ class EC2_Launch
         end        
         load_panel('Security_Group')
         load_panel('Chef_Node')
+        load_panel('Puppet_Manifest')
 	load_panel('Addressing')
         load_panel('Image_Id')
         load_panel('Image_Manifest')
@@ -419,6 +421,8 @@ class EC2_Launch
            load_panel('Putty_Private_Key')
         end
         load_panel('Win_Admin_Password')
+        load_panel('Local_Port')
+        load_bastion
         @block_mapping.load_from_properties(@properties,"BlockMapping",@launch['Block_Devices'])
         @image_bm.load_from_properties(@properties,"Image_Bm",@launch['Image_Block_Devices']) 
         @launch_loaded = true
@@ -459,6 +463,16 @@ class EC2_Launch
          end
       end   
    end
+   
+   def load_bastion
+           @bastion = {}
+   	   @bastion['bastion_host'] = @properties['Bastion_Host']
+   	   @bastion['bastion_port'] = @properties['Bastion_Port']
+   	   @bastion['bastion_user'] = @properties['Bastion_User']
+   	   @bastion['bastion_ssh_key'] = @properties['Bastion_Ssh_Key']
+           @bastion['bastion_putty_key'] = @properties['Bastion_Putty_Key']
+   end 
+   
    
    def load_profile(image)
          puts "Launch.load_profile"
@@ -501,6 +515,7 @@ class EC2_Launch
            end
            load_panel('Security_Group')
            load_panel('Chef_Node')
+           load_panel('Puppet_Manifest')
 	   load_panel('Addressing')
            load_panel('Image_Id')
            load_panel('Image_Manifest')
@@ -527,7 +542,9 @@ class EC2_Launch
            if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
               load_panel('Putty_Private_Key')
            end
-           load_panel('Win_Admin_Password')        
+           load_panel('Win_Admin_Password')
+           load_panel('Local_Port')
+	   load_bastion
            @launch_loaded = true
          else
            pk = @ec2_main.settings.get('EC2_SSH_PRIVATE_KEY')
@@ -597,6 +614,7 @@ class EC2_Launch
      @launch['Name'].enabled = true
      clear('Security_Group')
      clear('Chef_Node')
+     clear('Puppet_Manifest')
      clear('Tags')
      clear('Addressing')
      clear('Image_Id')
@@ -625,6 +643,8 @@ class EC2_Launch
         clear('Putty_Private_Key')
      end
      clear('Win_Admin_Password')
+     clear('Local_Port')
+     @bastion = {}
      @block_mapping.clear(@properties,"BlockMapping",@launch['Block_Devices'])
      @image_bm.clear(@properties,"Image_Bm",@launch['Image_Block_Devices'])
      clear_notes     
@@ -676,6 +696,7 @@ class EC2_Launch
       load_panel('Image_Root_Device_Type')      
       save_launch('Security_Group')
       save_launch('Chef_Node')
+      save_launch('Puppet_Manifest')
       save_launch('Addressing')
       save_launch('Image_Manifest')
       save_launch('Image_Architecture')
@@ -702,6 +723,8 @@ class EC2_Launch
          save_launch('Putty_Private_Key')
       end
       save_launch('Win_Admin_Password')
+      save_launch('Local_Port')
+      save_bastion
       @block_mapping.save(@properties,"BlockMapping")
       @image_bm.save(@properties,"Image_Bm")
       doc = ""
@@ -730,6 +753,15 @@ class EC2_Launch
       @ec2_main.treeCache.refresh_launch
      end 
    end
+   
+   def save_bastion(bastion=nil)
+            @bastion = bastion if bastion != nil 
+      	    @properties['Bastion_Host'] = @bastion['bastion_host']
+      	    @properties['Bastion_Port'] = @bastion['bastion_port']
+      	    @properties['Bastion_User'] =  @bastion['bastion_user']
+      	    @properties['Bastion_Ssh_Key'] = @bastion['bastion_ssh_key']
+            @properties['Bastion_Putty_Key'] = @bastion['bastion_putty_key']
+   end 
    
    def delete
       fn = @ec2_main.settings.get_system('ENV_PATH')+"/"+@profile_folder+"/"+@profile+".properties"

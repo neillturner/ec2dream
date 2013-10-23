@@ -42,14 +42,12 @@ class VAG_CreateDialog < FXDialogBox
            return        
         end
         rc = Dir.mkdir(folder, 0700)
-        puts "*** rc #{rc}"
         @saved = true if rc == 0
         if @saved == false
            error_message("Error","Vagrant Server Directory create Failed")
         else
            s = "#{ENV['EC2DREAM_HOME']}/chef/Vagrantfile"
            d = "#{@ec2_main.settings.get('VAGRANT_REPOSITORY')}/#{server}"
-           puts "*** Copy #{s} to #{d}"
            FileUtils.cp_r(s, d)        
         end   
       rescue

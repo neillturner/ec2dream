@@ -9,4 +9,4 @@ REM
 @echo on
 set VAGRANT_LOG=debug
 cd "%1"
-vagrant %2
+vagrant %2 --provider aws

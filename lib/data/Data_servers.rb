@@ -140,11 +140,6 @@ class Data_servers
                       r[:aws_launch_time]=y.created
                       r[:updated_at] = y.updated
                       r[:password] = y.password
-                      #if y.image.instance_of? Hash 
-                      #    r[:image_id] = y.image["id"]
-                      #    r[:aws_image_id] = y.image["id"]
-                      #    puts "*** #{r[:aws_image_id]}"
-                      #end    
                       r[:flavor] = y.flavor_id
                       r[:aws_instance_type] = y.flavor_id
                       r[:image]= y.image_id
@@ -528,7 +523,7 @@ class Data_servers
         #   data  = data['passwordData']
         elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
            response = conn.get_password_data(instance)
-           puts "*** status #{response.status} response #{response.body}"
+           puts "ERROR: status #{response.status} response #{response.body}"
            puts "ERROR: there is fog bug getting windows admin password"
            if response.status = 200
               data = response.body['passwordData']

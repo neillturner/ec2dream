@@ -49,7 +49,7 @@ class EC2_Main < FXMainWindow
     $ec2_main = self
     @initial_startup = false
     @app = app
-    super(app, "#{product} v3.6.6 - Build and Manage Cloud Servers...visually with chef", :opts => DECOR_ALL, :width => 900, :height => 650)
+    super(app, "#{product} v3.6.7 - Build and Manage Cloud Servers", :opts => DECOR_ALL, :width => 900, :height => 650)
 
     # Status bar
     status = FXStatusBar.new(self,
@@ -142,8 +142,8 @@ class EC2_Main < FXMainWindow
   
   def tree_top_level(item)
      if item.text == "Environments"
-        #puts "environment"
-        #@tabBook.setCurrent(4)	 
+        puts "environment"
+        @tabBook.setCurrent(4)	 
      elsif item.text == "Env - #{@environment.env}"
         puts "environment"
         @tabBook.setCurrent(4)
@@ -162,14 +162,8 @@ class EC2_Main < FXMainWindow
              puts "launch"
              @launch.clear_panel
              @tabBook.setCurrent(2)
-           #  @launch.select
-  	   #  when "Apps"   
-  	   #@server.clear_panel
-  	   #@launch.clear_panel
-  	   #@secgrp.clear_panel
-       #    @tabBook.setCurrent(2)
-	   when "Servers","Apps"
-         puts "#{item.text}"
+	  when "Servers","Apps"
+             puts "#{item.text}"
   	     @tabBook.setCurrent(0)
   	     @list.load(item.text)
 	   else

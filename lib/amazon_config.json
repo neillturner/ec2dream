@@ -212,8 +212,8 @@
           "response": "",
           "response_code": 200,
           "action": ["create","delete", "edit","","","","","",""],
-          "icon": ["@create","@delete","@edit","@monitor","@csv","@put","@chef_icon","",""],
-          "tooltip":[" Create Config ","  Delete Config "," edit Config ",""," Csv Data ","","","",""],
+          "icon": ["@create","@delete","@edit","@monitor","@csv","@put","@chef_icon","@puppet","@tunnel"],
+          "tooltip":[" Create Config ","  Delete Config "," edit Config "," ssh or rdp to server "," Csv Data ","WinSCP"," Run Chef Solo","Run Puppet Apply","Setup ssh tunnel"],
           "dialog":["LOC_CreateDialog","LOC_DeleteDialog","LOC_EditDialog","","","","","",""],
           "dialog_parm": ["","","","","","","","",""], 
           "keys": ["server"]

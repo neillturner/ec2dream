@@ -11,6 +11,7 @@
        ENV['EC2_INSTANCE'] = ""
        clear('Security_Groups')
        clear('Chef_Node')
+       clear('Puppet_Manifest')
        clear('Tags')
        clear('Image_ID')
        clear('State')
@@ -29,7 +30,8 @@
        end
        clear('EC2_SSH_User')
        clear('Win_Admin_Password')
-       clear('Command')
+       clear('Local_Port')
+       #clear('Command')
        clear('Ami_Launch_Index')
        clear('Kernel_Id')
        clear('Ramdisk_Id')
@@ -78,6 +80,7 @@
    	     @server['Tags'].text =  ""
    	 end   
     	 @server['Chef_Node'].text = get_chef_node
+    	 @server['Puppet_Manifest'].text =  get_puppet_manifest
     	 @server['Image_ID'].text = r['imageId']
     	 @server['State'].text = r['instanceState']['name']
     	 @server_status = @server['State'].text
@@ -109,11 +112,17 @@
     	       @server['Win_Admin_Password'].text = ""
     	   end
     	 end
-    	 if @command_stack[instance_id] != nil and @command_stack[instance_id] != ""
-    	   @server['Command'].text = @command_stack[instance_id]
-    	 else 
-    	   @server['Command'].text = ""
-    	 end
+    	 @server['Local_Port'].text = ""
+         data_temp = @ec2_main.launch.get('Local_Port')
+         if data_temp != nil and data_temp != ""
+            @server['Local_Port'].text = data_temp
+         end     	 
+	 load_bastion 
+    	 #if @command_stack[instance_id] != nil and @command_stack[instance_id] != ""
+    	 #  @server['Command'].text = @command_stack[instance_id]
+    	 #else 
+    	 #  @server['Command'].text = ""
+    	 #end
     	 if r['monitoring']['state'] != nil and r['monitoring']['state'] == true
     	    @server['Monitoring_State'].text = "detailed"
     	 else
@@ -141,6 +150,34 @@
        end
        @ec2_main.app.forceRefresh
      end	 
+  end 
+  
+ def load_bastion
+     instance_id = @server['Instance_ID'].text
+     puts "Server.load_bastion #{instance_id}"
+     if @bastion[instance_id] == nil
+    	 r = {}
+   	 r['bastion_host'] = @ec2_main.settings.get('BASTION_HOST')
+   	 r['bastion_port'] = @ec2_main.settings.get('BASTION_PORT')
+   	 r['bastion_user'] = @ec2_main.settings.get('BASTION_USER')
+   	 r['bastion_ssh_key'] = @ec2_main.settings.get('BASTION_SSH_KEY')
+         r['bastion_putty_key'] = @ec2_main.settings.get('BASTION_PUTTY_KEY')    	 
+         p = @ec2_main.launch.get('Bastion_Host')
+         r['bastion_host'] = p if p != nil and p != ""
+  	 
+         p = @ec2_main.launch.get('Bastion_Port')
+         r['bastion_port'] = p if p != nil and p != ""
+         p = @ec2_main.launch.get('Bastion_User')
+         r['bastion_user'] = p if p != nil and p != ""
+
+         p = @ec2_main.launch.get('Bastion_Ssh_Key')
+         r['bastion_ssh_key'] = p if p != nil and p != ""
+
+         p = @ec2_main.launch.get('Bastion_Putty_Key')
+         r['bastion_putty_key'] = p if p != nil and p != ""
+      
+         @bastion[instance_id]=r
+     end 
   end 
  
   def load_block_mapping(r)

@@ -9,11 +9,15 @@ class EC2_Server
         @windows_admin_pw = {}
         @command_stack = {}
         @ops_public_addr = {}
+        @ec2_ssh_user = {}
         @ops_admin_pw = {}
         @ec2_ssh_private_key = {}
         @ec2_chef_node = {}
+        @ec2_puppet_manifest = {}
         @putty_private_key = {}
         @mysql_admin_pw = {}
+        @bastion = {}
+        @local_port = {}
         @server_status = ""
         @server = {}
         @resource_tags = nil 
@@ -59,6 +63,8 @@ class EC2_Server
 	@create_image_icon.create
 	@chef_icon = @ec2_main.makeIcon("chef.png")
 	@chef_icon.create
+	@puppet_icon = @ec2_main.makeIcon("puppet.png")
+	@puppet_icon.create	
 	@view = @ec2_main.makeIcon("application_view_icons.png")
 	@view.create
         @tag_red = @ec2_main.makeIcon("tag_red.png")
@@ -75,6 +81,8 @@ class EC2_Server
 	@delete.create
 	@chart = @ec2_main.makeIcon("chart_stock.png")
 	@chart.create
+	@tunnel = @ec2_main.makeIcon("tunnel.png")
+	@tunnel.create	
         tab2 = FXTabItem.new(@ec2_main.tabBook, " Server ")
         @page1 = FXVerticalFrame.new(@ec2_main.tabBook, LAYOUT_FILL, :padding => 0)
         page1a = FXHorizontalFrame.new(@page1,LAYOUT_FILL_X, :padding => 0)
@@ -99,9 +107,6 @@ class EC2_Server
 	   enable_if_env_set(sender)
 	end
 	@putty_button = FXButton.new(page1a," ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
-	#|LAYOUT_FIX_WIDTH|LAYOUT_FIX_HEIGHT)
-	#@putty_button.width=30
-	#@putty_button.height=30
 	@putty_button.icon = @monitor
         @putty_button.tipText = " SSH "
 	@putty_button.connect(SEL_COMMAND) do |sender, sel, data|
@@ -318,6 +323,15 @@ class EC2_Server
 	@chef_button.connect(SEL_UPDATE) do |sender, sel, data|
            enable_if_ec2_server_loaded(sender)	
 	end
+	@puppet_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
+	@puppet_button.icon = @puppet_icon
+	@puppet_button.tipText = " Run Puppet Apply "
+	@puppet_button.connect(SEL_COMMAND) do |sender, sel, data|
+           run_puppet
+	end
+	@chef_button.connect(SEL_UPDATE) do |sender, sel, data|
+           enable_if_ec2_server_loaded(sender)	
+	end	
 	@graph_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@graph_button.icon = @chart
 	@graph_button.tipText = " Monitoring Graphs "
@@ -334,7 +348,21 @@ class EC2_Server
 	       sender.enabled = false
 	    end 	
 	end	
- 	
+	@tunnel_button = FXButton.new(page1a," ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
+	@tunnel_button.icon = @tunnel
+        @tunnel_button.tipText = " Setup SSH Tunnel"
+	@tunnel_button.connect(SEL_COMMAND) do |sender, sel, data|
+	    if @type == "ec2" or @type == "ops"
+               run_ssh_tunnel
+            end
+	end
+	@tunnel_button.connect(SEL_UPDATE) do |sender, sel, data|
+	   if @type != "cfy" and loaded
+	      sender.enabled = true
+  	   else
+	      sender.enabled = false
+	   end 
+	end		
 	@frame1 = FXMatrix.new(@page1, 3, MATRIX_BY_COLUMNS|LAYOUT_FILL)
  	FXLabel.new(@frame1, "Security Groups" )
         @frame1s = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
@@ -352,8 +380,9 @@ class EC2_Server
 	end 	
  	FXLabel.new(@frame1, "" )
  	FXLabel.new(@frame1, "Instance Id" )
- 	@server['Instance_ID'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
-	@server['Instance_ID_Button'] = FXButton.new(@frame1, " ",:opts => BUTTON_TOOLBAR)
+ 	@frame1t = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
+ 	@server['Instance_ID'] = FXTextField.new(@frame1t, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+	@server['Instance_ID_Button'] = FXButton.new(@frame1t, " ",:opts => BUTTON_TOOLBAR)
 	@server['Instance_ID_Button'].icon = @view
 	@server['Instance_ID_Button'].tipText = "  Modify Instance Attributes  "
 	@server['Instance_ID_Button'].connect(SEL_COMMAND) do |sender, sel, data|
@@ -365,6 +394,17 @@ class EC2_Server
                dialog.execute
             end
 	end
+ 	FXLabel.new(@frame1t, "Puppet Manifest" )
+ 	@server['Puppet_Manifest'] = FXTextField.new(@frame1t, 15, nil, 0, :opts => FRAME_SUNKEN)
+	@server['Puppet_Manifest'].connect(SEL_COMMAND) do
+           instance_id = @server['Instance_ID'].text
+           @ec2_puppet_manifest[instance_id] = @server['Puppet_Manifest'].text
+           if @ec2_main.launch.loaded == true
+              @ec2_main.launch.put('Puppet_Manifest',@server['Puppet_Manifest'].text) 
+    	      @ec2_main.launch.save
+    	   end   
+	end 
+ 	FXLabel.new(@frame1, "" )	
  	FXLabel.new(@frame1, "Tags" )
  	@server['Tags'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
 	@server['Tags_button'] = FXButton.new(@frame1, " ",:opts => BUTTON_TOOLBAR)
@@ -422,10 +462,10 @@ class EC2_Server
  	@server['Private_DSN'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
  	FXLabel.new(@frame1, "" )
 	FXLabel.new(@frame1, "Elastic IP" )
- 	@server['Public_IP'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
- 	FXLabel.new(@frame1, "" )
-	FXLabel.new(@frame1, "Private IP" )
- 	@server['Private_IP'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
+	@frame1ip = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
+ 	@server['Public_IP'] = FXTextField.new(@frame1ip, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+	FXLabel.new(@frame1ip, "Private IP" )
+ 	@server['Private_IP'] = FXTextField.new(@frame1ip, 25, nil, 0, :opts => TEXTFIELD_READONLY)
  	FXLabel.new(@frame1, "" )
 	FXLabel.new(@frame1, "Subnet Id" )
 	@frame1e = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
@@ -510,17 +550,21 @@ class EC2_Server
 	   end       
         end
 	FXLabel.new(@frame1, "EC2 SSH/Windows User" )
-	@server['EC2_SSH_User'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+	@frame1su = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
+	@server['EC2_SSH_User'] = FXTextField.new(@frame1su, 20, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
         @server['EC2_SSH_User'].connect(SEL_COMMAND) do |sender, sel, data|
+           instance_id = @server['Instance_ID'].text
+           @ec2_ssh_user[instance_id] = data
            if @ec2_main.launch.loaded == true
               @ec2_main.launch.put('EC2_SSH_User',data) 
     	      @ec2_main.launch.save
     	   end   
 	end
-	FXLabel.new(@frame1, "" )        
-	FXLabel.new(@frame1, "Win Admin Password" )
-	@server['Win_Admin_Password'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_PASSWD)
+ 	FXLabel.new(@frame1su, "Win Admin Pswd" )
+	@server['Win_Admin_Password'] = FXTextField.new(@frame1su, 20, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_PASSWD)
 	@server['Win_Admin_Password'].connect(SEL_COMMAND) do |sender, sel, data|
+	   instance_id = @server['Instance_ID'].text
+           @windows_admin_pw[instance_id] = data
 	   if @ec2_main.launch.loaded == true
 	      @ec2_main.launch.put('Win_Admin_Password',data) 
     	      @ec2_main.launch.save
@@ -574,20 +618,51 @@ class EC2_Server
 	@server['Win_Admin_Password_Button2'].connect(SEL_COMMAND) do
 	   dialog = EC2_ShowPasswordDialog.new(@ec2_main,"Win Admin Password",@server['Win_Admin_Password'].text)
            dialog.execute	
-	end         
-	FXLabel.new(@frame1, "Remote Command" ) 
-	@server['Command'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
-        @server['Command_Button'] = FXButton.new(@frame1, "", :opts => BUTTON_TOOLBAR)
-	@server['Command_Button'].icon = @start_icon
-	@server['Command_Button'].tipText = "Run Command on Server"
-	@server['Command_Button'].connect(SEL_COMMAND) do
+	end
+ 	FXLabel.new(@frame1, "Local Port (SSH Tunneling)" )
+ 	@frame1su = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
+	@server['Local_Port'] = FXTextField.new(@frame1su, 20, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+ 	@server['Local_Port'].connect(SEL_COMMAND) do  |sender, sel, data|
+ 	   instance_id = @server['Instance_ID'].text
+ 	   @local_port[instance_id] = data
+	   @ec2_main.launch.put('Local_Port',data) 
+    	   @ec2_main.launch.save        
+	end 		
+	@server['Local_Port_Button'] = FXButton.new(@frame1su, "", :opts => BUTTON_TOOLBAR)
+	@server['Local_Port_Button'].icon = @tunnel
+	@server['Local_Port_Button'].tipText = "  Configure Bastion Host  "
+	@server['Local_Port_Button'].connect(SEL_COMMAND) do
+	   r = {}
 	   instance_id = @server['Instance_ID'].text
-           @command_stack[instance_id] = @server['Command'].text
-	   run_command	
-	end 
-	FXLabel.new(@frame1, "AMI Launch Index" )    	 
-        @server['Ami_Launch_Index'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
+	   r = @bastion[instance_id] if @bastion[instance_id] != nil
+	   dialog = EC2_BastionEditDialog.new(@ec2_main,r)
+	   dialog.execute
+	   if dialog.saved 
+	      r = dialog.selected
+	      if r != nil and r != ""
+               @bastion[instance_id] = r
+               if @ec2_main.launch.loaded == true
+                  @ec2_main.launch.save_bastion(r)
+    	          @ec2_main.launch.save
+    	       end   	      
+              end   
+	   end   
+	end
+	FXLabel.new(@frame1, "" )
+	FXLabel.new(@frame1, "AMI Launch Index" ) 
+	#@frame1lr = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
+        @server['Ami_Launch_Index'] = FXTextField.new(@frame1, 20, nil, 0, :opts => TEXTFIELD_READONLY)
         FXLabel.new(@frame1, "" )
+	#FXLabel.new(@frame1lr, "Remote Command" ) 
+	#@server['Command'] = FXTextField.new(@frame1lr, 20, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+        #@server['Command_Button'] = FXButton.new(@frame1, "", :opts => BUTTON_TOOLBAR)
+	#@server['Command_Button'].icon = @start_icon
+	#@server['Command_Button'].tipText = "Run Command on Server"
+	#@server['Command_Button'].connect(SEL_COMMAND) do
+	#   instance_id = @server['Instance_ID'].text
+        #   @command_stack[instance_id] = @server['Command'].text
+	#   run_command	
+	#end
 	FXLabel.new(@frame1, "Kernel Id" )
 	@frame1f = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
         @server['Kernel_Id'] = FXTextField.new(@frame1f, 20, nil, 0, :opts => TEXTFIELD_READONLY)
@@ -660,9 +735,21 @@ class EC2_Server
 	FXLabel.new(@frame3, "" )
 	FXLabel.new(@frame3, "Security Groups" )
 	@ops_server['Security_Groups'] = FXTextField.new(@frame3, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+
  	FXLabel.new(@frame3, "" )
  	FXLabel.new(@frame3, "Instance ID" )
- 	@ops_server['Instance_ID'] = FXTextField.new(@frame3, 50, nil, 0, :opts => TEXTFIELD_READONLY)
+ 	@frame3t = FXHorizontalFrame.new(@frame3,LAYOUT_FILL_X, :padding => 0)
+ 	@ops_server['Instance_ID'] = FXTextField.new(@frame3t, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+ 	FXLabel.new(@frame3t, "Puppet Manifest" )
+ 	@ops_server['Puppet_Manifest'] = FXTextField.new(@frame3t, 15, nil, 0, :opts => FRAME_SUNKEN)
+	@ops_server['Puppet_Manifest'].connect(SEL_COMMAND) do
+           instance_id = @ops_server['Instance_ID'].text
+           @ec2_puppet_manifest[instance_id] = @ops_server['Puppet_Manifest'].text
+           if @ec2_main.launch.loaded == true
+              @ec2_main.launch.put('Puppet_Manifest',@ops_server['Puppet_Manifest'].text) 
+    	      @ec2_main.launch.save
+    	   end   
+	end 		 	
 	FXLabel.new(@frame3, "" )
  	FXLabel.new(@frame3, "Image ID" )
  	@ops_server['Image_ID'] = FXTextField.new(@frame3, 50, nil, 0, :opts => TEXTFIELD_READONLY)
@@ -1057,15 +1144,17 @@ class EC2_Server
                user = @ec2_main.launch.ops_get("EC2_SSH_User")
                address = @ops_server['Public_Addr'].text
                password = @ops_server['Admin_Password'].text
+               local_port = nil  # not added yet
             else 
                address = @server['Public_IP'].text
                user = @ec2_main.launch.get("EC2_SSH_User") 
                password =""
+               local_port = @server['Local_Port'].text
             end  
             putty_key = get_ppk
             private_key = get_pk
-            puts "scp #{server}, #{address}, #{user}, #{private_key}, #{putty_key}, #{password}"
-            scp(server, address, user, private_key, putty_key, password)
+            puts "scp #{server}, #{address}, #{user}, #{private_key}, #{putty_key}, #{password}, #{local_port}"
+            scp(server, address, user, private_key, putty_key, password, local_port)
   end
  
   def run_ssh
@@ -1074,17 +1163,49 @@ class EC2_Server
                user = @ec2_main.launch.ops_get("EC2_SSH_User")
                address = @ops_server['Public_Addr'].text
                password = @ops_server['Admin_Password'].text
+               local_port = nil  # not added yet
             else 
                address = @server['Public_IP'].text
                address = @server['Private_IP'].text if address == nil or address == ""
                user = @ec2_main.launch.get("EC2_SSH_User")
                password = ""
+               local_port = @server['Local_Port'].text
             end  
             putty_key = get_ppk
             private_key = get_pk
-            ssh(server, address, user, private_key, putty_key, password)
+            ssh(server, address, user, private_key, putty_key, password, local_port)
   end 
-  
+
+  def run_ssh_tunnel
+            puts "Server.run_ssh_tunnel" 
+            server = currentServer
+            instance_id = @server['Instance_ID'].text
+             
+            r = {}
+            r = @bastion[instance_id] if @bastion[instance_id] != nil 
+            if @type == "ops"  
+               user = @ec2_main.launch.ops_get("EC2_SSH_User")
+               address = @ops_server['Public_Addr'].text
+               password = @ops_server['Admin_Password'].text
+               local_port = nil   # not added yet 
+               address_port = "22" 
+            else 
+               #address = @server['Public_IP'].text
+               address = @server['Private_IP'].text if address == nil or address == ""
+               instance_id = @server['Instance_ID'].text
+               user = @ec2_main.launch.get("EC2_SSH_User")
+               local_port = @server['Local_Port'].text
+               password = ""
+               address_port = "22" 
+               if @server['Platform'].text == "windows" 
+                  address_port = "3389"
+               end   
+            end  
+            putty_key = get_ppk
+            private_key = get_pk
+             puts "ssh_tunnel #{server}, #{address}, #{user}, #{private_key}, #{putty_key}, #{password}, #{address_port}, #{local_port}, #{r}"
+            ssh_tunnel(server, address, user, private_key, putty_key, password, address_port, local_port, r['bastion_host'], r['bastion_port'],r['bastion_user'], r['bastion_ssh_key'], r['bastion_putty_key'])
+  end   
 
   def run_remote_desktop
              server = currentServer
@@ -1092,13 +1213,15 @@ class EC2_Server
                 user = @ec2_main.launch.ops_get("SSH_User")
                 address = @ops_server['Public_Addr'].text
                 pw = @ops_server['Admin_Password'].text
+                local_port = nil   # not added yet  
               else 
                 address = @server['Public_IP'].text
                 user = @ec2_main.launch.get("EC2_SSH_User")
                 pw = @server['Win_Admin_Password'].text
+                local_port = @server['Local_Port'].text
              end 
 	     if pw != nil and pw != ""
-	        remote_desktop(server, pw, user)
+	        remote_desktop(server, pw, user, "3389", local_port)
 	     else
 	        error_message("Error","No Admin Password")
              end	                       
@@ -1114,8 +1237,23 @@ class EC2_Server
          cn = @secgrp
         end
       end   
+      puts "chef_node #{cn}"
       return cn
-  end   
+  end  
+  
+  def get_puppet_manifest
+      instance_id = @server['Instance_ID'].text
+      if @ec2_puppet_manifest[instance_id] != nil and @ec2_puppet_manifest[instance_id] != ""
+  	cn =  @ec2_puppet_manifest[instance_id]
+      else  
+        cn = @ec2_main.launch.get('Puppet_Manifest')
+        if cn == nil or cn == ""
+         cn = 'init.pp'
+        end
+      end   
+      puts "puppet_manifest #{cn}"
+      return cn
+  end     
   
   def get_pk
    pk = ""
@@ -1195,23 +1333,6 @@ class EC2_Server
           return ""          
       end   
   end
-  
-  # not used i believe
-  #def securityGrps
-  #     return @ec2_main.serverCache.securityGrps
-  #end 
-  
-  #def instances
-  #     return @ec2_main.serverCache.instances
-  #end 
-  
-  #def instance_names
-  #  return @ec2_main.serverCache.instance_names
-  #end
-  
-  #def instance_running_names
-  #   return @ec2_main.serverCache.running_names
-  #end 
   
   def instance_group(i)
       return @ec2_main.serverCache.instance_group(i)
@@ -1301,12 +1422,14 @@ class EC2_Server
             chef_node = ""
             password =""
             platform = ""
+            local_port =""
             if @type == "ops"
                if @ops_server['Chef_Node'].text != nil and @ops_server['Chef_Node'].text != ""
                   chef_node = @ops_server['Chef_Node'].text
                end
                user = @ec2_main.launch.ops_get("SSH_User")
                password = @ops_server['Admin_Password'].text
+               local_port = nil  # not added yet
  	    else
                if @server['Chef_Node'].text != nil and @server['Chef_Node'].text != ""
                   chef_node = @server['Chef_Node'].text
@@ -1316,36 +1439,69 @@ class EC2_Server
                if platform == "windows" and @server['Win_Admin_Password'].text != ""
                   password = @server['Win_Admin_Password'].text
                end 
+               local_port = @server['Local_Port'].text
             end 
             private_key = get_pk
-	    chef(server, address,  chef_node, user, private_key, password, platform)
+	    chef(server, address,  chef_node, user, private_key, password, platform, local_port)
      end
-     
-    def run_command
-            server = currentServer
-            address = @server['Public_IP'].text
-            command = ""
-            password =""
-            platform = ""
-            if @type == "ops"
-               if @ops_server['Command'].text != nil and @ops_server['Command'].text != ""
-                  command = @ops_server['Command'].text
-               end
-               user = @ec2_main.launch.ops_get("SSH_User")
-               password = @ops_server['Admin_Password'].text
- 	    else
-               if @server['Command'].text != nil and @server['Command'].text != ""
-                  command = @server['Command'].text
-               end
-               user = @ec2_main.launch.get("EC2_SSH_User")
-               platform = @server['Platform'].text
-               if platform == "windows" and @server['Win_Admin_Password'].text != ""
-                  password = @server['Win_Admin_Password'].text
-               end 
-            end 
-            private_key = get_pk
-	    command_runner(server, address, command, user, private_key, password, platform)
-     end     
+ 
+     def run_puppet
+             server = currentServer
+             address = @server['Public_IP'].text
+             puppet_manifest = ""
+             password =""
+             platform = ""
+             local_port =""
+             if @type == "ops"
+                if @ops_server['Puppet_Manifest'].text != nil and @ops_server['Puppet_Manifest'].text != ""
+                   puppet_manifest = @ops_server['Puppet_Manifest'].text
+                end
+                user = @ec2_main.launch.ops_get("SSH_User")
+                password = @ops_server['Admin_Password'].text
+                local_port = nil  # not added yet
+  	    else
+                if @server['Puppet_Manifest'].text != nil and @server['Puppet_Manifest'].text != ""
+                   puppet_manifest = @server['Puppet_Manifest'].text
+                end
+                user = @ec2_main.launch.get("EC2_SSH_User")
+                platform = @server['Platform'].text
+                if platform == "windows" and @server['Win_Admin_Password'].text != ""
+                   password = @server['Win_Admin_Password'].text
+                end 
+                local_port = @server['Local_Port'].text
+             end 
+             private_key = get_pk
+ 	    puppet(server, address,  puppet_manifest, user, private_key, password, platform, local_port)
+     end
+ 
+    #def run_command
+   #         server = currentServer
+   #         address = @server['Public_IP'].text
+   #         command = ""
+   #         password =""
+   #         platform = ""
+   #         local_port =""
+   #         if @type == "ops"
+   #            if @ops_server['Command'].text != nil and @ops_server['Command'].text != ""
+   #               command = @ops_server['Command'].text
+   #            end
+   #            user = @ec2_main.launch.ops_get("SSH_User")
+   #            password = @ops_server['Admin_Password'].text
+   #            local_port = nil  # not added yet
+ #	    else
+   #            if @server['Command'].text != nil and @server['Command'].text != ""
+   #               command = @server['Command'].text
+   #            end
+   #            user = @ec2_main.launch.get("EC2_SSH_User")
+   #            platform = @server['Platform'].text
+   #            if platform == "windows" and @server['Win_Admin_Password'].text != ""
+   #               password = @server['Win_Admin_Password'].text
+   #            end 
+   #            local_port = @server['Local_Port'].text
+   #         end 
+   #         private_key = get_pk
+#	    command_runner(server, address, command, user, private_key, password, platform, local_port)
+  #   end     
      
      
  end

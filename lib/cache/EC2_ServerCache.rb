@@ -576,7 +576,7 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
 	        r['name'] = nickname
 	     else
 	        r['name']=""
-	        if gn != nil
+	        if gi != nil
 	           r['name']=gi
 	        else
 	           r['name']='default'
