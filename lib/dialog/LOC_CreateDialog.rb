@@ -11,7 +11,7 @@ class LOC_CreateDialog < FXDialogBox
     puts " LOC_CreateDialog.initialize"
     @saved = false
     @ec2_main = owner
-    super(@ec2_main, "Create Local Server", :opts => DECOR_ALL, :width => 450, :height => 500)
+    super(@ec2_main, "Create Local Server", :opts => DECOR_ALL, :width => 450, :height => 560)
     frame1 = FXMatrix.new(self, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
     FXLabel.new(frame1, "Server" )
     server = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
@@ -66,6 +66,9 @@ class LOC_CreateDialog < FXDialogBox
     FXLabel.new(frame1, "Puppet Manifest" )
     puppet_manifest = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     FXLabel.new(frame1, "" )
+    FXLabel.new(frame1, "Puppet Roles" )
+    puppet_roles = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    FXLabel.new(frame1, "" )	
     FXLabel.new(frame1, "Windows Server" )
     windows_server = FXComboBox.new(frame1, 15, :opts => COMBOBOX_STATIC|COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
     windows_server.numVisible = 2      
@@ -138,7 +141,7 @@ class LOC_CreateDialog < FXDialogBox
          if windows_server.itemCurrent?(0)
 	    windows_server_value = true
          end
-         create_local_server(server.text,address.text,address_port.text,chef_node.text,puppet_manifest.text,ssh_user.text,ssh_password.text,ssh_key.text,putty_key.text,local_port.text,bastion_host.text,bastion_port.text,bastion_user.text,bastion_ssh_key.text,bastion_putty_key.text,windows_server_value)
+         create_local_server(server.text,address.text,address_port.text,chef_node.text,puppet_manifest.text,puppet_roles.text,ssh_user.text,ssh_password.text,ssh_key.text,putty_key.text,local_port.text,bastion_host.text,bastion_port.text,bastion_user.text,bastion_ssh_key.text,bastion_putty_key.text,windows_server_value)
          if @saved == true
            self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
          end
@@ -146,7 +149,7 @@ class LOC_CreateDialog < FXDialogBox
     end
   end 
   
-  def create_local_server(server,address,address_port,chef_node,puppet_manifest,ssh_user,ssh_password,ssh_key,putty_key,local_port,bastion_host, bastion_port,bastion_user,bastion_ssh_key,bastion_putty_key,windows_server)
+  def create_local_server(server,address,address_port,chef_node,puppet_manifest,puppet_roles,ssh_user,ssh_password,ssh_key,putty_key,local_port,bastion_host, bastion_port,bastion_user,bastion_ssh_key,bastion_putty_key,windows_server)
      folder = "loc_server"
      loc = EC2_Properties.new
      if loc != nil
@@ -161,6 +164,7 @@ class LOC_CreateDialog < FXDialogBox
         properties['address_port']=address_port
         properties['chef_node']=chef_node
         properties['puppet_manifest']=puppet_manifest
+		properties['puppet_roles']=puppet_roles
         properties['windows_server']=windows_server
         properties['ssh_user']=ssh_user
         properties['ssh_password']=ssh_password

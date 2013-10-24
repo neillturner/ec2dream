@@ -11,13 +11,18 @@
            if RUBY_PLATFORM.index("mswin") != nil  or RUBY_PLATFORM.index("i386-mingw32") != nil
                   if local_port != nil and local_port != ""
                       puts "WARNING: accessing server via ssh tunnel"
-                     c = "cmd.exe /c \@start \"\" /b \""+ENV['EC2DREAM_HOME']+"/putty/putty.exe\" -ssh localhost -P #{local_port} -i "+"\""+putty_key+"\""+" -l "+user
-	          elsif putty_key  != nil and putty_key != "" 
+					  s = "localhost"
+                     #c = "cmd.exe /c \@start \"\" /b \""+ENV['EC2DREAM_HOME']+"/putty/putty.exe\" -ssh localhost -P #{local_port} -i "+"\""+putty_key+"\""+" -l "+user
+	              end
+			  if putty_key  != nil and putty_key != "" 
 	             c = "cmd.exe /c \@start \"\" /b \""+ENV['EC2DREAM_HOME']+"/putty/putty.exe\" -ssh "+s+" -i "+"\""+putty_key+"\""+" -l "+user
 	          else 
 	             puts "WARNING: no Putty Private Key specified" 
 	             c = "cmd.exe /c \@start \"\" /b \""+ENV['EC2DREAM_HOME']+"/putty/putty.exe\" -ssh "+s+" -pw "+"\""+password+"\""+" -l "+user
 	          end 
+			  if local_port != nil and local_port != ""
+			    c = c +" -P #{local_port}" 
+			  end 
 	          puts c
 	          system(c)
             else

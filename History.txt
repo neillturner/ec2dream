@@ -1,3 +1,7 @@
+Version 3.6.8  Oct 2013
+------------------------
+enhancements to puppet support for roles and hiera.
+
 Version 3.6.7  Sept 2013
 ------------------------
 Add support for masterless puppet and ssh tunneling for use with Amazon VPC. 

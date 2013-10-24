@@ -22,7 +22,7 @@
 
 Gem::Specification.new do |spec|
   spec.name = 'fogviz'
-  spec.version = '3.6.7'
+  spec.version = '3.6.8'
   spec.authors = ['Neill Turner']
   spec.email = 'neillwturner@gmail.com'
   spec.executables = ["fogviz"]
@@ -33,7 +33,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency('rubyzip')
   spec.add_dependency('gchartrb')
   spec.add_dependency('pocketknife_ec2dream', '>= 0.1.10')
-  spec.add_dependency('pocketknife_puppet', '>= 0.1.10')
+  spec.add_dependency('pocketknife_puppet', '>= 0.1.12')
   spec.add_dependency('pocketknife_windows', '>= 0.1.10')
   spec.add_dependency('fog', '= 1.12.1')
   spec.add_dependency('cloudfoundry-client')
@@ -46,10 +46,12 @@ Build and Manage Cloud Servers
 == FEATURES:
 
 Fogviz combines Fog, Ruby into a visual open source devops platform supporting:
+      Local and Hosted Servers.
       Amazon AWS with full support for VPC, Autoscaling and ability to list most entities.
       Amazon compatible clouds:  Eucalyptus, CloudStack.
       Openstack Clouds:  Rackspace Cloud Servers and HP Cloud.
-      Cloud Foundry and even Local Servers.
+      Cloud Foundry.
+	  Vagrant.
       Chef and Puppet.
 
 EOF

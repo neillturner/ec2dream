@@ -1,11 +1,13 @@
-EC2Dream Fogviz - Build and Manage Cloud Servers Version 3.6.7 -  Sept 2013 
+EC2Dream Fogviz - Build and Manage Cloud Servers Version 3.6.8 -  Oct 2013 
 -----------------------------------------------------------------------------
 
 EC2Dream Fogviz is visual cloud computing admin for the Fog ruby cloud services library and combines Fog, Ruby into an open source devops platform supporting:
+      Local and Hosted Servers.
       Amazon AWS.
       Amazon compatible clouds:  Eucalyptus, CloudStack.
       Openstack Clouds:  Rackspace Cloud Servers and HP Cloud.
-      Cloud Foundry and even Local Servers and Vagrant.
+      Cloud Foundry.
+	  Vagrant.
 
 It uses Chef Solo or Masterless Puppet to install software and applications via "one click".
 

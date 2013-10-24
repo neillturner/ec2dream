@@ -11,7 +11,7 @@ class LOC_EditDialog < FXDialogBox
     puts " LOC_EditDialog.initialize"
     @saved = false
     @ec2_main = owner
-    super(@ec2_main, "Edit Local Server", :opts => DECOR_ALL, :width => 450, :height => 500)
+    super(@ec2_main, "Edit Local Server", :opts => DECOR_ALL, :width => 450, :height => 560)
     frame1 = FXMatrix.new(self, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
     FXLabel.new(frame1, "Server" )
     server = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
@@ -67,6 +67,9 @@ class LOC_EditDialog < FXDialogBox
     FXLabel.new(frame1, "Puppet Manifest" )
     puppet_manifest = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     FXLabel.new(frame1, "" )
+    FXLabel.new(frame1, "Puppet Roles" )
+    puppet_roles = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    FXLabel.new(frame1, "" )		
     FXLabel.new(frame1, "Windows Server" )
     windows_server = FXComboBox.new(frame1, 15, :opts => COMBOBOX_STATIC|COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
     windows_server.numVisible = 2      
@@ -94,7 +97,10 @@ class LOC_EditDialog < FXDialogBox
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "Bastion User" )
     bastion_user = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
-    FXLabel.new(frame1, "" )    
+    FXLabel.new(frame1, "" )  
+    FXLabel.new(frame1, "Bastion Passwoird" )
+    bastion_password = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    FXLabel.new(frame1, "" ) 	
     FXLabel.new(frame1, "Bastion SSH key" )
     bastion_ssh_key = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     bastion_ssh_key_button = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
@@ -140,7 +146,7 @@ class LOC_EditDialog < FXDialogBox
          if windows_server.itemCurrent?(0)
 	    windows_server_value = true
          end
-         save_local_server(server.text,address.text,address_port.text,chef_node.text,puppet_manifest.text,ssh_user.text,ssh_password.text,ssh_key.text,putty_key.text,local_port.text,bastion_host.text,bastion_port.text,bastion_user.text,bastion_ssh_key.text,bastion_putty_key.text,windows_server_value)
+         save_local_server(server.text,address.text,address_port.text,chef_node.text,puppet_manifest.text,puppet_roles.text,ssh_user.text,ssh_password.text,ssh_key.text,putty_key.text,local_port.text,bastion_host.text,bastion_port.text,bastion_user.text,bastion_password.text,bastion_ssh_key.text,bastion_putty_key.text,windows_server_value)
          if @saved == true
            self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
          end
@@ -153,6 +159,7 @@ class LOC_EditDialog < FXDialogBox
        address_port.text = r['address_port']
        chef_node.text = r['chef_node']
        puppet_manifest.text = r['puppet_manifest']
+	   puppet_roles.text = r['puppet_roles']
        ssh_user.text = r['ssh_user']
        ssh_password.text = r['ssh_password']
        ssh_key.text = r['ssh_key']
@@ -161,6 +168,7 @@ class LOC_EditDialog < FXDialogBox
        bastion_host.text = r['bastion_host']
        bastion_port.text = r['bastion_port']
        bastion_user.text = r['bastion_user']
+	   bastion_password.text = r['bastion_password']
        bastion_ssh_key.text = r['bastion_ssh_key']
        bastion_putty_key.text = r['bastion_putty_key']
        windows_server.setCurrentItem(1)
@@ -180,7 +188,7 @@ class LOC_EditDialog < FXDialogBox
        return properties
   end 
 
-  def save_local_server(server,address,address_port,chef_node,puppet_manifest,ssh_user,ssh_password,ssh_key,putty_key,local_port,bastion_host, bastion_port,bastion_user,bastion_ssh_key,bastion_putty_key,windows_server)  
+  def save_local_server(server,address,address_port,chef_node,puppet_manifest,puppet_roles,ssh_user,ssh_password,ssh_key,putty_key,local_port,bastion_host, bastion_port,bastion_user,bastion_password,bastion_ssh_key,bastion_putty_key,windows_server)  
      folder = "loc_server"
      loc = EC2_Properties.new
      if loc != nil
@@ -191,6 +199,7 @@ class LOC_EditDialog < FXDialogBox
         properties['address_port']=address_port
         properties['chef_node']=chef_node
         properties['puppet_manifest']=puppet_manifest
+		properties['puppet_roles']=puppet_roles
         properties['windows_server']=windows_server
         properties['ssh_user']=ssh_user
         properties['ssh_password']=ssh_password
@@ -200,6 +209,7 @@ class LOC_EditDialog < FXDialogBox
         properties['bastion_host']=bastion_host
         properties['bastion_port']=bastion_port
         properties['bastion_user']=bastion_user
+		properties['bastion_password']=bastion_password
         properties['bastion_ssh_key']=bastion_ssh_key
         properties['bastion_putty_key']=bastion_putty_key
         

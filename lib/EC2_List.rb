@@ -455,7 +455,7 @@ class EC2_List
                      if r['windows_server'] == 'true' 
                         platform == "windows"
                      end 
-                     puppet(r['server'], r['address'], r['puppet_manifest'], r['ssh_user'], r['ssh_key'], r['ssh_password'],platform,r['local_port'])
+                     puppet(r['server'], r['address'], r['puppet_manifest'], r['ssh_user'], r['ssh_key'], r['ssh_password'],platform,r['local_port'],r['puppet_roles'])
                   end   
                 end
              else
@@ -484,7 +484,7 @@ class EC2_List
                   loc = EC2_Properties.new
                   r = loc.get('loc_server',@curr_item)
                   if r['server'] != nil and r['server'] != ""
-                     ssh_tunnel(r['server'], r['address'], r['ssh_user'], r['ssh_key'], r['putty_key'], r['ssh_password'], r['address_port'], r['local_port'], r['bastion_host'], r['bastion_port'], r['bastion_user'], r['bastion_ssh_key'], r['bastion_putty_key'])
+                     ssh_tunnel(r['server'], r['address'], r['ssh_user'], r['ssh_key'], r['putty_key'], r['ssh_password'], r['address_port'], r['local_port'], r['bastion_host'], r['bastion_port'], r['bastion_user'], r['bastion_ssh_key'], r['bastion_putty_key'],  r['bastion_password'])
                   end   
                 end            
           else

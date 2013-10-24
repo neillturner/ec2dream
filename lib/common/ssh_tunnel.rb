@@ -1,5 +1,5 @@
- def ssh_tunnel(server, address, user, private_key, putty_key, password, address_port, local_port, bastion_host, bastion_port, bastion_user, bastion_private_key, bastion_putty_key)
-         puts "ssh_tunnel #{server}, #{address}, #{user}, #{private_key}, #{putty_key}, #{password}, #{address_port}, #{local_port}, #{bastion_host}, #{bastion_port} #{bastion_user}, #{bastion_private_key}, #{bastion_putty_key}"
+ def ssh_tunnel(server, address, user, private_key, putty_key, password, address_port, local_port, bastion_host, bastion_port, bastion_user, bastion_private_key, bastion_putty_key, bastion_password="")
+         puts "ssh_tunnel #{server}, #{address}, #{user}, #{private_key}, #{putty_key}, #{password}, #{address_port}, #{local_port}, #{bastion_host}, #{bastion_port} #{bastion_user}, #{bastion_private_key}, #{bastion_putty_key}, #{bastion_password}"
          s = server
          if address != nil and address != ""
             s = address
@@ -23,13 +23,13 @@
 	       address_port = 22
 	    end   
            if RUBY_PLATFORM.index("mswin") != nil  or RUBY_PLATFORM.index("i386-mingw32") != nil
-               #if putty_key  != nil and putty_key != "" 
-                     puts "WARNING: Starting ssh tunnel" 
+		       puts "WARNING: Starting ssh tunnel" 
+               if putty_key  != nil and putty_key != "" 
 	             c = "cmd.exe /c \@start \"ssh tunnel port #{local_port}\" /b \""+ENV['EC2DREAM_HOME']+"/putty/putty.exe\" -ssh #{bastion_host} -i "+"\""+bastion_putty_key+"\""+" -l #{bastion_user} -L #{local_port}:#{s}:#{address_port}"
-	         # else 
-	         #    puts "WARNING: no Putty Private Key specified" 
-	         #    c = "cmd.exe /c \@start \"ssh tunnel port #{local_port}\" /b \""+ENV['EC2DREAM_HOME']+"/putty/putty.exe\" -ssh #{bastion_host} -pw "+"\""+password+"\""+" -l #{bastion_user} -L #{local_port}:#{s}:#{address_port}"
-	         # end
+	          else 
+	             puts "WARNING: no Putty Private Key specified" 
+	             c = "cmd.exe /c \@start \"ssh tunnel port #{local_port}\" /b \""+ENV['EC2DREAM_HOME']+"/putty/putty.exe\" -ssh #{bastion_host} -pw "+"\""+bastion_password+"\""+" -l #{bastion_user} -L #{local_port}:#{s}:#{address_port}"
+	          end
                   if bastion_port != nil and bastion_port != ""
 	             c = "#{c} -P #{bastion_port}"
 	          end		          
