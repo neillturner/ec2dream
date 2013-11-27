@@ -48,6 +48,8 @@
        clear('Ebs_Optimized')
        @frame1.show()
        @frame3.hide()
+	   @frame4.hide()
+	   @frame5.hide()
        @server_status = ""
        @secgrp = ""
      end  
@@ -67,6 +69,8 @@
        @type = "ec2"
        @frame1.show()
        @frame3.hide()
+	   @frame4.hide()
+	   @frame5.hide()
        @server['Instance_ID'].text = instance_id
        ENV['EC2_INSTANCE'] = instance_id
        r = @ec2_main.serverCache.instance(instance_id)

@@ -47,7 +47,7 @@ def puppet(server, address,  puppet_manifest, ssh_user, private_key, password, p
                  short_name = sa[0]
               end
            end
-           answer = FXMessageBox.question($ec2_main.tabBook,MBOX_YES_NO,"Confirm Puppet Apply","Confirm Running of puppet apply for Manifest #{puppet_manifest} on server #{short_name}")
+           answer = FXMessageBox.question($ec2_main.tabBook,MBOX_YES_NO,"Server - #{server} #{short_name}","Server #{server} #{short_name} - Confirm Running Puppet Apply\n for Manifest #{puppet_manifest} and Puppet Roles #{puppet_roles} ")
            if answer == MBOX_CLICKED_YES
                 puppet_options = "-iv"
 				if private_key != nil and private_key !=""

@@ -29,6 +29,8 @@ class EC2_Server
        ops_clear('EC2_SSH_User')
        @frame1.hide()
        @page1.width=300
+       @frame4.hide()
+	   @frame5.hide()	   
        @frame3.show()
        @server_status = ""
        @secgrp = ""
@@ -43,6 +45,8 @@ class EC2_Server
       @type = "ops"
       @frame1.hide()
       @page1.width=300
+      @frame4.hide()
+	  @frame5.hide()	  
       @frame3.show()
       @ops_server['Instance_ID'].text = instance_id
       ENV['EC2_INSTANCE'] = instance_id

@@ -1,3 +1,8 @@
+Version 3.6.9 Dec 2013
+----------------------
+Local Server have a server page.
+puppet roles and manifests in amazon aws
+
 Version 3.6.8  Oct 2013
 ------------------------
 enhancements to puppet support for roles and hiera.

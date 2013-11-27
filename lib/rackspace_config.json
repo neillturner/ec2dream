@@ -62,18 +62,18 @@
       "dialog_parm": ["","","","@curr_instance","","","","",""], 
       "keys": ["ip"]
     },
-    "Local Servers":{
+	"Local Servers":{
           "request":"",
           "name":"local_server",
           "response": "",
           "response_code": 200,
           "action": ["create","delete", "edit","","","","","",""],
-          "icon": ["@create","@delete","@edit","@put","@csv","@chef_icon","","",""],
-          "tooltip":[" Create Config ","  Delete Config "," edit Config ",""," Csv Data ","","","",""],
-          "dialog":["LOC_CreateDialog","LOC_DeleteDialog","LOC_EditDialog","","","","","",""],
+          "icon": ["@create","@delete","@edit","","@csv","","","",""],
+          "tooltip":[" Create Config ","  Delete Config "," Edit Config ",""," Csv Data ","","","",""],
+          "dialog":["LOC_CreateDialog","LOC_DeleteDialog","$ec2_main.server.loc_load(@curr_item);$ec2_main.tabBook.setCurrent(1)","","","","","",""],
           "dialog_parm": ["","","","","","","","",""], 
           "keys": ["server"]
-    }      
+    }  	
    },
    "BlockStorage":{
     "Volumes":{

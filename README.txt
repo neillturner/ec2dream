@@ -1,4 +1,4 @@
-EC2Dream Fogviz - Build and Manage Cloud Servers Version 3.6.8 -  Oct 2013 
+EC2Dream Fogviz - Build and Manage Cloud Servers Version 3.6.9 -  Dec 2013 
 -----------------------------------------------------------------------------
 
 EC2Dream Fogviz is visual cloud computing admin for the Fog ruby cloud services library and combines Fog, Ruby into an open source devops platform supporting:

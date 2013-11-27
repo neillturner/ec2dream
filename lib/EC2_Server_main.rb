@@ -25,6 +25,8 @@ class EC2_Server
         @cfy_server = {}
         @cfy_env = Array.new
         @cfy_env_curr_row = nil
+		@loc_server = {}
+		@saved = false
         @block_mapping = Array.new
         @flavor = {}
         @image = {}
@@ -82,7 +84,9 @@ class EC2_Server
 	@chart = @ec2_main.makeIcon("chart_stock.png")
 	@chart.create
 	@tunnel = @ec2_main.makeIcon("tunnel.png")
-	@tunnel.create	
+	@tunnel.create
+    @save = @ec2_main.makeIcon("disk.png")
+	@save.create	
         tab2 = FXTabItem.new(@ec2_main.tabBook, " Server ")
         @page1 = FXVerticalFrame.new(@ec2_main.tabBook, LAYOUT_FILL, :padding => 0)
         page1a = FXHorizontalFrame.new(@page1,LAYOUT_FILL_X, :padding => 0)
@@ -112,6 +116,8 @@ class EC2_Server
 	@putty_button.connect(SEL_COMMAND) do |sender, sel, data|
 	    if @type == "ec2" or @type == "ops"
                run_ssh
+		elsif @type == "loc"	   
+			   loc_ssh
             elsif @type == "cfy"
 	       dialog = CFY_AppUploadDialog.new(@ec2_main,@cfy_server['name'].text)
                dialog.execute            
@@ -135,6 +141,8 @@ class EC2_Server
 	   puts "server.serverWinscp.connect"
 	   if @type == "ec2" or @type == "ops"
               run_scp
+	   elsif @type == "loc"		  
+			  loc_winscp
            elsif @type == "cfy"
               cfy_restart              
            end
@@ -158,7 +166,11 @@ class EC2_Server
 	   @remote_desktop_button.tipText = " Windows Remote Desktop "
 	   @remote_desktop_button.connect(SEL_COMMAND) do |sender, sel, data|
 	      puts "server.serverRemote_Desktop.connect"
-              run_remote_desktop    
+		  if @type == "loc"	   
+			   loc_rdp
+		  else	   
+              run_remote_desktop
+          end			  
 	   end
 	   @remote_desktop_button.connect(SEL_UPDATE) do |sender, sel, data|
 		enable_if_ec2_server_loaded(sender)
@@ -173,11 +185,14 @@ class EC2_Server
 	    elsif @type == "ops" 
 	       ops_terminate
 	    elsif @type == "cfy" 
-	       cfy_delete	       
+	       cfy_delete	
+        elsif @type == "loc" 
+	       loc_save	 		   
 	    end  
 	end
 	@terminate_button.connect(SEL_UPDATE) do |sender, sel, data|
 	    sender.enabled = false
+		@terminate_button.icon = @disconnect
 	    @terminate_button.tipText = " Terminate Instance "
 	    if @type == "ec2" and (@server_status == "running" or @server_status == "stopped"or @server_status == "pending") 
 	       sender.enabled = true
@@ -186,6 +201,10 @@ class EC2_Server
 	    elsif @type == "cfy"
 	       sender.enabled = true
 	       @terminate_button.tipText = " Delete App "
+ 	    elsif @type == "loc"
+		   @terminate_button.icon = @save
+	       sender.enabled = true
+	       @terminate_button.tipText = " Save Configuration "		   
 	    end   
 	end
 	@log_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
@@ -219,7 +238,7 @@ class EC2_Server
 	    monitor
  	end
 	@mon_button.connect(SEL_UPDATE) do |sender, sel, data|
-	    enable_if_ec2_server_loaded_or_pending(sender) unless @type == "cfy" 
+	    enable_if_ec2_server_loaded_or_pending(sender) unless (@type == "cfy" or @type == "loc")
 	end
 	@unmon_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@unmon_button.icon = @unmon
@@ -228,7 +247,7 @@ class EC2_Server
 	    unMonitor 
  	end
 	@unmon_button.connect(SEL_UPDATE) do |sender, sel, data|
-	    enable_if_ec2_server_loaded_or_pending(sender) unless @type == "cfy" 
+	    enable_if_ec2_server_loaded_or_pending(sender) unless (@type == "cfy" or @type == "loc") 
 	end
 	@start_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@start_button.icon = @start_icon
@@ -318,7 +337,11 @@ class EC2_Server
 	@chef_button.icon = @chef_icon
 	@chef_button.tipText = " Run Chef Solo Roles and Recipes "
 	@chef_button.connect(SEL_COMMAND) do |sender, sel, data|
+	     if @type == "loc"
+	       loc_chef
+		 else  
            run_chef
+		 end  
 	end
 	@chef_button.connect(SEL_UPDATE) do |sender, sel, data|
            enable_if_ec2_server_loaded(sender)	
@@ -327,7 +350,11 @@ class EC2_Server
 	@puppet_button.icon = @puppet_icon
 	@puppet_button.tipText = " Run Puppet Apply "
 	@puppet_button.connect(SEL_COMMAND) do |sender, sel, data|
+	    if @type == "loc"
+	       loc_puppet
+		 else
            run_puppet
+		 end  
 	end
 	@chef_button.connect(SEL_UPDATE) do |sender, sel, data|
            enable_if_ec2_server_loaded(sender)	
@@ -354,7 +381,9 @@ class EC2_Server
 	@tunnel_button.connect(SEL_COMMAND) do |sender, sel, data|
 	    if @type == "ec2" or @type == "ops"
                run_ssh_tunnel
-            end
+		elsif @type == "loc"
+	       loc_ssh_tunnel
+        end
 	end
 	@tunnel_button.connect(SEL_UPDATE) do |sender, sel, data|
 	   if @type != "cfy" and loaded
@@ -366,10 +395,10 @@ class EC2_Server
 	@frame1 = FXMatrix.new(@page1, 3, MATRIX_BY_COLUMNS|LAYOUT_FILL)
  	FXLabel.new(@frame1, "Security Groups" )
         @frame1s = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
- 	@server['Security_Groups'] = FXTextField.new(@frame1s, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+ 	@server['Security_Groups'] = FXTextField.new(@frame1s, 20, nil, 0, :opts => TEXTFIELD_READONLY)
  	FXLabel.new(@frame1s, "" )
- 	FXLabel.new(@frame1s, "Chef Node" )
- 	@server['Chef_Node'] = FXTextField.new(@frame1s, 21, nil, 0, :opts => FRAME_SUNKEN)
+ 	FXLabel.new(@frame1s, "Chef Node/Puppet Roles" )
+ 	@server['Chef_Node'] = FXTextField.new(@frame1s, 20, nil, 0, :opts => FRAME_SUNKEN)
 	@server['Chef_Node'].connect(SEL_COMMAND) do
            instance_id = @server['Instance_ID'].text
            @ec2_chef_node[instance_id] = @server['Chef_Node'].text
@@ -381,7 +410,7 @@ class EC2_Server
  	FXLabel.new(@frame1, "" )
  	FXLabel.new(@frame1, "Instance Id" )
  	@frame1t = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
- 	@server['Instance_ID'] = FXTextField.new(@frame1t, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+ 	@server['Instance_ID'] = FXTextField.new(@frame1t, 20, nil, 0, :opts => TEXTFIELD_READONLY)
 	@server['Instance_ID_Button'] = FXButton.new(@frame1t, " ",:opts => BUTTON_TOOLBAR)
 	@server['Instance_ID_Button'].icon = @view
 	@server['Instance_ID_Button'].tipText = "  Modify Instance Attributes  "
@@ -395,7 +424,7 @@ class EC2_Server
             end
 	end
  	FXLabel.new(@frame1t, "Puppet Manifest" )
- 	@server['Puppet_Manifest'] = FXTextField.new(@frame1t, 15, nil, 0, :opts => FRAME_SUNKEN)
+ 	@server['Puppet_Manifest'] = FXTextField.new(@frame1t, 20, nil, 0, :opts => FRAME_SUNKEN)
 	@server['Puppet_Manifest'].connect(SEL_COMMAND) do
            instance_id = @server['Instance_ID'].text
            @ec2_puppet_manifest[instance_id] = @server['Puppet_Manifest'].text
@@ -720,9 +749,9 @@ class EC2_Server
 	@frame3.hide()
  	FXLabel.new(@frame3, "Name" )
         @frame3s = FXHorizontalFrame.new(@frame3,LAYOUT_FILL_X, :padding => 0)
- 	@ops_server['Name'] = FXTextField.new(@frame3s, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+ 	@ops_server['Name'] = FXTextField.new(@frame3s, 20, nil, 0, :opts => TEXTFIELD_READONLY)
  	FXLabel.new(@frame3s, "" )
- 	FXLabel.new(@frame3s, "Chef Node" )
+ 	FXLabel.new(@frame3s, "Chef Node/Puppet Roles" )
  	@ops_server['Chef_Node'] = FXTextField.new(@frame3s, 21, nil, 0, :opts => FRAME_SUNKEN)
 	@ops_server['Chef_Node'].connect(SEL_COMMAND) do
            instance_id = @ops_server['Instance_ID'].text
@@ -1123,6 +1152,127 @@ class EC2_Server
  	FXLabel.new(@frame4, "Meta" )
  	@cfy_server['meta'] = FXText.new(@frame4, :height => 100, :opts => LAYOUT_FIX_HEIGHT|TEXT_WORDWRAP|LAYOUT_FILL, :padding => 0) 
 	FXLabel.new(@frame4, "" )
+	
+	#
+	# local server  frame
+	#
+	@frame5 = FXMatrix.new(@page1, 3, MATRIX_BY_COLUMNS|LAYOUT_FILL)
+	@frame5.hide()
+    FXLabel.new(@frame5, "Server" )
+    @loc_server['server'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
+    FXLabel.new(@frame5, "" )
+    FXLabel.new(@frame5, "Address" )
+    @loc_server['address'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    FXLabel.new(@frame5, "" )
+    FXLabel.new(@frame5, "Address Port" )
+    @loc_server['address_port'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    FXLabel.new(@frame5, "(Default 22)" )    
+    FXLabel.new(@frame5, "SSH User" )
+    @loc_server['ssh_user'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    FXLabel.new(@frame5, "" )
+    FXLabel.new(@frame5, "SSH Password" )
+    @loc_server['ssh_password'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    FXLabel.new(@frame5, "" )
+    FXLabel.new(@frame5, "SSH key" )
+    @loc_server['ssh_key'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    @loc_server['ssh_key_button'] = FXButton.new(@frame5, "", :opts => BUTTON_TOOLBAR)
+    @loc_server['ssh_key_button'].icon = @magnifier
+    @loc_server['ssh_key_button'].tipText = "Browse..."
+    @loc_server['ssh_key_button'].connect(SEL_COMMAND) do
+       dialog = FXFileDialog.new(@frame5, "Select pem file")
+       dialog.patternList = [
+          "Pem Files (*.pem)"
+       ]
+       dialog.selectMode = SELECTFILE_EXISTING
+       if dialog.execute != 0
+          @loc_server['ssh_key'].text = dialog.filename
+       end
+    end
+    FXLabel.new(@frame5, "Putty Key" )
+    @loc_server['putty_key'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    @loc_server['putty_key_button'] = FXButton.new(@frame5, "", :opts => BUTTON_TOOLBAR)
+    @loc_server['putty_key_button'].icon = @magnifier
+    @loc_server['putty_key_button'].tipText = "Browse..."
+    @loc_server['putty_key_button'].connect(SEL_COMMAND) do
+       dialog = FXFileDialog.new(@frame5, "Select pem file")
+       dialog.patternList = [
+          "Pem Files (*.ppk)"
+       ]
+       dialog.selectMode = SELECTFILE_EXISTING
+       if dialog.execute != 0
+          @loc_server['putty_key'].text = dialog.filename
+       end
+    end
+    FXLabel.new(@frame5, "Chef Node" )
+    @loc_server['chef_node'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    FXLabel.new(@frame5, "" )
+    FXLabel.new(@frame5, "Puppet Manifest" )
+    @loc_server['puppet_manifest'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    FXLabel.new(@frame5, "" )
+    FXLabel.new(@frame5, "Puppet Roles" )
+    @loc_server['puppet_roles'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    FXLabel.new(@frame5, "" )		
+    FXLabel.new(@frame5, "Windows Server" )
+    @loc_server['windows_server'] = FXComboBox.new(@frame5, 15, :opts => COMBOBOX_STATIC|COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
+    @loc_server['windows_server'].numVisible = 2      
+    @loc_server['windows_server'].appendItem("true")	
+    @loc_server['windows_server'].appendItem("false")
+    @loc_server['windows_server'].setCurrentItem(1)    
+    FXLabel.new(@frame5, "" )
+    FXLabel.new(@frame5, "" )
+    FXLabel.new(@frame5, "" )
+    FXLabel.new(@frame5, "" )    
+    FXLabel.new(@frame5, "" )
+    FXLabel.new(@frame5, "" )
+    FXLabel.new(@frame5, "" )
+    FXLabel.new(@frame5, "" )
+    FXLabel.new(@frame5, "Tunnelling - Bastion Host" )
+    FXLabel.new(@frame5, "" )
+    FXLabel.new(@frame5, "Local Port" )
+    @loc_server['local_port'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    FXLabel.new(@frame5, "" )
+    FXLabel.new(@frame5, "Bastion Host" )
+    @loc_server['bastion_host'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    FXLabel.new(@frame5, "" )
+    FXLabel.new(@frame5, "Bastion Port" )
+    @loc_server['bastion_port'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    FXLabel.new(@frame5, "" )
+    FXLabel.new(@frame5, "Bastion User" )
+    @loc_server['bastion_user'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    FXLabel.new(@frame5, "" )  
+    FXLabel.new(@frame5, "Bastion Passwoird" )
+    @loc_server['bastion_password'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    FXLabel.new(@frame5, "" ) 	
+    FXLabel.new(@frame5, "Bastion SSH key" )
+    @loc_server['bastion_ssh_key'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    @loc_server['bastion_ssh_key_button'] = FXButton.new(@frame5, "", :opts => BUTTON_TOOLBAR)
+    @loc_server['bastion_ssh_key_button'].icon = @magnifier
+    @loc_server['bastion_ssh_key_button'].tipText = "Browse..."
+    @loc_server['bastion_ssh_key_button'].connect(SEL_COMMAND) do
+       dialog = FXFileDialog.new(@frame5, "Select pem file")
+       dialog.patternList = [
+          "Pem Files (*.pem)"
+       ]
+       dialog.selectMode = SELECTFILE_EXISTING
+       if dialog.execute != 0
+          @loc_server['bastion_ssh_key'].text = dialog.filename
+       end
+    end
+    FXLabel.new(@frame5, "Bastion Putty Key" )
+    @loc_server['bastion_putty_key'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    @loc_server['bastion_putty_key_button'] = FXButton.new(@frame5, "", :opts => BUTTON_TOOLBAR)
+    @loc_server['bastion_putty_key_button'].icon = @magnifier
+    @loc_server['bastion_putty_key_button'].tipText = "Browse..."
+    @loc_server['bastion_putty_key_button'].connect(SEL_COMMAND) do
+       dialog = FXFileDialog.new(@frame5, "Select pem file")
+       dialog.patternList = [
+          "Pem Files (*.ppk)"
+       ]
+       dialog.selectMode = SELECTFILE_EXISTING
+       if dialog.execute != 0
+          @loc_server['bastion_putty_key'].text = dialog.filename
+       end
+    end    	
   end 
   
   def loaded
@@ -1131,6 +1281,8 @@ class EC2_Server
      elsif @type == "ops" and @server_status.start_with?("ACTIVE")
         return true
      elsif @type == "cfy"
+        return true 
+     elsif @type == "loc"
         return true        
      else   
         return false 
@@ -1369,7 +1521,7 @@ class EC2_Server
  end 
    
  def enable_if_server_loaded(sender)
-      if loaded and (@type == "ec2" or @type == "ops" or @type == "cfy")
+      if loaded and (@type == "ec2" or @type == "ops" or @type == "cfy"  or @type == "loc")
           sender.enabled = true
       else
           sender.enabled = false
@@ -1385,7 +1537,7 @@ class EC2_Server
  end
  
  def enable_if_ec2_server_loaded(sender)
-        if loaded and (@type == "ec2" or @type == "ops")
+        if loaded and (@type == "ec2" or @type == "ops" or @type == "loc")
             sender.enabled = true
         else
             sender.enabled = false
@@ -1452,6 +1604,7 @@ class EC2_Server
              password =""
              platform = ""
              local_port =""
+			 roles = ""
              if @type == "ops"
                 if @ops_server['Puppet_Manifest'].text != nil and @ops_server['Puppet_Manifest'].text != ""
                    puppet_manifest = @ops_server['Puppet_Manifest'].text
@@ -1459,7 +1612,8 @@ class EC2_Server
                 user = @ec2_main.launch.ops_get("SSH_User")
                 password = @ops_server['Admin_Password'].text
                 local_port = nil  # not added yet
-  	    else
+				roles = @ops_server['Chef_Node'].text
+  	        else
                 if @server['Puppet_Manifest'].text != nil and @server['Puppet_Manifest'].text != ""
                    puppet_manifest = @server['Puppet_Manifest'].text
                 end
@@ -1469,9 +1623,10 @@ class EC2_Server
                    password = @server['Win_Admin_Password'].text
                 end 
                 local_port = @server['Local_Port'].text
+				roles = @server['Chef_Node'].text
              end 
              private_key = get_pk
- 	    puppet(server, address,  puppet_manifest, user, private_key, password, platform, local_port)
+ 	    puppet(server, address,  puppet_manifest, user, private_key, password, platform, local_port, roles)
      end
  
     #def run_command

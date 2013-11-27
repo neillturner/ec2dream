@@ -22,6 +22,7 @@ class EC2_Server
        cfy_clear('meta')
        @frame1.hide()
        @frame3.hide()
+	   @frame5.hide()	   
        @frame4.show()
        @page1.width=300       
        @server_status = ""
@@ -42,6 +43,7 @@ class EC2_Server
       @type = "cfy"
       @frame1.hide()
       @frame3.hide()
+      @frame5.hide()	  
       @frame4.show()
       @page1.width=300
       @appname = app_name

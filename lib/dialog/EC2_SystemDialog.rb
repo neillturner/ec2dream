@@ -19,17 +19,26 @@ class EC2_SystemDialog < FXDialogBox
     if !File.directory? local_repository
        puts "creating....#{local_repository}"
        Dir.mkdir(local_repository)
-    end     
-    if File.exists?(ENV['EC2DREAM_HOME']+"/env/system.properties")
+       @settings.put_system("REPOSITORY_LOCATION","")
+       defaults
+       @settings.save_system()	   
+    elsif File.exists?(ENV['EC2DREAM_HOME']+"/env/system.properties")
        @loc = @settings.get_system("REPOSITORY_LOCATION")
        @remloc = @settings.get_system("REPOSITORY_REMOTE")
        if @loc ==  ENV['EC2DREAM_HOME']+"/env"
          @loc = ""
        end  
     end
-    super(owner, "Environment Repository", :opts => DECOR_ALL, :width => 600, :height => 120, :x => 300, :y => 200 )
-    frame1 = FXMatrix.new(self, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
-    FXLabel.new(frame1, "" )
+    super(owner, "Environment Repository", :opts => DECOR_ALL, :width => 600, :height => 250, :x => 300, :y => 200 )
+	page1 = FXVerticalFrame.new(self, LAYOUT_FILL, :padding => 0)
+    frame1a = FXMatrix.new(page1, 1, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
+ 	FXLabel.new(frame1a, "The Environment Repository is where configuration is stored." )
+    FXLabel.new(frame1a, "Checking Local Environment Repository stores the information inside the ruby directory structure." ) 
+ 	FXLabel.new(frame1a, "For production use a repository location is recommended." ) 
+    FXLabel.new(frame1a, "You must create the directory using Windows Explorer or the command line" )
+    FXLabel.new(frame1a, "before selecting it by clicking on the icon to select it." )
+	frame1 = FXMatrix.new(page1, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
+    FXLabel.new(frame1, "" )   	
     local_check = FXCheckButton.new(frame1,"Local Environment Repository", :opts => ICON_BEFORE_TEXT|LAYOUT_SIDE_BOTTOM|LAYOUT_FILL_X)
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "Repository Location" )
@@ -81,9 +90,7 @@ class EC2_SystemDialog < FXDialogBox
     FXLabel.new(frame1, "" )
     ok = FXButton.new(frame1, "   &OK   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     FXLabel.new(frame1, "" )
-    @settings.put_system("REPOSITORY_LOCATION","")
-    defaults
-    @settings.save_system()
+
     ok.connect(SEL_COMMAND) do |sender, sel, data|
       @valid_loc = true
       if @local == false

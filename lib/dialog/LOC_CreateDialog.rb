@@ -11,7 +11,7 @@ class LOC_CreateDialog < FXDialogBox
     puts " LOC_CreateDialog.initialize"
     @saved = false
     @ec2_main = owner
-    super(@ec2_main, "Create Local Server", :opts => DECOR_ALL, :width => 450, :height => 560)
+    super(@ec2_main, "Create Local Server", :opts => DECOR_ALL, :width => 550, :height => 660)
     frame1 = FXMatrix.new(self, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
     FXLabel.new(frame1, "Server" )
     server = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)

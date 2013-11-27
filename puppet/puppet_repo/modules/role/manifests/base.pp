@@ -4,8 +4,7 @@
 # class parameters can be coded here or resolved via the hiera parameter hierachy 
 #
 class role::base {
- 
+
  # class { 'ntp': }
-
-
+ 
 }
