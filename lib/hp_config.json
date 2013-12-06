@@ -67,10 +67,10 @@
           "name":"local_server",
           "response": "",
           "response_code": 200,
-          "action": ["create","delete", "edit","","","","","",""],
-          "icon": ["@create","@delete","@edit","@put","@csv","@chef_icon","","",""],
-          "tooltip":[" Create Config ","  Delete Config "," edit Config ",""," Csv Data ","","","",""],
-          "dialog":["LOC_CreateDialog","LOC_DeleteDialog","LOC_EditDialog","","","","","",""],
+          "action": ["create","", "edit","","","","","",""],
+          "icon": ["@create","","@edit","@put","@csv","@chef_icon","","",""],
+          "tooltip":[" Create Config ",""," edit Config ",""," Csv Data ","","","",""],
+          "dialog":["LOC_CreateDialog","","LOC_EditDialog","","","","","",""],
           "dialog_parm": ["","","","","","","","",""], 
           "keys": ["server"]
     }  	      

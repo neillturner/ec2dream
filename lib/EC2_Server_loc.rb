@@ -89,6 +89,14 @@ def loc_load(server_name)
       end
      end
   end 
+  
+  def loc_delete 
+    dialog = LOC_DeleteDialog.new(@ec2_main,@loc_server['server'].text)
+	if dialog.success
+ 	   @ec2_main.list.load('Local Servers')
+       @ec2_main.tabBook.setCurrent(0)
+     end
+  end 
     
   def loc_ssh
       if @loc_server['windows_server'].itemCurrent?(1)

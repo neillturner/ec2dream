@@ -75,8 +75,8 @@ require 'dialog/CFY_ServiceCreateDialog'
 require 'dialog/CFY_ServiceDeleteDialog'
 
 require 'dialog/LOC_CreateDialog'
-require 'dialog/LOC_EditDialog'
-require 'dialog/LOC_DeleteDialog'
+#require 'dialog/LOC_EditDialog'
+#require 'dialog/LOC_DeleteDialog'
 
 require 'dialog/VAG_CreateDialog'
 require 'dialog/VAG_DeleteDialog'
@@ -319,25 +319,8 @@ class EC2_List
 	@link_break_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@link_break_button.icon = @link_break	
 	@link_break_button.connect(SEL_COMMAND) do |sender, sel, data|
-	    case @type
- 	    when "Local Servers"
-		if @curr_item == nil or @curr_item == ""
-                  error_message("No Server selected","No Server selected to ssh or rdp")
-                else
-                  loc = EC2_Properties.new
-                  r = loc.get('loc_server',@curr_item)
-                  if r['server'] != nil and r['server'] != ""
-                     if r['windows_server'] == 'true' 
-                        remote_desktop(r['server'], r['ssh_password'], r['ssh_user'], nil,r['local_port'])
-                     else
-                        ssh(r['server'], r['address'], r['ssh_user'], r['ssh_key'], r['putty_key'], r['ssh_password'],r['local_port'])
-                     end   
-                  end   
-                end 
-             else
-			  call_dialog(3)
-             end
-	end 
+	   call_dialog(3)
+ 	end 
 	@link_break_button.connect(SEL_UPDATE) do |sender, sel, data|
 	   if @loaded and @config['icon'] != nil and @config['icon'][3] != ""
 	        button_config(sender, eval(@config['icon'][3]), @config['tooltip'][3])
@@ -383,20 +366,7 @@ class EC2_List
 	@launch_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@launch_button.icon = @rocket	
 	@launch_button.connect(SEL_COMMAND) do |sender, sel, data|
-	    case @type
-  	    when "Local Servers"
-		        if @curr_item == nil or @curr_item == ""
-                  error_message("No Server selected","No Server selected to scp")
-                else
-                  loc = EC2_Properties.new
-                  r = loc.get('loc_server',@curr_item)
-                  if r['server'] != nil and r['server'] != ""
-                     scp(r['server'], r['address'], r['ssh_user'], r['ssh_key'], r['putty_key'], r['ssh_password'],r['local_port'])
-                  end                   
-                end
-            else
-			  call_dialog(5)
-           end            
+	   call_dialog(5)
 	end
 	@launch_button.connect(SEL_UPDATE) do |sender, sel, data|
 	   if @loaded and @config['icon'] != nil and @config['icon'][5] != "" 
@@ -412,25 +382,8 @@ class EC2_List
       	@view.create	
 	@attributes_button.icon = @view	
 	@attributes_button.connect(SEL_COMMAND) do |sender, sel, data|
-           case @type
-  	    when "Local Servers"
-		if @curr_item == nil or @curr_item == ""
-                  error_message("No Server selected","No Server selected to run chef")
-                else
-                  loc = EC2_Properties.new
-                  r = loc.get('loc_server',@curr_item)
-                  if r['server'] != nil and r['server'] != ""
-                     platform = ""
-                     if r['windows_server'] == 'true' 
-                        platform == "windows"
-                     end 
-                     chef(r['server'], r['address'], r['chef_node'], r['ssh_user'], r['ssh_key'], r['ssh_password'],platform,r['local_port'])
-                   end   
-                end
-             else
-			   call_dialog(6)
-             end
-	end
+	   call_dialog(6)
+ 	end
 	@attributes_button.connect(SEL_UPDATE) do |sender, sel, data|
 	   if @loaded and @config['icon'] != nil and @config['icon'][6] != "" 
 	        button_config(sender, eval(@config['icon'][6]), @config['tooltip'][6])
@@ -443,25 +396,8 @@ class EC2_List
 	@tags_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@tags_button.icon = @tag_red	
 	@tags_button.connect(SEL_COMMAND) do |sender, sel, data|
-           case @type
-  	    when "Local Servers"
-		if @curr_item == nil or @curr_item == ""
-                  error_message("No Server selected","No Server selected to run puppet")
-                else
-                  loc = EC2_Properties.new
-                  r = loc.get('loc_server',@curr_item)
-                  if r['server'] != nil and r['server'] != ""
-                     platform = ""
-                     if r['windows_server'] == 'true' 
-                        platform == "windows"
-                     end 
-                     puppet(r['server'], r['address'], r['puppet_manifest'], r['ssh_user'], r['ssh_key'], r['ssh_password'],platform,r['local_port'],r['puppet_roles'])
-                  end   
-                end
-             else
-			   call_dialog(7)
-             end	
-	end
+ 	   call_dialog(7)
+ 	end
 	@tags_button.connect(SEL_UPDATE) do |sender, sel, data|	
 	   if @loaded and @config['icon'] != nil and @config['icon'][7] != "" 
 	        button_config(sender, eval(@config['icon'][7]), @config['tooltip'][7])
@@ -477,17 +413,7 @@ class EC2_List
 	    case @type
           when "Images"
             # to do 
-  	  when "Local Servers"
-		if @curr_item == nil or @curr_item == ""
-                  error_message("No Server selected","No Server selected to ssh tunnel ")
-                else
-                  loc = EC2_Properties.new
-                  r = loc.get('loc_server',@curr_item)
-                  if r['server'] != nil and r['server'] != ""
-                     ssh_tunnel(r['server'], r['address'], r['ssh_user'], r['ssh_key'], r['putty_key'], r['ssh_password'], r['address_port'], r['local_port'], r['bastion_host'], r['bastion_port'], r['bastion_user'], r['bastion_ssh_key'], r['bastion_putty_key'],  r['bastion_password'])
-                  end   
-                end            
-          else
+           else
             if @config["dialog"][8] == "EC2_TagsFilterDialog"
                dialog = EC2_TagsFilterDialog.new(@ec2_main,@type,@tags_filter[@config["name"]])
                dialog.execute
@@ -631,6 +557,8 @@ class EC2_List
 			 @user_name =  @curr_item
 			when "Vagrant"
 	         @vagrant_file  =  find_value('Vagrantfile',which.row) 
+			when "Local Servers"
+	         call_dialog(2)  
  	      end 	         
 	  # else
 	  #    @curr_row = nil

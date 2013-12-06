@@ -235,10 +235,22 @@ class EC2_Server
 	@mon_button.icon = @mon
 	@mon_button.tipText = " Monitor Instance "
 	@mon_button.connect(SEL_COMMAND) do |sender, sel, data|
-	    monitor
+	    if @type == "loc" 
+	       loc_delete
+        else		   
+	       monitor
+		end   
  	end
 	@mon_button.connect(SEL_UPDATE) do |sender, sel, data|
 	    enable_if_ec2_server_loaded_or_pending(sender) unless (@type == "cfy" or @type == "loc")
+		if @type == "loc"
+		   @mon_button.icon = @delete
+		   sender.enabled = true
+	       @terminate_button.tipText = " Delete Configuration "	
+		else
+		   @mon_button.icon = @mon
+	       @mon_button.tipText = " Monitor Instance "
+	    end   
 	end
 	@unmon_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@unmon_button.icon = @unmon
@@ -1240,7 +1252,7 @@ class EC2_Server
     FXLabel.new(@frame5, "Bastion User" )
     @loc_server['bastion_user'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     FXLabel.new(@frame5, "" )  
-    FXLabel.new(@frame5, "Bastion Passwoird" )
+    FXLabel.new(@frame5, "Bastion Password" )
     @loc_server['bastion_password'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     FXLabel.new(@frame5, "" ) 	
     FXLabel.new(@frame5, "Bastion SSH key" )
