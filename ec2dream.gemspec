@@ -32,9 +32,9 @@ Gem::Specification.new do |spec|
   spec.add_dependency('fxruby')
   spec.add_dependency('rubyzip', '< 1.0.0')
   spec.add_dependency('gchartrb')
-  spec.add_dependency('pocketknife_ec2dream', '>= 0.1.10')
-  spec.add_dependency('pocketknife_puppet', '>= 0.1.12')
-  spec.add_dependency('pocketknife_windows', '>= 0.1.10')
+  spec.add_dependency('pocketknife_ec2dream', '>= 0.1.13')
+  spec.add_dependency('pocketknife_puppet', '>= 0.1.13')
+  spec.add_dependency('pocketknife_windows', '>= 0.1.13')
   spec.add_dependency('fog', '= 1.12.1')
   spec.add_dependency('cloudfoundry-client')
 
