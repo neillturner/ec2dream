@@ -14,7 +14,7 @@ def initialize(owner)
   end 
 
   def get_images(type, platform, root, search, filter)
-          puts "Data_Images.get_imges(#{type}, #{platform}, #{root}, #{search}, #{filter})"
+          puts "Data_Images.get_images(#{type}, #{platform}, #{root}, #{search}, #{filter})"
           owner = ""
           executable = ""
           arch = ""
@@ -98,7 +98,7 @@ def initialize(owner)
                 end
              end
           else
-           if executable == "all" or @ec2_main.settings.openstack
+           if executable == "all" or @ec2_main.settings.openstack and !@ec2_main.settings.google
               status = @ec2_main.imageCache.status
               if status == "loading"
                  error_message("Public Images","Public Images currently are loading")
@@ -141,6 +141,10 @@ def initialize(owner)
                 i=0
                 #ec2.describe_images_by_executable_by(executable).each do |r|
                 @ec2_main.environment.images.find_by_executable(executable).each do |r|
+				 if @ec2_main.settings.google
+				   image_locs[i] = r
+                   i = i+1
+				 else 
                   if r[:aws_is_public]
                    if search != nil and search != ""
                       loc = r['imageLocation'].downcase
@@ -161,6 +165,7 @@ def initialize(owner)
                       end   
                    end
                   end 
+				 end 
                 end   
               end
              end
@@ -202,7 +207,7 @@ def initialize(owner)
   #  ec2.describe_images(:filters => { 'image-type' => 'kernel', 'state' => 'available', 'tag:MyTag' => 'MyValue'})
   #
   def all(filter=nil)
-    data = Array.new
+    data = []
     conn = @ec2_main.environment.connection
     if conn != nil
        begin 
@@ -211,7 +216,9 @@ def initialize(owner)
              x.each do |y|
                 data = hash_ops_image(y) 
              end
-          elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
+		  elsif @ec2_main.settings.google
+              data = google_self()		  
+           elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
              x = conn.images.all(filters)
              x.each do |y|
 	        data.push(hash_ops_image_aws(y))
@@ -254,7 +261,13 @@ def initialize(owner)
               x.each do |y|
                 data.push(hash_ops_image(y))
               end
-            end            
+            end 
+          elsif @ec2_main.settings.google
+		     if owner == "self"
+               data = google_self(conn)
+			else
+               data = google_all(conn)
+            end			
           elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
              x = conn.describe_images('Owner' => owner)
  	     data = x.body['imagesSet']
@@ -285,10 +298,10 @@ def initialize(owner)
             if conn != nil and executable == "all"
               response = conn.list_images_detail({:type => 'BASE'})
               if response.status == 200 or data.status == 203
-	      	 x = response.body['images']
-	      	 x.each do |r|
-	      	    data.push(hash_ops_image_rackspace(r,'base'))
-	      	 end
+	      	     x = response.body['images']
+	      	     x.each do |r|
+	      	        data.push(hash_ops_image_rackspace(r,'base'))
+	      	     end
               end
             end        
           elsif  @ec2_main.settings.openstack 
@@ -301,11 +314,19 @@ def initialize(owner)
               end
              end 
             end
+		  elsif @ec2_main.settings.google
+		     if conn != nil 
+          		if executable == "all"
+                  data = google_all(conn)
+				else
+                  data = google_self(conn)	
+                end				  
+             end			 
           elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
              x = conn.describe_images('ExecutableBy' => executable)
-	     x = x.body['imagesSet']
+	         x = x.body['imagesSet']
              x.each do |y|
-	        data.push(hash_ops_image_aws(y))
+	            data.push(hash_ops_image_aws(y))
              end       	
           else 
              data = conn.describe_images_by_executable_by(executable)
@@ -388,13 +409,16 @@ def initialize(owner)
      if conn != nil
           if  @ec2_main.settings.openstack 
                 y = conn.images.get(image_id)
-                data = hash_ops_image(y) 
+                data = hash_ops_image(y)
+          elsif @ec2_main.settings.google
+		     # this needs testing
+             data = conn.get_image(image_id)						
            elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
              x = conn.describe_images({'ImageId' => image_id})
 	     x = x.body['imagesSet']
              x.each do |y|
                 data = hash_ops_image_aws(y)
-             end       	           
+             end 
           else                      
              a = conn.describe_images([image_id])
              data = a[0]
@@ -411,6 +435,8 @@ def initialize(owner)
      if conn != nil
           if  @ec2_main.settings.openstack 
           # openstack
+		  elsif @ec2_main.settings.google
+		  # google
           elsif conn.instance_of?(Fog::Compute)
           # no method is fog aws for this?
           else              
@@ -439,6 +465,9 @@ def initialize(owner)
 	   else
 	      raise "Error #{response.status} #{response.body['Message']}"	   
 	   end 
+	     elsif @ec2_main.settings.google
+		     # this needs testing
+             data = conn.insert_image(options[:name], options)	
         elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
            response = conn.create_image(instance_id, options[:name], options[:description], options[:no_reboot])
            if response.status = 200
@@ -455,6 +484,7 @@ def initialize(owner)
      return data
   end 
   
+  # delete google and other images 
   def  delete_image(image_id)
      data = false
      conn = @ec2_main.environment.connection
@@ -470,6 +500,23 @@ def initialize(owner)
      end
      return data  
   end  
+  
+  # Insert a google image
+  def  insert_image(image_name, options={})
+     data = false
+     conn = @ec2_main.environment.connection
+     if conn != nil
+        response = conn.insert_image(image_name, options)
+        if response.status == 200
+           data = response.body
+        else
+           data = {}
+        end                  
+     else 
+        raise "Connection Error"
+     end
+     return data  
+  end    
 
  # Register new image at Amazon.
  # Options: :image_location, :name, :description, :architecture, :kernel_id, :ramdisk_id,
@@ -560,7 +607,48 @@ def initialize(owner)
                  #  r['rootDeviceType'] = r['rootDeviceType']
                  # r[:root_device_name] = r['rootDeviceName']
                 return r
-  end              
+  end 
+  
+  def hash_gce_image(r,type="")
+      r['imageId'] = r['id']
+	  r['architecture'] = type
+	  r['rootDeviceType'] =  r['sourceType']
+	  r['imageLocation'] =  r['name']
+      return r
+  end  
+
+   def google_all(conn)
+    puts "google_all"
+                data = []  
+                response = conn.list_images('centos-cloud')
+			    x = response.body['items']
+			    if response.status == 200
+	      	       x.each do |r|
+	      	          data.push(hash_gce_image(r,'centos-cloud'))
+	      	       end
+			    end
+                response = conn.list_images('debian-cloud')
+			    x = response.body['items']
+			    if response.status == 200
+	      	       x.each do |r|
+	      	          data.push(hash_gce_image(r,'debian-cloud'))
+	      	       end
+			    end
+             return data 
+   end	
+
+    def google_self(conn) 
+	puts "google_self"
+	            data = []
+                response = conn.list_images
+			    x = response.body['items']
+			    if response.status == 200
+	      	       x.each do |r|
+	      	          data.push(hash_gce_image(r,'private'))
+	      	       end
+			    end
+ 			  return data  
+   end	   
   
   def hash_ops_image_rackspace(r,type)
       m = r[:metadata]
@@ -686,7 +774,7 @@ def initialize(owner)
   # search options 
   def viewing
      data = Array.new
-     if  @ec2_main.settings.openstack
+     if  @ec2_main.settings.openstack or @ec2_main.settings.google
         data.push("Owned By Me")
         data.push("Public Images")
      else     
@@ -706,23 +794,23 @@ def initialize(owner)
      return data
   end
   
-  # search options 
-  def platform
+   def platform
     data = Array.new
     if  @ec2_main.settings.openstack
          data.push("All Architectures")
-    else    
+	elsif @ec2_main.settings.google
+       data.push("All Architectures")
+     else    
        data.push("All Architectures")
        data.push("Small(i386)")
-       data.push("Large(x86_64)")
+       data.push("Large(x86_64)")	
     end   
     return data
   end 
   
-  # search options 
   def device
      data = Array.new
-     if  @ec2_main.settings.openstack
+     if  @ec2_main.settings.openstack  or @ec2_main.settings.google
          data.push("all")
      else
         data.push("ebs")
@@ -730,5 +818,10 @@ def initialize(owner)
      end   
      return data
   end
+  
+  def search_root
+   data = "ebs" 
+   data = "all" if @ec2_main.settings.openstack or @ec2_main.settings.google 
+  end  
   
 end

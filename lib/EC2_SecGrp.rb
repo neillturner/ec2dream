@@ -206,7 +206,7 @@ class EC2_SecGrp
   def load(sg,vpc=nil)
     puts "SecGrp.load #{sg} #{vpc}"
     @type = "ec2"
-    if  @ec2_main.settings.openstack
+    if  @ec2_main.settings.openstack or   @ec2_main.settings.google
        load_ops(sg)    
     else
        @secgrp['Security_Group'] = sg

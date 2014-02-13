@@ -16,9 +16,11 @@ class EC2_PlatformsDialog < FXDialogBox
     @item_name[1] = "cloudstack"
     @item_name[2] = "cloudfoundry"
     @item_name[3] = "eucalyptus"
-    @item_name[4] = "openstack"
-    @item_name[5] = "openstack_hp"
-    @item_name[6] = "openstack_rackspace"
+	@item_name[4] = "google"
+    @item_name[5] = "openstack"
+    @item_name[6] = "openstack_hp"
+    @item_name[7] = "openstack_rackspace"
+	@item_name[8] = "servers"
     super(owner, "Select Platform", :opts => DECOR_ALL, :width => 400, :height => 200)
     itemlist = FXList.new(self, :opts => LIST_SINGLESELECT|LAYOUT_FILL)
     @item_name.each do |e|

@@ -64,6 +64,7 @@ class EC2_Launch
        @frame3.hide()
        @frame4.hide()
        @frame5.show()
+	   @frame6.hide()
        @profile = name
        @properties = {}
        @cfy_launch['Name'].text = @profile

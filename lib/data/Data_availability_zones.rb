@@ -26,7 +26,27 @@ class Data_availability_zones
           data.push({:zone_name => 'az-2.region-a.geo-1'})
           data.push({:zone_name => 'az-3.region-a.geo-1'})
       elsif  @ec2_main.settings.openstack
-           data.push({:zone_name => 'default'})      
+           data.push({:zone_name => 'default'})
+     elsif @ec2_main.settings.google 
+        conn = @ec2_main.environment.connection
+        if conn != nil
+           begin 
+              response = conn.list_zones
+			  if response.status == 200
+	             x = response.body['items']
+	             x.each do |r|
+				    r[:zone_name] = r['name'] 
+				    data.push(r)
+ 	            end
+	          else
+	      	     data = []
+              end
+            rescue
+              puts "ERROR: getting all zones  #{$!}"
+           end
+        else 
+           raise "Connection Error"   
+        end 				   
       else
           conn = @ec2_main.environment.connection
           if conn != nil

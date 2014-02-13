@@ -16,10 +16,7 @@ class EC2_ImageDialog < FXDialogBox
        @viewing =  @ec2_main.environment.images.viewing
        @platform =  @ec2_main.environment.images.platform
        @device =  @ec2_main.environment.images.device
-       if search_root == nil 
-         search_root = "ebs" 
-         search_root = "all" if @ec2_main.settings.openstack
-       end  
+	   search_root =  @ec2_main.environment.images.search_root if search_root == nil 
        image_type = search_type
        image_platform = search_platform
        image_root_device = search_root
@@ -96,7 +93,7 @@ class EC2_ImageDialog < FXDialogBox
             sa = (selected_item).split"("
 	    if sa.size>1
 	       @curr_img = sa[1].chomp(")")
-	       @curr_name = sa[0]
+	       @curr_name = sa[0].rstrip
 	    else
 	       @curr_img =""
 	       @curr_name =""

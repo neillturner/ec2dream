@@ -71,6 +71,17 @@ class Data_snapshots
 	        r[:aws_owner_alias] = nil
 	        data.push(r)
 	     end
+		      elsif @ec2_main.settings.google 
+					response = conn.list_snapshots
+					if response.status == 200
+						x = response.body['items']
+						x.each do |r|
+						  r[:aws_id] = r['name']
+						  data.push(r)
+						end
+					else
+						data = []
+					end
           elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
              filter = {} if filter == nil
              x = conn.snapshots.all(filter)
@@ -222,6 +233,40 @@ class Data_snapshots
         else     
            data = conn.delete_snapshot(snapshot_id)
         end   
+     else 
+        raise "Connection Error"
+     end
+     return data  
+  end 
+
+# Delete a google disk
+  def  delete_snapshot(snapshot_name, zone_name)
+     data = false
+     conn = @ec2_main.environment.connection
+     if conn != nil
+        response = conn.delete_snapshot(snapshot_name, zone_name)
+        if response.status == 200
+           data = response.body
+        else
+           data = {}
+        end                  
+     else 
+        raise "Connection Error"
+     end
+     return data  
+  end    
+  
+  # Insert a google snapshot
+  def  insert_snapshot(disk_name, zone_name, project=nil, opts={})
+     data = false
+     conn = @ec2_main.environment.connection
+     if conn != nil
+        response = conn.insert_snapshot(disk_name, zone_name, project, opts)
+        if response.status == 200
+           data = response.body
+        else
+           data = {}
+        end                  
      else 
         raise "Connection Error"
      end

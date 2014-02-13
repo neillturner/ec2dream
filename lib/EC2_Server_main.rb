@@ -8,9 +8,7 @@ class EC2_Server
         @appname = ""
         @windows_admin_pw = {}
         @command_stack = {}
-        @ops_public_addr = {}
         @ec2_ssh_user = {}
-        @ops_admin_pw = {}
         @ec2_ssh_private_key = {}
         @ec2_chef_node = {}
         @ec2_puppet_manifest = {}
@@ -22,12 +20,17 @@ class EC2_Server
         @server = {}
         @resource_tags = nil 
         @ops_server = {}
+		@ops_public_addr = {}
+		@ops_admin_pw = {}
+		@google_server = {}
+		@google_public_addr = {}
+		@google_admin_pw = {}		
         @cfy_server = {}
-        @cfy_env = Array.new
+        @cfy_env = []
         @cfy_env_curr_row = nil
 		@loc_server = {}
 		@saved = false
-        @block_mapping = Array.new
+        @block_mapping = []
         @flavor = {}
         @image = {}
         @curr_row = nil
@@ -95,13 +98,15 @@ class EC2_Server
 	@refresh_button.icon = @arrow_refresh
 	@refresh_button.tipText = "Server Status Refresh"
 	@refresh_button.connect(SEL_COMMAND) do |sender, sel, data|
-	    puts "server.refresh.connect"
-	    if @type == "ec2"  or @type == "ops" 
-	       s = currentInstance
-	       if s != nil and s != ""
-	          @ec2_main.serverCache.refresh(s)	    
-	    	  load(s)
-	       end
+	    if @type == "ec2"  or @type == "ops" or @type == "google"
+		   begin 
+	          s = currentInstance
+	          if s != nil and s != ""
+	             @ec2_main.serverCache.refresh(s)	    
+	    	     load(s)
+	          end
+		   rescue 
+		   end
 	    end
 	    if @type == "cfy"
 	       cfy_refresh(@appname)
@@ -114,7 +119,7 @@ class EC2_Server
 	@putty_button.icon = @monitor
         @putty_button.tipText = " SSH "
 	@putty_button.connect(SEL_COMMAND) do |sender, sel, data|
-	    if @type == "ec2" or @type == "ops"
+	    if @type == "ec2" or @type == "ops" or @type == "google"
                run_ssh
 		elsif @type == "loc"	   
 			   loc_ssh
@@ -139,7 +144,7 @@ class EC2_Server
 	@winscp_button.tipText = "  SCP  "
 	@winscp_button.connect(SEL_COMMAND) do |sender, sel, data|
 	   puts "server.serverWinscp.connect"
-	   if @type == "ec2" or @type == "ops"
+	   if @type == "ec2" or @type == "ops"  or @type == "google"
               run_scp
 	   elsif @type == "loc"		  
 			  loc_winscp
@@ -152,9 +157,9 @@ class EC2_Server
 	      sender.enabled = true
 	      @winscp_button.icon = @reboot
 	      @winscp_button.tipText = " Restart App  "	  	
-           elsif loaded
+       elsif loaded
 	      sender.enabled = true
-              @winscp_button.icon = @put
+          @winscp_button.icon = @put
 	      @winscp_button.tipText = "  SCP  "
   	   else
 	      sender.enabled = false
@@ -184,6 +189,8 @@ class EC2_Server
 	       terminate
 	    elsif @type == "ops" 
 	       ops_terminate
+        elsif @type == "google" 
+	       google_terminate		   
 	    elsif @type == "cfy" 
 	       cfy_delete	
         elsif @type == "loc" 
@@ -198,6 +205,8 @@ class EC2_Server
 	       sender.enabled = true
 	    elsif @type == "ops" and (@server_status == "ACTIVE"  or @server_status == "BUILD")
 	       sender.enabled = true
+	    elsif @type == "google" and (@server_status == "RUNNING")
+	       sender.enabled = true		   
 	    elsif @type == "cfy"
 	       sender.enabled = true
 	       @terminate_button.tipText = " Delete App "
@@ -288,8 +297,8 @@ class EC2_Server
               stop_instance
 	   elsif @type == "cfy"
 	       cfy_stop
-            elsif @type == "ops"
-              instance = @ops_server['Instance_ID'].text
+       elsif @type == "ops"
+           instance = @ops_server['Instance_ID'].text
 	      dialog = EC2_InstanceRebootDialog.new(@ec2_main,instance)
               dialog.execute
               if dialog.rebooted
@@ -391,7 +400,7 @@ class EC2_Server
 	@tunnel_button.icon = @tunnel
         @tunnel_button.tipText = " Setup SSH Tunnel"
 	@tunnel_button.connect(SEL_COMMAND) do |sender, sel, data|
-	    if @type == "ec2" or @type == "ops"
+	    if @type == "ec2" or @type == "ops"  or @type == "google"
                run_ssh_tunnel
 		elsif @type == "loc"
 	       loc_ssh_tunnel
@@ -1284,24 +1293,206 @@ class EC2_Server
        if dialog.execute != 0
           @loc_server['bastion_putty_key'].text = dialog.filename
        end
-    end    	
+    end 
+	#
+	# google frame
+	#
+	@frame6 = FXMatrix.new(@page1, 3, MATRIX_BY_COLUMNS|LAYOUT_FILL)
+	@frame6.hide()
+ 	FXLabel.new(@frame6, "Name" )
+    @frame6s = FXHorizontalFrame.new(@frame6,LAYOUT_FILL_X, :padding => 0)
+ 	@google_server['Name'] = FXTextField.new(@frame6s, 20, nil, 0, :opts => TEXTFIELD_READONLY)
+ 	FXLabel.new(@frame6s, "" )
+ 	FXLabel.new(@frame6s, "Chef Node/Puppet Roles" )
+ 	@google_server['Chef_Node'] = FXTextField.new(@frame6s, 21, nil, 0, :opts => FRAME_SUNKEN)
+	@google_server['Chef_Node'].connect(SEL_COMMAND) do
+           instance_id = @google_server['Instance_ID'].text
+           @ec2_chef_node[instance_id] = @google_server['Chef_Node'].text
+           if @ec2_main.launch.loaded == true
+              @ec2_main.launch.google_put('Chef_Node',@google_server['Chef_Node'].text) 
+    	      @ec2_main.launch.save
+    	   end   
+	end
+ 	FXLabel.new(@frame6, "" )
+ 	FXLabel.new(@frame6, "Instance ID" )
+ 	@frame6t = FXHorizontalFrame.new(@frame6,LAYOUT_FILL_X, :padding => 0)
+ 	@google_server['Instance_ID'] = FXTextField.new(@frame6t, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+ 	FXLabel.new(@frame6t, "Puppet Manifest" )
+ 	@google_server['Puppet_Manifest'] = FXTextField.new(@frame6t, 15, nil, 0, :opts => FRAME_SUNKEN)
+	@google_server['Puppet_Manifest'].connect(SEL_COMMAND) do
+           instance_id = @google_server['Instance_ID'].text
+           @ec2_puppet_manifest[instance_id] = @google_server['Puppet_Manifest'].text
+           if @ec2_main.launch.loaded == true
+              @ec2_main.launch.put('Puppet_Manifest',@google_server['Puppet_Manifest'].text) 
+    	      @ec2_main.launch.save
+    	   end   
+	end 		 	
+	FXLabel.new(@frame6, "" )
+ 	FXLabel.new(@frame6, "State" )
+ 	@frame6j = FXHorizontalFrame.new(@frame6,LAYOUT_FILL_X, :padding => 0)
+ 	@google_server['State'] = FXTextField.new(@frame6j, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+ 	@google_server['State'].font = FXFont.new(@ec2_main.app, "Arial", 8, :weight => FXFont::ExtraBold)
+	FXLabel.new(@frame6j, "       Launch Time" )
+	@google_server['Launch_Time'] = FXTextField.new(@frame6j, 30, nil, 0, :opts => TEXTFIELD_READONLY)
+ 	FXLabel.new(@frame6, "" )
+
+ 	FXLabel.new(@frame6, "Tags" )
+ 	@google_server['Tags'] = FXTextField.new(@frame6, 60, nil, 0, :opts => TEXTFIELD_READONLY)
+ 	FXLabel.new(@frame6, "" )
+	FXLabel.new(@frame6, "Kernel" )
+ 	@google_server['Kernel'] = FXTextField.new(@frame6, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+ 	FXLabel.new(@frame6, "" )
+ 	FXLabel.new(@frame6, "Machine Type" )
+ 	@google_server['Flavor'] = FXTextField.new(@frame6, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+ 	FXLabel.new(@frame6, "" )
+ 	FXLabel.new(@frame6, "Zone")
+ 	@google_server['Availability_Zone'] = FXTextField.new(@frame6, 25, nil, 0, :opts => TEXTFIELD_READONLY) 	
+	FXLabel.new(@frame6, "" )
+ 	FXLabel.new(@frame6, "Scheduling")
+ 	@google_server['Scheduling'] = FXTextField.new(@frame6, 60, nil, 0, :opts => TEXTFIELD_READONLY) 	
+	FXLabel.new(@frame6, "" )
+    if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
+	   FXLabel.new(@frame6,"SSH Private Key" )
+ 	   @google_server['SSH_Private_Key'] = FXTextField.new(@frame6, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+	   @google_server['SSH_Private_Key'].connect(SEL_COMMAND) do
+               instance_id = @google_server['Instance_ID'].text
+               @ec2_ssh_private_key[instance_id] = @google_server['SSH_Private_Key'].text
+               @ec2_main.launch.ops_put('SSH_Private_Key',@google_server['SSH_Private_Key'].text) 
+    	       @ec2_main.launch.ops_save		   
+	   end
+	   @google_server['SSH_Private_Key_Button'] = FXButton.new(@frame6, "", :opts => BUTTON_TOOLBAR)
+	   @google_server['SSH_Private_Key_Button'].icon = @magnifier
+	   @google_server['SSH_Private_Key_Button'].tipText = "Browse..."
+	   @google_server['SSH_Private_Key_Button'].connect(SEL_COMMAND) do
+	      dialog = FXFileDialog.new(@frame6, "Select pem file")
+	      dialog.patternList = [
+	          "Pem Files (*.pem)"
+	      ]
+	      dialog.selectMode = SELECTFILE_EXISTING
+	      if dialog.execute != 0
+	         @google_server['SSH_Private_Key'].text = dialog.filename
+                 instance_id = @google_server['Instance_ID'].text
+                 @ec2_ssh_private_key[instance_id] = @google_server['SSH_Private_Key'].text
+                 if @ec2_main.launch.loaded == true
+                    @ec2_main.launch.ops_put('SSH_Private_Key',@google_server['SSH_Private_Key'].text) 
+    	 	    @ec2_main.launch.save
+    	 	 end   
+	      end
+	   end	   
+        else
+	   FXLabel.new(@frame6, "Putty Private Key" )        
+ 	   @google_server['Putty_Private_Key'] = FXTextField.new(@frame6, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+	   @google_server['Putty_Private_Key'].connect(SEL_COMMAND) do
+               instance_id = @google_server['Instance_ID'].text
+               @putty_private_key[instance_id] = @google_server['Putty_Private_Key'].text
+               if @ec2_main.launch.loaded == true
+                  @ec2_main.launch.ops_put('Putty_Private_Key',@google_server['Putty_Private_Key'].text) 
+    	          @ec2_main.launch.save
+    	       end   
+	   end
+	   @google_server['Putty_Private_Key_Button'] = FXButton.new(@frame6, "", :opts => BUTTON_TOOLBAR)
+	   @google_server['Putty_Private_Key_Button'].icon = @magnifier
+	   @google_server['Putty_Private_Key_Button'].tipText = "Browse..."
+	   @google_server['Putty_Private_Key_Button'].connect(SEL_COMMAND) do
+	      dialog = FXFileDialog.new(@frame6, "Select ppk file")
+	      dialog.patternList = [
+	          "Pem Files (*.ppk)"
+	      ]
+	      dialog.selectMode = SELECTFILE_EXISTING
+	      if dialog.execute != 0
+	         @google_server['Putty_Private_Key'].text = dialog.filename
+                 instance_id = @google_server['Instance_ID'].text
+                 @putty_private_key[instance_id] = @google_server['Putty_Private_Key'].text
+                 if @ec2_main.launch.loaded == true
+                    @ec2_main.launch.ops_put('Putty_Private_Key',@google_server['Putty_Private_Key'].text) 
+    	            @ec2_main.launch.save
+    	         end   
+	      end
+	   end       
+        end
+	FXLabel.new(@frame6, "SSH/Win Admin User" )
+	@google_server['EC2_SSH_User'] = FXTextField.new(@frame6, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+        @google_server['EC2_SSH_User'].connect(SEL_COMMAND) do |sender, sel, data|
+           if @ec2_main.launch.loaded == true
+              @ec2_main.launch.ops_put('EC2_SSH_User',data) 
+    	      @ec2_main.launch.save
+    	   end   
+	end
+	FXLabel.new(@frame6, "" )        
+	FXLabel.new(@frame6, "SSH/Win Admin Password" )
+	@google_server['Admin_Password'] = FXTextField.new(@frame6, 60, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_PASSWD)
+	@google_server['Admin_Password'].connect(SEL_COMMAND) do |sender, sel, data|
+	   instance_id = @google_server['Instance_ID'].text
+           @google_admin_pw[instance_id] = data
+           if @ec2_main.launch.loaded == true
+              @ec2_main.launch.ops_put('Admin_Password',data)
+    	      @ec2_main.launch.ops_save 
+    	   end   
+	end
+	@frame6g = FXHorizontalFrame.new(@frame6,LAYOUT_FILL_X, :padding => 0)
+	@google_server['Admin_Password_Button'] = FXButton.new(@frame6g, "", :opts => BUTTON_TOOLBAR)
+	@google_server['Admin_Password_Button'].icon = @key
+	@google_server['Admin_Password_Button'].tipText = "Change Admin Password"
+	@google_server['Admin_Password_Button'].connect(SEL_COMMAND) do
+	   if loaded
+	      begin
+	             instance_id = @google_server['Instance_ID'].text
+	             dialog = EC2_InstanceAdminPasswordDialog.new(@ec2_main,instance_id)
+                     dialog.execute
+                     if dialog.updated
+                        pw = dialog.selected 
+	                @google_server['Admin_Password'].text = pw
+                        instance_id = @google_server['Instance_ID'].text
+                        @google_admin_pw[instance_id] = pw
+                        if @ec2_main.launch.loaded == true
+                           @ec2_main.launch.ops_put('Admin_Password',pw) 
+    	 	           @ec2_main.launch.ops_save
+    	 	        end   
+    	 	        FXMessageBox.information(@ec2_main,MBOX_OK,"Admin Password","Admin password #{pw} saved")
+    	 	     end 
+	      rescue
+	         error_message("Error - Unable to update admin password", $!) 
+	      end
+           else
+             error_message("Error","Server not running. Press refresh")
+           end 
+        end
+        @google_server['Admin_Password_Button2'] = FXButton.new(@frame6g, "", :opts => BUTTON_TOOLBAR)
+	@google_server['Admin_Password_Button2'].icon = @magnifier
+	@google_server['Admin_Password_Button2'].tipText = "Show Admin Password"
+	@google_server['Admin_Password_Button2'].connect(SEL_COMMAND) do
+	   dialog = EC2_ShowPasswordDialog.new(@ec2_main,"Admin Password",@google_server['Admin_Password'].text)
+           dialog.execute	
+	end
+	FXLabel.new(@frame6, "IP Addr" )
+ 	@google_server['Public_Addr'] = FXTextField.new(@frame6, 40, nil, 0, :opts => FRAME_SUNKEN)
+ 	@google_server['Public_Addr'].connect(SEL_COMMAND) do  |sender, sel, data|
+ 	   instance_id = @google_server['Instance_ID'].text
+ 	   @google_public_addr[instance_id] = data
+	   #@ec2_main.launch.ops_put('Public_Addr',data) 
+    	   #@ec2_main.launch.save        
+	end 
+ 	FXLabel.new(@frame6, "" ) 	
+ 	FXLabel.new(@frame6, "Can Ip Forward" )
+ 	@google_server['Can_Ip_Forward'] = FXTextField.new(@frame6, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+ 	FXLabel.new(@frame6, "" )			
+ 	FXLabel.new(@frame6, "Networks" )
+	@google_server['Addresses'] =  FXText.new(@frame6, :opts => TEXT_WORDWRAP|LAYOUT_FILL|TEXTFIELD_READONLY)
+    @google_server['Addresses'].setVisibleRows(5)
+    @google_server['Addresses'].setText("") 
+ 	FXLabel.new(@frame6, "" )
+  	FXLabel.new(@frame6, "Disks" )
+	@google_server['Disks'] =  FXText.new(@frame6, :opts => TEXT_WORDWRAP|LAYOUT_FILL|TEXTFIELD_READONLY)
+    @google_server['Disks'].setVisibleRows(5)
+    @google_server['Disks'].setText("") 
+ 	FXLabel.new(@frame6, "" )		
+	FXLabel.new(@frame6, "Metadata" )
+	@google_server['Metadata'] =  FXText.new(@frame6, :opts => TEXT_WORDWRAP|LAYOUT_FILL|TEXTFIELD_READONLY)
+    @google_server['Metadata'].setVisibleRows(10)
+    @google_server['Metadata'].setText("") 
+    FXLabel.new(@frame6, "" )         	
   end 
   
-  def loaded
-     if @type == "ec2" and @server_status == "running" 
-      return true
-     elsif @type == "ops" and @server_status.start_with?("ACTIVE")
-        return true
-     elsif @type == "cfy"
-        return true 
-     elsif @type == "loc"
-        return true        
-     else   
-        return false 
-     end 
-  end
-  
-
   def run_scp
             server = currentServer
             if @type == "ops"  
@@ -1309,7 +1500,12 @@ class EC2_Server
                address = @ops_server['Public_Addr'].text
                password = @ops_server['Admin_Password'].text
                local_port = nil  # not added yet
-            else 
+            elsif @type == "google"  
+               user = @ec2_main.launch.google_get("EC2_SSH_User")
+               address = @google_server['Public_Addr'].text
+               password = ""
+               local_port = nil  # not added yet
+            else 			
                address = @server['Public_IP'].text
                user = @ec2_main.launch.get("EC2_SSH_User") 
                password =""
@@ -1328,6 +1524,11 @@ class EC2_Server
                address = @ops_server['Public_Addr'].text
                password = @ops_server['Admin_Password'].text
                local_port = nil  # not added yet
+            elsif @type == "google" 
+               address = @google_server['Public_Addr'].text
+               user = @ec2_main.launch.google_get("EC2_SSH_User")
+               password = ""
+               local_port = nil  # not added yet			   
             else 
                address = @server['Public_IP'].text
                address = @server['Private_IP'].text if address == nil or address == ""
@@ -1353,6 +1554,12 @@ class EC2_Server
                password = @ops_server['Admin_Password'].text
                local_port = nil   # not added yet 
                address_port = "22" 
+            elsif @type == "google"  
+               user = @ec2_main.launch.google_get("EC2_SSH_User")
+               address = @google_server['Public_Addr'].text
+               password = ""
+               local_port = nil   # not added yet 
+               address_port = "22" 			   
             else 
                #address = @server['Public_IP'].text
                address = @server['Private_IP'].text if address == nil or address == ""
@@ -1378,6 +1585,8 @@ class EC2_Server
                 address = @ops_server['Public_Addr'].text
                 pw = @ops_server['Admin_Password'].text
                 local_port = nil   # not added yet  
+			elsif @type == "google" 
+                return   # no windows on google			
               else 
                 address = @server['Public_IP'].text
                 user = @ec2_main.launch.get("EC2_SSH_User")
@@ -1441,6 +1650,16 @@ class EC2_Server
        pk = @ec2_main.settings.get('EC2_SSH_PRIVATE_KEY')
       end
     end
+   elsif @type == "google"
+    instance_id = @google_server['Instance_ID'].text
+    if @ec2_ssh_private_key[instance_id] != nil and @ec2_ssh_private_key[instance_id] != ""
+	pk =  @ec2_ssh_private_key[instance_id]
+    else  
+      pk = @ec2_main.launch.google_get('EC2_SSH_Private_Key')
+      if pk == nil or pk == ""
+       pk = @ec2_main.settings.get('EC2_SSH_PRIVATE_KEY')
+      end
+    end	
    end 
    return pk
   end  
@@ -1467,6 +1686,16 @@ class EC2_Server
           pk = @ec2_main.settings.get('PUTTY_PRIVATE_KEY')
        end
     end 
+   elsif @type == "google"
+    instance_id = @google_server['Instance_ID'].text
+    if @putty_private_key[instance_id] != nil and @putty_private_key[instance_id] != ""
+	pk =  @putty_private_key[instance_id]
+    else	  
+       pk = @ec2_main.launch.google_get('Putty_Private_Key')
+       if pk == nil or pk == ""
+          pk = @ec2_main.settings.get('PUTTY_PRIVATE_KEY')
+       end
+    end 	
    end 
    return pk
   end  
@@ -1476,6 +1705,8 @@ class EC2_Server
           return @server['Instance_ID'].text
       elsif @type == "ops"
           return @ops_server['Instance_ID'].text
+      elsif @type == "google"
+          return @google_server['Instance_ID'].text		  
       else
           return ""
       end       
@@ -1491,6 +1722,8 @@ class EC2_Server
           end
       elsif @type == "ops"
           return @ops_server['Public_Addr'].text
+      elsif @type == "google"
+          return @google_server['Name'].text          		  
       elsif @type == "cfy"
           return @cfy_server['name'].text          
       else
@@ -1522,8 +1755,27 @@ class EC2_Server
       end        
   end
   
+  def loaded
+     if @type == "ec2" and @server_status == "running" 
+      return true
+     elsif @type == "ops" and @server_status.start_with?("ACTIVE")
+        return true
+     elsif @type == "google" and @server_status == "RUNNING" 
+      return true		
+     elsif @type == "cfy"
+        return true 
+     elsif @type == "loc"
+        return true        
+     else   
+        return false 
+     end 
+  end
+  
+
+
+  
   def enable_if_env_set(sender)
-        @env = @ec2_main.environment.env
+       @env = @ec2_main.environment.env
        if @env != nil and @env.length>0
        	sender.enabled = true
        else
@@ -1533,7 +1785,7 @@ class EC2_Server
  end 
    
  def enable_if_server_loaded(sender)
-      if loaded and (@type == "ec2" or @type == "ops" or @type == "cfy"  or @type == "loc")
+      if loaded and ["ec2","ops","google","cfy","loc"].include? @type
           sender.enabled = true
       else
           sender.enabled = false
@@ -1541,7 +1793,7 @@ class EC2_Server
  end
  
  def enable_if_server_loaded_or_pending(sender)
-       if loaded or  @server_status == "pending"
+       if loaded or ["pending","BUILD","BUILD(scheduling)","BUILD(spawning)","REBOOT","RESIZE","REVERT_RESIZE","HARD_REBOOT","PROVISIONING","STAGING"].include? @server_status
            sender.enabled = true
        else
            sender.enabled = false
@@ -1549,7 +1801,7 @@ class EC2_Server
  end
  
  def enable_if_ec2_server_loaded(sender)
-        if loaded and (@type == "ec2" or @type == "ops" or @type == "loc")
+        if loaded and (@type == "ec2" or @type == "ops" or @type == "google" or @type == "loc")
             sender.enabled = true
         else
             sender.enabled = false
@@ -1594,7 +1846,13 @@ class EC2_Server
                user = @ec2_main.launch.ops_get("SSH_User")
                password = @ops_server['Admin_Password'].text
                local_port = nil  # not added yet
- 	    else
+ 	       elsif @type == "google"
+               if @google_server['Chef_Node'].text != nil and @google_server['Chef_Node'].text != ""
+                  chef_node = @google_server['Chef_Node'].text
+               end
+               user = @ec2_main.launch.google_get("EC2_SSH_User")
+               local_port = nil  # not added yet			   
+ 	       else
                if @server['Chef_Node'].text != nil and @server['Chef_Node'].text != ""
                   chef_node = @server['Chef_Node'].text
                end
@@ -1625,6 +1883,13 @@ class EC2_Server
                 password = @ops_server['Admin_Password'].text
                 local_port = nil  # not added yet
 				roles = @ops_server['Chef_Node'].text
+  	        elsif @type == "google"
+                if @google_server['Puppet_Manifest'].text != nil and @google_server['Puppet_Manifest'].text != ""
+                   puppet_manifest = @google_server['Puppet_Manifest'].text
+                end
+                user = @ec2_main.launch.google_get("EC2_SSH_User")
+                local_port = nil  # not added yet
+				roles = @google_server['Chef_Node'].text				
   	        else
                 if @server['Puppet_Manifest'].text != nil and @server['Puppet_Manifest'].text != ""
                    puppet_manifest = @server['Puppet_Manifest'].text
@@ -1641,34 +1906,4 @@ class EC2_Server
  	    puppet(server, address,  puppet_manifest, user, private_key, password, platform, local_port, roles)
      end
  
-    #def run_command
-   #         server = currentServer
-   #         address = @server['Public_IP'].text
-   #         command = ""
-   #         password =""
-   #         platform = ""
-   #         local_port =""
-   #         if @type == "ops"
-   #            if @ops_server['Command'].text != nil and @ops_server['Command'].text != ""
-   #               command = @ops_server['Command'].text
-   #            end
-   #            user = @ec2_main.launch.ops_get("SSH_User")
-   #            password = @ops_server['Admin_Password'].text
-   #            local_port = nil  # not added yet
- #	    else
-   #            if @server['Command'].text != nil and @server['Command'].text != ""
-   #               command = @server['Command'].text
-   #            end
-   #            user = @ec2_main.launch.get("EC2_SSH_User")
-   #            platform = @server['Platform'].text
-   #            if platform == "windows" and @server['Win_Admin_Password'].text != ""
-   #               password = @server['Win_Admin_Password'].text
-   #            end 
-   #            local_port = @server['Local_Port'].text
-   #         end 
-   #         private_key = get_pk
-#	    command_runner(server, address, command, user, private_key, password, platform, local_port)
-  #   end     
-     
-     
  end

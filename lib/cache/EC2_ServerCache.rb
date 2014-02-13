@@ -154,13 +154,13 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
 	         state = r[:aws_state]
 	      end
               case state 
-                   when "running","ACTIVE"
+                   when "running","ACTIVE","RUNNING"
                       tree.appendItem(groupBranch, s, light, light)
-                   when  "shutting-down"
+                   when  "shutting-down","ACTIVE(deleting)","STOPPING"
                       tree.appendItem(groupBranch, s, disconnect, disconnect)
-                   when "pending","BUILD","BUILD(scheduling)","BUILD(spawning)","REBOOT","RESIZE","REVERT_RESIZE","HARD_REBOOT"
+                   when "pending","BUILD","BUILD(scheduling)","BUILD(spawning)","REBOOT","RESIZE","REVERT_RESIZE","HARD_REBOOT","PROVISIONING","STAGING"
                       tree.appendItem(groupBranch, s, connect, connect)
-                   when "stopping","stopped","DELETED","SHUTOFF","ERROR","SUSPENDED","VERIFY_RESIZE"
+                   when "stopping","stopped","DELETED","SHUTOFF","ERROR","SUSPENDED","VERIFY_RESIZE","TERMINATED","STOPPED"
                       tree.appendItem(groupBranch, s, @stopped, @stopped)
                    else
                       tree.appendItem(groupBranch, s, nolight, nolight)
@@ -247,7 +247,7 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
  	            else
  	               r['name']='default'
  	            end   
-                 end 
+             end 
  	      end 
  	      begin 
  	         @serverList[gn].push("#{r['name']}/#{instance_id}")
@@ -297,13 +297,13 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
  	            state = r[:aws_state]
  	         end
                  case state 
-                    when "running","ACTIVE"
+                    when "running","ACTIVE","RUNNING"
                          tree.appendItem(groupBranch, s, light, light)
-                    when  "shutting-down"
+                    when  "shutting-down","ACTIVE(deleting)","STOPPING"
                          tree.appendItem(groupBranch, s, disconnect, disconnect)
-                    when "pending","BUILD","BUILD(scheduling)","BUILD(spawning)","REBOOT","RESIZE","REVERT_RESIZE","HARD_REBOOT"
+                    when "pending","BUILD","BUILD(scheduling)","BUILD(spawning)","REBOOT","RESIZE","REVERT_RESIZE","HARD_REBOOT","PROVISIONING","STAGING"
                          tree.appendItem(groupBranch, s, connect, connect)
-                    when "stopping","stopped","DELETED","SHUTOFF","ERROR","SUSPENDED","VERIFY_RESIZE"
+                    when "stopping","stopped","DELETED","SHUTOFF","ERROR","SUSPENDED","VERIFY_RESIZE","TERMINATED","STOPPED"
                          tree.appendItem(groupBranch, s, @stopped, @stopped)
                     else
                          tree.appendItem(groupBranch, s, nolight, nolight)
@@ -394,13 +394,13 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
       if t.text == treeText
           puts "tree item #{treeText} found updating state #{s}"
          case s  
-            when "running","ACTIVE"
+        when "running","ACTIVE","RUNNING"
                updateIcon(t,@light)
-	    when "shutting-down","ACTIVE(deleting)"
+	    when "shutting-down","ACTIVE(deleting)","STOPPING"
 	       updateIcon(t,@disconnect)
-	    when "pending","BUILD","BUILD(scheduling)","BUILD(spawning)","REBOOT","RESIZE","REVERT_RESIZE","HARD_REBOOT","ACTIVE(rebooting)"
+	    when "pending","BUILD","BUILD(scheduling)","BUILD(spawning)","REBOOT","RESIZE","REVERT_RESIZE","HARD_REBOOT","ACTIVE(rebooting)","PROVISIONING","STAGING"
 	       updateIcon(t,@connect)
-           when "stopping","stopped","SUSPENDED","VERIFY_RESIZE"
+           when "stopping","stopped","SUSPENDED","VERIFY_RESIZE","TERMINATED","STOPPED"
 	       updateIcon(t,@stopped)
 	   else
 	       if s.start_with?('ACTIVE')
@@ -656,6 +656,7 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
        sa = Array.new
        i=0
        cache.each do |key, r|
+	     puts "**** aws_state #{r[:aws_state]}"
          if (@ec2_main.settings.openstack and r[:aws_state] == "ACTIVE") or (!@ec2_main.settings.openstack and r[:aws_state] != "terminated") 
            gi = group_name(r)
            if r['name'] != nil
@@ -814,7 +815,7 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
             i=0
             while i<@serverList.size
                if @serverList[i].index("/") != nil
-                  case @serverState[i]
+	              case @serverState[i]
                      when "RUNNING","STARTED"
                         tree.appendItem(serverBranch, @serverList[i], light, light)
                      when "FLAPPING"

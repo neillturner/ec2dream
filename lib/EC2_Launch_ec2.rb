@@ -350,6 +350,8 @@ class EC2_Launch
       clear_panel
    elsif  @ec2_main.settings.openstack
       load_ops(profile)
+   elsif  @ec2_main.settings.google
+      load_google(profile)  
    elsif @ec2_main.settings.cloudfoundry
       load_cfy(profile)
    else   
@@ -359,8 +361,11 @@ class EC2_Launch
       @profile_folder = "launch"
       @properties = {}
       @frame1.show()
+	  @frame2.hide()
       @frame3.hide()
       @frame4.hide()
+	  @frame5.hide()
+	  @frame6.hide()
       @profile = profile
       @launch['Name'].text = @profile
       @launch['Name'].enabled = false
@@ -603,6 +608,8 @@ class EC2_Launch
       clear_cfy_panel
     elsif @ec2_main.settings.openstack
       clear_ops_panel
+    elsif @ec2_main.settings.google
+      clear_google_panel	  
     elsif @type == "as"  
       clear_as_panel
     else
@@ -844,6 +851,7 @@ class EC2_Launch
 def clear_notes
     @text_area.text = ""
     @ops_text_area.text = ""
+	@google_text_area.text = ""
     @loaded = false
 end
   
@@ -859,6 +867,8 @@ def load_notes
       f = File.open(fn, "r")
       if @type == "ops"
          @ops_text_area.text = f.read
+	  elsif @type == "google"
+         @google_text_area.text = f.read	 
       else
          @text_area.text = f.read
       end
@@ -871,7 +881,9 @@ end
   
 def save_notes
    if @type == "ops"
-      textOutput = @ops_text_area.text      
+      textOutput = @ops_text_area.text 
+   elsif @type == "google"
+      textOutput = @google_text_area.text      	  
    else   
       textOutput = @text_area.text
    end   

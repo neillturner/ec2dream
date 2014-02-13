@@ -100,6 +100,7 @@ class EC2_Launch
        @frame3.hide()
        @frame4.show()
        @frame5.hide()
+	   @frame6.hide()
        @profile = parm
        @ops_launch['Name'].text = @profile
        @ops_launch['Name'].enabled = false

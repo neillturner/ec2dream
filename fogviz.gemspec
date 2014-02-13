@@ -22,7 +22,7 @@
 
 Gem::Specification.new do |spec|
   spec.name = 'fogviz'
-  spec.version = '3.6.9'
+  spec.version = '3.7.0'
   spec.authors = ['Neill Turner']
   spec.email = 'neillwturner@gmail.com'
   spec.executables = ["fogviz"]
@@ -33,9 +33,9 @@ Gem::Specification.new do |spec|
   spec.add_dependency('rubyzip')
   spec.add_dependency('gchartrb')
   spec.add_dependency('pocketknife_ec2dream', '>= 0.1.10')
-  spec.add_dependency('pocketknife_puppet', '>= 0.1.12')
+  spec.add_dependency('pocketknife_puppet', '>= 0.1.14')
   spec.add_dependency('pocketknife_windows', '>= 0.1.10')
-  spec.add_dependency('fog', '= 1.12.1')
+  spec.add_dependency('fog', '>= 1.20.0')
   spec.add_dependency('cloudfoundry-client')
 
   spec.description = <<-EOF
@@ -50,6 +50,7 @@ Fogviz combines Fog, Ruby into a visual open source devops platform supporting:
       Amazon AWS with full support for VPC, Autoscaling and ability to list most entities.
       Amazon compatible clouds:  Eucalyptus, CloudStack.
       Openstack Clouds:  Rackspace Cloud Servers and HP Cloud.
+	  Google Compute Engine.
       Cloud Foundry.
 	  Vagrant.
       Chef and Puppet.
@@ -65,5 +66,6 @@ EOF
     candidates = candidates +  Dir.glob("{tar}/*")
     candidates = candidates +  Dir.glob("{wget}/*")
     candidates = candidates +  Dir.glob("{WinSCP}/*")
+	candidates = candidates +  Dir.glob("{google}/*")
   spec.files = candidates.sort
 end

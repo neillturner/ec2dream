@@ -75,14 +75,26 @@ require 'dialog/CFY_ServiceCreateDialog'
 require 'dialog/CFY_ServiceDeleteDialog'
 
 require 'dialog/LOC_CreateDialog'
-#require 'dialog/LOC_EditDialog'
-#require 'dialog/LOC_DeleteDialog'
 
 require 'dialog/VAG_CreateDialog'
 require 'dialog/VAG_DeleteDialog'
 require 'dialog/VAG_UpDialog'
 require 'dialog/VAG_DestroyDialog'
 
+require 'dialog/GOG_AddressCreateDialog'
+require 'dialog/GOG_AddressDeleteDialog'
+require 'dialog/GOG_NetworkCreateDialog'
+require 'dialog/GOG_NetworkDeleteDialog'
+require 'dialog/GOG_ZoneOperationDeleteDialog'
+require 'dialog/GOG_GlobalOperationDeleteDialog'
+require 'dialog/GOG_SnapDiskDialog'
+require 'dialog/GOG_SnapDeleteDialog'
+require 'dialog/GOG_DiskCreateDialog'
+require 'dialog/GOG_DiskDeleteDialog'
+require 'dialog/GOG_DiskAttachDialog'
+require 'dialog/GOG_DiskDetachDialog'
+require 'dialog/GOG_FirewallCreateDialog'
+require 'dialog/GOG_FirewallDeleteDialog'
 
 require 'dialog/CF_CreateDialog'
 require 'dialog/CF_EditDialog'
@@ -785,7 +797,8 @@ end
            end
         end
       end
-      if !@data.empty?  or @data.size>0
+	  @data = [] if @data == nil 
+      if  !@data.empty?  or @data.size>0
         @data_title = []
         @data.each do |r|
           r.each do |k, v|

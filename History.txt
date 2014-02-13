@@ -1,3 +1,9 @@
+Version 3.7.0 Feb 2014
+----------------------
+Partial support for google compute engine.
+enhancement to puppet support. 
+added a servers environment. 
+
 Version 3.6.9 Dec 2013
 ----------------------
 Local Server have a server page.

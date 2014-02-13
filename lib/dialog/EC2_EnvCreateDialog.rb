@@ -29,7 +29,7 @@ class EC2_EnvCreateDialog < FXDialogBox
     @env = ""
     @created = false
     @ec2_platform = "amazon"
-    super(owner, "Create Environment", :opts => DECOR_ALL, :width => 650, :height => 275)
+    super(owner, "Create Environment", :opts => DECOR_ALL, :width => 900, :height => 275)
     mainFrame = FXVerticalFrame.new(self,LAYOUT_SIDE_TOP|LAYOUT_FILL_X|LAYOUT_FILL_Y|PACK_UNIFORM_WIDTH)
     topFrame = FXVerticalFrame.new(mainFrame,LAYOUT_FILL_X|LAYOUT_FILL_Y|PACK_UNIFORM_WIDTH)
     @tabbook = FXTabBook.new(topFrame,:opts => LAYOUT_FILL_X|LAYOUT_FILL_Y|PACK_UNIFORM_WIDTH)
@@ -67,6 +67,54 @@ class EC2_EnvCreateDialog < FXDialogBox
          @amazon_secret_access_key.text = ENV['AMAZON_SECRET_ACCESS_KEY']
     end
     @ec2_url.text = "https://ec2.us-east-1.amazonaws.com/"
+    #
+    # Google Compute Engine
+    #
+    @googletab = FXTabItem.new(@tabbook, "&Google Compute", nil)
+    @googleframe = FXHorizontalFrame.new(@tabbook )
+    frame8 = FXMatrix.new(@googleframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
+    google_env = textBox("Environment Name",frame8)
+    @google_client_email = textBox("Google Client Email",frame8)
+    FXLabel.new(frame8, "Google Key Location" )
+    @google_key_location = FXTextField.new(frame8, 60, nil, 0, :opts => TEXTFIELD_PASSWD|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+    google_open = FXButton.new(frame8, "", nil, self, ID_ACCEPT, BUTTON_TOOLBAR|LAYOUT_LEFT)
+    google_open.icon = @magnifier
+    google_open.connect(SEL_COMMAND) {
+        google_cert = FXFileDialog.getOpenFilename(self, "Locate your google certificate file", "<google certificate file>", "*.p12")
+        if google_cert
+          @google_key_location.text = google_cert
+        end
+    }
+    FXLabel.new(frame8, "Google Project" )
+    @google_project = FXTextField.new(frame8, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+    FXLabel.new(frame8, "" )
+    FXLabel.new(frame8, "Google Zone" )
+    @google_zone = FXTextField.new(frame8, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+    @google_zone_button = FXButton.new(frame8, "", :opts => BUTTON_TOOLBAR)
+    @google_zone_button.icon = @magnifier
+    @google_zone_button.tipText = "Select Google Zone"
+    @google_zone_button.connect(SEL_COMMAND) do
+       @dialog = EC2_AvailZoneDialog.new(@ec2_main,"google")
+       @dialog.execute
+       it = @dialog.selected
+       if it != nil and it != ""
+          @google_zone.text = it
+       end 
+    end    
+    if ENV['AMAZON_ACCESS_KEY_ID'] != nil and ENV['AMAZON_ACCESS_KEY_ID'] != ""
+         @google_client_email.text = ENV['AMAZON_ACCESS_KEY_ID']
+    end
+    if ENV['AMAZON_SECRET_ACCESS_KEY'] != nil and ENV['AMAZON_SECRET_ACCESS_KEY'] != ""
+         @google_key_location.text = ENV['AMAZON_SECRET_ACCESS_KEY']
+    end    
+    @google_project.text = 'google.com:xxxxxxxxxxxx'    
+    if ENV['AVAILABILITY_ZONE'] != nil and ENV['AVAILABILITY_ZONE'] != ""
+         @google_zone.text = ENV['AVAILABILITY_ZONE']
+    else 
+        @google_zone.text = "us-central1-a"
+    end	
+	
+	
     #
     # eucalyptus
     #        
@@ -285,82 +333,128 @@ class EC2_EnvCreateDialog < FXDialogBox
          @cloudfoundry_secret_access_key.text = ENV['AMAZON_SECRET_ACCESS_KEY']
     end
     @cloudfoundry_url.text = "http://api.cloudfoundry.com/"     
+    #
+    # servers
+    #
+    @serverstab = FXTabItem.new(@tabbook, "&Servers", nil)
+    @serversframe = FXHorizontalFrame.new(@tabbook )
+    frame8 = FXMatrix.new(@serversframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
+    servers_env = textBox("Environment Name",frame8)
+      	
+	
     amazon_env.connect(SEL_CHANGED) {
+	  google_env.text = amazon_env.text
       euca_env.text = amazon_env.text
       openstack_env.text = amazon_env.text
       hp_env.text = amazon_env.text
       rack_env.text = amazon_env.text
       cloudstack_env.text = amazon_env.text
       cloudfoundry_env = amazon_env.text
+	  servers_env = amazon_env.text
       @new_env = amazon_env.text
       @ec2_platform = "amazon"
     }
+	
+	google_env.connect(SEL_CHANGED) {
+      amazon_env.text = google_env.text
+	  google_env.text = google_env.text
+      euca_env.text = google_env.text
+      openstack_env.text = google_env.text
+      rack_env.text = google_env.text
+      cloudstack_env.text = google_env.text
+      cloudfoundry_env = google_env.text
+	  servers_env = google_env.text
+      @new_env = google_env.text
+      @ec2_platform = "google"
+    }    
     
     euca_env.connect(SEL_CHANGED) {
       amazon_env.text = euca_env.text
+	  google_env.text = euca_env.text
       openstack_env.text = euca_env.text
       hp_env.text = euca_env.text
       rack_env.text = euca_env.text
       cloudstack_env.text = euca_env.text
       cloudfoundry_env = euca_env.text
+	  servers_env = euca_env.text
       @new_env = euca_env.text
       @ec2_platform = "eucalyptus"
     }
     
     openstack_env.connect(SEL_CHANGED) {
       amazon_env.text = openstack_env.text
+	  google_env.text = openstack_env.text
       euca_env.text = openstack_env.text
       hp_env.text = openstack_env.text
       rack_env.text = openstack_env.text
       cloudstack_env.text = openstack_env.text
       cloudfoundry_env = openstack_env.text
+	  servers_env = openstack_env.text
       @new_env = openstack_env.text
       @ec2_platform = "openstack"
     }
     
     hp_env.connect(SEL_CHANGED) {
       amazon_env.text = hp_env.text
+	  google_env.text = hp_env.text
       euca_env.text = hp_env.text
       openstack_env.text = hp_env.text
       rack_env.text = hp_env.text
       cloudstack_env.text = hp_env.text
       cloudfoundry_env = hp_env.text
+	  servers_env = hp_env.text
       @new_env = hp_env.text
       @ec2_platform = "openstack_hp"
     }    
 
     rack_env.connect(SEL_CHANGED) {
       amazon_env.text = rack_env.text
+	  google_env.text = rack_env.text
       euca_env.text = rack_env.text
       hp_env.text = rack_env.text
       cloudstack_env.text = rack_env.text
       openstack_env.text = rack_env.text
       cloudfoundry_env = rack_env.text
+	  servers_env = rack_env.text
       @new_env = rack_env.text
       @ec2_platform = "openstack_rackspace"
     }
     
     cloudstack_env.connect(SEL_CHANGED) {
       amazon_env.text = cloudstack_env.text
+	  google_env.text = cloudstack_env.text
       euca_env.text = cloudstack_env.text
       hp_env.text = cloudstack_env.text
       rack_env.text = cloudstack_env.text
       openstack_env.text = cloudstack_env.text
       cloudfoundry_env = cloudstack_env.text
+	  servers_env = cloudstack_env.text
       @new_env = cloudstack_env.text
       @ec2_platform = "cloudstack"
     }
     
     cloudfoundry_env.connect(SEL_CHANGED) {
       amazon_env.text = cloudfoundry_env.text
+	  google_env.text = cloudfoundry_env.text
       euca_env.text = cloudfoundry_env.text
       hp_env.text = cloudfoundry_env.text
       rack_env.text = cloudfoundry_env.text
       openstack_env.text = cloudfoundry_env.text
+	  servers_env = cloudfoundry_env.text
       @new_env = cloudfoundry_env.text
       @ec2_platform = "cloudfoundry"
     }    
 
+    servers_env.connect(SEL_CHANGED) {
+      amazon_env.text = servers_env.text
+	  google_env.text = servers_env.text
+      euca_env.text = servers_env.text
+      hp_env.text = servers_env.text
+      rack_env.text = servers_env.text
+      openstack_env.text = servers_env.text
+      @new_env = servers_env.text
+      @ec2_platform = "servers"
+    }    	
     bottomFrame = FXVerticalFrame.new(mainFrame,LAYOUT_SIDE_BOTTOM|LAYOUT_FILL_X|LAYOUT_FILL_Y)
 
     FXLabel.new(bottomFrame, "" )
@@ -415,18 +509,6 @@ class EC2_EnvCreateDialog < FXDialogBox
 	@ec2_platform = "eucalyptus"
         eucarc.close
     end 
-    #if @cloudstack_access_key.text != ""
-    #   @ec2_platform = "cloudstack"
-    #end 
-    #if @hp_access_key.text != ""
-    #   @ec2_platform = "openstack_hp"
-    #end 
-    #if @rack_access_key.text != ""
-    #   @ec2_platform = "openstack_rackspace"
-    #end 
-    #if @cloudfoundry_access_key.text != ""
-    #   @ec2_platform = "cloudfoundry"
-    #end     
     Dir.mkdir(d+"/launch")
     save_env
     if  @ec2_platform.start_with?("openstack")
@@ -435,14 +517,6 @@ class EC2_EnvCreateDialog < FXDialogBox
     end
     @created = true
     @ec2_main.imageCache.set_status("empty")
-    #if  @ec2_platform == "cloudstack"
-    #  if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil 
-    #     message = "Exit EC2Dream and enter set EC2_API_VERSION=2010-11-15  before running ec2dream"
-    #  else
-    #     message = "Exit EC2Dream and enter export EC2_API_VERSION=2010-11-15  before running ec2dream"
-    #  end    
-    #  FXMessageBox.warning(self,MBOX_OK,"Restart EC2Dream",message)
-    #end    
 
    rescue Exception => error
       puts error.message
@@ -531,7 +605,21 @@ class EC2_EnvCreateDialog < FXDialogBox
               if @cloudfoundry_url.text != nil 
   	       settings.put("EC2_URL",@cloudfoundry_url.text)
   	      end
-  	      settings.put('CLOUD_ADMIN_URL',"http://cloudfoundry.com/")  	      
+  	      settings.put('CLOUD_ADMIN_URL',"http://cloudfoundry.com/") 
+	   elsif @ec2_platform == "google"
+              if @google_client_email.text != nil 
+                 settings.put("AMAZON_ACCESS_KEY_ID",@google_client_email.text)
+              end
+              if @google_key_location.text != nil 
+                 settings.put("AMAZON_SECRET_ACCESS_KEY",@google_key_location.text)
+              end
+              if @google_project.text != nil 
+  	       settings.put("EC2_URL",@google_project.text)
+  	      end
+  	      if @google_zone.text != nil 
+	         settings.put("AVAILABILITY_ZONE",@google_zone.text)
+  	      end
+  	      settings.put('CLOUD_ADMIN_URL',"https://cloud.google.com/console") 	      
 	   else
               if @amazon_access_key.text != nil 
                  settings.put("AMAZON_ACCESS_KEY_ID",@amazon_access_key.text)

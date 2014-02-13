@@ -35,23 +35,7 @@ class EC2_VpcDialog < FXDialogBox
        self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
      end
   end
-  def describe_vpcs(options = {})
-       data = []
-       conn = @ec2_main.environment.connection
-       if conn != nil
-          begin 
-  	   response = conn.describe_vpcs(options = {})
-             if response.status == 200
-                data = response.body['vpcSet']
-   	     else
-  	        data = []
-             end
-          rescue 
-             puts "ERROR: describe_vpc #{$!}"
-          end
-       end 
-       return data
-  end
+ 
   def selected
     return @curr_item
   end  

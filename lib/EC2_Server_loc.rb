@@ -11,6 +11,7 @@ def loc_load(server_name)
     @frame1.hide()
     @frame3.hide()
 	@frame4.hide()
+	@frame6.hide()
     @frame5.show()
     @page1.width=300
     r = loc_get_local_server(server_name)

@@ -12,6 +12,7 @@ require 'dialog/EC2_ShowPasswordDialog'
 require 'dialog/EC2_SystemDialog'
 require 'dialog/EC2_TerminalsDialog'
 require 'dialog/EC2_BastionEditDialog'
+require 'dialog/EC2_PuppetEditDialog'
 require 'common/error_message'
 require 'common/read_properties'
 require 'common/save_properties'
@@ -34,7 +35,9 @@ class EC2_Settings
 	@tunnel = @ec2_main.makeIcon("tunnel.png")
 	@tunnel.create
     @repository = @ec2_main.makeIcon("drawer.png")
-	@repository.create	
+	@repository.create
+	@puppet_icon = @ec2_main.makeIcon("puppet.png")
+	@puppet_icon.create	
         tab4 = FXTabItem.new(@ec2_main.tabBook, " Environment ")
         page1 = FXVerticalFrame.new(@ec2_main.tabBook)
         page1a = FXHorizontalFrame.new(page1,LAYOUT_FILL_X, :padding => 0)
@@ -109,10 +112,10 @@ class EC2_Settings
                @settings['EC2_PLATFORM'].text = it
             end	    
         end        
-	FXLabel.new(frame1, "ACCESS_KEY_ID" )
+	@settings['AMAZON_ACCESS_KEY_ID_LABEL'] = FXLabel.new(frame1, "ACCESS_KEY_ID" )
 	@settings['AMAZON_ACCESS_KEY_ID'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
  	FXLabel.new(frame1, "" )
- 	FXLabel.new(frame1, "SECRET_ACCESS_KEY" )
+ 	@settings['AMAZON_SECRET_ACCESS_KEY_LABEL'] = FXLabel.new(frame1, "SECRET_ACCESS_KEY" )
 	@settings['AMAZON_SECRET_ACCESS_KEY'] = FXTextField.new(frame1, 60, nil, 0, :opts => TEXTFIELD_PASSWD|FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
 	@settings['AMAZON_SECRET_ACCESS_KEY_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
 	@settings['AMAZON_SECRET_ACCESS_KEY_BUTTON'].icon = @magnifier
@@ -121,10 +124,10 @@ class EC2_Settings
 	   dialog = EC2_ShowPasswordDialog.new(@ec2_main,"AMAZON_SECRET_ACCESS_KEY",@settings['AMAZON_SECRET_ACCESS_KEY'].text)
            dialog.execute	
 	end 	
-        FXLabel.new(frame1, "ACCOUNT_ID" )
+    @settings['AMAZON_ACCOUNT_ID_LABEL'] = FXLabel.new(frame1, "ACCOUNT_ID" )
 	@settings['AMAZON_ACCOUNT_ID'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
 	FXLabel.new(frame1, "" ) 	
- 	FXLabel.new(frame1, "URL" )
+ 	@settings['EC2_URL_LABEL'] = FXLabel.new(frame1, "URL" )
 	@settings['EC2_URL'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
 	@settings['EC2_URL_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
 	@settings['EC2_URL_BUTTON'].icon = @magnifier
@@ -137,7 +140,7 @@ class EC2_Settings
                @settings['EC2_URL'].text = it
             end	    
         end
-        FXLabel.new(frame1, "AVAILABILITY_ZONE" )
+    @settings['AVAILABILITY_ZONE_LABEL'] = FXLabel.new(frame1, "AVAILABILITY_ZONE" )
 	@settings['AVAILABILITY_ZONE'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
 	@settings['AVAILABILITY_ZONE_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
 	@settings['AVAILABILITY_ZONE_BUTTON'].icon = @magnifier
@@ -150,7 +153,7 @@ class EC2_Settings
                @settings['AVAILABILITY_ZONE'].text = it
             end	    
         end        
-        FXLabel.new(frame1, "NICKNAME TAG" )
+    @settings['AMAZON_NICKNAME_TAG'] = FXLabel.new(frame1, "NICKNAME TAG" )
 	@settings['AMAZON_NICKNAME_TAG'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
         FXLabel.new(frame1, "" )
  	#
@@ -223,8 +226,8 @@ class EC2_Settings
 	FXLabel.new(frame1, "" )
 	#
 	#   Global and General Settings
-        #
-        FXLabel.new(frame1, "" )
+    #
+    FXLabel.new(frame1, "" )
  	FXLabel.new(frame1, "  Global and General Settings", nil, LAYOUT_CENTER_X)
 	FXLabel.new(frame1, "" )
 	FXLabel.new(frame1, "CHEF_REPOSITORY" )
@@ -239,18 +242,55 @@ class EC2_Settings
 	      @settings['CHEF_REPOSITORY'].text = dialog.directory
            end
 	end
-	FXLabel.new(frame1, "PUPPET_REPOSITORY" )
- 	@settings['PUPPET_REPOSITORY'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
- 	@settings['PUPPET_REPOSITORY_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
-	@settings['PUPPET_REPOSITORY_BUTTON'].icon = @magnifier
-	@settings['PUPPET_REPOSITORY_BUTTON'].tipText = "Browse..."
-	@settings['PUPPET_REPOSITORY_BUTTON'].connect(SEL_COMMAND) do
-	   dialog = FXDirDialog.new(frame1, "Select Puppet Repository Directory")
-           dialog.directory = "#{ENV['EC2DREAM_HOME']}/puppet/puppet-repo"
-	   if dialog.execute != 0
-	      @settings['PUPPET_REPOSITORY'].text = dialog.directory
-           end
-	end		
+	FXLabel.new(frame1, "" )
+	@settings['PUPPET_BUTTON'] = FXButton.new(frame1, "  Configure Puppet  ", :opts => BUTTON_NORMAL|LAYOUT_LEFT)
+	@settings['PUPPET_BUTTON'].icon = @puppet_icon
+	@settings['PUPPET_BUTTON'].tipText = "  Configure Puppet  "
+	@settings['PUPPET_BUTTON'].connect(SEL_COMMAND) do
+	   r = {}
+	   r['puppet_repository'] = get('PUPPET_REPOSITORY')
+	   r['puppet_module_path'] = get('PUPPET_MODULE_PATH')
+	   r['puppet_syntax_check'] = get('PUPPET_SYNTAX_CHECK')
+	   r['puppet_rspec_test'] = get('PUPPET_RSPEC_TEST')
+       r['puppet_apply'] = get('PUPPET_APPLY')
+	   r['puppet_apply_noop'] = get('PUPPET_APPLY_NOOP')
+	   r['puppet_extra_options'] = get('PUPPET_EXTRA_OPTIONS')
+	   r['puppet_delete_repo'] = get('PUPPET_DELETE_REPO')
+	   r['puppet_sudo_password'] = get('PUPPET_SUDO_PASSWORD')
+	   r['puppet_upgrade_packages'] = get('PUPPET_UPGRADE_PACKAGES')
+	   dialog = EC2_PuppetEditDialog.new(@ec2_main,r)
+	   dialog.execute
+	   if dialog.saved 
+	      r = dialog.selected
+	      if r != nil and r != ""
+	         put('PUPPET_REPOSITORY',r['puppet_repository'])
+	         put('PUPPET_MODULE_PATH',r['puppet_module_path'])
+	         put('PUPPET_SYNTAX_CHECK',r['puppet_syntax_check'])
+	         put('PUPPET_RSPEC_TEST',r['puppet_rspec_test'])
+             put('PUPPET_APPLY',r['puppet_apply'])
+			 put('PUPPET_APPLY_NOOP',r['puppet_apply_noop'])
+			 put('PUPPET_EXTRA_OPTIONS',r['puppet_extra_options'])
+			 put('PUPPET_DELETE_REPO',r['puppet_delete_repo'])
+			 put('PUPPET_SUDO_PASSWORD',r['puppet_sudo_password'])
+			 put('PUPPET_UPGRADE_PACKAGES',r['puppet_upgrade_packages'])
+             save
+          end   
+	   end   
+	end
+	FXLabel.new(frame1, "" )
+	
+	#FXLabel.new(frame1, "PUPPET_REPOSITORY" )
+ 	#@settings['PUPPET_REPOSITORY'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+ 	#@settings['PUPPET_REPOSITORY_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
+	#@settings['PUPPET_REPOSITORY_BUTTON'].icon = @magnifier
+	#@settings['PUPPET_REPOSITORY_BUTTON'].tipText = "Browse..."
+	#@settings['PUPPET_REPOSITORY_BUTTON'].connect(SEL_COMMAND) do
+	#   dialog = FXDirDialog.new(frame1, "Select Puppet Repository Directory")
+    #       dialog.directory = "#{ENV['EC2DREAM_HOME']}/puppet/puppet-repo"
+	#   if dialog.execute != 0
+	#      @settings['PUPPET_REPOSITORY'].text = dialog.directory
+    #        end
+	#end		
 	FXLabel.new(frame1, "VAGRANT_REPOSITORY" )
  	@settings['VAGRANT_REPOSITORY'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
  	@settings['VAGRANT_REPOSITORY_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
@@ -345,16 +385,15 @@ class EC2_Settings
      env_path = get_system('ENV_PATH')
      if File.exists?(env_path+"/env.properties")
         @properties=read_properties(env_path+"/env.properties",true)
-	load_panel('EC2_PLATFORM')  
+	    load_panel('EC2_PLATFORM')  
         @settings['EC2_PLATFORM'].text =  (@settings['EC2_PLATFORM'].text).downcase  if @settings['EC2_PLATFORM'].text != nil or @settings['EC2_PLATFORM'].text = ""
-	@properties['EC2_PLATFORM'] = @properties['EC2_PLATFORM'].downcase  if @properties['EC2_PLATFORM'] != nil or @properties['EC2_PLATFORM'] = ""
+	    @properties['EC2_PLATFORM'] = @properties['EC2_PLATFORM'].downcase  if @properties['EC2_PLATFORM'] != nil or @properties['EC2_PLATFORM'] = ""
         load_panel('EC2_URL')
         load_panel('EC2_SSH_PRIVATE_KEY')
         load_panel('AMAZON_ACCOUNT_ID')
         load_panel('AMAZON_ACCESS_KEY_ID')
         load_panel('AMAZON_SECRET_ACCESS_KEY')
         load_panel('CHEF_REPOSITORY')
-        load_panel('PUPPET_REPOSITORY')
         load_panel('VAGRANT_REPOSITORY')
         if @settings['VAGRANT_REPOSITORY'].text == nil or @settings['VAGRANT_REPOSITORY'].text == "" 
            @properties['VAGRANT_REPOSITORY']  = "#{ENV['EC2DREAM_HOME']}/chef/vagrant"
@@ -368,10 +407,25 @@ class EC2_Settings
         @settings['EXTERNAL_EDITOR'].text = get_system('EXTERNAL_EDITOR')
         @settings['EXTERNAL_BROWSER'].text = get_system('EXTERNAL_BROWSER')
         @settings['TIMEZONE'].text = get_system('TIMEZONE')
-	if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil        
+	    if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil        
           load_panel('PUTTY_PRIVATE_KEY')
         end 
         load_panel('CLOUD_ADMIN_URL')
+		if @settings['EC2_PLATFORM'].text=="google" 
+			@settings['AMAZON_ACCESS_KEY_ID_LABEL'].text="CLIENT_EMAIL"
+			@settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].text="KEY_LOCATION"
+			@settings['AMAZON_ACCOUNT_ID_LABEL'].text=""
+		    @settings['EC2_URL_LABEL'].text="PROJECT" 
+			@settings['AVAILABILITY_ZONE_LABEL'].text = "ZONE"
+			@settings['AMAZON_NICKNAME_TAG'].text=""
+		else	
+			@settings['AMAZON_ACCESS_KEY_ID_LABEL'].text="ACCESS_KEY"
+			@settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].text="SECRET_ACCESS_KEY"
+			@settings['AMAZON_ACCOUNT_ID_LABEL'].text="ACCOUNT_ID"
+		    @settings['EC2_URL_LABEL'].text="URL" 
+			@settings['AVAILABILITY_ZONE_LABEL'].text = "AVAILABILITY_ZONE"	
+            @settings['AMAZON_NICKNAME_TAG'].text="NICKNAME TAG"			
+	    end		
      end
      @ec2_main.app.forceRefresh
   end 
@@ -392,7 +446,6 @@ class EC2_Settings
     clear('AMAZON_ACCOUNT_ID')
     clear('AMAZON_ACCESS_KEY_ID')
     clear('AMAZON_SECRET_ACCESS_KEY')
-    clear('PUPPET_REPOSITORY')
     clear('VAGRANT_REPOSITORY')
     clear('AVAILABILITY_ZONE')
     clear('AMAZON_NICKNAME_TAG')
@@ -430,7 +483,15 @@ class EC2_Settings
        else
          return false
        end
-  end  
+  end 
+
+  def google
+       if get("EC2_PLATFORM") == "google"
+         return true 
+       else
+         return false
+       end
+  end    
   
  def cloudstack
        if get("EC2_PLATFORM") == "cloudstack"
@@ -448,13 +509,37 @@ class EC2_Settings
        end
   end 
   
+  #def openstack
+  #   if get("EC2_PLATFORM").start_with?("openstack")
+  #     return true 
+  #   else
+  #     return false
+  #   end
+  #end
+  
   def openstack
-     if get("EC2_PLATFORM").start_with?("openstack")
-       return true 
-     else
-       return false
-     end
-  end
+      begin
+       if $ec2_main.cloud.api == 'openstack'
+          true 
+       else
+          false
+       end
+	  rescue 
+	   false
+	  end
+  end 
+
+ def aws
+     begin
+       if $ec2_main.cloud.api == 'aws'
+          true 
+       else
+          false
+       end
+	 rescue 
+       false
+     end	   
+  end 
   
   def openstack_hp
        if get("EC2_PLATFORM") == "openstack_hp"
@@ -502,7 +587,6 @@ class EC2_Settings
      save_setting("AMAZON_ACCESS_KEY_ID")
      save_setting("AMAZON_SECRET_ACCESS_KEY")
      save_setting("CHEF_REPOSITORY")
-     save_setting("PUPPET_REPOSITORY")
      save_setting("VAGRANT_REPOSITORY")
      save_setting("AVAILABILITY_ZONE")
      save_setting("AMAZON_NICKNAME_TAG")

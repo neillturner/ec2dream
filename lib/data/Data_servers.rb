@@ -187,7 +187,21 @@ class Data_servers
                    r[:sec_groups]= gp 
                    data.push(r)                   
                 end 
-            elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
+		      elsif @ec2_main.settings.google 
+					response = conn.list_servers($google_zone)
+					if response.status == 200
+						x = response.body['items']
+						if x != nil 
+						  x.each do |r|
+						    r[:aws_instance_id] = r['id'].to_s
+						    r[:aws_state] = r['status'] 
+						    data.push(r)
+						  end	
+						end
+					else
+						data = []
+					end
+             elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
               if filters != nil 
 	         filter = filters          
               else 
@@ -393,8 +407,9 @@ class Data_servers
   #      :aws_current_state_name=>"shutting-down",
   #      :aws_prev_state_code=>16,
   #      :aws_prev_state_name=>"running"}]
-  #  
-  def delete_server(server_id)
+  # 
+    
+  def delete_server(server_id, zone_name=nil)
      data = {}
      conn = @ec2_main.environment.connection
      if conn != nil
@@ -405,10 +420,17 @@ class Data_servers
               data = conn.delete_server(server_id)
            end 
            if data.status == 204
-	      data = true
-	   else   
-	      data = false
-	   end 
+	          data = true
+	       else   
+	          data = false
+	       end 
+		elsif @ec2_main.settings.google
+		   response = conn.delete_server(server_id, zone_name)
+           if response.status == 200
+              data = response.body
+           else
+              data = {}
+           end   
         else  	   	   
             data = conn.terminate_instances([server_id])
         end
@@ -657,7 +679,149 @@ class Data_servers
         raise "Connection Error"
      end
      return data
-  end         
+  end 
+  
+  # Get the current google project
+  def  get_project
+     data = false
+     conn = @ec2_main.environment.connection
+     if conn != nil
+        response = conn.get_project
+        if response.status == 200
+           data = response.body
+        else
+           data = {}
+        end                  
+     else 
+        raise "Connection Error"
+     end
+     return data  
+  end    
+   
+  
+  # set google  instance tags 
+  def set_tags(instance, zone, tags=[]) 
+     data = false
+     conn = @ec2_main.environment.connection
+     if conn != nil
+        response = conn.set_tags(instance, zone, tags) 
+        if response.status == 200
+           data = response.body
+        else
+           data = {}
+        end                  
+     else 
+        raise "Connection Error"
+     end
+     return data  
+  end     
+  
+  # Insert a google common instance metadata 
+  def  set_common_instance_metadata(metadata={})
+     data = false
+     conn = @ec2_main.environment.connection
+     if conn != nil
+        response = conn.set_common_instance_metadata(metadata)
+        if response.status == 200
+           data = response.body
+        else
+           data = {}
+        end                  
+     else 
+        raise "Connection Error"
+     end
+     return data  
+  end    
+  
+   # Insert a google server metadata 
+  def  set_meta(server_name, zone_name, metadata={})
+     data = false
+     conn = @ec2_main.environment.connection
+     if conn != nil
+        response = conn.set_metadata(server_name, zone_name, metadata)
+        if response.status == 200
+           data = response.body
+        else
+           data = {}
+        end                  
+     else 
+        raise "Connection Error"
+     end
+     return data  
+  end    
+
+# Get a google server
+  def  get_server(name, zone_name=nil)
+     data = false
+     conn = @ec2_main.environment.connection
+     if conn != nil
+	    puts "*** get_server name #{name} zone_name #{zone_name}"
+        response = conn.get_server(name, zone_name)
+		puts "*** status #{response.status}"
+		puts "*** body #{response.body}"
+        if response.status == 200
+           data = response.body
+        else
+           data = {}
+        end                  
+     else 
+        raise "Connection Error"
+     end
+     return data  
+  end    
+
+
+  
+   # Insert a google server
+  def  insert_server(server_name, zone_name, options={})
+     data = false
+     conn = @ec2_main.environment.connection
+     if conn != nil
+        response = conn.insert_server(server_name, zone_name, options)
+        if response.status == 200
+           data = response.body
+        else
+           data = {}
+        end                  
+     else 
+        raise "Connection Error"
+     end
+     return data  
+  end    
+  
+  # Delete a google zone operation
+  def  delete_zone_operation(zone, operation_name)
+     data = false
+     conn = @ec2_main.environment.connection
+     if conn != nil
+        response = conn.delete_zone_operation(zone, operation_name)
+        if response.status == 200
+           data = response.body
+        else
+           data = {}
+        end                  
+     else 
+        raise "Connection Error"
+     end
+     return data  
+  end 
+
+ # Delete a google global operation
+  def  delete_global_operation(operation_name)
+     data = false
+     conn = @ec2_main.environment.connection
+     if conn != nil
+        response = conn.delete_global_operation(operation_name)
+        if response.status == 200
+           data = response.body
+        else
+           data = {}
+        end                  
+     else 
+        raise "Connection Error"
+     end
+     return data  
+  end    
   
   
  end

@@ -22,7 +22,7 @@
 
 Gem::Specification.new do |spec|
   spec.name = 'ec2dream'
-  spec.version = '3.6.9'
+  spec.version = '3.7.0'
   spec.authors = ['Neill Turner']
   spec.email = 'neillwturner@gmail.com'
   spec.executables = ["ec2dream"]
@@ -33,9 +33,9 @@ Gem::Specification.new do |spec|
   spec.add_dependency('rubyzip', '< 1.0.0')
   spec.add_dependency('gchartrb')
   spec.add_dependency('pocketknife_ec2dream', '>= 0.1.13')
-  spec.add_dependency('pocketknife_puppet', '>= 0.1.13')
+  spec.add_dependency('pocketknife_puppet', '>= 0.1.14')
   spec.add_dependency('pocketknife_windows', '>= 0.1.13')
-  spec.add_dependency('fog', '= 1.12.1')
+  spec.add_dependency('fog', '>= 1.20.0')
   spec.add_dependency('cloudfoundry-client')
 
   spec.description = <<-EOF
@@ -50,6 +50,7 @@ EC2Dream combines Fog, Ruby, into a visual open source devops platform supportin
       Amazon AWS with full support for VPC, Autoscaling and ability to list most entities.
       Amazon compatible clouds:  Eucalyptus, CloudStack.
       Openstack Clouds:  Rackspace Cloud Servers and HP Cloud.
+	  Google Compute Engine.
       Cloud Foundry.
 	  Vagrant.  
       Chef and Puppet.
@@ -57,11 +58,12 @@ EC2Dream combines Fog, Ruby, into a visual open source devops platform supportin
 EOF
 
     candidates = Dir.glob("{lib}/**/*") +  ['History.txt', 'README.txt', 'ec2dream.ico', 'ec2dream.bmp' , 'ec2dream.gemspec']
-    candidates = candidates + Dir.glob("{chef}/**/*")
-    candidates = candidates + Dir.glob("{puppet}/**/*")
+    candidates = candidates +  Dir.glob("{chef}/**/*")
+    candidates = candidates +  Dir.glob("{puppet}/**/*")
     candidates = candidates +  Dir.glob("{launchrdp}/*")
     candidates = candidates +  Dir.glob("{putty}/*")
     candidates = candidates +  Dir.glob("{rackspace}/*")
+	candidates = candidates +  Dir.glob("{google}/*")
     candidates = candidates +  Dir.glob("{tar}/*")
     candidates = candidates +  Dir.glob("{wget}/*")
     candidates = candidates +  Dir.glob("{WinSCP}/*")

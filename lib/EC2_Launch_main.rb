@@ -14,6 +14,7 @@ class EC2_Launch
         @type = ""
         @curr_item = ""
         @resource_tags = nil 
+		@google_metadata = nil 
         @profile_type = "secgrp"
         @profile_folder = "launch"
         @arrow_refresh = @ec2_main.makeIcon("arrow_refresh.png")
@@ -87,7 +88,9 @@ class EC2_Launch
 	    if @type == "ec2"
 	       save
 	    elsif @type == "ops"
-	       ops_save	       
+	       ops_save	 
+	    elsif @type == "google"
+	       google_save	  		   
 	    elsif @type == "as"
 	       as_save
 	    elsif @type == "cfy"
@@ -111,7 +114,9 @@ class EC2_Launch
 	    if @type == "ec2"
 	       delete
 	    elsif @type == "ops"
-	       ops_delete	       
+	       ops_delete
+	    elsif @type == "google"
+	       google_delete	  		  	       
 	    elsif @type == "cfy"
 	       cfy_delete
 	    elsif @type == "as"   
@@ -133,14 +138,16 @@ class EC2_Launch
 	          request_spot_instance
 	       end
 	    elsif @type == "ops"
-               launch_ops_instance	       
+               launch_ops_instance	
+	    elsif @type == "google"
+	           launch_google_instance	  		  	       			   
 	    elsif @type == "cfy"
                launch_cfy_instance               
 	    end		
 	end
 	@launch_button.connect(SEL_UPDATE) do |sender, sel, data|
          sender.enabled = false
-	   if @type == "ec2" or @type == "ops"
+	   if @type == "ec2" or @type == "ops"  or @type == "google"
               enable_if_launch_loaded(sender)
 	      @launch_button.icon = @rocket
 	      @launch_button.tipText = " Launch Server Instance "
@@ -156,14 +163,43 @@ class EC2_Launch
 	@launch_snap_button.connect(SEL_COMMAND) do |sender, sel, data|
 	    if @type == "cfy"
 	       @ec2_main.tabBook.setCurrent(0)
-	       @ec2_main.list.load("Apps","CloudFoundry")	    
-	    end		
+	       @ec2_main.list.load("Apps","CloudFoundry")
+        elsif @type == "google"	
+		   md = {}
+		   begin 
+		      r = @ec2_main.environment.servers.get_project
+		   rescue 
+           end		   
+		   if r != nil 
+		      items = r['commonInstanceMetadata']['items']
+			  if items != nil 
+			    items.each do |i|
+			       md[i['key']] = i['value']  
+                 end
+			  end	 
+			  metadata = GOG_Metadata.new(@ec2_main,md)
+	          dialog = GOG_MetadataEditDialog.new(@ec2_main,"Common Instance",metadata)
+              dialog.execute
+              if dialog.saved
+			     begin 
+				    mr = dialog.metadata_tags
+			        r = @ec2_main.environment.servers.set_common_instance_metadata(mr.get)
+				 rescue 
+                     error_message("Set Common Instance Metadata Failed",$!)
+                 end 				 
+			  end	 
+           end   
+        end
 	end
 	@launch_snap_button.connect(SEL_UPDATE) do |sender, sel, data|
              if @type == "cfy"
                  sender.enabled = true
 	         @launch_snap_button.icon = @view
-	         @launch_snap_button.tipText = " List Apps "      
+	         @launch_snap_button.tipText = " List Apps "  
+         elsif @type == "google"
+                 sender.enabled = true
+	         @launch_snap_button.icon = @edit
+	         @launch_snap_button.tipText = " Edit Common Instance Metadata "      			 
 	     else 
                  sender.enabled = false
              end 
@@ -978,6 +1014,186 @@ class EC2_Launch
 	     cfy_put('Bind_Service',selected)
 	   end   
 	end
+	#
+	# google launch frame
+	#
+	@frame6 = FXMatrix.new(page1, 3, MATRIX_BY_COLUMNS|LAYOUT_FILL)
+	@frame6.hide()
+        @google_launch = {}
+ 	FXLabel.new(@frame6, "Server Name" )
+ 	@google_launch['Name'] = FXTextField.new(@frame6, 20, nil, 0, :opts => FRAME_SUNKEN)
+ 	FXLabel.new(@frame6, "" ) 	        
+ 	FXLabel.new(@frame6, "Chef Node/Puppet Roles" )
+ 	@google_launch['Chef_Node'] = FXTextField.new(@frame6, 20, nil, 0, :opts => FRAME_SUNKEN)
+ 	FXLabel.new(@frame6, "" )
+	FXLabel.new(@frame6, "Puppet Manifest" )
+	@google_launch['Puppet_Manifest'] = FXTextField.new(@frame6, 20, nil, 0, :opts => FRAME_SUNKEN)
+	FXLabel.new(@frame6, "" )	
+   	FXLabel.new(@frame6, "Machine Type" )
+ 	@frame6z = FXHorizontalFrame.new(@frame6,LAYOUT_FILL_X, :padding => 0)
+ 	@google_launch['Flavor'] = FXTextField.new(@frame6z, 20, nil, 0, :opts => FRAME_SUNKEN)
+    @google_launch['Flavor_Button'] = FXButton.new(@frame6z, "", :opts => BUTTON_TOOLBAR)
+	@google_launch['Flavor_Button'].icon = @magnifier
+	@google_launch['Flavor_Button'].tipText = "Select Machine Type"
+	@google_launch['Flavor_Button'].connect(SEL_COMMAND) do
+	   dialog = EC2_InstanceDialog.new(@ec2_main)
+	   dialog.execute
+	   type = dialog.selected
+	   if type != nil and type != ""
+	      google_put('Flavor',type)
+	   end   
+	end	
+	FXLabel.new(@frame6, "" )
+
+  	FXLabel.new(@frame6, "Boot Disk" )
+ 	@frame6d = FXHorizontalFrame.new(@frame6,LAYOUT_FILL_X, :padding => 0)
+ 	@google_launch['Boot_Disk'] = FXTextField.new(@frame6d, 20, nil, 0, :opts => FRAME_SUNKEN)
+ 	@google_launch['Boot_Disk_Button'] = FXButton.new(@frame6d, "", :opts => BUTTON_TOOLBAR)
+	@google_launch['Boot_Disk_Button'].icon = @magnifier
+	@google_launch['Boot_Disk_Button'].tipText = "Select Boot Disk"
+	@google_launch['Boot_Disk_Button'].connect(SEL_COMMAND) do
+	   dialog = GOG_DiskDialog.new(@ec2_main)
+	   dialog.execute
+	   b = dialog.selected
+	   if b != nil and b != ""
+	      google_put('Boot_Disk',b)
+	   end   
+	end
+ 	@google_launch['Boot_Disk_Create_Button'] = FXButton.new(@frame6d, "", :opts => BUTTON_TOOLBAR)
+	@google_launch['Boot_Disk_Create_Button'].icon = @create
+	@google_launch['Boot_Disk_Create_Button'].tipText = "Create Boot Disk"
+	@google_launch['Boot_Disk_Create_Button'].connect(SEL_COMMAND) do
+	   dialog = GOG_DiskCreateDialog.new(@ec2_main)
+	   dialog.execute
+	   b = dialog.name
+	   if b != nil and b != ""
+	      google_put('Boot_Disk',b)
+	   end   
+	end	
+	FXLabel.new(@frame6, "" )
+	FXLabel.new(@frame6, "Boot Disk Device" )
+	@google_launch['Boot_Disk_Device'] = FXTextField.new(@frame6, 20, nil, 0, :opts => FRAME_SUNKEN)
+	
+	FXLabel.new(@frame6, "" )	
+	FXLabel.new(@frame6, "Additional Disks" )
+	@frame6e = FXHorizontalFrame.new(@frame6,LAYOUT_FILL_X, :padding => 0)
+ 	@google_launch['Disks'] = FXTextField.new(@frame6e, 20, nil, 0, :opts => FRAME_SUNKEN)
+ 	@google_launch['Disks_Button'] = FXButton.new(@frame6e, "", :opts => BUTTON_TOOLBAR)
+	@google_launch['Disks_Button'].icon = @magnifier
+	@google_launch['Disks_Button'].tipText = "Select Boot Disk"
+	@google_launch['Disks_Button'].connect(SEL_COMMAND) do
+	   dialog = GOG_DiskDialog.new(@ec2_main)
+	   dialog.execute
+	   b = dialog.selected
+	   if b != nil and b != ""
+	      google_append('Disks',b)
+	   end   
+	end
+	FXLabel.new(@frame6, "" )
+ 	FXLabel.new(@frame6, "Tags")
+ 	@google_launch['Tags'] = FXTextField.new(@frame6, 30, nil, 0, :opts => FRAME_SUNKEN)
+	FXLabel.new(@frame6, "" ) 	
+ 	FXLabel.new(@frame6, "Zone")
+ 	@google_launch['Availability_Zone'] = FXTextField.new(@frame6, 30, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_READONLY)
+	FXLabel.new(@frame6, "" ) 
+ 	FXLabel.new(@frame6, "Metadata")
+ 	@frame6m = FXHorizontalFrame.new(@frame6,LAYOUT_FILL_X, :padding => 0)
+ 	@google_launch['User_Data'] = FXTextField.new(@frame6m, 60, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_READONLY)	
+ 	@google_launch['User_Data_Button'] = FXButton.new(@frame6m, "", :opts => BUTTON_TOOLBAR)
+	@google_launch['User_Data_Button'].icon = @edit
+	@google_launch['User_Data_Button'].tipText = "Edit Metadata"
+	@google_launch['User_Data_Button'].connect(SEL_COMMAND) do
+	   dialog = GOG_MetadataEditDialog.new(@ec2_main,"Launch",@google_metadata)
+       dialog.execute
+        if dialog.saved
+	         @google_metadata = dialog.metadata_tags
+	         @google_launch['User_Data'].text = @google_metadata.show
+           end   
+        end
+ 	FXLabel.new(@frame6, "" )
+	FXLabel.new(@frame6, "Networks" )
+ 	@frame6f = FXHorizontalFrame.new(@frame6,LAYOUT_FILL_X, :padding => 0)
+ 	@google_launch['Network'] = FXTextField.new(@frame6f, 30, nil, 0, :opts => FRAME_SUNKEN)
+ 	@google_launch['Network_Button'] = FXButton.new(@frame6f, "", :opts => BUTTON_TOOLBAR)
+	@google_launch['Network_Button'].icon = @magnifier
+	@google_launch['Network_Button'].tipText = "Select Zone"
+	@google_launch['Network_Button'].connect(SEL_COMMAND) do
+	   dialog = EC2_VpcDialog.new(@ec2_main)
+	   dialog.execute
+	   n = dialog.selected
+	   if n != nil and n != ""
+	      google_append('Network',n)
+	   end   
+	end
+	FXLabel.new(@frame6, "" )
+	FXLabel.new(@frame6, "External Ip" )
+ 	@frame6i = FXHorizontalFrame.new(@frame6,LAYOUT_FILL_X, :padding => 0)
+ 	@google_launch['External_Ip'] = FXTextField.new(@frame6i, 20, nil, 0, :opts => FRAME_SUNKEN)
+ 	@google_launch['External_Ip_Button'] = FXButton.new(@frame6i, "", :opts => BUTTON_TOOLBAR)
+	@google_launch['External_Ip_Button'].icon = @magnifier
+	@google_launch['External_Ip_Button'].tipText = "Select Address"
+	@google_launch['External_Ip_Button'].connect(SEL_COMMAND) do
+	   dialog = GOG_AddressDialog.new(@ec2_main)
+	   dialog.execute
+	   item = dialog.selected
+	   if item != nil and item != ""
+	      google_put('External_Ip',item)
+	   end   
+	end	
+	@google_launch['External_Ip_Create_Button'] = FXButton.new(@frame6i, "", :opts => BUTTON_TOOLBAR)
+	@google_launch['External_Ip_Create_Button'].icon = @create
+	@google_launch['External_Ip_Create_Button'].tipText = "Create Address"
+	@google_launch['External_Ip_Create_Button'].connect(SEL_COMMAND) do
+	   dialog = GOG_AddressCreateDialog.new(@ec2_main)
+	   dialog.execute
+	   item = dialog.address
+	   if item != nil and item != ""
+	      google_put('External_Ip',item)
+	   else
+	      google_put('External_Ip',"")	  
+	   end   
+	end		
+	FXLabel.new(@frame6, "" )	
+	FXLabel.new(@frame6, "Admin Password" )
+	@google_launch['Admin_Password'] = FXTextField.new(@frame6, 25, nil, 0, :opts => FRAME_SUNKEN)
+	FXLabel.new(@frame6, "" )	
+	FXLabel.new(@frame6, "Override SSH User" )
+	@google_launch['EC2_SSH_User'] = FXTextField.new(@frame6, 60, nil, 0, :opts => FRAME_SUNKEN)
+	FXLabel.new(@frame6, "" )	
+	FXLabel.new(@frame6, "Override SSH Private Key" )
+	@google_launch['SSH_Private_Key'] = FXTextField.new(@frame6, 60, nil, 0, :opts => FRAME_SUNKEN)
+	@google_launch['SSH_Private_Key_Button'] = FXButton.new(@frame6, "", :opts => BUTTON_TOOLBAR)
+	@google_launch['SSH_Private_Key_Button'].icon = @magnifier
+	@google_launch['SSH_Private_Key_Button'].tipText = "Browse..."
+	@google_launch['SSH_Private_Key_Button'].connect(SEL_COMMAND) do
+	   dialog = FXFileDialog.new(@frame1, "Select pem file")
+	   dialog.patternList = [
+	          "Pem Files (*.pem)"
+	   ]
+	   dialog.selectMode = SELECTFILE_EXISTING
+	   if dialog.execute != 0
+	      @google_launch['SSH_Private_Key'].text = dialog.filename
+	   end
+	end
+        if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil	
+	   FXLabel.new(@frame6, "Override Putty Private Key" )
+	   @google_launch['Putty_Private_Key'] = FXTextField.new(@frame6, 60, nil, 0, :opts => FRAME_SUNKEN)
+	   @google_launch['Putty_Private_Key_Button'] = FXButton.new(@frame6, "", :opts => BUTTON_TOOLBAR)
+	   @google_launch['Putty_Private_Key_Button'].icon = @magnifier
+	   @google_launch['Putty_Private_Key_Button'].tipText = "Browse..."
+	   @google_launch['Putty_Private_Key_Button'].connect(SEL_COMMAND) do
+	      dialog = FXFileDialog.new(@frame1, "Select ppk file")
+	      dialog.patternList = [
+	          "Pem Files (*.ppk)"
+	      ]
+	      dialog.selectMode = SELECTFILE_EXISTING
+	      if dialog.execute != 0
+	         @google_launch['Putty_Private_Key'].text = dialog.filename
+	      end
+	   end
+        end	 	
+	FXLabel.new(@frame6, "Notes")
+	@google_text_area = FXText.new(@frame6, :height => 100, :opts => LAYOUT_FIX_HEIGHT|TEXT_WORDWRAP|LAYOUT_FILL, :padding => 0)	
   end 	
   
  	

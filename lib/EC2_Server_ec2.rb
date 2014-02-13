@@ -4,7 +4,9 @@
      if  @ec2_main.settings.openstack 
         ops_clear_panel
      elsif  @ec2_main.settings.cloudfoundry 
-        cfy_clear_panel        
+        cfy_clear_panel  
+    elsif  @ec2_main.settings.google 
+        google_clear_panel        		
      else  
        @type = ""
        clear('Instance_ID')
@@ -50,6 +52,7 @@
        @frame3.hide()
 	   @frame4.hide()
 	   @frame5.hide()
+	   @frame6.hide()
        @server_status = ""
        @secgrp = ""
      end  
@@ -65,12 +68,15 @@
         ops_load(instance_id)
      elsif  @ec2_main.settings.cloudfoundry 
         cfy_load(instance_id)        
+     elsif  @ec2_main.settings.google 
+        google_load(instance_id)        		
      else   
        @type = "ec2"
        @frame1.show()
        @frame3.hide()
 	   @frame4.hide()
 	   @frame5.hide()
+	   @frame6.hide()
        @server['Instance_ID'].text = instance_id
        ENV['EC2_INSTANCE'] = instance_id
        r = @ec2_main.serverCache.instance(instance_id)

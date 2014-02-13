@@ -12,6 +12,7 @@ class EC2_Launch
       @frame3.show()
       @frame4.hide()
       @frame5.hide()
+	  @frame6.hide()
       @profile_type = "secgrp"
       clear_as_panel
       if sec_grp != nil and sec_grp != ""

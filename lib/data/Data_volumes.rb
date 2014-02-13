@@ -85,6 +85,16 @@ class Data_volumes
                 end   
                   data.push(r)
              end
+		  elsif @ec2_main.settings.google 
+					response = conn.list_disks($google_zone)
+					if response.status == 200
+						x = response.body['items']
+						x.each do |r|
+						  data.push(r)
+						end
+					else
+						data = []
+					end			 
           elsif conn.instance_of?(Fog::Compute)
              x = conn.volumes.all(filters)
              x.each do |y|
@@ -112,7 +122,17 @@ class Data_volumes
   end
   
   
-  def get(volume_id) 
+  def get(volume_id)
+    if  @ec2_main.settings.google
+     data = {}	
+     conn = @ec2_main.environment.connection
+     if conn != nil
+        data = conn.disks.get(volume_id,$goggle_zone)
+     else 
+        raise "Connection Error"
+     end
+     return data  	   
+	else 
      data = {}
      conn = @ec2_main.environment.volume_connection
      if conn != nil
@@ -121,6 +141,7 @@ class Data_volumes
         raise "Connection Error"
      end
      return data
+	end 
   end 
 
   # Create new EBS volume based on previously created snapshot.
@@ -327,6 +348,76 @@ class Data_volumes
      end
      return data  
   end  
+  
+  
+  # Attach a google disk
+  def  attach_disk(instance, zone, disk_name, device_name=nil, disk_mode='READ_WRITE', disk_type='PERSISTENT')
+     data = false
+     conn = @ec2_main.environment.connection
+     if conn != nil
+        response = conn.attach_disk(instance, zone, disk_name, device_name, disk_mode, disk_type)
+        if response.status == 200
+           data = response.body
+        else
+           data = {}
+        end                  
+     else 
+        raise "Connection Error"
+     end
+     return data  
+  end  
+  
+  # Detach a google disk
+  def  detach_disk(instance, zone, device_name)
+     data = false
+     conn = @ec2_main.environment.connection
+     if conn != nil
+        response = conn.detach_disk(instance, zone, device_name)
+        if response.status == 200
+           data = response.body
+        else
+           data = {}
+        end                  
+     else 
+        raise "Connection Error"
+     end
+     return data  
+  end  
+  
+  # Delete a google disk
+  def  delete_disk(name, zone_name)
+     data = false
+     conn = @ec2_main.environment.connection
+     if conn != nil
+        response = conn.delete_disk(name, zone_name)
+        if response.status == 200
+           data = response.body
+        else
+           data = {}
+        end                  
+     else 
+        raise "Connection Error"
+     end
+     return data  
+  end  
+  
+   # Insert a google disk
+  def  insert_disk(disk_name, zone_name, image_name=nil, opts={})
+     data = false
+     conn = @ec2_main.environment.connection
+     if conn != nil
+        response = conn.insert_disk(disk_name, zone_name, image_name, opts)
+        if response.status == 200
+           data = response.body
+        else
+           data = {}
+        end                  
+     else 
+        raise "Connection Error"
+     end
+     return data  
+  end  
+
   
 
 end

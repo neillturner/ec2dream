@@ -12,7 +12,28 @@ class Data_vpc
 
 
 def describe_vpcs(options = {})
-       data = []
+     data = []
+     if @ec2_main.settings.google 
+        conn = @ec2_main.environment.connection
+        if conn != nil
+           begin 
+              response = conn.list_networks
+			  if response.status == 200
+	             x = response.body['items']
+	             x.each do |r|
+				    r['vpcId'] = r['name'] 
+				    data.push(r)
+ 	            end
+	          else
+	      	     data = []
+              end
+            rescue
+              puts "ERROR: getting all zones  #{$!}"
+           end
+        else 
+           raise "Connection Error"   
+        end
+     else		
        conn = @ec2_main.environment.connection
        if conn != nil
           begin 
@@ -25,8 +46,9 @@ def describe_vpcs(options = {})
           rescue 
              puts "ERROR: describe_vpc #{$!}"
           end
-       end 
-       return data
+       end
+	 end 
+     return data
   end
   
  def describe_subnets(options = {})
@@ -46,5 +68,39 @@ def describe_vpcs(options = {})
        end 
        return data
   end 
+  
+  # Delete a google network
+  def  delete_network(name)
+     data = false
+     conn = @ec2_main.environment.connection
+     if conn != nil
+        response = conn.delete_network(name)
+        if response.status == 200
+           data = response.body
+        else
+           data = {}
+        end                  
+     else 
+        raise "Connection Error"
+     end
+     return data  
+  end  
+  
+   # Insert a google network
+  def  insert_network(name, ip_range)
+     data = false
+     conn = @ec2_main.environment.connection
+     if conn != nil
+        response = conn.insert_network(name, ip_range)
+        if response.status == 200
+           data = response.body
+        else
+           data = {}
+        end                  
+     else 
+        raise "Connection Error"
+     end
+     return data  
+  end  
   
  end 

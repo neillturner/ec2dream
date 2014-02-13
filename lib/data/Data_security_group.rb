@@ -39,7 +39,7 @@ class Data_security_group
       conn = @ec2_main.environment.connection
       if conn != nil
          begin
-           if  @ec2_main.settings.openstack_rackspace
+           if  @ec2_main.settings.openstack_rackspace or @ec2_main.settings.google
 		 r = {}
                  r[:id] = 1000
                  r[:name] = 'default'
@@ -59,6 +59,13 @@ class Data_security_group
                  r[:tenant_id] = y.tenant_id
                  data.push(r)
               end
+			elsif @ec2_main.settings.google
+             response = conn.list_firewalls
+		     if response.status == 200
+	             data = response.body['items']
+             else
+	      	     data = []
+              end			 
             elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"  
               if filter != nil
                   response = conn.describe_security_groups(filter)
@@ -277,11 +284,11 @@ class Data_security_group
        conn = @ec2_main.environment.connection
        if conn != nil
           if  @ec2_main.settings.openstack
-             data = conn.delete_security_group(group_id.to_i)	          
+             data = conn.delete_security_group(group_id.to_i)
           elsif @ec2_main.settings.get("EC2_PLATFORM") == "amazon"
-	     data = conn.delete_security_group(nil, group_id)
-	  else
-	     data = conn.delete_security_group(group_name, nil)
+	         data = conn.delete_security_group(nil, group_id)
+	      else
+	         data = conn.delete_security_group(group_name, nil)
           end       
           response = true
        else 
@@ -289,6 +296,40 @@ class Data_security_group
        end
        return response  
   end
+  
+  # Delete a google firewall
+  def  delete_firewall(name)
+     data = false
+     conn = @ec2_main.environment.connection
+     if conn != nil
+        response = conn.delete_firewall(name)
+        if response.status == 200
+           data = response.body
+        else
+           data = {}
+        end                  
+     else 
+        raise "Connection Error"
+     end
+     return data  
+  end  
+  
+   # Insert a google firewall
+  def  insert_firewall(name, source_range, source_tags, allowed, network=nil)
+     data = false
+     conn = @ec2_main.environment.connection
+     if conn != nil
+        response = conn.insert_firewall(name, source_range, source_tags, allowed, network)
+        if response.status == 200
+           data = response.body
+        else
+           data = {}
+        end                  
+     else 
+        raise "Connection Error"
+     end
+     return data  
+  end  
 
 
 end

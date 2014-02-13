@@ -44,7 +44,10 @@ class Data_regions
            data.push('https://dfw.servers.api.rackspacecloud.com/v2 (Dallas)')
            data.push('https://ord.servers.api.rackspacecloud.com/v2 (Chicago)')
            data.push('https://lon.servers.api.rackspacecloud.com/v2 (London)')
-     elsif  platform == "cloudfoundry"      
+	 elsif  platform == "google"  
+           data.push('us-central1')
+           data.push('europe-central1')
+      elsif  platform == "cloudfoundry"      
 	   data.push("http://api.vcap.me                                   (Local CloudFoundry")
 	   data.push("http://api.aws.af.cm                                (AppFog - AWS service)")
 	   data.push("http://api.hp.af.cm                                  (AppFog - HP Cloud service)")

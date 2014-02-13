@@ -18,12 +18,14 @@ require 'cache/EC2_TreeCache'
 require 'cache/EC2_ServerCache'
 require 'cache/EC2_ImageCache'
 require 'Amazon'
+require 'Google_compute'
 require 'Hp'
 require 'Rackspace'
 require 'OpenStack'
 require 'Eucalyptus'
 require 'CloudStack'
 require 'Cloud_Foundry'
+require 'Servers'
 
 include Fox
 
@@ -49,7 +51,7 @@ class EC2_Main < FXMainWindow
     $ec2_main = self
     @initial_startup = false
     @app = app
-    super(app, "#{product} v3.6.9 - Build and Manage Cloud Servers", :opts => DECOR_ALL, :width => 900, :height => 650)
+    super(app, "#{product} v3.7.0 - Build and Manage Cloud Servers", :opts => DECOR_ALL, :width => 900, :height => 650)
 
     # Status bar
     status = FXStatusBar.new(self,
@@ -130,6 +132,7 @@ class EC2_Main < FXMainWindow
           @settings.put_system('ENVIRONMENT',item.text)
           @settings.save_system
           @environment.reset_connection
+		  @imageCache.set_status("empty")
           @environment.load_env
        end       
      elsif (item.parent).parent == nil  and ((item.parent).text == "Env - #{@environment.env}")  
@@ -228,7 +231,7 @@ class EC2_Main < FXMainWindow
   
   def process_server(item,vpc=nil)
                  s_id = "/i-" 
-                 if settings.openstack
+                 if settings.openstack or settings.google
                    s_id="/"
                  end  
                  if item.text[s_id] != nil
@@ -316,6 +319,12 @@ class EC2_Main < FXMainWindow
          else
            @Amazon = Amazon.new
 		 end
+	    when "google"
+	     if @Google != nil
+           @Google
+         else
+           @Google = Google_compute.new
+		 end		 
        when "openstack_hp"
 	     if @Hp != nil
            @Hp
@@ -351,18 +360,26 @@ class EC2_Main < FXMainWindow
            @Cloud_Foundry
          else
            @Cloud_Foundry = Cloud_Foundry.new
-		 end	   
+		 end
+	   when "servers"
+	     if @Servers != nil
+           @Servers
+         else
+           @Servers = Servers.new
+		 end	 		 
       end   
   end
   
   def cloud_reset
     @Amazon = nil
+	@Google = nil
     @Hp = nil
     @Rackspace = nil
     @OpenStack = nil
     @Eucalyptus = nil
     @CloudStack = nil
     @Cloud_Foundry = nil
+	@Servers = nil
   end
   
   def app

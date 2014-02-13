@@ -37,6 +37,28 @@ class Data_addresses
                   r[:instance_id] = (y.instance_id).to_s
                   data.push(r)
                end
+            elsif @ec2_main.settings.google 
+              conn = @ec2_main.environment.connection
+              if conn != nil
+                begin 
+                 response = conn.list_addresses($google_region)
+			     if response.status == 200
+	                x = response.body['items']
+					if x != nil 
+	                  x.each do |r|
+				         r[:public_ip] = r['address'] 
+				         data.push(r)
+					  end	 
+ 	                end
+	             else
+	      	        data = []
+                 end
+                rescue
+                  puts "ERROR: getting all addresses  #{$!}"
+               end
+            else 
+               raise "Connection Error"   
+            end
             elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
                x = conn.addresses.all
                x.each do |y|
@@ -260,5 +282,58 @@ class Data_addresses
      end
      return data
   end 
+  
+  # Get a google address
+  def  get_address(name, region)
+     data = false
+     conn = @ec2_main.environment.connection
+     if conn != nil
+        response = conn.get_address(name, region)
+        if response.status == 200
+           data = response.body
+        else
+           data = {}
+        end                  
+     else 
+        raise "Connection Error"
+     end
+     return data  
+  end    
+
+  
+   # Delete a google address
+  def  delete_address(name,region)
+     data = false
+     conn = @ec2_main.environment.connection
+     if conn != nil
+        response = conn.delete_address(name,region)
+        if response.status == 200
+           data = response.body
+        else
+           data = {}
+        end                  
+     else 
+        raise "Connection Error"
+     end
+     return data  
+  end  
+  
+   # Insert a google address
+  def  insert_address(name,region)
+     data = false
+     conn = @ec2_main.environment.connection
+     if conn != nil
+        response = conn.insert_address(name,region)
+        if response.status == 200
+           data = response.body
+        else
+           data = {}
+        end                  
+     else 
+        raise "Connection Error"
+     end
+     return data  
+  end  
+  
 
 end
