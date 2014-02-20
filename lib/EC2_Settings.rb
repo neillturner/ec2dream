@@ -13,6 +13,7 @@ require 'dialog/EC2_SystemDialog'
 require 'dialog/EC2_TerminalsDialog'
 require 'dialog/EC2_BastionEditDialog'
 require 'dialog/EC2_PuppetEditDialog'
+require 'dialog/EC2_ChefEditDialog'
 require 'common/error_message'
 require 'common/read_properties'
 require 'common/save_properties'
@@ -38,6 +39,8 @@ class EC2_Settings
 	@repository.create
 	@puppet_icon = @ec2_main.makeIcon("puppet.png")
 	@puppet_icon.create	
+	@chef_icon = @ec2_main.makeIcon("chef.png")
+	@chef_icon.create		
         tab4 = FXTabItem.new(@ec2_main.tabBook, " Environment ")
         page1 = FXVerticalFrame.new(@ec2_main.tabBook)
         page1a = FXHorizontalFrame.new(page1,LAYOUT_FILL_X, :padding => 0)
@@ -230,52 +233,34 @@ class EC2_Settings
     FXLabel.new(frame1, "" )
  	FXLabel.new(frame1, "  Global and General Settings", nil, LAYOUT_CENTER_X)
 	FXLabel.new(frame1, "" )
-	FXLabel.new(frame1, "CHEF_REPOSITORY" )
- 	@settings['CHEF_REPOSITORY'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
- 	@settings['CHEF_REPOSITORY_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
-	@settings['CHEF_REPOSITORY_BUTTON'].icon = @magnifier
-	@settings['CHEF_REPOSITORY_BUTTON'].tipText = "Browse..."
-	@settings['CHEF_REPOSITORY_BUTTON'].connect(SEL_COMMAND) do
-	   dialog = FXDirDialog.new(frame1, "Select Chef Repository Directory")
-           dialog.directory = "#{ENV['EC2DREAM_HOME']}/chef/chef-repo"
-	   if dialog.execute != 0
-	      @settings['CHEF_REPOSITORY'].text = dialog.directory
-           end
-	end
 	FXLabel.new(frame1, "" )
-	@settings['PUPPET_BUTTON'] = FXButton.new(frame1, "  Configure Puppet  ", :opts => BUTTON_NORMAL|LAYOUT_LEFT)
+	frame1s = FXHorizontalFrame.new(frame1,LAYOUT_FILL_X, :padding => 0)
+	@settings['CHEF_BUTTON'] = FXButton.new(frame1s, "  Configure Chef  ", :opts => BUTTON_NORMAL|LAYOUT_LEFT)
+	@settings['CHEF_BUTTON'].icon = @chef_icon
+	@settings['CHEF_BUTTON'].tipText = "  Configure Chef  "
+	@settings['CHEF_BUTTON'].connect(SEL_COMMAND) do
+	   dialog = EC2_ChefEditDialog.new(@ec2_main)
+	   dialog.execute
+	end
+	#FXLabel.new(frame1, "CHEF_REPOSITORY" )
+ 	#@settings['CHEF_REPOSITORY'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+ 	#@settings['CHEF_REPOSITORY_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
+	#@settings['CHEF_REPOSITORY_BUTTON'].icon = @magnifier
+	#@settings['CHEF_REPOSITORY_BUTTON'].tipText = "Browse..."
+	#@settings['CHEF_REPOSITORY_BUTTON'].connect(SEL_COMMAND) do
+	#   dialog = FXDirDialog.new(frame1, "Select Chef Repository Directory")
+    #       dialog.directory = "#{ENV['EC2DREAM_HOME']}/chef/chef-repo"
+	#   if dialog.execute != 0
+	#      @settings['CHEF_REPOSITORY'].text = dialog.directory
+    #       end
+	#end
+	FXLabel.new(frame1s, "              " )
+	@settings['PUPPET_BUTTON'] = FXButton.new(frame1s, "  Configure Puppet  ", :opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@settings['PUPPET_BUTTON'].icon = @puppet_icon
 	@settings['PUPPET_BUTTON'].tipText = "  Configure Puppet  "
 	@settings['PUPPET_BUTTON'].connect(SEL_COMMAND) do
-	   r = {}
-	   r['puppet_repository'] = get('PUPPET_REPOSITORY')
-	   r['puppet_module_path'] = get('PUPPET_MODULE_PATH')
-	   r['puppet_syntax_check'] = get('PUPPET_SYNTAX_CHECK')
-	   r['puppet_rspec_test'] = get('PUPPET_RSPEC_TEST')
-       r['puppet_apply'] = get('PUPPET_APPLY')
-	   r['puppet_apply_noop'] = get('PUPPET_APPLY_NOOP')
-	   r['puppet_extra_options'] = get('PUPPET_EXTRA_OPTIONS')
-	   r['puppet_delete_repo'] = get('PUPPET_DELETE_REPO')
-	   r['puppet_sudo_password'] = get('PUPPET_SUDO_PASSWORD')
-	   r['puppet_upgrade_packages'] = get('PUPPET_UPGRADE_PACKAGES')
-	   dialog = EC2_PuppetEditDialog.new(@ec2_main,r)
+	   dialog = EC2_PuppetEditDialog.new(@ec2_main)
 	   dialog.execute
-	   if dialog.saved 
-	      r = dialog.selected
-	      if r != nil and r != ""
-	         put('PUPPET_REPOSITORY',r['puppet_repository'])
-	         put('PUPPET_MODULE_PATH',r['puppet_module_path'])
-	         put('PUPPET_SYNTAX_CHECK',r['puppet_syntax_check'])
-	         put('PUPPET_RSPEC_TEST',r['puppet_rspec_test'])
-             put('PUPPET_APPLY',r['puppet_apply'])
-			 put('PUPPET_APPLY_NOOP',r['puppet_apply_noop'])
-			 put('PUPPET_EXTRA_OPTIONS',r['puppet_extra_options'])
-			 put('PUPPET_DELETE_REPO',r['puppet_delete_repo'])
-			 put('PUPPET_SUDO_PASSWORD',r['puppet_sudo_password'])
-			 put('PUPPET_UPGRADE_PACKAGES',r['puppet_upgrade_packages'])
-             save
-          end   
-	   end   
 	end
 	FXLabel.new(frame1, "" )
 	
@@ -393,7 +378,6 @@ class EC2_Settings
         load_panel('AMAZON_ACCOUNT_ID')
         load_panel('AMAZON_ACCESS_KEY_ID')
         load_panel('AMAZON_SECRET_ACCESS_KEY')
-        load_panel('CHEF_REPOSITORY')
         load_panel('VAGRANT_REPOSITORY')
         if @settings['VAGRANT_REPOSITORY'].text == nil or @settings['VAGRANT_REPOSITORY'].text == "" 
            @properties['VAGRANT_REPOSITORY']  = "#{ENV['EC2DREAM_HOME']}/chef/vagrant"
@@ -586,7 +570,6 @@ class EC2_Settings
      save_setting("AMAZON_ACCOUNT_ID")
      save_setting("AMAZON_ACCESS_KEY_ID")
      save_setting("AMAZON_SECRET_ACCESS_KEY")
-     save_setting("CHEF_REPOSITORY")
      save_setting("VAGRANT_REPOSITORY")
      save_setting("AVAILABILITY_ZONE")
      save_setting("AMAZON_NICKNAME_TAG")

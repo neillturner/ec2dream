@@ -6,11 +6,22 @@ include Fox
 
 class EC2_PuppetEditDialog < FXDialogBox
 
-  def initialize(owner, parm)
+  def initialize(owner)
     #puts "PuppetEditDialog.initialize"
     @saved = false
     @ec2_main = owner
-    @parm = {}
+	settings = @ec2_main.settings
+    parm = {}
+	parm['puppet_repository'] = settings.get('PUPPET_REPOSITORY')
+	parm['puppet_module_path'] = settings.get('PUPPET_MODULE_PATH')
+	parm['puppet_syntax_check'] = settings.get('PUPPET_SYNTAX_CHECK')
+	parm['puppet_rspec_test'] = settings.get('PUPPET_RSPEC_TEST')
+    parm['puppet_apply'] = settings.get('PUPPET_APPLY')
+	parm['puppet_apply_noop'] = settings.get('PUPPET_APPLY_NOOP')
+	parm['puppet_extra_options'] = settings.get('PUPPET_EXTRA_OPTIONS')
+	parm['puppet_delete_repo'] = settings.get('PUPPET_DELETE_REPO')
+	parm['puppet_sudo_password'] = settings.get('PUPPET_SUDO_PASSWORD')
+	parm['puppet_upgrade_packages'] = settings.get('PUPPET_UPGRADE_PACKAGES')	
 	@magnifier = @ec2_main.makeIcon("magnifier.png")
     @magnifier.create
     super(@ec2_main, "Configure Puppet", :opts => DECOR_ALL, :width => 800, :height => 350)
@@ -83,28 +94,40 @@ class EC2_PuppetEditDialog < FXDialogBox
     create = FXButton.new(frame1, "   &Save   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     FXLabel.new(frame1, "" )
     create.connect(SEL_COMMAND) do |sender, sel, data|
-        @parm['puppet_repository']=puppet_repository.text
-        @parm['puppet_module_path']=puppet_module_path.text
-        @parm['puppet_syntax_check']=puppet_syntax_check.text
-        @parm['puppet_rspec_test']=puppet_rspec_test.text
-		@parm['puppet_apply']="false"	
+	    r = {}
+        r['puppet_repository']=puppet_repository.text
+        r['puppet_module_path']=puppet_module_path.text
+        r['puppet_syntax_check']=puppet_syntax_check.text
+        r['puppet_rspec_test']=puppet_rspec_test.text
+		r['puppet_apply']="false"	
         if puppet_apply.itemCurrent?(0)
-	      @parm['puppet_apply']="true"
+	      r['puppet_apply']="true"
         end		
-		@parm['puppet_apply_noop']="false"	
+		r['puppet_apply_noop']="false"	
         if puppet_apply_noop.itemCurrent?(0)
-	      @parm['puppet_apply_noop']="true"
+	      r['puppet_apply_noop']="true"
         end		
-        @parm['puppet_extra_options']=puppet_extra_options.text
-        @parm['puppet_delete_repo']="false"	
+        r['puppet_extra_options']=puppet_extra_options.text
+        r['puppet_delete_repo']="false"	
         if puppet_delete_repo.itemCurrent?(0)
-	      @parm['puppet_delete_repo']="true"
+	      r['puppet_delete_repo']="true"
         end			
-        @parm['puppet_sudo_password']=puppet_sudo_password.text
-        @parm['puppet_upgrade_packages']="false"	
+        r['puppet_sudo_password']=puppet_sudo_password.text
+        r['puppet_upgrade_packages']="false"	
         if puppet_upgrade_packages.itemCurrent?(0)
-	      @parm['puppet_upgrade_packages']="true"
-        end		
+	      r['puppet_upgrade_packages']="true"
+        end	
+	    settings.put('PUPPET_REPOSITORY',r['puppet_repository'])
+	    settings.put('PUPPET_MODULE_PATH',r['puppet_module_path'])
+	    settings.put('PUPPET_SYNTAX_CHECK',r['puppet_syntax_check'])
+	    settings.put('PUPPET_RSPEC_TEST',r['puppet_rspec_test'])
+        settings.put('PUPPET_APPLY',r['puppet_apply'])
+		settings.put('PUPPET_APPLY_NOOP',r['puppet_apply_noop'])
+		settings.put('PUPPET_EXTRA_OPTIONS',r['puppet_extra_options'])
+		settings.put('PUPPET_DELETE_REPO',r['puppet_delete_repo'])
+		settings.put('PUPPET_SUDO_PASSWORD',r['puppet_sudo_password'])
+		settings.put('PUPPET_UPGRADE_PACKAGES',r['puppet_upgrade_packages'])
+        settings.save		
         @saved = true
         self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
     end
@@ -139,9 +162,5 @@ class EC2_PuppetEditDialog < FXDialogBox
   def success
      @saved
   end
-  
-  def selected
-    @parm
-  end 
   
 end

@@ -22,7 +22,7 @@
 
 Gem::Specification.new do |spec|
   spec.name = 'ec2dream'
-  spec.version = '3.7.0'
+  spec.version = '3.7.1'
   spec.authors = ['Neill Turner']
   spec.email = 'neillwturner@gmail.com'
   spec.executables = ["ec2dream"]
@@ -32,7 +32,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency('fxruby')
   spec.add_dependency('rubyzip', '< 1.0.0')
   spec.add_dependency('gchartrb')
-  spec.add_dependency('pocketknife_ec2dream', '>= 0.1.13')
+  spec.add_dependency('pocketknife_ec2dream', '>= 0.1.14')
   spec.add_dependency('pocketknife_puppet', '>= 0.1.14')
   spec.add_dependency('pocketknife_windows', '>= 0.1.13')
   spec.add_dependency('fog', '>= 1.20.0')

@@ -1,0 +1,6 @@
+site :opscode
+
+cookbook 'aws'
+cookbook 'apache2'
+
+

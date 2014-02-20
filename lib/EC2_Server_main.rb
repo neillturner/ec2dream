@@ -427,7 +427,14 @@ class EC2_Server
               @ec2_main.launch.put('Chef_Node',@server['Chef_Node'].text) 
     	      @ec2_main.launch.save
     	   end   
-	end 	
+	end 
+	@server['CHEF_BUTTON'] = FXButton.new(@frame1s, " Configure Chef ", :opts => BUTTON_NORMAL|LAYOUT_LEFT)
+	@server['CHEF_BUTTON'].icon = @chef_icon
+	@server['CHEF_BUTTON'].tipText = "  Configure Chef  "
+	@server['CHEF_BUTTON'].connect(SEL_COMMAND) do
+	   dialog = EC2_ChefEditDialog.new(@ec2_main)
+	   dialog.execute
+	end		
  	FXLabel.new(@frame1, "" )
  	FXLabel.new(@frame1, "Instance Id" )
  	@frame1t = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
@@ -454,6 +461,13 @@ class EC2_Server
     	      @ec2_main.launch.save
     	   end   
 	end 
+ 	@server['PUPPET_BUTTON'] = FXButton.new(@frame1t, " Configure Puppet ", :opts => BUTTON_NORMAL|LAYOUT_LEFT)
+	@server['PUPPET_BUTTON'].icon = @puppet_icon
+	@server['PUPPET_BUTTON'].tipText = "  Configure Puppet  "
+	@server['PUPPET_BUTTON'].connect(SEL_COMMAND) do
+	   dialog = EC2_PuppetEditDialog.new(@ec2_main)
+	   dialog.execute
+	end		
  	FXLabel.new(@frame1, "" )	
  	FXLabel.new(@frame1, "Tags" )
  	@server['Tags'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
@@ -700,19 +714,8 @@ class EC2_Server
 	end
 	FXLabel.new(@frame1, "" )
 	FXLabel.new(@frame1, "AMI Launch Index" ) 
-	#@frame1lr = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
-        @server['Ami_Launch_Index'] = FXTextField.new(@frame1, 20, nil, 0, :opts => TEXTFIELD_READONLY)
-        FXLabel.new(@frame1, "" )
-	#FXLabel.new(@frame1lr, "Remote Command" ) 
-	#@server['Command'] = FXTextField.new(@frame1lr, 20, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
-        #@server['Command_Button'] = FXButton.new(@frame1, "", :opts => BUTTON_TOOLBAR)
-	#@server['Command_Button'].icon = @start_icon
-	#@server['Command_Button'].tipText = "Run Command on Server"
-	#@server['Command_Button'].connect(SEL_COMMAND) do
-	#   instance_id = @server['Instance_ID'].text
-        #   @command_stack[instance_id] = @server['Command'].text
-	#   run_command	
-	#end
+    @server['Ami_Launch_Index'] = FXTextField.new(@frame1, 20, nil, 0, :opts => TEXTFIELD_READONLY)
+    FXLabel.new(@frame1, "" )
 	FXLabel.new(@frame1, "Kernel Id" )
 	@frame1f = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
         @server['Kernel_Id'] = FXTextField.new(@frame1f, 20, nil, 0, :opts => TEXTFIELD_READONLY)
@@ -782,6 +785,13 @@ class EC2_Server
     	      @ec2_main.launch.save
     	   end   
 	end
+	@ops_server['CHEF_BUTTON'] = FXButton.new(@frame3s, " Configure Chef ", :opts => BUTTON_NORMAL|LAYOUT_LEFT)
+	@ops_server['CHEF_BUTTON'].icon = @chef_icon
+	@ops_server['CHEF_BUTTON'].tipText = "  Configure Chef  "
+	@ops_server['CHEF_BUTTON'].connect(SEL_COMMAND) do
+	   dialog = EC2_ChefEditDialog.new(@ec2_main)
+	   dialog.execute
+	end		
 	FXLabel.new(@frame3, "" )
 	FXLabel.new(@frame3, "Security Groups" )
 	@ops_server['Security_Groups'] = FXTextField.new(@frame3, 25, nil, 0, :opts => TEXTFIELD_READONLY)
@@ -799,7 +809,14 @@ class EC2_Server
               @ec2_main.launch.put('Puppet_Manifest',@ops_server['Puppet_Manifest'].text) 
     	      @ec2_main.launch.save
     	   end   
-	end 		 	
+	end 
+ 	@ops_server['PUPPET_BUTTON'] = FXButton.new(@frame3t, " Configure Puppet ", :opts => BUTTON_NORMAL|LAYOUT_LEFT)
+	@ops_server['PUPPET_BUTTON'].icon = @puppet_icon
+	@ops_server['PUPPET_BUTTON'].tipText = "  Configure Puppet  "
+	@ops_server['PUPPET_BUTTON'].connect(SEL_COMMAND) do
+	   dialog = EC2_PuppetEditDialog.new(@ec2_main)
+	   dialog.execute
+	end		
 	FXLabel.new(@frame3, "" )
  	FXLabel.new(@frame3, "Image ID" )
  	@ops_server['Image_ID'] = FXTextField.new(@frame3, 50, nil, 0, :opts => TEXTFIELD_READONLY)
@@ -1226,13 +1243,25 @@ class EC2_Server
     end
     FXLabel.new(@frame5, "Chef Node" )
     @loc_server['chef_node'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
-    FXLabel.new(@frame5, "" )
+ 	@loc_server['CHEF_BUTTON'] = FXButton.new(@frame5, "  Configure Chef      ", :opts => BUTTON_NORMAL|LAYOUT_LEFT)
+	@loc_server['CHEF_BUTTON'].icon = @chef_icon
+	@loc_server['CHEF_BUTTON'].tipText = "  Configure Chef  "
+	@loc_server['CHEF_BUTTON'].connect(SEL_COMMAND) do
+	   dialog = EC2_ChefEditDialog.new(@ec2_main)
+	   dialog.execute
+	end	
     FXLabel.new(@frame5, "Puppet Manifest" )
     @loc_server['puppet_manifest'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
-    FXLabel.new(@frame5, "" )
+ 	@loc_server['PUPPET_BUTTON'] = FXButton.new(@frame5, "  Configure Puppet  ", :opts => BUTTON_NORMAL|LAYOUT_LEFT)
+	@loc_server['PUPPET_BUTTON'].icon = @puppet_icon
+	@loc_server['PUPPET_BUTTON'].tipText = "  Configure Puppet  "
+	@loc_server['PUPPET_BUTTON'].connect(SEL_COMMAND) do
+	   dialog = EC2_PuppetEditDialog.new(@ec2_main)
+	   dialog.execute
+	end	
     FXLabel.new(@frame5, "Puppet Roles" )
     @loc_server['puppet_roles'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
-    FXLabel.new(@frame5, "" )		
+    FXLabel.new(@frame5, "" )	
     FXLabel.new(@frame5, "Windows Server" )
     @loc_server['windows_server'] = FXComboBox.new(@frame5, 15, :opts => COMBOBOX_STATIC|COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
     @loc_server['windows_server'].numVisible = 2      
@@ -1242,7 +1271,7 @@ class EC2_Server
     FXLabel.new(@frame5, "" )
     FXLabel.new(@frame5, "" )
     FXLabel.new(@frame5, "" )
-    FXLabel.new(@frame5, "" )    
+    FXLabel.new(@frame5, "" ) 	
     FXLabel.new(@frame5, "" )
     FXLabel.new(@frame5, "" )
     FXLabel.new(@frame5, "" )
@@ -1313,6 +1342,13 @@ class EC2_Server
     	      @ec2_main.launch.save
     	   end   
 	end
+	@google_server['CHEF_BUTTON'] = FXButton.new(@frame6s, " Configure Chef ", :opts => BUTTON_NORMAL|LAYOUT_LEFT)
+	@google_server['CHEF_BUTTON'].icon = @chef_icon
+	@google_server['CHEF_BUTTON'].tipText = "  Configure Chef  "
+	@google_server['CHEF_BUTTON'].connect(SEL_COMMAND) do
+	   dialog = EC2_ChefEditDialog.new(@ec2_main)
+	   dialog.execute
+	end			
  	FXLabel.new(@frame6, "" )
  	FXLabel.new(@frame6, "Instance ID" )
  	@frame6t = FXHorizontalFrame.new(@frame6,LAYOUT_FILL_X, :padding => 0)
@@ -1326,7 +1362,14 @@ class EC2_Server
               @ec2_main.launch.put('Puppet_Manifest',@google_server['Puppet_Manifest'].text) 
     	      @ec2_main.launch.save
     	   end   
-	end 		 	
+	end 
+	@google_server['PUPPET_BUTTON'] = FXButton.new(@frame6t, " Configure Puppet ", :opts => BUTTON_NORMAL|LAYOUT_LEFT)
+	@google_server['PUPPET_BUTTON'].icon = @puppet_icon
+	@google_server['PUPPET_BUTTON'].tipText = "  Configure Puppet  "
+	@google_server['PUPPET_BUTTON'].connect(SEL_COMMAND) do
+	   dialog = EC2_PuppetEditDialog.new(@ec2_main)
+	   dialog.execute
+	end		
 	FXLabel.new(@frame6, "" )
  	FXLabel.new(@frame6, "State" )
  	@frame6j = FXHorizontalFrame.new(@frame6,LAYOUT_FILL_X, :padding => 0)
