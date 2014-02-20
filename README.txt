@@ -1,4 +1,4 @@
-EC2Dream Fogviz - Build and Manage Cloud Servers Version 3.7.0 -  Feb 2014 
+EC2Dream Fogviz - Build and Manage Cloud Servers Version 3.7.1 -  Feb 2014 
 -----------------------------------------------------------------------------
 
 For installation see http://ec2dream.blogspot.co.uk/search/label/EC2Dream%20Installation
