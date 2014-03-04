@@ -1,0 +1,34 @@
+---
+driver:
+    name: ec2
+    aws_access_key_id: XXXXXXXXXXXXXX
+    aws_secret_access_key: YYYYYYYYYYYYYYYYYYYYYY
+    aws_ssh_key_id: test
+    ssh_key: C:/repository/keys/test.pem
+    security_group_ids: ["sg-xxxxxxxx"]
+    region: us-east-1
+    availability_zone: us-east-1d
+    flavor_id: t1.micro
+    require_chef_omnibus: true
+    subnet_id: subnet-xxxxxxx
+ 
+  
+provisioner:
+  name: chef_solo
+  
+  
+platforms:
+  - name: ubuntu-12.04
+    driver:
+      image_id: ami-fd20ad94
+      username: ubuntu
+  - name: centos-6.3
+    driver:
+      image_id: ami-ef5ff086
+      username: ec2-user
+
+suites:
+  - name: default
+    run_list: 
+      - role[app]
+    attributes:

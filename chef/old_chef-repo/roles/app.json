@@ -1,0 +1,8 @@
+{
+  "name": "app",
+  "chef_type": "role",
+  "json_class": "Chef::Role",
+  "run_list": [
+    "recipe[base]", "recipe[mycompany_webserver]"
+  ]
+}

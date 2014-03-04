@@ -76,6 +76,8 @@ require 'dialog/CFY_ServiceDeleteDialog'
 
 require 'dialog/LOC_CreateDialog'
 
+require 'dialog/KIT_LogSelectDialog'
+
 require 'dialog/VAG_CreateDialog'
 require 'dialog/VAG_DeleteDialog'
 require 'dialog/VAG_UpDialog'
@@ -113,6 +115,7 @@ require 'common/ssh_tunnel'
 require 'common/remote_desktop'
 require 'common/error_message'
 require 'common/convert_time'
+require 'common/kitchen_cmd'
 
 class EC2_List
 
@@ -571,6 +574,11 @@ class EC2_List
 	         @vagrant_file  =  find_value('Vagrantfile',which.row) 
 			when "Local Servers"
 	         call_dialog(2)  
+			when "Chef Test Kitchen"
+			 @curr_driver = find_value('Driver',which.row)
+			 @curr_provisioner = find_value('Provisioner',which.row)
+			 @curr_last_action = find_value('Last-Action',which.row)
+	         call_dialog(2)   
  	      end 	         
 	  # else
 	  #    @curr_row = nil
@@ -727,6 +735,8 @@ end
                    end
                 end	
 		end
+      elsif type == "Chef Test Kitchen"	
+         @data = kitchen_cmd("list")
       elsif type == "Vagrant"	
              begin
                 envs = Dir.entries($ec2_main.settings.get("VAGRANT_REPOSITORY"))
@@ -738,7 +748,7 @@ end
                 @data = []
                 envs.each do |r|
 				   vf = "#{$ec2_main.settings.get('VAGRANT_REPOSITORY')}/#{r}/Vagrantfile"
-                   @data.push({"server" => r, "Vagrantfile" => vf  }) if r != '.' and r != '..'
+                   @data.push({"server" => r, "Vagrantfile" => vf  }) if r != '.' and r != '..' and File.directory?("#{$ec2_main.settings.get('VAGRANT_REPOSITORY')}/#{r}") 
                 end
              end				 
 	 

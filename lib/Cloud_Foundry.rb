@@ -1,4 +1,4 @@
-require 'cloudfoundry'
+require 'json'
 
 class Cloud_Foundry 
 
@@ -23,6 +23,14 @@ end
 def conn(type) 
   #Fog.mock!
   if @conn[type] == nil
+ 	 if `gem list cloudfoundry-client -i`.include?('false')
+	   puts "------>Installing cloudfoundry-client....."
+	   begin
+          system "gem install cloudfoundry-client  --no-ri --no-rdoc"
+	   rescue
+	      puts $!
+       end
+ 	 end		 
      begin
        @conn[type] = CloudFoundry::Client.new({:target_url => $ec2_main.settings.get('EC2_URL')})
        @conn[type].login($ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'))         	

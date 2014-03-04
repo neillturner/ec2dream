@@ -12,6 +12,7 @@ def loc_load(server_name)
     @frame3.hide()
 	@frame4.hide()
 	@frame6.hide()
+	@frame7.hide()
     @frame5.show()
     @page1.width=300
     r = loc_get_local_server(server_name)
@@ -123,8 +124,9 @@ def loc_load(server_name)
         if @loc_server['windows_server'].itemCurrent?(0) 
            platform == "windows"
         end 
-        chef(@loc_server['server'].text, @loc_server['address'].text, @loc_server['chef_node'].text, @loc_server['ssh_user'].text, @loc_server['ssh_key'].text, @loc_server['ssh_password'].text,platform,@loc_server['local_port'].text)
-     end
+        dialog = EC2_ChefEditDialog.new(@ec2_main,@loc_server['server'].text, @loc_server['address'].text, @loc_server['chef_node'].text, @loc_server['ssh_user'].text, @loc_server['ssh_key'].text, @loc_server['ssh_password'].text,platform,@loc_server['local_port'].text)
+        dialog.execute
+	 end
   end
 
   def loc_puppet
@@ -133,8 +135,9 @@ def loc_load(server_name)
         if @loc_server['windows_server'].itemCurrent?(0)
            platform == "windows"
         end 
-        puppet(@loc_server['server'].text, @loc_server['address'].text, @loc_server['puppet_manifest'].text, @loc_server['ssh_user'].text, @loc_server['ssh_key'].text, @loc_server['ssh_password'].text,platform,@loc_server['local_port'].text,@loc_server['puppet_roles'].text)
-     end
+        dialog = EC2_PuppetEditDialog.new(@ec2_main,@loc_server['server'].text, @loc_server['address'].text, @loc_server['puppet_manifest'].text, @loc_server['ssh_user'].text, @loc_server['ssh_key'].text, @loc_server['ssh_password'].text,platform,@loc_server['local_port'].text,@loc_server['puppet_roles'].text)
+ 	     dialog.execute
+	 end
   end
 
   def loc_ssh_tunnel

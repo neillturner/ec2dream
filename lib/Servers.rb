@@ -1,4 +1,4 @@
-require 'fog'
+require 'json'
 
 class Servers 
 

@@ -1,6 +1,7 @@
 require 'chefspec'
+require 'chefspec/berkshelf'
 require 'fauxhai'
 
 RSpec.configure do |config|
-  config.cookbook_path = ['/var/local/pocketknife/cookbooks','/var/local/pocketknife/site-cookbooks']
+  config.cookbook_path = ['./cookbooks']
 end

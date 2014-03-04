@@ -33,6 +33,23 @@ class EC2_EnvCreateDialog < FXDialogBox
     mainFrame = FXVerticalFrame.new(self,LAYOUT_SIDE_TOP|LAYOUT_FILL_X|LAYOUT_FILL_Y|PACK_UNIFORM_WIDTH)
     topFrame = FXVerticalFrame.new(mainFrame,LAYOUT_FILL_X|LAYOUT_FILL_Y|PACK_UNIFORM_WIDTH)
     @tabbook = FXTabBook.new(topFrame,:opts => LAYOUT_FILL_X|LAYOUT_FILL_Y|PACK_UNIFORM_WIDTH)
+	
+	#
+    # servers
+    #
+    @serverstab = FXTabItem.new(@tabbook, "&Servers", nil)
+    @serversframe = FXHorizontalFrame.new(@tabbook )
+    frame0 = FXMatrix.new(@serversframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
+	FXLabel.new(frame0,"")
+	FXLabel.new(frame0,"")
+	FXLabel.new(frame0,"")
+	FXLabel.new(frame0,"")
+	FXLabel.new(frame0,"")
+	FXLabel.new(frame0,"")
+	FXLabel.new(frame0,"")
+	FXLabel.new(frame0,"")
+	FXLabel.new(frame0,"")
+    servers_env = textBox("Environment Name",frame0)
     
     #
     # amazon aws
@@ -132,19 +149,7 @@ class EC2_EnvCreateDialog < FXDialogBox
           @eucazipfile.text = eucazip
         end
     }
-    #FXLabel.new(frame2, "")
-    FXLabel.new(frame2, "")
-    FXLabel.new(frame2, "")
-    FXLabel.new(frame2, "")
-    FXLabel.new(frame2, "")
-    FXLabel.new(frame2, "NOTE: Eucalyptus version 3.3 and earlier are supported")
-    FXLabel.new(frame2, "")
-    FXLabel.new(frame2, "")
-    FXLabel.new(frame2, "")
-    FXLabel.new(frame2, "")
-    FXLabel.new(frame2, "")
-    FXLabel.new(frame2, "")    
-    
+     
     #
     # openstack
     #    
@@ -333,13 +338,7 @@ class EC2_EnvCreateDialog < FXDialogBox
          @cloudfoundry_secret_access_key.text = ENV['AMAZON_SECRET_ACCESS_KEY']
     end
     @cloudfoundry_url.text = "http://api.cloudfoundry.com/"     
-    #
-    # servers
-    #
-    @serverstab = FXTabItem.new(@tabbook, "&Servers", nil)
-    @serversframe = FXHorizontalFrame.new(@tabbook )
-    frame8 = FXMatrix.new(@serversframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
-    servers_env = textBox("Environment Name",frame8)
+
       	
 	
     amazon_env.connect(SEL_CHANGED) {
@@ -635,7 +634,7 @@ class EC2_EnvCreateDialog < FXDialogBox
   	   end  
   	   settings.put('CHEF_REPOSITORY',"#{ENV['EC2DREAM_HOME']}/chef/chef-repo")
   	   settings.put('PUPPET_REPOSITORY',"#{ENV['EC2DREAM_HOME']}/puppet/puppet-repo")
-  	   settings.put('VAGRANT_REPOSITORY',"#{ENV['EC2DREAM_HOME']}/chef/vagrant")
+  	   settings.put('VAGRANT_REPOSITORY',"#{ENV['EC2DREAM_HOME']}/vagrant")
            settings.save
   end
   

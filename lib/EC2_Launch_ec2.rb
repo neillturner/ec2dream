@@ -360,8 +360,7 @@ class EC2_Launch
       @profile_type = "secgrp"
       @profile_folder = "launch"
       @properties = {}
-      @frame1.show()
-	  @frame2.hide()
+	  @frame1.show()
       @frame3.hide()
       @frame4.hide()
 	  @frame5.hide()

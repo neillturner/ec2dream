@@ -1,0 +1,8 @@
+{
+  "name": "base_cloudinit",
+  "chef_type": "role",
+  "json_class": "Chef::Role",
+  "run_list": [
+     "recipe[base_cloudinit]"" 
+  ]
+}

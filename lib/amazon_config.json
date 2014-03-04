@@ -2,6 +2,18 @@
  "Cloud":{
    "Compute":{
     "Launch": {},
+    "Chef Test Kitchen":{
+          "request":"",
+          "name":"chef_test_kitchen",
+          "response": "",
+          "response_code": 200,
+          "action": ["edit","logs","select","","","","","",""],
+          "icon": ["@edit","@script","@server","","@csv","","","",""],
+          "tooltip":["Edit kitchen.yml","View Logs"," Select Server ",""," Csv Data ","","","",""],
+          "dialog":["edit(@ec2_main.settings.get('CHEF_REPOSITORY')+'/.kitchen.yml')","KIT_LogSelectDialog","$ec2_main.server.kit_load(@curr_item,@curr_driver,@curr_provisioner,@curr_last_action);$ec2_main.tabBook.setCurrent(1)","","","","","",""],
+          "dialog_parm": ["","","","","","","","",""], 
+          "keys": ["Instance"]
+    },   	   	
     "Vagrant":{
           "request":"",
           "name":"vagrant",
@@ -217,8 +229,8 @@
           "dialog":["LOC_CreateDialog","","$ec2_main.server.loc_load(@curr_item);$ec2_main.tabBook.setCurrent(1)","","","","","",""],
           "dialog_parm": ["","","","","","","","",""], 
           "keys": ["server"]
-    }  	
-    },
+    }
+   },
    "AutoScaling":{
      "Auto Scaling Groups":{
       "request":"describe_auto_scaling_groups",

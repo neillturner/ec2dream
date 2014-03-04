@@ -10,7 +10,7 @@
 	 
            if RUBY_PLATFORM.index("mswin") != nil  or RUBY_PLATFORM.index("i386-mingw32") != nil
                   if local_port != nil and local_port != ""
-                      puts "WARNING: accessing server via ssh tunnel"
+                      puts "WARNING: accessing server maybe via ssh tunnel"
 					  s = "localhost"
                      #c = "cmd.exe /c \@start \"\" /b \""+ENV['EC2DREAM_HOME']+"/putty/putty.exe\" -ssh localhost -P #{local_port} -i "+"\""+putty_key+"\""+" -l "+user
 	              end

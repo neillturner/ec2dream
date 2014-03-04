@@ -1,0 +1,20 @@
+---
+driver:
+    name: vagrant
+  
+provisioner:
+  name: chef_solo
+  
+platforms:
+  - name: ubuntu-12.04
+    driver:  vagrant
+  - name: centos-6.3
+    driver:  vagrant
+  - name: centos-6.4
+    driver:  vagrant	  
+
+suites:
+  - name: default
+    run_list: 
+      - role[app]
+    attributes:

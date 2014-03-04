@@ -29,6 +29,8 @@ class EC2_Server
         @cfy_env = []
         @cfy_env_curr_row = nil
 		@loc_server = {}
+		@kit_server = {}
+		@kit_debug = false
 		@saved = false
         @block_mapping = []
         @flavor = {}
@@ -89,11 +91,22 @@ class EC2_Server
 	@tunnel = @ec2_main.makeIcon("tunnel.png")
 	@tunnel.create
     @save = @ec2_main.makeIcon("disk.png")
-	@save.create	
+	@save.create
+	@rocket = @ec2_main.makeIcon("rocket.png")
+	@rocket.create
+	@arrow_in = @ec2_main.makeIcon("arrow_in.png")
+	@arrow_in.create	
+	@bug = @ec2_main.makeIcon("bug.png")
+	@bug.create	
+	@style = @ec2_main.makeIcon("style.png")
+	@style.create	
+	@lightbulb = @ec2_main.makeIcon("lightbulb.png")
+	@lightbulb.create
+	
         tab2 = FXTabItem.new(@ec2_main.tabBook, " Server ")
         @page1 = FXVerticalFrame.new(@ec2_main.tabBook, LAYOUT_FILL, :padding => 0)
         page1a = FXHorizontalFrame.new(@page1,LAYOUT_FILL_X, :padding => 0)
-	@server_label = FXLabel.new(page1a, "" )
+    	@server_label = FXLabel.new(page1a, "" )
 	@refresh_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@refresh_button.icon = @arrow_refresh
 	@refresh_button.tipText = "Server Status Refresh"
@@ -107,27 +120,30 @@ class EC2_Server
 	          end
 		   rescue 
 		   end
-	    end
-	    if @type == "cfy"
+	    elsif @type == "cfy"
 	       cfy_refresh(@appname)
+	    elsif @type == "kit"
+	       kit_refresh		   
 	    end
 	end
 	@refresh_button.connect(SEL_UPDATE) do |sender, sel, data|
 	   enable_if_env_set(sender)
 	end
-	@putty_button = FXButton.new(page1a," ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
+    	@putty_button = FXButton.new(page1a," ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@putty_button.icon = @monitor
-        @putty_button.tipText = " SSH "
+    @putty_button.tipText = " SSH "
 	@putty_button.connect(SEL_COMMAND) do |sender, sel, data|
-	    if @type == "ec2" or @type == "ops" or @type == "google"
+	       if @type == "ec2" or @type == "ops" or @type == "google"
                run_ssh
-		elsif @type == "loc"	   
+		   elsif @type == "loc"	   
 			   loc_ssh
-            elsif @type == "cfy"
-	       dialog = CFY_AppUploadDialog.new(@ec2_main,@cfy_server['name'].text)
-               dialog.execute            
-            end
-	end
+		   elsif @type == "kit"	   
+			   kit_ssh	   
+           elsif @type == "cfy"
+	           dialog = CFY_AppUploadDialog.new(@ec2_main,@cfy_server['name'].text)
+               dialog.execute  
+           end			   
+    end
 	@putty_button.connect(SEL_UPDATE) do |sender, sel, data|
 	   enable_if_server_loaded(sender)
 	   if @type == "cfy"
@@ -137,20 +153,21 @@ class EC2_Server
 	    elsif loaded
 	       @putty_button.icon = @monitor 
 	       @putty_button.tipText = " SSH "
-	    end	    
+		end	    
 	end
 	@winscp_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@winscp_button.icon = @put
 	@winscp_button.tipText = "  SCP  "
 	@winscp_button.connect(SEL_COMMAND) do |sender, sel, data|
-	   puts "server.serverWinscp.connect"
 	   if @type == "ec2" or @type == "ops"  or @type == "google"
               run_scp
 	   elsif @type == "loc"		  
 			  loc_winscp
-           elsif @type == "cfy"
+	   elsif @type == "kit"		  
+			  kit_winscp		  
+       elsif @type == "cfy"
               cfy_restart              
-           end
+        end
 	end
 	@winscp_button.connect(SEL_UPDATE) do |sender, sel, data|
 	   if @type == "cfy"
@@ -165,7 +182,7 @@ class EC2_Server
 	      sender.enabled = false
 	   end 
 	end		
-        if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
+    if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
 	   @remote_desktop_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	   @remote_desktop_button.icon = @desktop
 	   @remote_desktop_button.tipText = " Windows Remote Desktop "
@@ -173,19 +190,21 @@ class EC2_Server
 	      puts "server.serverRemote_Desktop.connect"
 		  if @type == "loc"	   
 			   loc_rdp
+		  elsif @type == "kit"	   
+		       kit_rdp     
 		  else	   
               run_remote_desktop
           end			  
 	   end
 	   @remote_desktop_button.connect(SEL_UPDATE) do |sender, sel, data|
-		enable_if_ec2_server_loaded(sender)
+		 enable_if_ec2_server_loaded(sender)
 	   end
 	end
 	@terminate_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@terminate_button.icon = @disconnect
 	@terminate_button.tipText = " Terminate Instance "
 	@terminate_button.connect(SEL_COMMAND) do |sender, sel, data|
-            if @type == "ec2"  
+        if @type == "ec2"  
 	       terminate
 	    elsif @type == "ops" 
 	       ops_terminate
@@ -194,7 +213,9 @@ class EC2_Server
 	    elsif @type == "cfy" 
 	       cfy_delete	
         elsif @type == "loc" 
-	       loc_save	 		   
+	       loc_save	
+        elsif @type == "kit" 
+	       kit_edit	 		   
 	    end  
 	end
 	@terminate_button.connect(SEL_UPDATE) do |sender, sel, data|
@@ -210,6 +231,10 @@ class EC2_Server
 	    elsif @type == "cfy"
 	       sender.enabled = true
 	       @terminate_button.tipText = " Delete App "
+		elsif @type == "kit"
+		   @terminate_button.icon = @modify
+	       sender.enabled = true
+	       @terminate_button.tipText = " Edit Kitchem yml File "   
  	    elsif @type == "loc"
 		   @terminate_button.icon = @save
 	       sender.enabled = true
@@ -224,18 +249,24 @@ class EC2_Server
 	      s = currentInstance()
 	      g =instance_group(s)	   
 	      dialog = EC2_System_ConsoleDialog.new(@ec2_main,g,s)
-              dialog.execute
-           end   	
+          dialog.execute
+	   elsif @type == "kit"	
+          kit_log	   
+       end   	
  	end
 	@log_button.connect(SEL_UPDATE) do |sender, sel, data|
            if loaded or  @server_status == "pending" and @type == "ec2"
               @log_button.icon = @log
-	      @log_button.tipText = " Console Output "
+	          @log_button.tipText = " Console Output "
               sender.enabled = true
            elsif loaded and @type == "ops"
               @log_button.icon = @log
-	      @log_button.tipText = " Console Output "
-              sender.enabled = true           
+	          @log_button.tipText = " Console Output "
+              sender.enabled = true  
+          elsif @type == "kit"
+              @log_button.icon = @log
+	          @log_button.tipText = " Kitchen Log "
+              sender.enabled = true			  
            else
               sender.enabled = false
            end      
@@ -246,6 +277,8 @@ class EC2_Server
 	@mon_button.connect(SEL_COMMAND) do |sender, sel, data|
 	    if @type == "loc" 
 	       loc_delete
+		elsif @type == "kit" 
+	       kit_destroy   
         else		   
 	       monitor
 		end   
@@ -256,6 +289,10 @@ class EC2_Server
 		   @mon_button.icon = @delete
 		   sender.enabled = true
 	       @terminate_button.tipText = " Delete Configuration "	
+		elsif @type == "kit"
+		   @mon_button.icon = @delete
+		   sender.enabled = true
+	       @mon_button.tipText = " Destroy Instance "			   
 		else
 		   @mon_button.icon = @mon
 	       @mon_button.tipText = " Monitor Instance "
@@ -265,10 +302,20 @@ class EC2_Server
 	@unmon_button.icon = @unmon
 	@unmon_button.tipText = " Stop Monitoring Instance "
 	@unmon_button.connect(SEL_COMMAND) do |sender, sel, data|
-	    unMonitor 
+		if @type == "kit"
+	       kit_create		   
+	    else
+	       unMonitor 
+		end   
  	end
 	@unmon_button.connect(SEL_UPDATE) do |sender, sel, data|
-	    enable_if_ec2_server_loaded_or_pending(sender) unless (@type == "cfy" or @type == "loc") 
+	    if @type == "kit" 
+	      sender.enabled = true
+	      @unmon_button.icon = @rocket
+	      @unmon_button.tipText = " Create Instance "		  
+	    else  
+	      enable_if_ec2_server_loaded_or_pending(sender) unless (@type == "cfy" or @type == "loc") 
+		end  
 	end
 	@start_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@start_button.icon = @start_icon
@@ -276,15 +323,21 @@ class EC2_Server
 	@start_button.connect(SEL_COMMAND) do |sender, sel, data|
 	    if @type == "cfy"
 	       cfy_start
+	    elsif @type == "kit"
+	       kit_converge		   
 	    else
 	       start_instance
 	    end   
  	end
 	@start_button.connect(SEL_UPDATE) do |sender, sel, data|
-           if loaded and @type == "cfy" 
+        if loaded and @type == "cfy" 
 	      sender.enabled = true
 	      @start_button.icon = @start_icon
 	      @start_button.tipText = " Start App "
+        elsif loaded and @type == "kit" 
+	      sender.enabled = true
+	      @start_button.icon = @arrow_in
+	      @start_button.tipText = " Converge Instance "		  
 	    else  
 	      enable_if_ebs_ec2_server_loaded(sender)
 	    end  
@@ -294,20 +347,22 @@ class EC2_Server
 	@stop_button.tipText = " Stop Instance "
 	@stop_button.connect(SEL_COMMAND) do |sender, sel, data|
 	   if @type == "ec2"
-              stop_instance
+           stop_instance
 	   elsif @type == "cfy"
 	       cfy_stop
+	   elsif @type == "kit"
+	       kit_verify		   
        elsif @type == "ops"
            instance = @ops_server['Instance_ID'].text
-	      dialog = EC2_InstanceRebootDialog.new(@ec2_main,instance)
-              dialog.execute
-              if dialog.rebooted
-                 FXMessageBox.information(@ec2_main,MBOX_OK,"Instance Rebooted","Server Instance #{instance} Rebooted")    
-              end              
-           end	
+	       dialog = EC2_InstanceRebootDialog.new(@ec2_main,instance)
+           dialog.execute
+           if dialog.rebooted
+              FXMessageBox.information(@ec2_main,MBOX_OK,"Instance Rebooted","Server Instance #{instance} Rebooted")    
+           end              
+        end	
  	end
 	@stop_button.connect(SEL_UPDATE) do |sender, sel, data|
-           if loaded and @type == "ec2" 
+       if loaded and @type == "ec2" 
 	      sender.enabled = true
 	      @stop_button.icon = @stop_icon
 	      @stop_button.tipText = " Stop Instance "
@@ -315,10 +370,14 @@ class EC2_Server
 	      sender.enabled = true
 	      @stop_button.icon = @reboot
 	      @stop_button.tipText = " Reboot  "
-           elsif loaded and @type == "cfy" 
+       elsif loaded and @type == "cfy" 
 	      sender.enabled = true
 	      @stop_button.icon = @stop_icon
-	      @stop_button.tipText = " Stop App "	      
+	      @stop_button.tipText = " Stop App "	
+       elsif loaded and @type == "kit" 
+	      sender.enabled = true
+	      @stop_button.icon = @edit
+	      @stop_button.tipText = " Verify Instance "		  
   	   else
 	      sender.enabled = false
 	   end 	
@@ -330,42 +389,57 @@ class EC2_Server
 	   if @type == "ec2" or @type == "ops"
 	      if @server['Root_Device_Type'].text == "ebs"  or @type == "ops"
 	         s = currentInstance()
-                 today = DateTime.now
-                 g =instance_group(s)
-                 n=g.gsub("_","-")+ "-" + today.strftime("%Y%m%d")	      
+             today = DateTime.now
+             g =instance_group(s)
+             n=g.gsub("_","-")+ "-" + today.strftime("%Y%m%d")	      
 	         dialog = EC2_ImageCreateDialog.new(@ec2_main,s,n)
-                 dialog.execute
-                 if dialog.created
-                    image_id = dialog.image_id
-                    FXMessageBox.information(@ec2_main,MBOX_OK,"EBS Image","EBS Image #{image_id} created")    
-                 end
-              else 
-                 dialog = EC2_ImageRegisterDialog.new(@ec2_main)
-                 dialog.execute         
-              end   
-           end 
+             dialog.execute
+             if dialog.created
+                image_id = dialog.image_id
+                FXMessageBox.information(@ec2_main,MBOX_OK,"EBS Image","EBS Image #{image_id} created")    
+              end
+           else 
+              dialog = EC2_ImageRegisterDialog.new(@ec2_main)
+              dialog.execute         
+           end   
+  	   elsif @type == "kit"
+          kit_debug	   
+       end	   
  	end 	
 	@create_image_button.connect(SEL_UPDATE) do |sender, sel, data|
 	    if @type == "ec2" and @server_status != "terminated"
 	       sender.enabled = true
 	    elsif @type == "ops" and @server_status == "ACTIVE" 
 	       sender.enabled = true
+	    elsif @type == "kit"  
+	       sender.enabled = true
+	       @create_image_button.icon = @bug
+	       @create_image_button.tipText = " Set Kitchen Debug level logs "		  		   
 	    else
 	       sender.enabled = false
 	    end 	
 	end
 	@chef_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
-	@chef_button.icon = @chef_icon
-	@chef_button.tipText = " Run Chef Solo Roles and Recipes "
+
 	@chef_button.connect(SEL_COMMAND) do |sender, sel, data|
 	     if @type == "loc"
 	       loc_chef
+		elsif @type == "kit"
+	       kit_test  		   
 		 else  
            run_chef
 		 end  
 	end
 	@chef_button.connect(SEL_UPDATE) do |sender, sel, data|
-           enable_if_ec2_server_loaded(sender)	
+	     if @type == "kit"
+		    sender.enabled = true
+	        @chef_button.icon = @start_icon
+	        @chef_button.tipText = " Kitchen test instance "
+		 else 
+		    @chef_button.icon = @chef_icon
+	        @chef_button.tipText = " Run Chef Solo Roles and Recipes "
+            enable_if_ec2_server_loaded(sender)
+         end			
 	end
 	@puppet_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@puppet_button.icon = @puppet_icon
@@ -373,12 +447,22 @@ class EC2_Server
 	@puppet_button.connect(SEL_COMMAND) do |sender, sel, data|
 	    if @type == "loc"
 	       loc_puppet
+		elsif @type == "kit"
+	       kit_foodcritic   
 		 else
            run_puppet
 		 end  
 	end
-	@chef_button.connect(SEL_UPDATE) do |sender, sel, data|
-           enable_if_ec2_server_loaded(sender)	
+	@puppet_button.connect(SEL_UPDATE) do |sender, sel, data|
+	     if @type == 'kit'
+		    @puppet_button.icon = @style
+	        @puppet_button.tipText = " Run Foodcritic "
+		    sender.enabled = true
+		 else
+		   @puppet_button.icon = @puppet_icon
+	       @puppet_button.tipText = " Run Puppet Apply "
+           enable_if_ec2_server_loaded(sender)
+         end		   
 	end	
 	@graph_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@graph_button.icon = @chart
@@ -386,19 +470,27 @@ class EC2_Server
 	@graph_button.connect(SEL_COMMAND) do |sender, sel, data|
 	   if @type == "ec2"
 	      dialog = EC2_MonitorSelectDialog.new(@ec2_main,@server['Instance_ID'].text,"InstanceId",@secgrp,@server['Platform'].text)
-              dialog.execute
-           end 
+          dialog.execute
+	   elsif @type == "kit"
+	       kit_rspec_test 	  
+       end 
  	end 	
 	@graph_button.connect(SEL_UPDATE) do |sender, sel, data|
 	    if @type == "ec2" 
+	       @graph_button.icon = @chart
+	       @graph_button.tipText = " Monitoring Graphs "		
 	       sender.enabled = true
+	    elsif @type == 'kit'
+		    @graph_button.icon = @lightbulb
+	        @graph_button.tipText = " Run rspec "
+		    sender.enabled = true
 	    else
 	       sender.enabled = false
 	    end 	
 	end	
 	@tunnel_button = FXButton.new(page1a," ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@tunnel_button.icon = @tunnel
-        @tunnel_button.tipText = " Setup SSH Tunnel"
+    @tunnel_button.tipText = " Setup SSH Tunnel"
 	@tunnel_button.connect(SEL_COMMAND) do |sender, sel, data|
 	    if @type == "ec2" or @type == "ops"  or @type == "google"
                run_ssh_tunnel
@@ -407,9 +499,11 @@ class EC2_Server
         end
 	end
 	@tunnel_button.connect(SEL_UPDATE) do |sender, sel, data|
-	   if @type != "cfy" and loaded
+	   if @type == "cfy" or @type == "kit"
+	      sender.enabled = false
+  	   elsif loaded
 	      sender.enabled = true
-  	   else
+	   else	  
 	      sender.enabled = false
 	   end 
 	end		
@@ -428,13 +522,6 @@ class EC2_Server
     	      @ec2_main.launch.save
     	   end   
 	end 
-	@server['CHEF_BUTTON'] = FXButton.new(@frame1s, " Configure Chef ", :opts => BUTTON_NORMAL|LAYOUT_LEFT)
-	@server['CHEF_BUTTON'].icon = @chef_icon
-	@server['CHEF_BUTTON'].tipText = "  Configure Chef  "
-	@server['CHEF_BUTTON'].connect(SEL_COMMAND) do
-	   dialog = EC2_ChefEditDialog.new(@ec2_main)
-	   dialog.execute
-	end		
  	FXLabel.new(@frame1, "" )
  	FXLabel.new(@frame1, "Instance Id" )
  	@frame1t = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
@@ -461,13 +548,6 @@ class EC2_Server
     	      @ec2_main.launch.save
     	   end   
 	end 
- 	@server['PUPPET_BUTTON'] = FXButton.new(@frame1t, " Configure Puppet ", :opts => BUTTON_NORMAL|LAYOUT_LEFT)
-	@server['PUPPET_BUTTON'].icon = @puppet_icon
-	@server['PUPPET_BUTTON'].tipText = "  Configure Puppet  "
-	@server['PUPPET_BUTTON'].connect(SEL_COMMAND) do
-	   dialog = EC2_PuppetEditDialog.new(@ec2_main)
-	   dialog.execute
-	end		
  	FXLabel.new(@frame1, "" )	
  	FXLabel.new(@frame1, "Tags" )
  	@server['Tags'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
@@ -785,13 +865,6 @@ class EC2_Server
     	      @ec2_main.launch.save
     	   end   
 	end
-	@ops_server['CHEF_BUTTON'] = FXButton.new(@frame3s, " Configure Chef ", :opts => BUTTON_NORMAL|LAYOUT_LEFT)
-	@ops_server['CHEF_BUTTON'].icon = @chef_icon
-	@ops_server['CHEF_BUTTON'].tipText = "  Configure Chef  "
-	@ops_server['CHEF_BUTTON'].connect(SEL_COMMAND) do
-	   dialog = EC2_ChefEditDialog.new(@ec2_main)
-	   dialog.execute
-	end		
 	FXLabel.new(@frame3, "" )
 	FXLabel.new(@frame3, "Security Groups" )
 	@ops_server['Security_Groups'] = FXTextField.new(@frame3, 25, nil, 0, :opts => TEXTFIELD_READONLY)
@@ -810,13 +883,6 @@ class EC2_Server
     	      @ec2_main.launch.save
     	   end   
 	end 
- 	@ops_server['PUPPET_BUTTON'] = FXButton.new(@frame3t, " Configure Puppet ", :opts => BUTTON_NORMAL|LAYOUT_LEFT)
-	@ops_server['PUPPET_BUTTON'].icon = @puppet_icon
-	@ops_server['PUPPET_BUTTON'].tipText = "  Configure Puppet  "
-	@ops_server['PUPPET_BUTTON'].connect(SEL_COMMAND) do
-	   dialog = EC2_PuppetEditDialog.new(@ec2_main)
-	   dialog.execute
-	end		
 	FXLabel.new(@frame3, "" )
  	FXLabel.new(@frame3, "Image ID" )
  	@ops_server['Image_ID'] = FXTextField.new(@frame3, 50, nil, 0, :opts => TEXTFIELD_READONLY)
@@ -1243,22 +1309,10 @@ class EC2_Server
     end
     FXLabel.new(@frame5, "Chef Node" )
     @loc_server['chef_node'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
- 	@loc_server['CHEF_BUTTON'] = FXButton.new(@frame5, "  Configure Chef      ", :opts => BUTTON_NORMAL|LAYOUT_LEFT)
-	@loc_server['CHEF_BUTTON'].icon = @chef_icon
-	@loc_server['CHEF_BUTTON'].tipText = "  Configure Chef  "
-	@loc_server['CHEF_BUTTON'].connect(SEL_COMMAND) do
-	   dialog = EC2_ChefEditDialog.new(@ec2_main)
-	   dialog.execute
-	end	
+    FXLabel.new(@frame5, "" )
     FXLabel.new(@frame5, "Puppet Manifest" )
     @loc_server['puppet_manifest'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
- 	@loc_server['PUPPET_BUTTON'] = FXButton.new(@frame5, "  Configure Puppet  ", :opts => BUTTON_NORMAL|LAYOUT_LEFT)
-	@loc_server['PUPPET_BUTTON'].icon = @puppet_icon
-	@loc_server['PUPPET_BUTTON'].tipText = "  Configure Puppet  "
-	@loc_server['PUPPET_BUTTON'].connect(SEL_COMMAND) do
-	   dialog = EC2_PuppetEditDialog.new(@ec2_main)
-	   dialog.execute
-	end	
+    FXLabel.new(@frame5, "" )
     FXLabel.new(@frame5, "Puppet Roles" )
     @loc_server['puppet_roles'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     FXLabel.new(@frame5, "" )	
@@ -1342,13 +1396,6 @@ class EC2_Server
     	      @ec2_main.launch.save
     	   end   
 	end
-	@google_server['CHEF_BUTTON'] = FXButton.new(@frame6s, " Configure Chef ", :opts => BUTTON_NORMAL|LAYOUT_LEFT)
-	@google_server['CHEF_BUTTON'].icon = @chef_icon
-	@google_server['CHEF_BUTTON'].tipText = "  Configure Chef  "
-	@google_server['CHEF_BUTTON'].connect(SEL_COMMAND) do
-	   dialog = EC2_ChefEditDialog.new(@ec2_main)
-	   dialog.execute
-	end			
  	FXLabel.new(@frame6, "" )
  	FXLabel.new(@frame6, "Instance ID" )
  	@frame6t = FXHorizontalFrame.new(@frame6,LAYOUT_FILL_X, :padding => 0)
@@ -1363,13 +1410,6 @@ class EC2_Server
     	      @ec2_main.launch.save
     	   end   
 	end 
-	@google_server['PUPPET_BUTTON'] = FXButton.new(@frame6t, " Configure Puppet ", :opts => BUTTON_NORMAL|LAYOUT_LEFT)
-	@google_server['PUPPET_BUTTON'].icon = @puppet_icon
-	@google_server['PUPPET_BUTTON'].tipText = "  Configure Puppet  "
-	@google_server['PUPPET_BUTTON'].connect(SEL_COMMAND) do
-	   dialog = EC2_PuppetEditDialog.new(@ec2_main)
-	   dialog.execute
-	end		
 	FXLabel.new(@frame6, "" )
  	FXLabel.new(@frame6, "State" )
  	@frame6j = FXHorizontalFrame.new(@frame6,LAYOUT_FILL_X, :padding => 0)
@@ -1533,7 +1573,51 @@ class EC2_Server
 	@google_server['Metadata'] =  FXText.new(@frame6, :opts => TEXT_WORDWRAP|LAYOUT_FILL|TEXTFIELD_READONLY)
     @google_server['Metadata'].setVisibleRows(10)
     @google_server['Metadata'].setText("") 
-    FXLabel.new(@frame6, "" )         	
+    FXLabel.new(@frame6, "" ) 
+
+	#
+	# kitchen  frame
+	#
+	@frame7 = FXMatrix.new(@page1, 3, MATRIX_BY_COLUMNS|LAYOUT_FILL)
+	@frame7.hide()
+    FXLabel.new(@frame7, "Instance" )
+    @kit_server['instance'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
+    FXLabel.new(@frame7, "" )
+    FXLabel.new(@frame7, "Driver" )
+    @kit_server['driver'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
+    FXLabel.new(@frame7, "" )
+    FXLabel.new(@frame7, "Provisioner" )
+    @kit_server['provisioner'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
+    FXLabel.new(@frame7, "" )    
+    FXLabel.new(@frame7, "Last Action" )
+    @kit_server['last_action'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
+    FXLabel.new(@frame7, "" )	
+    FXLabel.new(@frame7, "" )
+    FXLabel.new(@frame7, "" )
+    FXLabel.new(@frame7, "" ) 	
+    FXLabel.new(@frame7, "" )
+    FXLabel.new(@frame7, "" )
+    FXLabel.new(@frame7, "" )
+    FXLabel.new(@frame7, "Chef Repository" )
+ 	@kit_server['chef_repository'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
+    FXLabel.new(@frame7, "" )
+    FXLabel.new(@frame7, "SSH User" )
+ 	@kit_server['ssh_user'] = FXTextField.new(@frame7, 30, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
+    FXLabel.new(@frame7, "" )	
+    FXLabel.new(@frame7, "Foodcritic cookbook_path" )
+    @kit_server['chef_foodcritic'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+	@kit_server['chef_foodcritic'].connect(SEL_COMMAND) do
+	    @ec2_main.settings.put('CHEF_FOODCRITIC',@kit_server['chef_foodcritic'].text)
+		@ec2_main.settings.save
+	end
+    FXLabel.new(@frame7, "e.g. site-cookbooks/mycompany_webserver" )    
+    FXLabel.new(@frame7, "RSpec spec files" )
+    @kit_server['chef_rspec_test'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+	@kit_server['chef_rspec_test'].connect(SEL_COMMAND) do
+	    @ec2_main.settings.put('CHEF_RSPEC_TEST',@kit_server['chef_rspec_test'].text)
+		@ec2_main.settings.save
+	end
+    FXLabel.new(@frame7, "e.g. site-cookbooks/*/spec/*_spec.rb" )	
   end 
   
   def run_scp
@@ -1808,7 +1892,9 @@ class EC2_Server
      elsif @type == "cfy"
         return true 
      elsif @type == "loc"
-        return true        
+        return true  
+     elsif @type == "kit"
+        return true   		
      else   
         return false 
      end 
@@ -1828,7 +1914,7 @@ class EC2_Server
  end 
    
  def enable_if_server_loaded(sender)
-      if loaded and ["ec2","ops","google","cfy","loc"].include? @type
+      if loaded and ["ec2","ops","google","cfy","loc","kit"].include? @type
           sender.enabled = true
       else
           sender.enabled = false
@@ -1907,7 +1993,8 @@ class EC2_Server
                local_port = @server['Local_Port'].text
             end 
             private_key = get_pk
-	    chef(server, address,  chef_node, user, private_key, password, platform, local_port)
+			dialog = EC2_ChefEditDialog.new(@ec2_main,server, address,  chef_node, user, private_key, password, platform, local_port)
+            dialog.execute
      end
  
      def run_puppet
@@ -1946,7 +2033,9 @@ class EC2_Server
 				roles = @server['Chef_Node'].text
              end 
              private_key = get_pk
- 	    puppet(server, address,  puppet_manifest, user, private_key, password, platform, local_port, roles)
-     end
+			 dialog = EC2_PuppetEditDialog.new(@ec2_main, server, address,  puppet_manifest, user, private_key, password, platform, local_port, roles)
+             dialog.execute
+      end
  
  end
+

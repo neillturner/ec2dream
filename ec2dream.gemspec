@@ -22,7 +22,7 @@
 
 Gem::Specification.new do |spec|
   spec.name = 'ec2dream'
-  spec.version = '3.7.1'
+  spec.version = '3.7.2'
   spec.authors = ['Neill Turner']
   spec.email = 'neillwturner@gmail.com'
   spec.executables = ["ec2dream"]
@@ -32,12 +32,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency('fxruby')
   spec.add_dependency('rubyzip', '< 1.0.0')
   spec.add_dependency('gchartrb')
-  spec.add_dependency('pocketknife_ec2dream', '>= 0.1.14')
-  spec.add_dependency('pocketknife_puppet', '>= 0.1.14')
-  spec.add_dependency('pocketknife_windows', '>= 0.1.13')
   spec.add_dependency('fog', '>= 1.20.0')
-  spec.add_dependency('cloudfoundry-client')
-
+ 
   spec.description = <<-EOF
 == DESCRIPTION:
 
@@ -54,18 +50,20 @@ EC2Dream combines Fog, Ruby, into a visual open source devops platform supportin
       Cloud Foundry.
 	  Vagrant.  
       Chef and Puppet.
+	  Test Kitchen.
 
 EOF
 
-    candidates = Dir.glob("{lib}/**/*") +  ['History.txt', 'README.txt', 'ec2dream.ico', 'ec2dream.bmp' , 'ec2dream.gemspec']
+    candidates = Dir.glob("{lib}/**/*") +  ['History.md', 'README.md', 'ec2dream.ico', 'ec2dream.bmp' , 'ec2dream.gemspec']
     candidates = candidates +  Dir.glob("{chef}/**/*")
+	candidates = candidates +  Dir.glob("{chef}/**/.kitchen*.yml")
     candidates = candidates +  Dir.glob("{puppet}/**/*")
     candidates = candidates +  Dir.glob("{launchrdp}/*")
     candidates = candidates +  Dir.glob("{putty}/*")
-    candidates = candidates +  Dir.glob("{rackspace}/*")
 	candidates = candidates +  Dir.glob("{google}/*")
     candidates = candidates +  Dir.glob("{tar}/*")
     candidates = candidates +  Dir.glob("{wget}/*")
     candidates = candidates +  Dir.glob("{WinSCP}/*")
+	candidates = candidates +  Dir.glob("{vagrant}/*")
   spec.files = candidates.sort
 end

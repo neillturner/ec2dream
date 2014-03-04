@@ -5,7 +5,8 @@
        puts "ERROR: file #{filename} not found"
     else   
  	 editor = $ec2_main.settings.get_system('EXTERNAL_EDITOR')
- 	 puts "#{editor} #{filename}"
-	 system editor+" "+filename
+	 c = "\"#{editor}\" \"#{filename}\""
+ 	 puts c
+	 system(c) 
     end	 
  end	 

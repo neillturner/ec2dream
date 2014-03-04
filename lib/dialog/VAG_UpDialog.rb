@@ -19,11 +19,11 @@ def vargant(server, command)
               folder = "#{$ec2_main.settings.get('VAGRANT_REPOSITORY')}/#{server}"
               if RUBY_PLATFORM.index("mswin") != nil  or RUBY_PLATFORM.index("i386-mingw32") != nil
                  folder = folder.gsub('/','\\')
-                 c = "cmd.exe /c \@start \"#{server} - vagrant #{command} \" \"#{ENV['EC2DREAM_HOME']}/chef/vagrant_cmd.bat\" #{folder} #{command}"                 
+                 c = "cmd.exe /c \@start \"#{server} - vagrant #{command} \" \"#{ENV['EC2DREAM_HOME']}/vagrant/vagrant_cmd.bat\" #{folder} #{command}"                 
        	         puts c
    	         system(c)
    	      else
-   	         c = "#{ENV['EC2DREAM_HOME']}/chef/vagrant_cmd.sh\" #{folder} #{command}"
+   	         c = "#{ENV['EC2DREAM_HOME']}/vagrant/vagrant_cmd.sh\" #{folder} #{command}"
    	         puts c
    	         system(c)
    	      end

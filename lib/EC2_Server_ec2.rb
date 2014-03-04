@@ -53,6 +53,7 @@
 	   @frame4.hide()
 	   @frame5.hide()
 	   @frame6.hide()
+	   @frame7.hide()
        @server_status = ""
        @secgrp = ""
      end  
@@ -77,6 +78,7 @@
 	   @frame4.hide()
 	   @frame5.hide()
 	   @frame6.hide()
+	   @frame7.hide()
        @server['Instance_ID'].text = instance_id
        ENV['EC2_INSTANCE'] = instance_id
        r = @ec2_main.serverCache.instance(instance_id)
