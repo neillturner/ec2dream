@@ -22,7 +22,7 @@
 
 Gem::Specification.new do |spec|
   spec.name = 'fogviz'
-  spec.version = '3.7.4'
+  spec.version = '3.7.5'
   spec.authors = ['Neill Turner']
   spec.email = 'neillwturner@gmail.com'
   spec.executables = ["fogviz"]
