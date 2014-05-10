@@ -8,13 +8,13 @@ class Data_snapshots
 
   def initialize(owner)
      puts "data_snapshots.initialize"
-     @ec2_main = owner  
-  end 
+     @ec2_main = owner
+  end
 
   # Describe EBS snapshots.
   #
   # Accepts a list of snapshots and/or options: :restorable_by, :owner and :filters
-  # 
+  #
   # Options: :restorable_by => Array or String, :owner => Array or String, :filters => Hash
   #
   # Filters: description, owner-alias, owner-id, progress, snapshot-id, start-time, status, tag-key,
@@ -42,13 +42,14 @@ class Data_snapshots
   #      :aws_owner=>"711940113766",
   #      :aws_volume_id=>"vol-001efb69",
   #      :aws_started_at=>"2008-10-20T18:25:53.000Z"}, ... ]
-  #    
+  #
   def all(owner=nil,filter=nil)
     data = Array.new
     conn = @ec2_main.environment.volume_connection
     if conn != nil
        begin
-          if  @ec2_main.settings.openstack 
+          if  @ec2_main.settings.openstack
+             conn = @ec2_main.environment.connection if !@ec2_main.settings.openstack_hp and !@ec2_main.settings.openstack_rackspace
              x  = conn.snapshots.all
              x.each do |y|
 	        r = {}
@@ -58,11 +59,11 @@ class Data_snapshots
                    r[:aws_description] = y.display_description
                    r[:zone] = y.availability_zone
                    r[:aws_status] = y.state
-                else                
+                else
                    r[:name] = y.name
 	           r[:aws_description] = y.description
 	           r[:aws_status] = y.status
-	        end   
+	        end
 	        r[:aws_started_at] = y.created_at.to_s
 	        r[:aws_volume_id] = y.volume_id.to_s
 	        r[:aws_progress] = nil
@@ -71,7 +72,7 @@ class Data_snapshots
 	        r[:aws_owner_alias] = nil
 	        data.push(r)
 	     end
-		      elsif @ec2_main.settings.google 
+		      elsif @ec2_main.settings.google
 					response = conn.list_snapshots
 					if response.status == 200
 						x = response.body['items']
@@ -97,19 +98,19 @@ class Data_snapshots
 	        r[:aws_owner] = y.owner_id
 	        r[:aws_owner_alias] = nil
                 data.push(r)
-             end                  
-          else      	     
+             end
+          else
              data = conn.describe_snapshots({:owner => owner, :filters => filter})
-          end   
-       rescue 
+          end
+       rescue
           puts "ERROR: getting all snapshots  #{$!}"
        end
-    end   
+    end
     return data
   end
-  
-  
-  def get(snapshot_id) 
+
+
+  def get(snapshot_id)
      data = {}
      conn = @ec2_main.environment.volume_connection
      if conn != nil
@@ -117,12 +118,12 @@ class Data_snapshots
            data = conn.snapshots.get(volume_id)
         else
            data = conn.snapshots.get(snapshot_id)
-        end   
-     else 
+        end
+     else
         raise "Connection Error"
      end
      return data
-  end 
+  end
 
   # Create a snapshot of specified volume.
   #
@@ -135,7 +136,7 @@ class Data_snapshots
   #     :aws_status=>"pending",
   #     :aws_volume_size=>1,
   #     :aws_id=>"snap-3df54854"}
-  #  
+  #
   def create_volume_snapshot(volume_id, name, description, force=false)
      data = nil
      conn = @ec2_main.environment.volume_connection
@@ -150,17 +151,19 @@ class Data_snapshots
 	      options[:display_description] = description
 	      if force == true
 	         options[:force] = true
-	      end	      
+	      end
               data = conn.create_snapshot(volume_id, options)
-           else
+           elsif  @ec2_main.settings.openstack_hp
               if force == true
 	        options['force'] = true
 	      end
               data = conn.create_snapshot(name, description, volume_id, options)
-           end   
+           else
+              data = conn.create_volume_snapshot(volume_id, name, description, force)
+           end
            if data.status == 200
 	      data = data.body["snapshot"]
-	   else   
+	   else
 	      data = nil
            end
 	elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
@@ -178,16 +181,16 @@ class Data_snapshots
 	      data[:aws_owner] = response['ownerId']
 	    else
 	      data = {}
-            end 
-        else             
+            end
+        else
            data = conn.create_snapshot(volume_id,description)
-        end   
-     else 
+        end
+     else
         raise "Connection Error"
      end
      return data
-  end 
-  
+  end
+
   def get_snapshot_details(snapshot_id)
      data = {}
      conn = @ec2_main.environment.volume_connection
@@ -196,23 +199,24 @@ class Data_snapshots
            response = conn.get_snapshot_details(snapshot_id)
            if response.status == 200
 	      data = data.body["snapshot"]
-	   else   
+	   else
 	      data = nil
            end
-        else     
+        else
            data = conn.get_snapshot_details(snapshot_id)
-        end   
-     else 
+        end
+     else
         raise "Connection Error"
      end
-     return data  
+     return data
   end
-  
+
   # Delete the specified snapshot.
   #
   #  ec2.delete_snapshot('snap-55a5403c') #=> true
-  #  
-  def  delete_snapshot(snapshot_id)
+  #
+  def  delete_snapshot(snapshot_id, zone_name=nil)
+    if zone_name.nil?
      data = false
      conn = @ec2_main.environment.volume_connection
      if conn != nil
@@ -220,42 +224,41 @@ class Data_snapshots
             response = conn.delete_snapshot(snapshot_id)
             if response.status == 200
 	       data = true
-	    else   
+	    else
 	       data = false
-            end             
+            end
 	elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
 	    response = conn.delete_snapshot(snapshot_id)
             if response.status == 200
 	       data = true
-	    else   
+	    else
 	       data = false
-            end  
-        else     
+            end
+        else
            data = conn.delete_snapshot(snapshot_id)
-        end   
-     else 
+        end
+     else
         raise "Connection Error"
      end
-     return data  
-  end 
-
-# Delete a google disk
-  def  delete_snapshot(snapshot_name, zone_name)
+     return data
+    else
+     # google
      data = false
      conn = @ec2_main.environment.connection
      if conn != nil
-        response = conn.delete_snapshot(snapshot_name, zone_name)
+        response = conn.delete_snapshot(snapshot_id, zone_name)
         if response.status == 200
            data = response.body
         else
            data = {}
-        end                  
-     else 
+        end
+     else
         raise "Connection Error"
      end
-     return data  
-  end    
-  
+     return data
+    end
+  end
+
   # Insert a google snapshot
   def  insert_snapshot(disk_name, zone_name, project=nil, opts={})
      data = false
@@ -266,11 +269,11 @@ class Data_snapshots
            data = response.body
         else
            data = {}
-        end                  
-     else 
+        end
+     else
         raise "Connection Error"
      end
-     return data  
-  end  
-  
+     return data
+  end
+
 end

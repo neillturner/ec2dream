@@ -1,19 +1,7 @@
 {
  "Cloud":{
    "Compute":{
-    "Chef Test Kitchen":{
-          "request":"",
-          "name":"chef_test_kitchen",
-          "response": "",
-          "response_code": 200,
-          "action": ["edit","logs","select","","","","","",""],
-          "icon": ["@edit","@script","@server","","@csv","","","",""],
-          "tooltip":["Edit kitchen.yml","View Logs"," Select Server ",""," Csv Data ","","","",""],
-          "dialog":["edit(@ec2_main.settings.get('CHEF_REPOSITORY')+'/.kitchen.yml')","KIT_LogSelectDialog","$ec2_main.server.kit_load(@curr_item,@curr_driver,@curr_provisioner,@curr_last_action);$ec2_main.tabBook.setCurrent(1)","","","","","",""],
-          "dialog_parm": ["","","","","","","","",""], 
-          "keys": ["Instance"]
-    },   	   	
-  	"Local Servers":{
+     "Local Servers":{
           "request":"",
           "name":"local_server",
           "response": "",
@@ -22,8 +10,20 @@
           "icon": ["@create","","@edit","","@csv","","","",""],
           "tooltip":[" Create Config ",""," Edit Config ",""," Csv Data ","","","",""],
           "dialog":["LOC_CreateDialog","","$ec2_main.server.loc_load(@curr_item);$ec2_main.tabBook.setCurrent(1)","","","","","",""],
-          "dialog_parm": ["","","","","","","","",""], 
+          "dialog_parm": ["","","","","","","","",""],
           "keys": ["server"]
+    },
+      "Test Kitchen":{
+          "request":"",
+          "name":"test_kitchen",
+          "response": "",
+          "response_code": 200,
+          "action": ["config","logs","select","edit","","","","",""],
+          "icon": ["@edit","@script","@server","@script_edit","@csv","","","",""],
+          "tooltip":["Configure Test Kitchen Path","View Logs"," Select Server ","Edit kitchen.yml"," Csv Data ","","","",""],
+          "dialog":["KIT_PathCreateDialog","KIT_LogSelectDialog","$ec2_main.server.kit_load(@curr_item,@curr_driver,@curr_provisioner,@curr_last_action);$ec2_main.tabBook.setCurrent(1)","edit(@ec2_main.settings.get('TEST_KITCHEN_PATH')+'/.kitchen.yml')","","","","",""],
+          "dialog_parm": ["","","","","","","","",""],
+          "keys": ["Instance"]
     },
      "Vagrant":{
           "request":"",
@@ -34,9 +34,9 @@
           "icon": ["@create","@delete","@edit","@rocket","@csv","@disconnect","","",""],
           "tooltip":[" Create Vagrantfile ","  Delete Vagrantfile "," Edit Vagrantfile "," vagrant up "," Csv Data "," vagrant destroy ","","",""],
           "dialog":["VAG_CreateDialog","VAG_DeleteDialog","edit(@vagrant_file)","VAG_UpDialog","","VAG_DestroyDialog","","",""],
-          "dialog_parm": ["","","","","","","","",""], 
+          "dialog_parm": ["","","","","","","","",""],
           "keys": []
-    }  	      	
+    }
    }
- } 
+ }
 }

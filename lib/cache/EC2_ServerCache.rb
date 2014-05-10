@@ -4,7 +4,7 @@ require 'net/http'
 require 'resolv'
 require 'common/error_message'
 
-class EC2_ServerCache 
+class EC2_ServerCache
 
 def initialize(owner, tree)
         @ec2_main = owner
@@ -27,7 +27,7 @@ def initialize(owner, tree)
 	@connect    = @ec2_main.makeIcon("connect.png")
 	@connect.create
 	@disconnect = @ec2_main.makeIcon("disconnect.png")
-	@disconnect.create 
+	@disconnect.create
 	@database = @ec2_main.makeIcon("database.png")
 	@database.create
 	@camera = @ec2_main.makeIcon("camera.png")
@@ -39,7 +39,7 @@ def initialize(owner, tree)
 	@link_break = @ec2_main.makeIcon("link_break.png")
 	@link_break.create
 	@stopped = @ec2_main.makeIcon("cancel.png")
-	@stopped.create 
+	@stopped.create
 	@firewall = @ec2_main.makeIcon("firewall.png")
 	@firewall.create
         @vpc_serverList= {}
@@ -47,14 +47,14 @@ def initialize(owner, tree)
         @vpc_secGrps = {}
         @vpc_instances = {}
         @vpc_sg_instances = {}
-        @vpc_sg_active_instances = {}        
-end  
+        @vpc_sg_active_instances = {}
+end
 
 def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disconnect, vpc)
     settings = @ec2_main.settings
-    if settings.cloudfoundry 
+    if settings.cloudfoundry
        refreshCfyTree(tree, serverBranch, doc, light, nolight, connect, disconnect)
-    else 
+    else
        puts "ServerCache.refreshVpcServerTree"
        @vpc_serverList[vpc]= {}
        #@vpc_securityGrps[vpc] = []
@@ -65,7 +65,7 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
        #   if gp != nil and gp != ""
        #      @vpc_secGrps[vpc][gp]=r
        #      @vpc_securityGrps[vpc].push(gp)
-       #   end   
+       #   end
        #end
        #@ec2_main.environment.addresses.all.each do |r|
        #   if r[:instance_id] != nil and r[:instance_id] != ""
@@ -86,7 +86,7 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
          instance_id = r[:aws_instance_id]
          if @eip[instance_id] != nil
            r[:public_ip] = @eip[instance_id]
-         end 
+         end
          gn = group_name(r)
          if r['name'] == nil or r['name'] == ""
     	     ta = r['tagSet']
@@ -94,7 +94,7 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
     	     if ta.size>0
    	        t = EC2_ResourceTags.new(@ec2_main,ta,nil)
 	        nickname = t.nickname
-	     end   
+	     end
 	     if nickname != nil and nickname != ""
 	        r['name'] = nickname
 	     else
@@ -103,14 +103,14 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
 	           r['name']=gn
 	        else
 	           r['name']='default'
-	       end   
-            end 
-	 end 
-	 begin 
+	       end
+            end
+	 end
+	 begin
 	    @vpc_serverList[vpc][gn].push("#{r['name']}/#{instance_id}")
 	 rescue
 	    puts "ERROR: mismatch on security groups"
-	 end  
+	 end
         @vpc_instances[vpc][instance_id]=r
         if @vpc_sg_instances[vpc][gn] == nil
             ig = Array.new
@@ -132,12 +132,12 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
 	    end
             @vpc_sg_active_instances[vpc][gn] = ig
          end
-      end   
+      end
       @vpc_securityGrps[vpc].each do |s|
          if @vpc_serverList[vpc][s].size>0
             @vpc_serverList[vpc][s] = @vpc_serverList[vpc][s].sort_by { |x| x.downcase }
          end
-      end 
+      end
       i=0
       #puts "*** vpc_securityGrps #{@vpc_securityGrps[vpc]}"
       while i< @vpc_securityGrps[vpc].size
@@ -153,7 +153,7 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
 	      if r != nil
 	         state = r[:aws_state]
 	      end
-              case state 
+              case state
                    when "running","ACTIVE","RUNNING"
                       tree.appendItem(groupBranch, s, light, light)
                    when  "shutting-down","ACTIVE(deleting)","STOPPING"
@@ -164,7 +164,7 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
                       tree.appendItem(groupBranch, s, @stopped, @stopped)
                    else
                       tree.appendItem(groupBranch, s, nolight, nolight)
-              end                 
+              end
             end
           end
           i = i+1
@@ -174,39 +174,39 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
        end
     end
  end
- 
+
  def refreshServerTree(tree, serverBranch, doc, light, nolight, connect, disconnect)
      settings = @ec2_main.settings
-     if settings.cloudfoundry 
+     if settings.cloudfoundry
         refreshCfyTree(tree, serverBranch, doc, light, nolight, connect, disconnect)
-     else 
+     else
         puts "ServerCache.refreshServerTree"
         @serverList= {}
         @securityGrps = []
         @secGrps = {}
-        
+
         @vpc_securityGrps = {}
         @vpc_secGrps = {}
         @eip = {}
         load_secGrps_tags
         @ec2_main.environment.security_group.all.each do |r|
-            if r['groupId'] != nil 
+            if r['groupId'] != nil
                 r['tagSet'] =  @secGrps_tags[r['groupId']]
-            end     
+            end
             gp = r[:aws_group_name]
-            if gp != nil and gp != "" 
+            if gp != nil and gp != ""
               if (r['vpcId'] == nil or r['vpcId']=="")
                   @secGrps[gp]=r
                   @securityGrps.push(gp)
-              else 
+              else
                   vpc = r['vpcId']
-                  @vpc_securityGrps[vpc] = [] if @vpc_securityGrps[vpc] == nil 
-                  @vpc_secGrps[vpc] = {}      if  @vpc_secGrps[vpc] == nil 
+                  @vpc_securityGrps[vpc] = [] if @vpc_securityGrps[vpc] == nil
+                  @vpc_secGrps[vpc] = {}      if  @vpc_secGrps[vpc] == nil
  	          @vpc_secGrps[vpc][gp]=r
 	          @vpc_securityGrps[vpc].push(gp)
               end
-              
-           end   
+
+           end
         end
         @ec2_main.environment.addresses.all.each do |r|
            if r[:instance_id] != nil and r[:instance_id] != ""
@@ -229,7 +229,7 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
               instance_id = r[:aws_instance_id]
               if @eip[instance_id] != nil
                  r[:public_ip] = @eip[instance_id]
-              end 
+              end
               gn = group_name(r)
               if r['name'] == nil or r['name'] == ""
      	         ta = r['tagSet']
@@ -237,7 +237,7 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
      	         if ta.size>0
     	            t = EC2_ResourceTags.new(@ec2_main,ta,nil)
  	            nickname = t.nickname
- 	         end   
+ 	         end
  	         if nickname != nil and nickname != ""
  	            r['name'] = nickname
  	         else
@@ -246,14 +246,14 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
  	               r['name']=gn
  	            else
  	               r['name']='default'
- 	            end   
-             end 
- 	      end 
- 	      begin 
+ 	            end
+             end
+ 	      end
+ 	      begin
  	         @serverList[gn].push("#{r['name']}/#{instance_id}")
  	      rescue
  	         puts "ERROR: mismatch on security groups"
- 	      end  
+ 	      end
               @instances[instance_id]=r
               if @sg_instances[gn] == nil
                  ig = Array.new
@@ -275,13 +275,13 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
  	         end
                  @sg_active_instances[gn] = ig
               end
-           end              
-        end   
+           end
+        end
         @securityGrps.each do |s|
            if @serverList[s].size>0
               @serverList[s] = @serverList[s].sort_by { |x| x.downcase }
            end
-        end 
+        end
         i=0
          while i< @securityGrps.size
            groupBranch = tree.appendItem(serverBranch, @securityGrps[i], @firewall, @firewall, @securityGrps[i])
@@ -296,7 +296,7 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
  	         if r != nil
  	            state = r[:aws_state]
  	         end
-                 case state 
+                 case state
                     when "running","ACTIVE","RUNNING"
                          tree.appendItem(groupBranch, s, light, light)
                     when  "shutting-down","ACTIVE(deleting)","STOPPING"
@@ -307,18 +307,18 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
                          tree.appendItem(groupBranch, s, @stopped, @stopped)
                     else
                          tree.appendItem(groupBranch, s, nolight, nolight)
-                    end                 
+                    end
                  end
               end
               i = i+1
            end
            if @securityGrps.size>0
               tree.expandTree(serverBranch)
-           end 
-        end   
+           end
+        end
 
  end
-  
+
  def refresh(instance_id)
      settings = @ec2_main.settings
      gi = ""
@@ -332,7 +332,7 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
     	  if x['tagSet'] != nil
     	    ta = x['tagSet']
     	  end
-    	  nickname = nil          
+    	  nickname = nil
           if x['name'] == nil or x['name'] == ""
              t = EC2_ResourceTags.new(@ec2_main,ta,nil)
 	     nickname = t.nickname
@@ -344,9 +344,9 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
 	           x['name']=gn
 	        else
 	           x['name']='default'
-	        end   
-            end 
-	  end           
+	        end
+            end
+	  end
 	  @instances[instance_id]=x
           ig = Array.new
           if @sg_instances[gn] == nil
@@ -358,7 +358,7 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
              ig[i] = instance_id
           end
           @sg_instances[gn] = ig
-          puts "refresh state #{ x[:aws_state]}" 
+          puts "refresh state #{ x[:aws_state]}"
           if x[:aws_state] == "running"	or x[:aws_state] == "ACTIVE"
              if @sg_active_instances[gn] == nil
  	        ig = Array.new
@@ -368,15 +368,17 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
  	        i = ig.size
  	        ig[i-1] = instance_id
  	     end
- 	     puts "active instances #{gn} #{ig}"  
+ 	     puts "active instances #{gn} #{ig}"
  	     @sg_active_instances[gn] = ig
           end
           s = x[:aws_state]
           gi = group_name(x)
-          if x['name'] != nil 
+          if x['name'] != nil
              gi = x['name']
           end
-       end   
+       else
+        puts "refreshing instance not found #{instance_id}"
+       end
      end
      @ec2_main.environment.addresses.all.each do |r|
           if r[:instance_id] == instance_id
@@ -385,15 +387,15 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
   	     @instances[instance_id] = x
           end
      end
-     
+
      # refresh icon in tree.
      treeText =  gi + "/" + instance_id
      puts "refresh #{treeText}"
      t = @tree.findItem(treeText)
-     if t != nil 
+     if t != nil
       if t.text == treeText
           puts "tree item #{treeText} found updating state #{s}"
-         case s  
+         case s
         when "running","ACTIVE","RUNNING"
                updateIcon(t,@light)
 	    when "shutting-down","ACTIVE(deleting)","STOPPING"
@@ -408,18 +410,18 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
 	       else
 	          updateIcon(t,@nolight)
                end
-         end 
+         end
       end
-     else 
+     else
         puts "tree item #{treeText} not found - refrshing tree"
         @ec2_main.treeCache.refresh
      end
  end
- 
+
  def group_name(x)
    gn = ""
    begin
-    if x['groupSet'] != nil 
+    if x['groupSet'] != nil
        gn = x['groupSet'][0]
     elsif x[:sec_groups].instance_of? Array and x[:sec_groups][0] != nil
        gn = x[:sec_groups][0]
@@ -437,108 +439,108 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
    end
    return gn
  end
- 
+
  def updateIcon(t,icon)
     if t.openIcon() != icon
        t.setOpenIcon(icon)
        t.setClosedIcon(icon)
        @tree.updateItem(t)
     end
- end   
- 
+ end
+
  def securityGrps_Instances(vpc=nil)
-     if vpc != nil 
+     if vpc != nil
         return @vpc_sg_instances[vpc]
      else
         return @sg_instances
-     end   
- end 
- 
- # TO DO for VPC - i don't think these are used anymore 
+     end
+ end
+
+ # TO DO for VPC - i don't think these are used anymore
  #def running(group)
  #      return @sg_instances[group]
  #end
- 
+
  # TO DO for VPC  - i don't think these are used anymore
  #def active(group)
  #        return @sg_active_instances[group]
  #end
-  
-  # TO DO for VPC - used by treecache  ??? cannot find 
+
+  # TO DO for VPC - used by treecache  ??? cannot find
   #def securityGrps
   #     return @securityGrps
  # end
-  
-  # DONE - add part for vpc. 
+
+  # DONE - add part for vpc.
   def secGrps(group_name,vpc=nil)
        puts "ServerCache.secGrps(#{group_name},#{vpc})"
-      if vpc == nil or vpc == "" 
-           if @secGrps[group_name] != nil and 
+      if vpc == nil or vpc == ""
+           if @secGrps[group_name] != nil and
              return @secGrps[group_name]
           else
-	     i=0 
-	     load_secGrps_tags 
+	     i=0
+	     load_secGrps_tags
 	     @ec2_main.environment.security_group.all.each do |r|
                if r[:aws_group_name] == group_name and (r['vpcId']=nil or r['vpcId']=="")
-	           if r['groupId'] != nil 
+	           if r['groupId'] != nil
                       r['tagSet'] =  @secGrps_tags[r['groupId']]
-                   end                 
+                   end
 	           @secGrps[r[:aws_group_name]]=r
 	           @ec2_main.treeCache.addSecGrp(group_name)
 	        end
 	     end
           end
           return @secGrps[group_name]
-       else    
+       else
           if @vpc_secGrps[vpc][group_name] != nil
              return @vpc_secGrps[vpc][group_name]
           else
-	     i=0 
-	     load_secGrps_tags 
+	     i=0
+	     load_secGrps_tags
 	     @ec2_main.environment.security_group.all({'vpc-id'=>vpc}).each do |r|
                 if r[:aws_group_name] == group_name
-	           if r['groupId'] != nil 
+	           if r['groupId'] != nil
                       r['tagSet'] =  @secGrps_tags[r['groupId']]
-                   end                 
+                   end
                    @vpc_secGrps[vpc][r[:aws_group_name]]=r
 	           # TO DO
 	           #@ec2_main.treeCache.addSecGrp(group_name)
 	        end
 	     end
           end
-          return @vpc_secGrps[vpc][group_name]          
-       end  
-  end 
-  
-  # DONE - need to add vpc parameter used by ec2_secgrp 
+          return @vpc_secGrps[vpc][group_name]
+       end
+  end
+
+  # DONE - need to add vpc parameter used by ec2_secgrp
   def refresh_secGrps(group_name, vpc=nil)
     puts "ServerCache.refresh_secGrps(#{group_name},#{vpc})"
-    filter = nil 
+    filter = nil
     filter = {'vpc-id' => vpc}  if vpc != nil and vpc !=""
     load_secGrps_tags
-    if filter == nil  
+    if filter == nil
        @ec2_main.environment.security_group.all.each do |r|
           if r[:aws_group_name] == group_name and (r['vpcId']==nil or r['vpcId']=="")
-	     if r['groupId'] != nil 
+	     if r['groupId'] != nil
                 r['tagSet'] =  @secGrps_tags[r['groupId']]
-             end           
+             end
 	     @secGrps[r[:aws_group_name]]=r
-          end 
-       end      
+          end
+       end
        return @secGrps[group_name]
     else
        @ec2_main.environment.security_group.all(filter).each do |r|
            if r[:aws_group_name] == group_name
-             if r['groupId'] != nil 
+             if r['groupId'] != nil
                 r['tagSet'] =  @secGrps_tags[r['groupId']]
-             end            
+             end
 	     @vpc_secGrps[vpc][r[:aws_group_name]]=r
-          end 
-       end      
-       return @vpc_secGrps[vpc][group_name]    
+          end
+       end
+       return @vpc_secGrps[vpc][group_name]
     end
   end
-  
+
   def delete_secGrp(group_name,vpc)
      if vpc == nil or vpc == ""
        @securityGrps.delete(group_name)
@@ -548,7 +550,7 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
        @vpc_secGrps[vpc].delete(group_name)
      end
   end
-  
+
   def load_secGrps_tags
      puts "SecGrps.load_secGrps_tags"
      @secGrps_tags = {}
@@ -556,8 +558,8 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
             @secGrps_tags[r['resourceId']] = {} if @secGrps_tags[r['resourceId']] == nil
             @secGrps_tags[r['resourceId']][r['key']] = r['value']
      end
-  end   
-  
+  end
+
   # DONE - can figure out vpc from r['vpcId']
   def addInstance(r)
      puts "adding instance name #{r['name']}"
@@ -568,7 +570,7 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
     	  if r['tagSet'] != nil
     	    ta = r['tagSet']
     	  end
-    	  nickname = nil          
+    	  nickname = nil
           if r['name'] == nil or r['name'] == ""
              t = EC2_ResourceTags.new(@ec2_main,ta,nil)
 	     nickname = t.nickname
@@ -580,173 +582,173 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
 	           r['name']=gi
 	        else
 	           r['name']='default'
-	        end   
-            end 
+	        end
+            end
 	  end
-	  
-     if r['name'] != nil and r['name'] != "" 
+
+     if r['name'] != nil and r['name'] != ""
         gi = r['name']
-     end 
-     if gi != nil 
-         puts "adding #{gi}/#{si} in vpc #{vpc} to tree" 
+     end
+     if gi != nil
+         puts "adding #{gi}/#{si} in vpc #{vpc} to tree"
         @ec2_main.treeCache.addInstance(gi, si, vpc)
-     end 
+     end
      @instances[si]=r
-  end 
-  
-  # TO DO for VPC - merge vpc instances - i don't think it is used anymore  
+  end
+
+  # TO DO for VPC - merge vpc instances - i don't think it is used anymore
   #def instances
   #     return @instances
-  #end 
-  
+  #end
+
   def instance(instance_id)
-      return @instances[instance_id] if @instances[instance_id] != nil 
+      return @instances[instance_id] if @instances[instance_id] != nil
       @vpc_instances.each  do |k,v|
          if v.has_key?(instance_id) == true
       	    return v[instance_id]
-         end   
+         end
       end
       return nil
-  end 
-  
+  end
+
   def instance_names
      sa = []
      @instances.each do |key, r|
          gi = group_name(r)
          if r['name'] != nil
             gi = r['name']
-         end   
-         if gi != nil 
+         end
+         if gi != nil
             sa.push(gi+"/"+key)
          else
             sa.push(key)
-         end 
+         end
      end
      @vpc_instances.each  do |k,v|
        v.each do |key, r|
          gi = group_name(r)
          if r['name'] != nil
             gi = r['name']
-         end   
-         if gi != nil 
+         end
+         if gi != nil
             sa.push(gi+"/"+key)
          else
             sa.push(key)
-         end 
-       end  
-     end     
+         end
+       end
+     end
      sa = sa.sort
      return sa
   end
 
-  # DONE 
+  # DONE
   def instance_running_names(type=nil)
     sa = []
-    if type==nil or type != "vpc" 
+    if type==nil or type != "vpc"
       sa = running_names(@instances)
     else
       @vpc_instances.each do |vpc, inst|
          sa += running_names(inst)
-      end   
-    end 
+      end
+    end
     return sa
   end
-  
+
   def running_names(cache)
        sa = Array.new
        i=0
        cache.each do |key, r|
 	     puts "**** aws_state #{r[:aws_state]}"
-         if (@ec2_main.settings.openstack and r[:aws_state] == "ACTIVE") or (!@ec2_main.settings.openstack and r[:aws_state] != "terminated") 
+         if (@ec2_main.settings.openstack and r[:aws_state] == "ACTIVE") or (!@ec2_main.settings.openstack and r[:aws_state] != "terminated")
            gi = group_name(r)
            if r['name'] != nil
               gi = r['name']
-           end   
-           if gi != nil 
+           end
+           if gi != nil
               sa[i] = gi+"/"+key
            else
               sa[i] = key
-           end 
+           end
            i=i+1
-         end 
+         end
        end
        sa = sa.sort
      return sa
-  end   
-  
+  end
+
   def instance_sec_group(i)
         if !@ec2_main.settings.openstack
           i="i-#{i}"
-        end  
+        end
         gi = ""
          if @instances.has_key?(i) == true
            r = @instances[i]
            gi = group_name(r)
-         else 
+         else
             @vpc_instances.each  do |k,v|
                 if v.has_key?(i) == true
 	           r = v[i]
                    gi = group_name(r)
                  end
-             end   
-         end 
-         puts "ERROR: No Security Group for instances #{i}" if gi == ""       
+             end
+         end
+         puts "ERROR: No Security Group for instances #{i}" if gi == ""
          return gi
   end
 
   def instance_group(i)
        gi = ""
        if @instances.has_key?(i) == true
-          s = @instances[i]   
-       else       
+          s = @instances[i]
+       else
           @vpc_instances.each  do |k,v|
              s = v[i] if v.has_key?(i) == true
           end
-       end 
-       if s != nil      
+       end
+       if s != nil
          gi = group_name(s)
-         if s['name'] != nil         
-            gi = s['name']         
+         if s['name'] != nil
+            gi = s['name']
          end
-       end  
+       end
        return gi
   end
-  
+
   def instance_groups(i)
-       gi = [] 
+       gi = []
        s = nil
        if @instances.has_key?(i) == true
-          s = @instances[i]   
-       else       
+          s = @instances[i]
+       else
           @vpc_instances.each  do |k,v|
              s = v[i] if v.has_key?(i) == true
           end
-       end 
+       end
        if s != nil
           if s['name'] != nil and @ec2_main.settings.openstack
               gi[0] = s['name']
            elsif s[:groups].instance_of?(Array)
               gp = s[:groups]
               gp.each do |g|
-                if g[:group_name] == nil 
+                if g[:group_name] == nil
                    gi.push(g[:group_id])
                 else
                   gi.push(g[:group_name])
                 end
-              end   
+              end
            elsif s[:sec_groups].instance_of?(Array)
               s[:sec_groups].each do |g|
                  gi.push(g)
               end
-           elsif s['groupSet'].instance_of?(Array)   
-             gi=s['groupSet'] 
+           elsif s['groupSet'].instance_of?(Array)
+             gi=s['groupSet']
            end
-        end                
+        end
         return gi
   end
-  
+
   def instance_groups_list(i)
-      gp = instance_groups(i) 
+      gp = instance_groups(i)
       puts "instance_groups_list instance #{i} group #{gp}"
       gp_list = ""
       gp.each do |g|
@@ -754,42 +756,42 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
       	    gp_list = gp_list+","+g
          else
       	    gp_list = g
-         end 
+         end
      end
      return gp_list
   end
-  
+
   def instance_groups_first(i)
-      gp = instance_groups(i)  
+      gp = instance_groups(i)
       gp_first = ""
       gp.each do |g|
          if gp_first == ""
       	    gp_first = g
-         end 
+         end
      end
-     return gp_first 
-  end   
-  
+     return gp_first
+  end
+
   #
   # cloudfoundry methods
   #
-  
+
   def refreshCfyTree(tree, serverBranch, doc, light, nolight, connect, disconnect)
             settings = @ec2_main.settings
             puts "ServerCache.refreshCfyTree"
             @serverList= Array.new
-            @serverState  = Array.new       
+            @serverState  = Array.new
             @securityGrps = Array.new
             @instances = {}
             @sg_instances = {}
             @sg_active_instances = {}
-            @profile_folder = "launch"        
+            @profile_folder = "launch"
             begin
                items = Dir.entries(@ec2_main.settings.get_system('ENV_PATH')+"/"+@profile_folder)
             rescue
                error_message("Repository Location does not exist",$!)
                return
-            end    
+            end
             if items != nil
                items.each do |e|
                   e = e.to_s
@@ -798,19 +800,19 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
    	             if sa.size>1 and sa[1] == "properties"
 	                @securityGrps.push(sa[0])
     	             end
-                   end 
+                   end
                end
-            end            
+            end
             @ec2_main.environment.cfy_app.find_all_apps().each do |r|
-              k = "#{r[:name]}/#{r[:staging][:model]}" 
+              k = "#{r[:name]}/#{r[:staging][:model]}"
               @serverList.push(k)
               @serverState.push(r[:state])
               @instances[k]=r
-              if @sg_instances["#{r[:name]}"] == nil 
+              if @sg_instances["#{r[:name]}"] == nil
                  @sg_instances["#{r[:name]}"]=Array.new
-              end   
-              @sg_instances["#{r[:name]}"].push(r) 
-            end   
+              end
+              @sg_instances["#{r[:name]}"].push(r)
+            end
 
             i=0
             while i<@serverList.size
@@ -826,7 +828,7 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
                         tree.appendItem(serverBranch, @serverList[i], @stopped, @stopped)
                      else
                         tree.appendItem(serverBranch, @serverList[i], nolight, nolight)
-                  end 
+                  end
                else
                   tree.appendItem(serverBranch, @serverList[i], doc, doc, @serverList[i])
                end
@@ -836,12 +838,12 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
             while i<@securityGrps.size
                if @sg_instances[@securityGrps[i]]==nil
                   tree.appendItem(serverBranch, @securityGrps[i], doc, doc, @securityGrps[i])
-               end   
+               end
                i = i+1
             end
             if @serverList.size>0 or @securityGrps.size>0
                tree.expandTree(serverBranch)
-            end            
+            end
     end
 
 end

@@ -9,9 +9,9 @@ class Data_images
 
 def initialize(owner)
      puts "data_images.initialize"
-     @ec2_main = owner 
+     @ec2_main = owner
      @error_message = ""
-  end 
+  end
 
   def get_images(type, platform, root, search, filter)
           puts "Data_Images.get_images(#{type}, #{platform}, #{root}, #{search}, #{filter})"
@@ -21,17 +21,17 @@ def initialize(owner)
           search = search.downcase
           if @ec2_main.settings.openstack and root == "ebs"
              root = "snapshot"
-          end   
+          end
           root_device=root
           image_locs = Array.new
           @tags_filter = filter
           if platform == "Small(i386)"
             arch = "i386"
-          end  
+          end
           if platform == "Large(x86_64)"
             arch = "x86_64"
           end
-          case type 
+          case type
              when "Owned By Me"
                 owner = "self"
              when "Amazon Images"
@@ -57,24 +57,24 @@ def initialize(owner)
                          if root_device == nil or  root_device == "" or root_device == r['rootDeviceType']
                             image_locs[i] = r
                             i = i+1
-                         end   
-                      end                    
+                         end
+                      end
                    end
                 else
                    if arch == nil or  arch == "" or arch == r['architecture']
                       if root_device == nil or  root_device == "" or root_device == r['rootDeviceType']
                          image_locs[i] = r
                          i = i+1
-                      end   
-                   end   
+                      end
+                   end
                 end
              end
-            rescue 
+            rescue
 	      @error_message = "Image Listing Error #{$!.to_s}"
-              image_locs = Array.new             
-            end             
+              image_locs = Array.new
+            end
           else
-           if owner != "" and !@ec2_main.settings.openstack_hp 
+           if owner != "" and !@ec2_main.settings.openstack_hp
              i=0
              #ec2.describe_images_by_owner(owner).each do |r|
              @ec2_main.environment.images.find_by_owner(owner).each do |r|
@@ -85,16 +85,16 @@ def initialize(owner)
                          if root_device == nil or  root_device == "" or root_device == r['rootDeviceType']
                             image_locs[i] = r
                             i = i+1
-                         end   
-                      end                    
+                         end
+                      end
                    end
                 else
                    if arch == nil or  arch == "" or arch == r['architecture']
                       if root_device == nil or  root_device == "" or root_device == "all" or root_device == r['rootDeviceType']
                          image_locs[i] = r
                          i = i+1
-                      end   
-                   end   
+                      end
+                   end
                 end
              end
           else
@@ -109,7 +109,7 @@ def initialize(owner)
                  @ec2_main.imageCache.load
               end
               image_list = @ec2_main.imageCache.get(search,arch,root_device,owner)
-              if image_list != nil 
+              if image_list != nil
                  i = 0
   	       image_list.each do |e|
   	          r = {}
@@ -120,7 +120,7 @@ def initialize(owner)
                        while j < sa.size-1
                           r['imageLocation'] = r['imageLocation'] + sa[j]
                           j = j+1
-                       end   
+                       end
                        l = sa[sa.size-1]
                        r['imageId'] = l[0,l.length-1]
                        r['rootDeviceType'] = root_device
@@ -131,20 +131,20 @@ def initialize(owner)
                           end
                        #else
                        #   r[:aws_is_public]="Public"
-                       end   
+                       end
                        image_locs[i] = r
                        i = i+1
                     end
-                 end   
+                 end
               end
-             else 
+             else
                 i=0
                 #ec2.describe_images_by_executable_by(executable).each do |r|
                 @ec2_main.environment.images.find_by_executable(executable).each do |r|
 				 if @ec2_main.settings.google
 				   image_locs[i] = r
                    i = i+1
-				 else 
+				 else
                   if r[:aws_is_public]
                    if search != nil and search != ""
                       loc = r['imageLocation'].downcase
@@ -153,34 +153,34 @@ def initialize(owner)
                             if root_device == nil or  root_device == "" or root_device == r['rootDeviceType']
                                image_locs[i] = r
                                i = i+1
-                            end   
-                         end                    
+                            end
+                         end
                       end
                    else
                        if arch == nil or  arch == "" or arch == r['architecture']
-                         if root_device == nil or  root_device == "" or root_device == r['rootDeviceType'] or r['rootDeviceType'] == nil or r['rootDeviceType'] == "" 
+                         if root_device == nil or  root_device == "" or root_device == r['rootDeviceType'] or r['rootDeviceType'] == nil or r['rootDeviceType'] == ""
                             image_locs[i] = r
                             i = i+1
-                         end   
-                      end   
+                         end
+                      end
                    end
-                  end 
-				 end 
-                end   
+                  end
+				 end
+                end
               end
              end
           end
           return image_locs
   end
-  
+
   def error_message
        @error_message
-  end 
+  end
 
   # Retrieve a list of images.
   #
   # Accepts a set of filters as the last parameter.
-  # 
+  #
   # Filters: architecture, block-device-mapping.delete-on-termination block-device-mapping.device-name,
   # block-device-mapping.snapshot-id, block-device-mapping.volume-size, description, image-id, image-type,
   # is-public, kernel-id, manifest-location, name, owner-alias, owner-id, platform, product-code,
@@ -210,35 +210,35 @@ def initialize(owner)
     data = []
     conn = @ec2_main.environment.connection
     if conn != nil
-       begin 
-          if @ec2_main.settings.openstack 
+       begin
+          if @ec2_main.settings.openstack
              x = conn.images.all
              x.each do |y|
-                data = hash_ops_image(y) 
+                data = hash_ops_image(y)
              end
 		  elsif @ec2_main.settings.google
-              data = google_self()		  
+              data = google_self()
            elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
              x = conn.images.all(filters)
              x.each do |y|
 	        data.push(hash_ops_image_aws(y))
-             end 
+             end
           else
-             data = conn.describe_images(:filters => filter)          
-          end   
+             data = conn.describe_images(:filters => filter)
+          end
        rescue
           puts "ERROR: getting all images #{$!}"
        end
-    end   
+    end
     return data
   end
 
   # Retrieve a list of images by image owner.
   #
   # Accepts an owner.
-  # 
+  #
   #   ec2.describe_images_by_owner('522821470517')
-  #  
+  #
   def find_by_owner(owner)
     puts "find_by_owner(#{owner})"
     data = Array.new
@@ -254,20 +254,20 @@ def initialize(owner)
 	      	    data.push(hash_ops_image_rackspace(r,'snapshot'))
 	      	 end
               end
-            end 
+            end
           elsif @ec2_main.settings.openstack
             if conn != nil
               x = conn.images.all
               x.each do |y|
                 data.push(hash_ops_image(y))
               end
-            end 
+            end
           elsif @ec2_main.settings.google
 		     if owner == "self"
                data = google_self(conn)
 			else
                data = google_all(conn)
-            end			
+            end
           elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
              x = conn.describe_images('Owner' => owner)
  	     data = x.body['imagesSet']
@@ -277,14 +277,14 @@ def initialize(owner)
        rescue
           puts "ERROR: getting images by executable #{$!}"
        end
-    end 
-    return data  
-  end 
-  
+    end
+    return data
+  end
+
   # Retrieve a list of images by image executable by.
-  # 
-  # Accepts executable_by 
-  # 
+  #
+  # Accepts executable_by
+  #
   #   ec2.describe_images_by_executable_by('522821470517')
   #   ec2.describe_images_by_executable_by('self')
   #   ec2.describe_images_by_executable_by('all', :filters => { 'architecture' => 'i386' })
@@ -303,8 +303,8 @@ def initialize(owner)
 	      	        data.push(hash_ops_image_rackspace(r,'base'))
 	      	     end
               end
-            end        
-          elsif  @ec2_main.settings.openstack 
+            end
+          elsif  @ec2_main.settings.openstack
             #image_conn = @ec2_main.environment.image_connection
             if conn != nil
              if executable == "all"
@@ -312,82 +312,82 @@ def initialize(owner)
               x.each do |y|
                 data.push(hash_ops_image(y))
               end
-             end 
+             end
             end
 		  elsif @ec2_main.settings.google
-		     if conn != nil 
+		     if conn != nil
           		if executable == "all"
                   data = google_all(conn)
 				else
-                  data = google_self(conn)	
-                end				  
-             end			 
+                  data = google_self(conn)
+                end
+             end
           elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
              x = conn.describe_images('ExecutableBy' => executable)
 	         x = x.body['imagesSet']
              x.each do |y|
 	            data.push(hash_ops_image_aws(y))
-             end       	
-          else 
+             end
+          else
              data = conn.describe_images_by_executable_by(executable)
           end
        rescue
           data = []
           puts "ERROR: getting images by executable #{$!}"
        end
-    end   
-    return data  
-  end  
-  
+    end
+    return data
+  end
+
   def details
     data = Array.new
     conn = @ec2_main.environment.connection
     if conn != nil
-       begin 
+       begin
           data = conn.images.details
        rescue
           puts "ERROR: getting images details #{$!}"
        end
-    end   
+    end
     return data
-  end  
-  
+  end
+
   def find_by_id(id)
     data = Array.new
     conn = @ec2_main.environment.connection
     if conn != nil
-       begin 
+       begin
           data = conn.images.find_by_id(id)
        rescue
           puts "ERROR: finding images by id #{id} #{$!}"
        end
-    end   
+    end
     return data
-  end  
+  end
 
   def public
     data = Array.new
     conn = @ec2_main.environment.connection
     if conn != nil
-       begin 
+       begin
           data = conn.images.public
        rescue
           puts "ERROR: getting images public #{$!}"
        end
-    end   
+    end
     return data
-  end  
+  end
 
   def private
     data = Array.new
     conn = @ec2_main.environment.connection
     if conn != nil
-       begin 
+       begin
           data = conn.images.private
        rescue
           puts "ERROR: getting images private #{$!}"
        end
-    end   
+    end
     return data
   end
 
@@ -396,63 +396,63 @@ def initialize(owner)
      conn = @ec2_main.environment.connection
      if conn != nil
         data = conn.destroy(id)
-     else 
+     else
         raise "Connection Error"
      end
-     return data  
+     return data
   end
 
 
-  def get(image_id) 
+  def get(image_id)
      data = {}
      conn = @ec2_main.environment.connection
      if conn != nil
-          if  @ec2_main.settings.openstack 
+          if  @ec2_main.settings.openstack
                 y = conn.images.get(image_id)
                 data = hash_ops_image(y)
           elsif @ec2_main.settings.google
 		     # this needs testing
-             data = conn.get_image(image_id)						
+             data = conn.get_image(image_id)
            elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
              x = conn.describe_images({'ImageId' => image_id})
 	     x = x.body['imagesSet']
              x.each do |y|
                 data = hash_ops_image_aws(y)
-             end 
-          else                      
+             end
+          else
              a = conn.describe_images([image_id])
              data = a[0]
-          end   
-     else 
+          end
+     else
         raise "Connection Error"
      end
      return data
-  end 
-  
-  def get_attribute(image_id) 
+  end
+
+  def get_attribute(image_id)
      data = {}
      conn = @ec2_main.environment.connection
      if conn != nil
-          if  @ec2_main.settings.openstack 
+          if  @ec2_main.settings.openstack
           # openstack
 		  elsif @ec2_main.settings.google
 		  # google
           elsif conn.instance_of?(Fog::Compute)
           # no method is fog aws for this?
-          else              
+          else
              data = conn.describe_image_attribute(image_id)
-          end   
-     else 
+          end
+     else
         raise "Connection Error"
      end
      return data
-  end   
-  
+  end
+
   def create_image(instance_id, options)
      data = ""
      conn = @ec2_main.environment.connection
      if conn != nil
-        if  @ec2_main.settings.openstack 
+        if  @ec2_main.settings.openstack
            if  @ec2_main.settings.openstack_hp
               response = conn.create_image(instance_id.to_i,options[:name],options)
            else
@@ -463,11 +463,11 @@ def initialize(owner)
 	      #data = response.body['image']['id']
 	      data  = options[:name]
 	   else
-	      raise "Error #{response.status} #{response.body['Message']}"	   
-	   end 
+	      raise "Error #{response.status} #{response.body['Message']}"
+	   end
 	     elsif @ec2_main.settings.google
 		     # this needs testing
-             data = conn.insert_image(options[:name], options)	
+             data = conn.insert_image(options[:name], options)
         elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
            response = conn.create_image(instance_id, options[:name], options[:description], options[:no_reboot])
            if response.status = 200
@@ -475,16 +475,16 @@ def initialize(owner)
 	   else
 	      raise "Error #{response.status} #{response.body['Message']}"
 	   end
-        else   	   
+        else
            data = conn.create_image(instance_id, options)
         end
-     else 
+     else
         raise "Connection Error"
      end
      return data
-  end 
-  
-  # delete google and other images 
+  end
+
+  # delete google and other images
   def  delete_image(image_id)
      data = false
      conn = @ec2_main.environment.connection
@@ -492,15 +492,15 @@ def initialize(owner)
         data = conn.delete_image(image_id)
         if data.status == 200
 	   data = true
-	else   
+	else
 	   data = false
-        end        
-     else 
+        end
+     else
         raise "Connection Error"
      end
-     return data  
-  end  
-  
+     return data
+  end
+
   # Insert a google image
   def  insert_image(image_name, options={})
      data = false
@@ -511,12 +511,12 @@ def initialize(owner)
            data = response.body
         else
            data = {}
-        end                  
-     else 
+        end
+     else
         raise "Connection Error"
      end
-     return data  
-  end    
+     return data
+  end
 
  # Register new image at Amazon.
  # Options: :image_location, :name, :description, :architecture, :kernel_id, :ramdisk_id,
@@ -541,12 +541,12 @@ def initialize(owner)
  #                                                     :ebs_delete_on_termination=>true,
  #                                                     :device_name=>"/dev/sda1"} ] }
  #  ec2.register_image(image_reg_params) #=> "ami-b2a1f7a4"
- #    
+ #
  def register_image(options)
      data = {}
      conn = @ec2_main.environment.connection
      if conn != nil
-        if  @ec2_main.settings.openstack 
+        if  @ec2_main.settings.openstack
           # openstack
         elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
            bm = options[:block_device_mappings]
@@ -555,7 +555,7 @@ def initialize(owner)
            bm_fog['DeviceName'] = bm[:device_name]
            bm_fog['DeleteOnTermation'] = bm[:ebs_delete_on_termination]
            opts_fog = {}
-           opts_fog['KernelId'] = options[:kernel_id] 
+           opts_fog['KernelId'] = options[:kernel_id]
            opts_fog['RamdiskId'] = options[:ramdisk_id]
            opts_fog['Architecture'] = options[:architecture]
            response = conn.register_image(options[:name],  options[:description], options[:root_device_name], [bm_fog], opts_fog)
@@ -563,36 +563,36 @@ def initialize(owner)
 	      data = response.body['imageId']
 	   else
 	      raise "Error #{response.status} #{response.body['Message']}"
-	   end          
-        else                 
+	   end
+        else
            data = conn.register_image(options)
-        end           
-     else 
+        end
+     else
         raise "Connection Error"
      end
-     return data  
+     return data
   end
-  
+
   # Deregister image at Amazon. Returns +true+ or an exception.
   #
   #  ec2.deregister_image('ami-e444444d') #=> true
-  #  
+  #
   def deregister_image(image_id)
      data = {}
      conn = @ec2_main.environment.connection
      if conn != nil
-        if  @ec2_main.settings.openstack 
+        if  @ec2_main.settings.openstack
           # openstack
-         else                
+         else
            data = conn.deregister_image(image_id)
-          end           
-     else 
+          end
+     else
         raise "Connection Error"
      end
-     return data  
+     return data
   end
-  
-  
+
+
   def hash_ops_image_aws(r)
                  # r['imageId'] = r['imageId']
                  # r['imageLocation']  = r['imageLocation']
@@ -607,19 +607,19 @@ def initialize(owner)
                  #  r['rootDeviceType'] = r['rootDeviceType']
                  # r[:root_device_name] = r['rootDeviceName']
                 return r
-  end 
-  
+  end
+
   def hash_gce_image(r,type="")
       r['imageId'] = r['id']
 	  r['architecture'] = type
 	  r['rootDeviceType'] =  r['sourceType']
 	  r['imageLocation'] =  r['name']
       return r
-  end  
+  end
 
    def google_all(conn)
     puts "google_all"
-                data = []  
+                data = []
                 response = conn.list_images('centos-cloud')
 			    x = response.body['items']
 			    if response.status == 200
@@ -634,10 +634,10 @@ def initialize(owner)
 	      	          data.push(hash_gce_image(r,'debian-cloud'))
 	      	       end
 			    end
-             return data 
-   end	
+             return data
+   end
 
-    def google_self(conn) 
+    def google_self(conn)
 	puts "google_self"
 	            data = []
                 response = conn.list_images
@@ -647,16 +647,16 @@ def initialize(owner)
 	      	          data.push(hash_gce_image(r,'private'))
 	      	       end
 			    end
- 			  return data  
-   end	   
-  
+ 			  return data
+   end
+
   def hash_ops_image_rackspace(r,type)
       m = r[:metadata]
-      if m != nil 
+      if m != nil
          m.each do |k,v|
             r[k]=v
          end
-      end   
+      end
       r['imageId'] = r["id"]
       r[:created_at] = r["created"]
       r[:updated_at] = r["updated"]
@@ -664,52 +664,52 @@ def initialize(owner)
       r[:min_ram] = r["minRam"]
       r['architecture'] = r["arch"]
       r[:user_id] = r["user_id"]   #  is this the metadata r["owner_id"] of hp???
-      r[:tenant_id] = r["tenant_id"]       
+      r[:tenant_id] = r["tenant_id"]
       l = r['links']
       l.each do |v|
          if v["rel"] == "self"
             r["href"] = v["href"]
-         end   
+         end
       end
-      if r[:created_at] != nil and r[:created_at] != ""   
+      if r[:created_at] != nil and r[:created_at] != ""
          r[:description] = "Created #{r[:created_at]} Updated #{r[:updated_at]}"
-      end   
+      end
       r[:location]  = r["href"]
       r['imageLocation']  = r["name"]
       r[:aws_owner] = r["owner_id"]
       # figure out value to test
-      if type == 'base' 
+      if type == 'base'
          r[:aws_is_public]  = true
       else
          r[:aws_is_public]  = false
-      end               
+      end
       r[:aws_state] = r["image_state"]
       r[:aws_kernel_id] = r["kernel_id"]
       r[:aws_image_type] = type
       if r['imageversion'] != nil and r['imageversion'] != ""
          r[:state_reason_message] = "Image Version #{r['imageversion']}"
-      end   
+      end
       r[:aws_ramdisk_id] = r["ramdisk_id"]
       r['rootDeviceType'] = type
       r[:name] = r["name"]
       r[:ami_name] = r["name"]
       return r
-  end      
-  
+  end
+
   def hash_ops_image(y)
                 r = {}
                 if @ec2_main.settings.openstack_hp
                    y.metadata.all.each do |m|
                      r[m.key]=m.value
-                   end 
-                else
+                   end
+                elsif @ec2_main.settings.openstack_rackspace
                    m = y.metadata
-                   if m != nil 
+                   if m != nil
 		      m.each do |k,v|
 		        r[k]=v
                       end
-                   end   
-                end   
+                   end
+                end
   	        r[:id] = y.id
   	        r['imageId'] = y.id.to_s
                   #r['imageLocation']  = y.imageLocation
@@ -722,7 +722,7 @@ def initialize(owner)
                      r[:created_at] = y.created_at
                      r[:updated_at] = y.updated_at
                      r[:server] = y.server
-                  end   
+                  end
                   r[:progress] = y.progress
                   if @ec2_main.settings.openstack_hp
                      r[:min_disk] = y.min_disk
@@ -733,7 +733,7 @@ def initialize(owner)
                       r[:min_ram] = y.minRam
                       r['architecture'] = r["arch"]
                       r[:user_id] = y.user_id   #  is this the metadata r["owner_id"] of hp???
-                      r[:tenant_id] = y.tenant_id       
+                      r[:tenant_id] = y.tenant_id
                  else
 		     r[:min_disk] = y.minDisk
                      r[:min_ram] = y.minRam
@@ -744,11 +744,11 @@ def initialize(owner)
                   l.each do |v|
                     if v["rel"] == "self"
                        r["href"] = v["href"]
-                    end   
+                    end
                   end
-                   if r[:created_at] != nil and r[:created_at] != ""   
+                   if r[:created_at] != nil and r[:created_at] != ""
                       r[:description] = "Created #{r[:created_at]} Updated #{r[:updated_at]}"
-                   end   
+                   end
                   r[:location]  = r["href"]
                   r['imageLocation']  = y.name
                   r[:aws_owner] = r["owner_id"]
@@ -757,27 +757,27 @@ def initialize(owner)
                      r["image_type"] = "snapshot"
                   else
                      r[:aws_is_public]  = true
-                  end               
+                  end
                   r[:aws_state] = r["image_state"]
                   r[:aws_kernel_id] = r["kernel_id"]
                   r[:aws_image_type] = r["image_type"]
                   if r['imageversion'] != nil and r['imageversion'] != ""
                      r[:state_reason_message] = "Image Version #{r['imageversion']}"
-                  end   
+                  end
                    r[:aws_ramdisk_id] = r["ramdisk_id"]
                   r['rootDeviceType'] = r["image_type"]
                   r[:name] = y.name
                   r[:ami_name] = r[:name]
       return r
-  end      
-  
-  # search options 
+  end
+
+  # search options
   def viewing
      data = Array.new
      if  @ec2_main.settings.openstack or @ec2_main.settings.google
         data.push("Owned By Me")
         data.push("Public Images")
-     else     
+     else
         data.push("Owned By Me")
         data.push("Amazon Images")
         data.push("Public Images")
@@ -790,24 +790,24 @@ def initialize(owner)
         data.push("RBuilder")
         data.push("rightscale")
         data.push("windows")
-     end   
+     end
      return data
   end
-  
+
    def platform
     data = Array.new
     if  @ec2_main.settings.openstack
          data.push("All Architectures")
 	elsif @ec2_main.settings.google
        data.push("All Architectures")
-     else    
+     else
        data.push("All Architectures")
        data.push("Small(i386)")
-       data.push("Large(x86_64)")	
-    end   
+       data.push("Large(x86_64)")
+    end
     return data
-  end 
-  
+  end
+
   def device
      data = Array.new
      if  @ec2_main.settings.openstack  or @ec2_main.settings.google
@@ -815,13 +815,13 @@ def initialize(owner)
      else
         data.push("ebs")
         data.push("instance-store")
-     end   
+     end
      return data
   end
-  
+
   def search_root
-   data = "ebs" 
-   data = "all" if @ec2_main.settings.openstack or @ec2_main.settings.google 
-  end  
-  
+   data = "ebs"
+   data = "all" if @ec2_main.settings.openstack or @ec2_main.settings.google
+  end
+
 end

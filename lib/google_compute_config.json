@@ -2,18 +2,18 @@
  "Cloud":{
    "Compute":{
     "Launch": {},
-    "Chef Test Kitchen":{
+    "Test Kitchen":{
           "request":"",
-          "name":"chef_test_kitchen",
+          "name":"test_kitchen",
           "response": "",
           "response_code": 200,
-          "action": ["edit","logs","select","","","","","",""],
-          "icon": ["@edit","@script","@server","","@csv","","","",""],
-          "tooltip":["Edit kitchen.yml","View Logs"," Select Server ",""," Csv Data ","","","",""],
-          "dialog":["edit(@ec2_main.settings.get('CHEF_REPOSITORY')+'/.kitchen.yml')","KIT_LogSelectDialog","$ec2_main.server.kit_load(@curr_item,@curr_driver,@curr_provisioner,@curr_last_action);$ec2_main.tabBook.setCurrent(1)","","","","","",""],
-          "dialog_parm": ["","","","","","","","",""], 
+          "action": ["config","logs","select","edit","","","","",""],
+          "icon": ["@edit","@script","@server","@script_edit","@csv","","","",""],
+          "tooltip":["Configure Test Kitchen Path","View Logs"," Select Server ","Edit kitchen.yml"," Csv Data ","","","",""],
+          "dialog":["KIT_PathCreateDialog","KIT_LogSelectDialog","$ec2_main.server.kit_load(@curr_item,@curr_driver,@curr_provisioner,@curr_last_action);$ec2_main.tabBook.setCurrent(1)","edit(@ec2_main.settings.get('TEST_KITCHEN_PATH')+'/.kitchen.yml')","","","","",""],
+          "dialog_parm": ["","","","","","","","",""],
           "keys": ["Instance"]
-    },   	 	
+    },
     "Vagrant":{
           "request":"",
           "name":"vagrant",
@@ -23,9 +23,9 @@
           "icon": ["@create","@delete","@edit","@rocket","@csv","@disconnect","","",""],
           "tooltip":[" Create Vagrantfile ","  Delete Vagrantfile "," Edit Vagrantfile "," vagrant up "," Csv Data "," vagrant destroy ","","",""],
           "dialog":["VAG_CreateDialog","VAG_DeleteDialog","edit(@vagrant_file)","VAG_UpDialog","","VAG_DestroyDialog","","",""],
-          "dialog_parm": ["","","","","","","","",""], 
+          "dialog_parm": ["","","","","","","","",""],
           "keys": []
-    }, 
+    },
    "Firewalls":{
       "request":"list_firewalls",
       "name":"firewall",
@@ -35,7 +35,7 @@
       "icon": ["@create", "@delete", "","","@csv","","","",""],
       "tooltip":[" Create Firewall "," Delete Firewall ", "","","csv data","","","",""],
       "dialog":["GOG_FirewallCreateDialog","GOG_FirewallDeleteDialog", "","","","","","",""],
-      "dialog_parm": ["","","","","","","","",""], 
+      "dialog_parm": ["","","","","","","","",""],
       "keys": ["name","id"]
     },
    "Servers":{
@@ -47,7 +47,7 @@
       "icon": ["","","","","@csv","","","",""],
       "tooltip":["","","",""," csv data ","","","",""],
       "dialog":["","","","","","","","",""],
-      "dialog_parm": ["","","","","","","","",""], 
+      "dialog_parm": ["","","","","","","","",""],
       "keys": ["name","id"]
     },
    "Addresses":{
@@ -59,9 +59,9 @@
       "icon": ["@create", "@delete", "","","@csv","","","",""],
       "tooltip":[" Create Address "," Delete Address ", "","","csv data","","","",""],
       "dialog":["GOG_AddressCreateDialog","GOG_AddressDeleteDialog", "","","","","","",""],
-      "dialog_parm": ["","","","","","","","",""], 
+      "dialog_parm": ["","","","","","","","",""],
       "keys": ["name","id","address"]
-    },		
+    },
    "Networks":{
       "request":"list_networks",
       "name":"network",
@@ -71,7 +71,7 @@
       "icon": ["@create","@delete","","","@csv","","","",""],
       "tooltip":["  Create  ","Delete","",""," csv data ","","","",""],
       "dialog":["GOG_NetworkCreateDialog","GOG_NetworkDeleteDialog","","","","","","",""],
-      "dialog_parm": ["","","","","","","","",""], 
+      "dialog_parm": ["","","","","","","","",""],
       "keys": ["name","id"]
     },
 
@@ -84,7 +84,7 @@
           "icon": ["@create","","@edit","@put","@csv","@chef_icon","","",""],
           "tooltip":[" Create Config ",""," Edit Config ",""," Csv Data ","","","",""],
           "dialog":["LOC_CreateDialog","","LOC_EditDialog","","","","","",""],
-          "dialog_parm": ["","","","","","","","",""], 
+          "dialog_parm": ["","","","","","","","",""],
           "keys": ["server"]
     },
     "Disks":{
@@ -96,7 +96,7 @@
       "icon": ["@create","@delete","@link","@link_break","@csv","","@camera","",""],
       "tooltip":["  Create  ","Delete"," Attach Disk "," Detach Disk "," csv data ","","  Create Snapshot  ","",""],
       "dialog": ["GOG_DiskCreateDialog","GOG_DiskDeleteDialog","GOG_DiskAttachDialog","GOG_DiskDetachDialog","","","GOG_SnapDiskDialog","",""],
-      "dialog_parm": ["","","","","","","","",""], 
+      "dialog_parm": ["","","","","","","","",""],
       "keys": ["name","id"]
     },
     "Snapshots":{
@@ -108,7 +108,7 @@
       "icon": ["","@delete","","","@csv","","","",""],
       "tooltip":["","Delete","",""," csv data ","","","",""],
       "dialog":["","GOG_SnapDeleteDialog","","","","","","",""],
-      "dialog_parm": ["","","","","","","","",""], 
+      "dialog_parm": ["","","","","","","","",""],
       "keys": ["name","id"]
     },
     "Images":{
@@ -120,7 +120,7 @@
       "icon": ["@magnifier","@delete","","","@csv","","","",""],
       "tooltip":["  Select Images  ","  Delete Image  ","",""," csv data ","","","",""],
       "dialog":["EC2_ImageSelectDialog","EC2_ImageEBSDeleteDialog","","","","","","",""],
-      "dialog_parm": ["","","","","","","","",""], 
+      "dialog_parm": ["","","","","","","","",""],
       "keys": ["name","description"]
     },
    "Zones":{
@@ -132,7 +132,7 @@
       "icon": ["","","","","@csv","","","",""],
       "tooltip":["","","",""," csv data ","","","",""],
       "dialog":["","","","","","","","",""],
-      "dialog_parm": ["","","","","","","","",""], 
+      "dialog_parm": ["","","","","","","","",""],
       "keys": ["name","id"]
     },
   "Regions":{
@@ -144,9 +144,9 @@
       "icon": ["","","","","@csv","","","",""],
       "tooltip":["","","",""," csv data ","","","",""],
       "dialog":["","","","","","","","",""],
-      "dialog_parm": ["","","","","","","","",""], 
+      "dialog_parm": ["","","","","","","","",""],
       "keys": ["name","id"]
-    },		
+    },
    "Global Operations":{
       "request":"list_global_operations",
       "name":"global_operation",
@@ -156,7 +156,7 @@
       "icon": ["","@delete","","","@csv","","","",""],
       "tooltip":["","Delete","",""," csv data ","","","",""],
       "dialog":["","GOG_GlobalOperationDeleteDialog","","","","","","",""],
-      "dialog_parm": ["","","","","","","","",""], 
+      "dialog_parm": ["","","","","","","","",""],
       "keys": ["name","id"]
     },
   "Zone Operations":{
@@ -168,9 +168,9 @@
       "icon": ["","@delete","","","@csv","","","",""],
       "tooltip":["","Delete","",""," csv data ","","","",""],
       "dialog":["","GOG_ZoneOperationDeleteDialog","","","","","","",""],
-      "dialog_parm": ["","","","","","","","",""], 
+      "dialog_parm": ["","","","","","","","",""],
       "keys": ["name","id"]
-    }		
-   }  	
- } 
+    }
+   }
+ }
 }

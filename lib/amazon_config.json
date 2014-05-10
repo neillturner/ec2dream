@@ -2,18 +2,18 @@
  "Cloud":{
    "Compute":{
     "Launch": {},
-    "Chef Test Kitchen":{
+    "Test Kitchen":{
           "request":"",
-          "name":"chef_test_kitchen",
+          "name":"test_kitchen",
           "response": "",
           "response_code": 200,
-          "action": ["edit","logs","select","","","","","",""],
-          "icon": ["@edit","@script","@server","","@csv","","","",""],
-          "tooltip":["Edit kitchen.yml","View Logs"," Select Server ",""," Csv Data ","","","",""],
-          "dialog":["edit(@ec2_main.settings.get('CHEF_REPOSITORY')+'/.kitchen.yml')","KIT_LogSelectDialog","$ec2_main.server.kit_load(@curr_item,@curr_driver,@curr_provisioner,@curr_last_action);$ec2_main.tabBook.setCurrent(1)","","","","","",""],
-          "dialog_parm": ["","","","","","","","",""], 
+          "action": ["config","logs","select","edit","","","","",""],
+          "icon": ["@edit","@script","@server","@script_edit","@csv","","","",""],
+          "tooltip":["Configure Test Kitchen Path","View Logs"," Select Server ","Edit kitchen.yml"," Csv Data ","","","",""],
+          "dialog":["KIT_PathCreateDialog","KIT_LogSelectDialog","$ec2_main.server.kit_load(@curr_item,@curr_driver,@curr_provisioner,@curr_last_action);$ec2_main.tabBook.setCurrent(1)","edit(@ec2_main.settings.get('TEST_KITCHEN_PATH')+'/.kitchen.yml')","","","","",""],
+          "dialog_parm": ["","","","","","","","",""],
           "keys": ["Instance"]
-    },   	   	
+    },
     "Vagrant":{
           "request":"",
           "name":"vagrant",
@@ -23,9 +23,9 @@
           "icon": ["@create","@delete","@edit","@rocket","@csv","@disconnect","","",""],
           "tooltip":[" Create Vagrantfile ","  Delete Vagrantfile "," Edit Vagrantfile "," vagrant up "," Csv Data "," vagrant destroy ","","",""],
           "dialog":["VAG_CreateDialog","VAG_DeleteDialog","edit(@vagrant_file)","VAG_UpDialog","","VAG_DestroyDialog","","",""],
-          "dialog_parm": ["","","","","","","","",""], 
+          "dialog_parm": ["","","","","","","","",""],
           "keys": []
-    },  	    
+    },
     "Security Groups":{
       "request":"describe_security_groups",
       "name":"security_group",
@@ -35,7 +35,7 @@
       "icon": ["@create", "@edit", "","","@csv","","","@tag_red","@funnel"],
       "tooltip":[" Create Security Group "," Edit Security Group ", "","","","","","  Edit Tags  ","  Filter by Tags  "],
       "dialog":["EC2_SecGrp_CreateDialog","$ec2_main.secgrp.load(@curr_item,@curr_vpc_id);$ec2_main.tabBook.setCurrent(3)","","","","","","EC2_TagsAssignDialog","EC2_TagsFilterDialog"],
-      "dialog_parm": ["","", "","","","","","'security-group',@group_id",""], 
+      "dialog_parm": ["","", "","","","","","'security-group',@group_id",""],
       "keys": ["groupName","groupId","vpcId"]
     },
    "Instance Status":{
@@ -47,9 +47,9 @@
       "icon": ["","","","","@csv","","","@tag_red","@funnel"],
       "tooltip":["","","",""," Csv Data ","","","  Edit Tags  ","  Filter by Tags  "],
       "dialog":["","","","","","","","EC2_TagsAssignDialog","EC2_TagsFilterDialog"],
-      "dialog_parm": ["","","","","","","","",""], 
+      "dialog_parm": ["","","","","","","","",""],
       "keys": ["instanceId","eventsSet"]
-    },	     
+    },
    "Servers":{
       "request":"describe_instances",
       "name":"instance",
@@ -59,9 +59,9 @@
       "icon": ["","","","","@csv","","","@tag_red","@funnel"],
       "tooltip":["","","",""," Csv Data ","","","  Edit Tags  ","  Filter by Tags  "],
       "dialog":["","","","","","","","EC2_TagsAssignDialog","EC2_TagsFilterDialog"],
-      "dialog_parm": ["","","","","","","","",""], 
+      "dialog_parm": ["","","","","","","","",""],
       "keys": ["instanceId","tagSet","vpcId"]
-    },	
+    },
    "Images":{
       "request":"describe_images",
       "name":"image",
@@ -71,7 +71,7 @@
       "icon": ["@magnifier","@delete","","","@csv","","@view","@tag_red","@funnel"],
       "tooltip":["  Select Images  ","  Delete and Deregister EBS Image  ","",""," Csv Data "," Launch Server Instance ","  Image Attributes  ","  Edit Tags  ","  Filter by Tags  "],
       "dialog":["EC2_ImageSelectDialog","EC2_ImageEBSDeleteDialog","","","","","EC2_ImageAttributeDialog","EC2_TagsAssignDialog","EC2_TagsFilterDialog"],
-      "dialog_parm": ["","","","","","","","'image'",""], 
+      "dialog_parm": ["","","","","","","","'image'",""],
       "keys": ["imageId","imageLocation","tagSet"]
     },
   "Volumes":{
@@ -83,7 +83,7 @@
       "icon": ["@create","@delete","@link","@link_break","@csv","@chart","@camera","@tag_red","@funnel"],
       "tooltip":["  Create  ","Delete"," Attach Volume "," Detach Volume "," Csv Data ","  Monitoring Graphs  ","  Create Snapshot  ","  Edit Tags  ","  Filter by Tags  "],
       "dialog": ["EC2_EBSCreateDialog","EC2_EBSDeleteDialog","EC2_EBSAttachDialog","EC2_EBSDetachDialog","","EC2_MonitorSelectDialog","EC2_SnapVolumeDialog","EC2_TagsAssignDialog","EC2_TagsFilterDialog"],
-      "dialog_parm": ["","","","@curr_instance","","@curr_item,'VolumeId'","","'volume'",""], 
+      "dialog_parm": ["","","","@curr_instance","","@curr_item,'VolumeId'","","'volume'",""],
       "keys": ["volumeId","tagSet"]
     },
   "Snapshots":{
@@ -95,7 +95,7 @@
       "icon": ["@create","@delete","","@create_image_icon","@csv","","","@tag_red","@funnel"],
       "tooltip":[" Create Volume ","Delete",""," Register Image "," Csv Data ","","","  Edit Tags  ","  Filter by Tags  "],
       "dialog":["EC2_EBSCreateDialog","EC2_SnapDeleteDialog","","EC2_SnapRegisterDialog","","","","EC2_TagsAssignDialog","EC2_TagsFilterDialog"],
-      "dialog_parm": ["@curr_item,@volumeSize","","","","","","","'snapshot'",""], 
+      "dialog_parm": ["@curr_item,@volumeSize","","","","","","","'snapshot'",""],
       "keys": ["snapshotId","tagSet"]
     },
    "Key Pairs":{
@@ -107,7 +107,7 @@
       "icon": ["@create","@delete","","","@csv","","","",""],
       "tooltip":["  Create  ","Delete","",""," Csv Data ","","","",""],
       "dialog":["EC2_KeypairCreateDialog","EC2_KeypairDeleteDialog","","","","","","",""],
-      "dialog_parm": ["","","","","","","","",""], 
+      "dialog_parm": ["","","","","","","","",""],
       "keys": ["keyName"]
     },
   "IP Addresses":{
@@ -119,7 +119,7 @@
       "icon": ["@create","@delete","@link","@link_break","@csv","","","",""],
       "tooltip":["  Allocate  ","Delete"," Associate IP Address "," Dis-associate IP Address "," Csv Data ","","","",""],
       "dialog":["EC2_EIPCreateDialog","EC2_EIPDeleteDialog","EC2_EIPAssociateDialog","EC2_EIPDisassociateDeleteDialog","","","","",""],
-      "dialog_parm": ["","@curr_allocation_id","@curr_allocation_id,@curr_domain","@curr_instance,@curr_association_id","","","","",""], 
+      "dialog_parm": ["","@curr_allocation_id","@curr_allocation_id,@curr_domain","@curr_instance,@curr_association_id","","","","",""],
       "keys": []
     },
    "Reserved Instances":{
@@ -131,9 +131,9 @@
       "icon": ["","","","","@csv","","","@tag_red",""],
       "tooltip":["","","",""," Csv Data ","","","  Edit Tags  ",""],
       "dialog":["","","","","","","","EC2_TagsAssignDialog",""],
-      "dialog_parm": ["","","","","","","","'reserved-instances'",""], 
+      "dialog_parm": ["","","","","","","","'reserved-instances'",""],
       "keys": ["reservedInstancesId"]
-    },    
+    },
    "Spot Requests":{
       "request":"describe_spot_instance_requests",
       "name":"spot_instance_request",
@@ -143,7 +143,7 @@
       "icon": ["@market_icon","@delete","","","@csv","","","@tag_red","@funnel"],
       "tooltip":["  CloudMarket Spot Prices ","  Cancel  ","",""," Csv Data ","","","  Edit Tags  ","  Filter by Tags  "],
       "dialog":["browser('http://thecloudmarket.com/stats#/spot_prices')","EC2_SpotRequestCancelDialog","","","","","","EC2_TagsAssignDialog","EC2_TagsFilterDialog"],
-      "dialog_parm": ["","","","","","","","'spot-instances-request'","@tags_filter[:spot_instances_request]"], 
+      "dialog_parm": ["","","","","","","","'spot-instances-request'","@tags_filter[:spot_instances_request]"],
       "keys": ["spotInstanceRequestId","tagSet"]
     },
    "VPCs":{
@@ -155,7 +155,7 @@
       "icon": ["","","","","@csv","","","@tag_red",""],
       "tooltip":["","","",""," Csv Data ","","","  Edit Tags  ",""],
       "dialog":["","","","","","","","EC2_TagsAssignDialog",""],
-      "dialog_parm": ["","","","","","","","'vpc'",""], 
+      "dialog_parm": ["","","","","","","","'vpc'",""],
       "keys": ["vpcId"]
     },
 	"DHCP Options":{
@@ -167,9 +167,9 @@
           "icon": ["","","","","@csv","","","@tag_red",""],
           "tooltip":["","","",""," Csv Data ","","","  Edit Tags  ",""],
           "dialog":["","","","","","","","EC2_TagsAssignDialog",""],
-          "dialog_parm": ["","","","","","","","'dhcp-options'",""], 
+          "dialog_parm": ["","","","","","","","'dhcp-options'",""],
           "keys": ["dhcpOptionsId"]
-    }, 
+    },
 	"Internet Gateways":{
           "request":"describe_internet_gateways",
           "name":"internet_gateway",
@@ -179,9 +179,9 @@
           "icon": ["","","","","@csv","","","@tag_red",""],
           "tooltip":["","","",""," Csv Data ","","","  Edit Tags  ",""],
           "dialog":["","","","","","","","EC2_TagsAssignDialog",""],
-          "dialog_parm": ["","","","","","","","'internet-gateway'",""], 
+          "dialog_parm": ["","","","","","","","'internet-gateway'",""],
           "keys": ["internetGatewayId"]
-    },     
+    },
 	"Network Interfaces":{
           "request":"describe_network_interfaces",
           "name":"network_interface",
@@ -191,9 +191,9 @@
           "icon": ["","","","","@csv","","","@tag_red",""],
           "tooltip":["","","",""," Csv Data ","","","  Edit Tags  ",""],
           "dialog":["","","","","","","","EC2_TagsAssignDialog",""],
-          "dialog_parm": ["","","","","","","","'network-interface'",""], 
+          "dialog_parm": ["","","","","","","","'network-interface'",""],
           "keys": ["networkInterfaceId","subnetId","vpcId"]
-    }, 
+    },
 	"Placement Groups":{
           "request":"describe_placement_groups",
           "name":"placement_groups",
@@ -203,9 +203,9 @@
           "icon": ["","","","","@csv","","","",""],
           "tooltip":["","","",""," Csv Data ","","","",""],
           "dialog":["","","","","","","","",""],
-          "dialog_parm": ["","","","","","","","",""], 
+          "dialog_parm": ["","","","","","","","",""],
           "keys": ["groupName"]
-    },     
+    },
 	"Subnets":{
           "request":" describe_subnets",
           "name":"subnet",
@@ -215,7 +215,7 @@
           "icon": ["","","","","@csv","","","@tag_red",""],
           "tooltip":["","","",""," Csv Data ","","","  Edit Tags  ",""],
           "dialog":["","","","","","","","EC2_TagsAssignDialog",""],
-          "dialog_parm": ["","","","","","","","'subnet'",""], 
+          "dialog_parm": ["","","","","","","","'subnet'",""],
           "keys": ["subnetId","vpcId"]
     },
 	"Local Servers":{
@@ -227,7 +227,7 @@
           "icon": ["@create","","@edit","","@csv","","","",""],
           "tooltip":[" Create Config ",""," Edit Config ",""," Csv Data ","","","",""],
           "dialog":["LOC_CreateDialog","","$ec2_main.server.loc_load(@curr_item);$ec2_main.tabBook.setCurrent(1)","","","","","",""],
-          "dialog_parm": ["","","","","","","","",""], 
+          "dialog_parm": ["","","","","","","","",""],
           "keys": ["server"]
     }
    },
@@ -241,7 +241,7 @@
       "icon": ["@create","@delete","@edit","@script","@csv","@server","@chart","@stop_icon","@start_icon"],
       "tooltip":["  Create  ","Delete"," Update Auto Scaling Group ","  List Scaling Activities  "," Csv Data ","  Instances  ","  Monitoring Graphs  ","  Suspend Scaling Processes  ","  Resume Scaling Processes  "],
       "dialog":["AS_GroupCreateDialog","AS_GroupDeleteGroupDialog","AS_GroupEditDialog","@as_group = @curr_item;load('Scaling Activities','AutoScaling')","","AS_InstancesDialog","EC2_MonitorSelectDialog","AS_GroupSuspendDialog","AS_GroupResumeDialog"],
-      "dialog_parm": ["","","","","","","@curr_item,'AutoScalingGroupName'","",""], 
+      "dialog_parm": ["","","","","","","@curr_item,'AutoScalingGroupName'","",""],
       "keys": ["AutoScalingGroupName","Tags"]
     },
   "Launch Configurations":{
@@ -253,7 +253,7 @@
       "icon": ["@create","@delete","@edit","","@csv","","","",""],
       "tooltip":["  Create  ","Delete","  Edit Launch Configuration  ",""," Csv Data ","","","",""],
       "dialog":["@ec2_main.launch.load_as;@ec2_main.tabBook.setCurrent(2)","AS_LaunchConfigurationDeleteDialog","@ec2_main.launch.load_as(@curr_item);@ec2_main.tabBook.setCurrent(2)",""," Csv Data ","","","",""],
-      "dialog_parm": ["","","","","","","","",""], 
+      "dialog_parm": ["","","","","","","","",""],
       "keys": ["LaunchConfigurationName"]
     },
   "Auto Scaling Policies":{
@@ -265,7 +265,7 @@
       "icon": ["@create","@delete","@edit","@rocket","@csv","","","",""],
       "tooltip":["  Create  ","Delete","  Edit Policies  ","  Execute Policy  "," Csv Data ","","","",""],
       "dialog":["AS_PolicyCreateDialog","AS_PolicyDeleteDialog","AS_PolicyEditDialog","AS_PolicyExecuteDialog","","","","",""],
-      "dialog_parm": ["","@as_group","@as_group","@as_group","","","","",""], 
+      "dialog_parm": ["","@as_group","@as_group","@as_group","","","","",""],
       "keys": ["PolicyName","AutoScalingGroupName"]
     },
     "Scheduled Actions":{
@@ -277,7 +277,7 @@
       "icon": ["@create","@delete","@edit","","@csv","","","",""],
       "tooltip":["  Create  ","Delete","  Edit Scheduled Actions  ",""," Csv Data ","","","",""],
       "dialog":["AS_ScheduledActionCreateDialog","AS_ScheduledActionDeleteDialog","AS_ScheduledActionEditDialog","","","","","",""],
-      "dialog_parm": ["","@as_group","@as_group","","","","","",""], 
+      "dialog_parm": ["","@as_group","@as_group","","","","","",""],
       "keys": ["ScheduledActionName","AutoScalingGroupName"]
     },
    "Scaling Activities":{
@@ -304,9 +304,9 @@
            "icon": ["@app_delete","","","","@csv","","","",""],
            "tooltip":["List Invalidations","","",""," Csv Data ","","","",""],
            "dialog":["@cdn_distibution = @curr_item;load('Invalidations','CDN')","","","","","","","",""],
-           "dialog_parm": ["","","","","","","","",""], 
+           "dialog_parm": ["","","","","","","","",""],
            "keys": ["Id"]
-       }, 
+       },
         "Invalidations":{
            "request":"get_invalidation_list(@cdn_distibution)",
            "name":"invalidation",
@@ -319,7 +319,7 @@
            "dialog_parm": ["","","","","","","","",""],
            "menu": false,
            "keys": ["Id"]
-       }, 
+       },
         "Streaming Distributions":{
            "request":"get_streaming_distribution_list",
            "name":"streaming_distribution",
@@ -329,10 +329,10 @@
            "icon": ["","","","","@csv","","","",""],
            "tooltip":["","","",""," Csv Data ","","","",""],
            "dialog":["","","","","","","","",""],
-           "dialog_parm": ["","","","","","","","",""], 
+           "dialog_parm": ["","","","","","","","",""],
            "keys": ["Id"]
-       }        
-    }, 
+       }
+    },
     "CloudFormation":{
        "Templates":{
           "request":"",
@@ -343,7 +343,7 @@
           "icon": ["@create","@delete","@edit","@start_icon","@csv","@check","@events","@script_edit","@viewstack"],
           "tooltip":[" New Configuration "," Delete Configuration ","Edit Configuration, Create or Update Stack",""," Csv Data "," Validate Template ","  View Stack Events  ","   Edit Template  ","  View Sample Templates  "],
           "dialog":["CF_CreateDialog","CF_DeleteDialog","CF_EditDialog","CF_EditDialog","","CF_ValidateDialog","@stack_name = @curr_item;load('Stack Events','CloudFormation')","@stack_name = @curr_item;edit(@template_file)","browser('http://aws.amazon.com/cloudformation/aws-cloudformation-templates/')"],
-          "dialog_parm": ["","","","","","@template_file","@template_file","",""], 
+          "dialog_parm": ["","","","","","@template_file","@template_file","",""],
           "keys": ["stack_name"]
        },
        "Stacks":{
@@ -355,9 +355,9 @@
           "icon": ["","@delete","@script_edit","","@csv","","","@viewstack","@events"],
           "tooltip":[""," Delete ","Get Template",""," Csv Data ","","","  View Stack Resources  ","  View Stack Events  "],
           "dialog":["","CF_StackDeleteDialog","CF_GetTemplateDialog","","","","","@stack_name = @curr_item;load('Stack Resources','CloudFormation')","@stack_name = @curr_item;load('Stack Events','CloudFormation')"],
-          "dialog_parm": ["","","","","","","","",""], 
+          "dialog_parm": ["","","","","","","","",""],
           "keys": ["StackName","StackStatus"]
-       }, 
+       },
        "Stack Events":{
           "request":"describe_stack_events(@stack_name)",
           "name":"stack_events",
@@ -370,7 +370,7 @@
           "dialog_parm": ["","","","","","","","",""],
           "menu": false,
           "keys": ["StackName","LogicalResourceId","ResourceType","Timestamp"]
-       }, 
+       },
        "Stack Resources":{
           "request":"describe_stack_resources({'StackName' => @stack_name})",
           "name":"stack_resources",
@@ -383,7 +383,7 @@
           "dialog_parm": ["","","","","","","","",""],
           "menu": false,
           "keys": ["StackName","LogicalResourceId","ResourceType","Timestamp"]
-       }                   
+       }
     },
     "CloudWatch":{
        "Alarms":{
@@ -395,7 +395,7 @@
           "icon": ["@create","@delete","@edit","@script","@csv","","","","@funnel"],
           "tooltip":["CloudWatch Alarm Create","CloudWatch Alarm Delete","CloudWatch Alarm Edit","CloudWatch Alarm History"," Csv Data ","","","","  Filter by Tags  "],
           "dialog":["AS_AlarmCreateDialog","AS_AlarmDeleteDialog","AS_AlarmEditDialog","load('Alarm History','CloudWatch')","","","","","EC2_TagsFilterDialog"],
-          "dialog_parm": ["","","","","","","","",""], 
+          "dialog_parm": ["","","","","","","","",""],
           "keys": ["AlarmName"]
        },
        "Alarm History":{
@@ -407,9 +407,9 @@
           "icon": ["","","","","@csv","","","","@funnel"],
           "tooltip":["","","",""," Csv Data ","","","","  Filter by Tags  "],
           "dialog":["","","","","","","","","EC2_TagsFilterDialog"],
-          "dialog_parm": ["","","","","","","","",""], 
+          "dialog_parm": ["","","","","","","","",""],
           "keys": ["AlarmName"]
-       }          
+       }
     },
    "DNS":{
        "Hosted Zones":{
@@ -421,10 +421,10 @@
           "icon": ["","","","","@csv","","","","@funnel"],
           "tooltip":["","","",""," Csv Data ","","","","  Filter by Tags  "],
           "dialog":["","","","","","","","","EC2_TagsFilterDialog"],
-          "dialog_parm": ["","","","","","","","",""], 
+          "dialog_parm": ["","","","","","","","",""],
           "keys": ["HostedZone"]
-       }      
-    },  
+       }
+    },
     "ElasticBeanstalk":{
        "Applications":{
           "request":"describe_applications",
@@ -435,7 +435,7 @@
           "icon": ["","","","@view","@csv","","","",""],
           "tooltip":["","","","Configuration Settings"," Csv Data ","","","",""],
           "dialog":["","","","@application_name = @curr_item;load('Configuration Settings','ElasticBeanstalk')","","","","",""],
-          "dialog_parm": ["","","","","","","","",""], 
+          "dialog_parm": ["","","","","","","","",""],
           "keys": ["ApplicationName"]
        },
        "Application Versions":{
@@ -447,7 +447,7 @@
           "icon": ["","","","","@csv","","","",""],
           "tooltip":["","","",""," Csv Data ","","","",""],
           "dialog":["","","","","","","","",""],
-          "dialog_parm": ["","","","","","","","",""], 
+          "dialog_parm": ["","","","","","","","",""],
           "keys": ["ApplicationName","VersionLabel"]
        },
        "Configuration Options":{
@@ -459,7 +459,7 @@
           "icon": ["","","","","@csv","","","",""],
           "tooltip":["","","",""," Csv Data ","","","",""],
           "dialog":["","","","","","","","",""],
-          "dialog_parm": ["","","","","","","","",""], 
+          "dialog_parm": ["","","","","","","","",""],
           "keys": []
        },
        "Configuration Settings":{
@@ -484,7 +484,7 @@
           "icon": ["","","","","@csv","","","",""],
           "tooltip":["","","",""," Csv Data ","","","",""],
           "dialog":["","","","","","","","",""],
-          "dialog_parm": ["","","","","","","","",""], 
+          "dialog_parm": ["","","","","","","","",""],
           "keys": ["EnvironmentName","EnvironmentId"]
        },
        "Environment Resources":{
@@ -496,7 +496,7 @@
           "icon": ["","","","","@csv","","","",""],
           "tooltip":["","","",""," Csv Data ","","","",""],
           "dialog":["","","","","","","","",""],
-          "dialog_parm": ["","","","","","","","",""], 
+          "dialog_parm": ["","","","","","","","",""],
           "keys": ["EnvironmentName"]
        },
        "BeanStalk Events":{
@@ -508,10 +508,10 @@
           "icon": ["","","","","@csv","","","",""],
           "tooltip":["","","",""," Csv Data ","","","",""],
           "dialog":["","","","","","","","",""],
-          "dialog_parm": ["","","","","","","","",""], 
+          "dialog_parm": ["","","","","","","","",""],
           "keys": ["EventDate"]
        }
-    },          
+    },
    "ELB":{
        "Load Balancers":{
              "request":"describe_load_balancers",
@@ -522,9 +522,9 @@
              "icon": ["@create","@delete","@server","@edit","@csv","@zones","@view","@chart",""],
              "tooltip":["  Create  ","Delete","  View Instances  "," Edit Listeners and Polices "," csv data "," Availability Zones  "," Configure Load Balancer Health Check "," Monitoring Graphs ",""],
              "dialog":["ELB_CreateDialog","ELB_DeleteDialog","ELB_InstancesDialog","ELB_PolicyDialog","","ELB_AvailZoneDialog","ELB_HealthDialog","EC2_MonitorSelectDialog",""],
-             "dialog_parm": ["","","","","","@curr_avail_zone","","@curr_item,'LoadBalancerName'",""], 
+             "dialog_parm": ["","","","","","@curr_avail_zone","","@curr_item,'LoadBalancerName'",""],
              "keys": ["LoadBalancerName"]
-       }      
+       }
     },
      "IAM":{
         "Access Keys":{
@@ -536,9 +536,9 @@
            "icon": ["","","","","@csv","","","",""],
            "tooltip":["","","",""," Csv Data ","","","",""],
            "dialog":["","","","","","","","",""],
-           "dialog_parm": ["","","","","","","","",""], 
+           "dialog_parm": ["","","","","","","","",""],
            "keys": []
-       },  
+       },
         "Account Aliases":{
            "request": "list_account_aliases",
            "name":"account_alias",
@@ -548,9 +548,9 @@
            "icon": ["","","","","@csv","","","",""],
            "tooltip":["","","",""," Csv Data ","","","",""],
            "dialog":["","","","","","","","",""],
-           "dialog_parm": ["","","","","","","","",""], 
+           "dialog_parm": ["","","","","","","","",""],
            "keys": []
-       },    
+       },
         "Groups":{
            "request":"list_groups",
            "name":"groups",
@@ -562,7 +562,7 @@
            "dialog":["","","","","","","","@group_name = @curr_item;load('Group Policies','IAM')",""],
            "dialog_parm": ["","","","","","","","",""],
            "keys": ["GroupName"]
-       },    
+       },
         "Group Policies":{
            "request":"list_group_policies(@group_name)",
            "name":"group_policy",
@@ -575,7 +575,7 @@
            "dialog_parm": ["","","","","","","","",""],
            "menu": false,
            "keys": []
-       },    
+       },
         "Instance Profiles":{
            "request":"list_instance_profiles",
            "name":"instance_profiles",
@@ -585,9 +585,9 @@
            "icon": ["","","","","@csv","","","",""],
            "tooltip":["","","",""," Csv Data ","","","",""],
            "dialog":["","","","","","","","",""],
-           "dialog_parm": ["","","","","","","","",""], 
+           "dialog_parm": ["","","","","","","","",""],
            "keys": ["InstanceProfileName"]
-       },    
+       },
         "Roles":{
            "request":"list_roles",
            "name":"role",
@@ -597,9 +597,9 @@
            "icon": ["","","","","@csv","","","@viewstack","@view"],
            "tooltip":["","","",""," Csv Data ","",""," List Role Policies "," List Role Profiles "],
            "dialog":["","","","","","","","@role_name = @curr_item;load('Role Policies','IAM')","@role_name = @curr_item;load('Role Profiles','IAM')"],
-           "dialog_parm": ["","","","","","","","",""], 
+           "dialog_parm": ["","","","","","","","",""],
            "keys": ["RoleName"]
-       },    
+       },
         "Role Profiles":{
            "request":"list_instance_profiles_for_role(@role_name)",
            "name":"role_profile",
@@ -612,7 +612,7 @@
            "dialog_parm": ["","","","","","","","",""],
            "menu": false,
            "keys": ["InstanceProfileName"]
-       },    
+       },
         "Role Policies":{
            "request":"list_role_policies(@role_name)",
            "name":"role_policy",
@@ -622,10 +622,10 @@
            "icon": ["","","","","@csv","","","",""],
            "tooltip":["","","",""," Csv Data ","","","",""],
            "dialog":["","","","","","","","",""],
-           "dialog_parm": ["","","","","","","","",""], 
+           "dialog_parm": ["","","","","","","","",""],
            "menu": false,
            "keys": []
-       },    
+       },
           "Server Certificates":{
            "request":"list_server_certificates",
            "name":"server_certificate",
@@ -635,9 +635,9 @@
            "icon": ["","","","","@csv","","","",""],
            "tooltip":["","","",""," Csv Data ","","","",""],
            "dialog":["","","","","","","","",""],
-           "dialog_parm": ["","","","","","","","",""], 
+           "dialog_parm": ["","","","","","","","",""],
            "keys": []
-       },    
+       },
         "Signing Certificates":{
            "request":"list_signing_certificates",
            "name":"signing_certificate",
@@ -647,9 +647,9 @@
            "icon": ["","","","","@csv","","","",""],
            "tooltip":["","","",""," Csv Data ","","","",""],
            "dialog":["","","","","","","","",""],
-           "dialog_parm": ["","","","","","","","",""], 
+           "dialog_parm": ["","","","","","","","",""],
            "keys": []
-       },    
+       },
          "Users":{
            "request":"list_users",
            "name":"user",
@@ -659,9 +659,9 @@
            "icon": ["","","","","@csv","","","@viewstack","@view"],
            "tooltip":["","","",""," Csv Data ","",""," List User Policies"," List User Groups"],
            "dialog":["","","","","","","","@user_name = @curr_item;load('User Policies','IAM')","@user_name = @curr_item;load('User Groups','IAM')"],
-           "dialog_parm": ["","","","","","","","",""], 
+           "dialog_parm": ["","","","","","","","",""],
            "keys": ["UserName"]
-       },    
+       },
         "User Policies":{
            "request":"list_user_policies(@user_name)",
            "name":"user_policy",
@@ -674,7 +674,7 @@
            "dialog_parm": ["","","","","","","","",""],
            "menu": false,
            "keys": []
-       },    
+       },
         "User Groups":{
            "request":"list_groups_for_user(@user_name)",
            "name":"user_group",
@@ -684,10 +684,10 @@
            "icon": ["","","","","@csv","","","",""],
            "tooltip":["","","",""," Csv Data ","","","",""],
            "dialog":["","","","","","","","",""],
-           "dialog_parm": ["","","","","","","","",""], 
+           "dialog_parm": ["","","","","","","","",""],
            "menu": false,
            "keys": ["GroupName"]
-       }           
+       }
     },
     "RDS":{
         "DB Instances":{
@@ -699,7 +699,7 @@
            "icon": ["","","","","@csv","","","",""],
            "tooltip":["","","",""," Csv Data ","","","",""],
            "dialog":["","","","","","","","",""],
-           "dialog_parm": ["","","","","","","","",""], 
+           "dialog_parm": ["","","","","","","","",""],
            "keys": ["DBInstanceIdentifier"]
        },
        "Engine Version":{
@@ -711,7 +711,7 @@
            "icon": ["","","","","@csv","","","",""],
            "tooltip":["","","",""," Csv Data ","","","",""],
            "dialog":["","","","","","","","",""],
-           "dialog_parm": ["","","","","","","","",""], 
+           "dialog_parm": ["","","","","","","","",""],
            "keys": ["Engine"]
        },
        "DB Parameters":{
@@ -736,7 +736,7 @@
            "icon": ["","@view","","","@csv","","","",""],
            "tooltip":[" List DB Parameters ","","",""," Csv Data ","","","",""],
            "dialog":["@db_parm_grp = @curr_item;load('DB Parameters','RDS')","","","","","","","",""],
-           "dialog_parm": ["","","","","","","","",""], 
+           "dialog_parm": ["","","","","","","","",""],
            "keys": ["DBParameterGroupName"]
        },
        "DB Reserved Instances":{
@@ -748,7 +748,7 @@
            "icon": ["","","","","@csv","","","",""],
            "tooltip":["","","",""," Csv Data ","","","",""],
            "dialog":["","","","","","","","",""],
-           "dialog_parm": ["","","","","","","","",""], 
+           "dialog_parm": ["","","","","","","","",""],
            "keys": ["ReservedDBInstanceId"]
        },
        "DB Security Groups":{
@@ -760,7 +760,7 @@
            "icon": ["","","","","@csv","","","",""],
            "tooltip":["","","",""," Csv Data ","","","",""],
            "dialog":["","","","","","","","",""],
-           "dialog_parm": ["","","","","","","","",""], 
+           "dialog_parm": ["","","","","","","","",""],
            "keys": ["DBSecurityGroupName"]
        },
        "DB Snapshots":{
@@ -772,7 +772,7 @@
            "icon": ["","","","","@csv","","","",""],
            "tooltip":["","","",""," Csv Data ","","","",""],
            "dialog":["","","","","","","","",""],
-           "dialog_parm": ["","","","","","","","",""], 
+           "dialog_parm": ["","","","","","","","",""],
            "keys": ["DBSnapshotIdentifier"]
        },
        "DB Subnet Groups":{
@@ -784,7 +784,7 @@
            "icon": ["","","","","@csv","","","",""],
            "tooltip":["","","",""," Csv Data ","","","",""],
            "dialog":["","","","","","","","",""],
-           "dialog_parm": ["","","","","","","","",""], 
+           "dialog_parm": ["","","","","","","","",""],
            "keys": ["VpcId","DBSubnetGroupName"]
        },
        "DB Events":{
@@ -796,9 +796,9 @@
            "icon": ["","","","","@csv","","","",""],
            "tooltip":["","","",""," Csv Data ","","","",""],
            "dialog":["","","","","","","","",""],
-           "dialog_parm": ["","","","","","","","",""], 
+           "dialog_parm": ["","","","","","","","",""],
            "keys": ["SourceIdentifier"]
-       }  
+       }
     },
     "SES":{
         "Verified Email Addresses":{
@@ -810,9 +810,9 @@
            "icon": ["","","","","@csv","","","",""],
            "tooltip":["","","",""," Csv Data ","","","",""],
            "dialog":["","","","","","","","",""],
-           "dialog_parm": ["","","","","","","","",""], 
+           "dialog_parm": ["","","","","","","","",""],
            "keys": ["member"]
-       }, 
+       },
         "Send Statistics":{
            "request":"get_send_statistics",
            "name":"send_statistics",
@@ -822,9 +822,9 @@
            "icon": ["","","","","@csv","","","",""],
            "tooltip":["","","",""," Csv Data ","","","",""],
            "dialog":["","","","","","","","",""],
-           "dialog_parm": ["","","","","","","","",""], 
+           "dialog_parm": ["","","","","","","","",""],
            "keys": ["Timestamp"]
-       },  
+       },
         "Send Quota":{
            "request":"get_send_quota",
            "name":"send_quota",
@@ -834,10 +834,10 @@
            "icon": ["","","","","@csv","","","",""],
            "tooltip":["","","",""," Csv Data ","","","",""],
            "dialog":["","","","","","","","",""],
-           "dialog_parm": ["","","","","","","","",""], 
+           "dialog_parm": ["","","","","","","","",""],
            "keys": []
        }
-    },   
+    },
     "SNS":{
         "Subscriptions":{
            "request":"list_subscriptions",
@@ -848,9 +848,9 @@
            "icon": ["","","","","@csv","","","",""],
            "tooltip":["","","",""," Csv Data ","","","",""],
            "dialog":["","","","","","","","",""],
-           "dialog_parm": ["","","","","","","","",""], 
+           "dialog_parm": ["","","","","","","","",""],
            "keys": []
-       },  
+       },
         "Topics":{
            "request":"list_topics",
            "name":"topics",
@@ -860,10 +860,9 @@
            "icon": ["","","","","@csv","","","",""],
            "tooltip":["","","",""," Csv Data ","","","",""],
            "dialog":["","","","","","","","",""],
-           "dialog_parm": ["","","","","","","","",""], 
+           "dialog_parm": ["","","","","","","","",""],
            "keys": []
        }
-    }        
- } 
+    }
+ }
 }
-   

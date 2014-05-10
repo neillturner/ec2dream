@@ -13,7 +13,6 @@ class EC2_SnapDialog < FXDialogBox
     @ec2_main = owner
     @curr_item = ""
     @item_name = Array.new
-       #ec2.describe_snapshots.each do |r|
        @ec2_main.environment.snapshots.all.each do |r|
             if r[:tags] != nil
                t = EC2_ResourceTags.new(@ec2_main,r[:tags])
@@ -29,7 +28,7 @@ class EC2_SnapDialog < FXDialogBox
        itemlist = FXList.new(self, :opts => LIST_SINGLESELECT|LAYOUT_FILL)
        @item_name.each do |e|
           itemlist.appendItem(e)
-       end 
+       end
        itemlist.connect(SEL_COMMAND) do |sender, sel, data|
           selected_item = ""
           itemlist.each do |item|
@@ -41,12 +40,12 @@ class EC2_SnapDialog < FXDialogBox
           self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
        end
   end
-  
+
   def selected
     return @curr_item
-  end  
-  
-  def success 
+  end
+
+  def success
     true
   end
 

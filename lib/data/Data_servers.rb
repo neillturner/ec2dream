@@ -4,17 +4,17 @@ require 'net/http'
 require 'resolv'
 require 'fog'
 
-class Data_servers 
+class Data_servers
 
   def initialize(owner)
      puts "Data_servers.initialize"
-     @ec2_main = owner  
-  end 
+     @ec2_main = owner
+  end
 
   # Retrieve information about EC2 instances.
   #
   # Accepts a list of instances and/or a set of filters as the last parameter.
-  # 
+  #
   # Filters: architecture, availability-zone, block-device-mapping.attach-time, block-device-mapping.delete-on-termination,
   # block-device-mapping.device-name, block-device-mapping.status, block-device-mapping.volume-id, client-token, dns-name,
   # group-id, image-id, instance-id, instance-lifecycle, instance-state-code, instance-state-name, instance-type, ip-address,
@@ -64,12 +64,12 @@ class Data_servers
   #        :private_ip_address=>"192.168.0.52",
   #        :aws_reason=>"User initiated ",
   #        :aws_state=>"stopped"}, ...]
-  #  
+  #
   def all(instance = [], filters = nil)
       data = []
       conn = @ec2_main.environment.connection
       if conn != nil
-         begin
+         #begin
          # need to handle instance parameter for openstack
             if  @ec2_main.settings.openstack
                 x = conn.servers.all
@@ -78,15 +78,15 @@ class Data_servers
                    if @ec2_main.settings.openstack_hp
                       y.metadata.all.each do |m|
                         r[m.key]=m.value
-                      end 
+                      end
                    else
                       m = y.metadata
-                      if m != nil 
+                      if m != nil
 		         m.each do |k,v|
 		           r[k]=v
                          end
-                      end   
-                   end                      
+                      end
+                   end
                    r[:id]= y.id
                    r[:addresses]= y.addresses
                    r[:host_id]= y.host_id
@@ -98,7 +98,7 @@ class Data_servers
                    r[:tenant_id] = y.tenant_id
 		   r[:user_id] = y.user_id
                    #r[:min_count]= y.min_count
-                   #r[:max_count]= y.max_count             
+                   #r[:max_count]= y.max_count
                    r[:aws_instance_id] = y.id.to_s
                    r[:name] = y.name
                    # need to handle this in the list
@@ -107,21 +107,21 @@ class Data_servers
       	 	   if  !@ec2_main.settings.openstack_rackspace
       	 	      r[:key_name] = y.key_name
        	 	      r[:ssh_key_name] = y.key_name
-      	 	   end   
+      	 	   end
       	 	   r[:dns_name] = y.host_id
       	 	   r[:private_dns_name] = nil
       	 	   #r[:aws_availability_zone] = y.availability_zone
-      	 	   r[:aws_state] = y.state                    
+      	 	   r[:aws_state] = y.state
                    if  @ec2_main.settings.openstack_hp
                       r[:created_at]= y.created_at
                       r[:aws_launch_time]=y.created_at
                       r[:updated_at] = y.updated_at
-                      if y.image.instance_of? Hash 
+                      if y.image.instance_of? Hash
                           r[:image_id] = y.image["id"]
                           r[:aws_image_id] = y.image["id"]
                        else
                          r[:aws_image_id] = y.image
-                      end    
+                      end
                       r[:flavor] = y.flavor_id
                       r[:personality]= y.personality
                       r[:aws_instance_type] = y.flavor_id
@@ -133,7 +133,7 @@ class Data_servers
                       r[:public_ip_address] = y.public_ip_address
                       r[:password] = y.password
                       r['security_groups']= y.security_groups
-                      
+
                       r[:aws_instance_type] = y.flavor_id
                    elsif  @ec2_main.settings.openstack_rackspace
                       r[:created_at]= y.created
@@ -156,7 +156,7 @@ class Data_servers
                              end
                           end
                         end
-                      end  
+                      end
                       r[:accessIPv4]= y.ipv4_address
                       r[:accessIPv6]= y.ipv6_address
                       r[:public_ip_address] = y.ipv4_address
@@ -173,40 +173,41 @@ class Data_servers
                       r['security_groups'] = y.security_groups
                       r[:aws_image_id] = y.image
                       r[:aws_instance_type] = y.flavor
-                   end   
+                   end
                    # rackspace should have an extra attribute :password
                    gp = Array.new
                    if  @ec2_main.settings.openstack_rackspace
 		      gp.push('default')
                    else
-                      y.security_groups.each do |g|
-                         gp.push(g['name'])
-                      end
+                      gp.push('default')
+                      #y.security_groups.each do |g|
+                      #  gp.push(g['name'])
+                      #end
 
-                   end 
-                   r[:sec_groups]= gp 
-                   data.push(r)                   
-                end 
-		      elsif @ec2_main.settings.google 
+                   end
+                   r[:sec_groups]= gp
+                   data.push(r)
+                end
+		      elsif @ec2_main.settings.google
 					response = conn.list_servers($google_zone)
 					if response.status == 200
 						x = response.body['items']
-						if x != nil 
+						if x != nil
 						  x.each do |r|
 						    r[:aws_instance_id] = r['id'].to_s
-						    r[:aws_state] = r['status'] 
+						    r[:aws_state] = r['status']
 						    data.push(r)
-						  end	
+						  end
 						end
 					else
 						data = []
 					end
              elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
-              if filters != nil 
-	         filter = filters          
-              else 
+              if filters != nil
+	         filter = filters
+              else
                  filter = {}
-              end   
+              end
               filter['instance-id'] = instance if instance != []
               response = conn.describe_instances(filter)
 	      if response.status == 200
@@ -220,12 +221,12 @@ class Data_servers
                        r[:aws_state] = r['instanceState']['name']
                        r['groupSet']=rs['groupSet']
                        data.push(r)
-                    end   
+                    end
 	         end
 	      else
 	      	 data = {}
-              end            
-               # x = conn.servers.all 
+              end
+               # x = conn.servers.all
                # x.each do |y|
                #    r = {}
               #     r[:aws_instance_id] 		= y.id
@@ -243,7 +244,7 @@ class Data_servers
         	#    when 'attachTime'          then @block_device_mapping[:ebs_attach_time]            = @text
         	#    when 'deleteOnTermination' then @block_device_mapping[:ebs_delete_on_termination]  = @text == 'true' ? true : false
         	#    when 'item'                then @item[:block_device_mappings]                     << @block_device_mapping
-        	#    end        
+        	#    end
                 #   r[:network_interfaces]     	= y.network_interfaces
                  #  r[:client_token] 		= y.client_token
                #    r[:dns_name] 		= y.dns_name
@@ -274,32 +275,32 @@ class Data_servers
         	#   r[:tags] = y.tags
         	#  when %r{/tagSet/item/key$}   then @aws_tag[:key]               = @text
         	#  when %r{/tagSet/item/value$} then @aws_tag[:value]             = @text
-        	#  when %r{/tagSet/item$}       then @item[:tags][@aws_tag[:key]] = @aws_tag[:value]        
-                #   r[:vpc_id] 			= y.vpc_id                
+        	#  when %r{/tagSet/item$}       then @item[:tags][@aws_tag[:key]] = @aws_tag[:value]
+                #   r[:vpc_id] 			= y.vpc_id
                 #   data.push(r)
-                #end                 
-            else                              
+                #end
+            else
                 data = conn.describe_instances(instance,filters)
-            end   
-         rescue
-            puts "ERROR: getting all servers  #{$!}"
-         end
-      end   
+            end
+         #rescue
+         #   puts "ERROR: getting all servers  #{$!}"
+         #end
+      end
       return data
   end
- 
+
   # not used
-  def get(server_id) 
+  def get(server_id)
       data = nil
       conn = @ec2_main.environment.connection
       if conn != nil
          data = conn.servers.get(server_id)
-      else 
+      else
          raise "Connection Error"
       end
       return data
-  end 
- 
+  end
+
   # Launch new EC2 instances. Returns a list of launched instances or an exception.
   #
   #  ec2.run_instances('ami-e444444d',1,1,['2009-07-15-default'],'my_awesome_key', 'Woohoo!!!', 'public') #=>
@@ -335,16 +336,25 @@ class Data_servers
 	       puts "server create #{data}"
 	       #data[:aws_instance_id] = data[:id].to_s
 	       #data[:aws_launch_time] = data[:created].to_s
-	    else   
+	    else
 	       data = {}
-	    end          
-         elsif  @ec2_main.settings.openstack
+	    end
+         elsif  @ec2_main.settings.openstack_hp
             data = conn.create_server(name,  flavor_ref.to_i, image_ref.to_i, options)
             if data.status == 200 or data.status == 202
 	       data = data.body['server']
 	       data[:aws_instance_id] = data[:id].to_s
 	       data[:aws_launch_time] = data[:created_at].to_s
-	    else   
+	    else
+	       data = {}
+	    end
+         elsif  @ec2_main.settings.openstack
+            data = conn.create_server(name, image_ref.to_s, flavor_ref.to_i,  options)
+            if data.status == 200 or data.status == 202
+	       data = data.body['server']
+	       data[:aws_instance_id] = data[:id].to_s
+	       data[:aws_launch_time] = data[:created_at].to_s
+	    else
 	       data = {}
 	    end
          elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
@@ -361,19 +371,19 @@ class Data_servers
                  r[:aws_state] = r['instanceState']['name']
                  r['groupSet'] = gs
                  data.push(r)
-             end   
+             end
            else
               data = []
-           end   	    
-         else   
+           end
+         else
             data = conn.launch_instances(name, options)
          end
-      else 
+      else
          raise "Connection Error"
       end
       return data
-  end 
-  
+  end
+
   def request_spot_instances(options)
      data = []
      conn = @ec2_main.environment.connection
@@ -389,15 +399,15 @@ class Data_servers
               data = response.body['spotInstanceRequestSet']
            else
               data = []
-           end   
-        else          
+           end
+        else
            data = conn.request_spot_instances(options)
         end
-     else 
+     else
         raise "Connection Error"
      end
      return data
-  end     
+  end
 
   # Terminates EC2 instances. Returns a list of termination params or an exception.
   #
@@ -407,38 +417,38 @@ class Data_servers
   #      :aws_current_state_name=>"shutting-down",
   #      :aws_prev_state_code=>16,
   #      :aws_prev_state_name=>"running"}]
-  # 
-    
+  #
+
   def delete_server(server_id, zone_name=nil)
      data = {}
      conn = @ec2_main.environment.connection
      if conn != nil
         if @ec2_main.settings.openstack
-           if  !@ec2_main.settings.openstack_rackspace
-              data = conn.delete_server(server_id.to_i)
-           else  
+           #if  !@ec2_main.settings.openstack_rackspace
+           #   data = conn.delete_server(server_id.to_i)
+           #else
               data = conn.delete_server(server_id)
-           end 
+           #end
            if data.status == 204
 	          data = true
-	       else   
+	       else
 	          data = false
-	       end 
+	       end
 		elsif @ec2_main.settings.google
 		   response = conn.delete_server(server_id, zone_name)
            if response.status == 200
               data = response.body
            else
               data = {}
-           end   
-        else  	   	   
+           end
+        else
             data = conn.terminate_instances([server_id])
         end
-     else 
+     else
         raise "Connection Error"
      end
      return data
-  end   
+  end
 
   # Stop instances.
   #
@@ -450,7 +460,7 @@ class Data_servers
   #      :aws_instance_id=>"i-36e84a5e",
   #      :aws_current_state_code=>64,
   #      :aws_current_state_name=>"stopping"}]
-  #  
+  #
   def stop_instances(server_id)
      data = {}
      conn = @ec2_main.environment.connection
@@ -459,14 +469,14 @@ class Data_servers
            data = conn.pause_server(server_id)
         elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
            data = conn.stop_instances([server_id])
-        else                   
+        else
            data = conn.stop_instances(server_id)
         end
-     else 
+     else
         raise "Connection Error"
      end
      return data
-  end    
+  end
 
   # Start instances.
   #
@@ -483,51 +493,51 @@ class Data_servers
      if conn != nil
         if  @ec2_main.settings.openstack
            data = conn.resume_server(server_id)
-        elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS" 
+        elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
            data = conn.start_instances([server_id])
-        else 
-           data = conn.start_instances(server_id)           
+        else
+           data = conn.start_instances(server_id)
         end
-     else 
+     else
         raise "Connection Error"
      end
      return data
-  end  
-  
+  end
+
   def reboot_server(server_id,type)
        data = {}
        conn = @ec2_main.environment.connection
        if conn != nil
           if  @ec2_main.settings.openstack_rackspace
-             data = conn.reboot_server(server_id, type) 
+             data = conn.reboot_server(server_id, type)
           elsif @ec2_main.settings.openstack
              data = conn.reboot_server(server_id.to_i,type)
-          else 
-             # amazon 
+          else
+             # amazon
           end
-       else 
+       else
           raise "Connection Error"
        end
        return data
-  end 
-  
+  end
+
   def change_password_server(server_id, admin_password)
        data = {}
        conn = @ec2_main.environment.connection
        if conn != nil
           if  @ec2_main.settings.openstack_rackspace
-             data = conn.change_server_password(server_id, admin_password) 
+             data = conn.change_server_password(server_id, admin_password)
           elsif  @ec2_main.settings.openstack
              data = conn.change_password_server(server_id.to_i, admin_password)
-          else 
-             # amazon 
+          else
+             # amazon
           end
-       else 
+       else
           raise "Connection Error"
        end
        return data
-  end   
-  
+  end
+
   # Get initial Windows Server setup password from an instance console output.
   #
   #  # wait until instance enters 'operational' state and get it's initial password
@@ -549,15 +559,15 @@ class Data_servers
            puts "ERROR: there is fog bug getting windows admin password"
            if response.status = 200
               data = response.body['passwordData']
-           end               
-        else                 
+           end
+        else
            data = conn.get_initial_password(instance, pk_text)
         end
-     else 
+     else
         raise "Connection Error"
      end
      return data
-  end    
+  end
 
   # Retreive EC2 instance OS logs. Returns a hash of data or an exception.
   #
@@ -565,7 +575,7 @@ class Data_servers
   #    {:aws_instance_id => 'i-f222222d',
   #     :aws_timestamp   => "2007-05-23T14:36:07.000-07:00",
   #     :timestamp       => Wed May 23 21:36:07 UTC 2007,          # Time instance
-  #     :aws_output      => "Linux version 2.6.16-xenU (builder@patchbat.amazonsa) (gcc version 4.0.1 20050727 ..." 
+  #     :aws_output      => "Linux version 2.6.16-xenU (builder@patchbat.amazonsa) (gcc version 4.0.1 20050727 ..."
   def get_console_output(instance, num_lines=1000)
      data = {}
      conn = @ec2_main.environment.connection
@@ -574,23 +584,23 @@ class Data_servers
            response = conn.get_console_output(instance, num_lines)
            if response.status = 200
               data[:aws_output] = response.body['output']
-           end 
+           end
         elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
            response = conn.get_console_output(instance)
            if response.status = 200
               data[:aws_output] = response.body['output']
-           end         
-        else                 
+           end
+        else
            data = conn.get_console_output(instance)
         end
-     else 
+     else
         raise "Connection Error"
      end
      return data
-  end     
-  
+  end
+
   # Enables monitoring for a running instances. For more information, refer to the Amazon CloudWatch Developer Guide.
-  # 
+  #
   #  ec2.monitor_instances('i-8437ddec') #=>
   #    {:instance_id=>"i-8437ddec", :monitoring_state=>"pending"}
   #
@@ -600,15 +610,15 @@ class Data_servers
      if conn != nil
         if  @ec2_main.settings.openstack
         # openstack
-        else                 
+        else
            data = conn.monitor_instances([instance])
         end
-     else 
+     else
         raise "Connection Error"
      end
      return data
-  end   
-  
+  end
+
   # Disables monitoring for a running instances. For more information, refer to the Amazon CloudWatch Developer Guide.
   #
   #  ec2.unmonitor_instances('i-8437ddec') #=>
@@ -620,14 +630,14 @@ class Data_servers
      if conn != nil
         if  @ec2_main.settings.openstack
         # openstack
-        else                
+        else
            data = conn.unmonitor_instances([instance])
         end
-     else 
+     else
         raise "Connection Error"
      end
      return data
-  end   
+  end
 
   # Modify instance attribute.
   #
@@ -641,15 +651,15 @@ class Data_servers
      conn = @ec2_main.environment.connection
      if conn != nil
         if  @ec2_main.settings.openstack
-        # openstack 
-        else     
+        # openstack
+        else
            data = conn.modify_instance_attribute(instance,{ attr => value})
         end
-     else 
+     else
         raise "Connection Error"
      end
      return data
-  end       
+  end
 
   # Describe instance attribute.
   #
@@ -664,7 +674,7 @@ class Data_servers
   #  ec2.describe_instance_attribute(instance, "instanceType") #=> "m1.small"
   #
   #  ec2.describe_instance_attribute(instance, "instanceInitiatedShutdownBehavior") #=> "stop"
-  #  
+  #
   def describe_instance_attribute(instance,attr)
      data = ""
      conn = @ec2_main.environment.connection
@@ -672,15 +682,15 @@ class Data_servers
         if  @ec2_main.settings.openstack
         # openstack
            data = conn.describe_instance_attribute(instance,attr)
-        else 
+        else
            data = ""
         end
-     else 
+     else
         raise "Connection Error"
      end
      return data
-  end 
-  
+  end
+
   # Get the current google project
   def  get_project
      data = false
@@ -691,32 +701,32 @@ class Data_servers
            data = response.body
         else
            data = {}
-        end                  
-     else 
+        end
+     else
         raise "Connection Error"
      end
-     return data  
-  end    
-   
-  
-  # set google  instance tags 
-  def set_tags(instance, zone, tags=[]) 
+     return data
+  end
+
+
+  # set google  instance tags
+  def set_tags(instance, zone, tags=[])
      data = false
      conn = @ec2_main.environment.connection
      if conn != nil
-        response = conn.set_tags(instance, zone, tags) 
+        response = conn.set_tags(instance, zone, tags)
         if response.status == 200
            data = response.body
         else
            data = {}
-        end                  
-     else 
+        end
+     else
         raise "Connection Error"
      end
-     return data  
-  end     
-  
-  # Insert a google common instance metadata 
+     return data
+  end
+
+  # Insert a google common instance metadata
   def  set_common_instance_metadata(metadata={})
      data = false
      conn = @ec2_main.environment.connection
@@ -726,14 +736,14 @@ class Data_servers
            data = response.body
         else
            data = {}
-        end                  
-     else 
+        end
+     else
         raise "Connection Error"
      end
-     return data  
-  end    
-  
-   # Insert a google server metadata 
+     return data
+  end
+
+   # Insert a google server metadata
   def  set_meta(server_name, zone_name, metadata={})
      data = false
      conn = @ec2_main.environment.connection
@@ -743,12 +753,12 @@ class Data_servers
            data = response.body
         else
            data = {}
-        end                  
-     else 
+        end
+     else
         raise "Connection Error"
      end
-     return data  
-  end    
+     return data
+  end
 
 # Get a google server
   def  get_server(name, zone_name=nil)
@@ -763,15 +773,15 @@ class Data_servers
            data = response.body
         else
            data = {}
-        end                  
-     else 
+        end
+     else
         raise "Connection Error"
      end
-     return data  
-  end    
+     return data
+  end
 
 
-  
+
    # Insert a google server
   def  insert_server(server_name, zone_name, options={})
      data = false
@@ -782,13 +792,13 @@ class Data_servers
            data = response.body
         else
            data = {}
-        end                  
-     else 
+        end
+     else
         raise "Connection Error"
      end
-     return data  
-  end    
-  
+     return data
+  end
+
   # Delete a google zone operation
   def  delete_zone_operation(zone, operation_name)
      data = false
@@ -799,12 +809,12 @@ class Data_servers
            data = response.body
         else
            data = {}
-        end                  
-     else 
+        end
+     else
         raise "Connection Error"
      end
-     return data  
-  end 
+     return data
+  end
 
  # Delete a google global operation
   def  delete_global_operation(operation_name)
@@ -816,12 +826,12 @@ class Data_servers
            data = response.body
         else
            data = {}
-        end                  
-     else 
+        end
+     else
         raise "Connection Error"
      end
-     return data  
-  end    
-  
-  
+     return data
+  end
+
+
  end

@@ -13,6 +13,7 @@ class EC2_LaunchDialog < FXDialogBox
     @curr_env = ""
     @ec2_main = owner
     @profile_folder = "launch"
+    @profile_folder = "opslaunch" if @ec2_main.settings.openstack
     envs = nil
     begin
        envs = Dir.entries(@ec2_main.settings.get_system('ENV_PATH')+"/"+@profile_folder)
@@ -28,9 +29,9 @@ class EC2_LaunchDialog < FXDialogBox
               if e.end_with?(".properties")
                  envlist.appendItem(e[0..-12])
               end
-          end 
+          end
        end
-    end   
+    end
     envlist.connect(SEL_COMMAND) do |sender, sel, data|
        selected_item = ""
        envlist.each do |item|
@@ -41,9 +42,9 @@ class EC2_LaunchDialog < FXDialogBox
        self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
     end
   end
-  
+
   def selected
     return @curr_env
   end
-  
+
 end

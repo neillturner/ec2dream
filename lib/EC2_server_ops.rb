@@ -3,7 +3,7 @@ class EC2_Server
 #
 #  ops methods
 #
- 
+
   def ops_clear_panel
        @type = ""
        ops_clear('Instance_ID')
@@ -32,16 +32,16 @@ class EC2_Server
        @frame4.hide()
 	   @frame5.hide()
        @frame6.hide()
-	   @frame7.hide()	   
+	   @frame7.hide()
        @frame3.show()
        @server_status = ""
        @secgrp = ""
-  end 
-     
+  end
+
   def ops_clear(key)
     @ops_server[key].text = ""
-  end 
- 
+  end
+
   def ops_load(instance_id)
       puts "server.ops_load "+instance_id
       @type = "ops"
@@ -50,13 +50,13 @@ class EC2_Server
       @frame4.hide()
 	  @frame5.hide()
       @frame6.hide()
-	  @frame7.hide()	  
+	  @frame7.hide()
       @frame3.show()
       @ops_server['Instance_ID'].text = instance_id
       ENV['EC2_INSTANCE'] = instance_id
       #puts "instance id #{instance_id}"
       r = @ec2_main.serverCache.instance(instance_id)
-      if r != nil	 
+      if r != nil
      	 gp = group_array(r)
          gp_list = ""
          gp_first = ""
@@ -66,16 +66,16 @@ class EC2_Server
             else
                gp_first = g
                gp_list = g
-            end 
-         end   	 
+            end
+         end
     	 @ops_server['Security_Groups'].text = gp_list
     	 @secgrp = gp_first
-    	 if r[:name] == nil 
+    	 if r[:name] == nil
     	   return
-    	 end  
+    	 end
     	 @ops_server['Name'].text = r[:name]
     	 @ops_server['Chef_Node'].text = ops_get_chef_node
-    	 @ops_server['Image_ID'].text = r[:aws_image_id]
+    	 @ops_server['Image_ID'].text = r[:aws_image_id]['id']
     	 @ops_server['State'].text = r[:aws_state]
     	 @server_status = @ops_server['State'].text
     	 @ops_server['Launch_Time'].text = convert_time(r[:aws_launch_time])
@@ -91,33 +91,40 @@ class EC2_Server
     	 #  else
     	 #      @server['Win_Admin_Password'].text = ""
     	 #  end
-    	 #end    	 
+    	 #end
      	 if @ops_public_addr[instance_id] != nil and @ops_public_addr[instance_id] != ""
     	   @ops_server['Public_Addr'].text = @ops_public_addr[instance_id]
-    	 elsif @ec2_main.launch.ops_get('Public_Addr') != nil 
+    	 elsif @ec2_main.launch.ops_get('Public_Addr') != nil
     	    @ops_server['Public_Addr'].text = @ec2_main.launch.ops_get('Public_Addr')
-    	 else   
+    	 else
     	    @ops_server['Public_Addr'].text = ""
-    	 end   
+    	 end
     	 @ops_server['Addresses'].text = ""
     	 addr_list = ""
     	 r[:addresses].each do |k, a|
-    	    #puts "k #{k} a #{a}"
+    	    #puts "*** k #{k} a #{a}"
     	    a.each do |v|
-    	       #puts "v #{v}"
+    	       #puts "*** v #{v}"
     	       if v["addr"] != nil
     	          if addr_list.length > 0
     	             addr_list = addr_list+","+v["addr"]
     	          else
     	             addr_list = v["addr"]
                   end
-                  if  @ops_server['Public_Addr'].text == "" and !v["addr"].start_with?("10.") and v["addr"].index(':')==nil
+                  if v["OS-EXT-IPS:type"] == 'floating'
                      @ops_server['Public_Addr'].text = v["addr"]
-                     @ops_public_addr[instance_id]
-                  end   
+                     @ops_public_addr[instance_id] = v["addr"]
+                  end
                end
              end
-         end  
+         end
+         if @ops_server['Public_Addr'].text ==nil or @ops_server['Public_Addr'].text == ""
+            v = addr_list.split(',')
+            if v.size>0
+              @ops_server['Public_Addr'].text  = v[-1]
+              @ops_public_addr[instance_id]  = v[-1]
+            end
+         end
          @ops_server['Addresses'].text = addr_list
     	 @ops_server['Progress'].text = "#{r[:progress]}%"
     	 #if r.personality != nil
@@ -129,12 +136,12 @@ class EC2_Server
     	    @ops_server['Flavor'].text = r[:flavor]
     	 else
     	    @ops_server['Flavor'].text = r[:flavor]["id"]
-    	 end   
+    	 end
     	 if r[:availability_zone] != nil
     	    @ops_server['Availability_Zone'].text = r[:availability_zone]
     	 else
     	    @ops_server['Availability_Zone'].text =  ""
-    	 end   
+    	 end
     	 if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
             @ops_server['EC2_SSH_Private_Key'].text = get_pk
          else
@@ -145,7 +152,7 @@ class EC2_Server
          ssh_u = @ec2_main.launch.ops_get('EC2_SSH_User')
          if ssh_u != nil and ssh_u != ""
             @ops_server['EC2_SSH_User'].text = ssh_u
-         end  
+         end
        	 if @ops_admin_pw[instance_id] != nil and @ops_admin_pw[instance_id] != ""
     	   @ops_server['Admin_Password'].text = @ops_admin_pw[instance_id]
     	 else
@@ -158,32 +165,34 @@ class EC2_Server
     	 if r[:password] != nil
 	    @ops_server['Admin_Password'].text =  r[:password]
 	 end
+     else
+	ops_clear_panel
      end
      @ec2_main.app.forceRefresh
-  end 
- 
+  end
+
 def group_array(x)
      ga = Array.new
-     puts "security groups #{x['security_groups']}"
-     if x[:sec_groups].instance_of? Array and x[:sec_groups][0] != nil 
+     #puts "security groups #{x['security_groups']}"
+     if x[:sec_groups].instance_of? Array and x[:sec_groups][0] != nil
         ga = x[:sec_groups]
      elsif x['security_groups'].instance_of? Array and x['security_groups'][0] != nil
         x['security_groups'].each do |g|
          ga.push(g['name'])
-        end 
+        end
      elsif x[:groups].instance_of? Array and x[:groups][0][:group_name] == nil
         x[:groups].each do |g|
          ga.push(g['group_id'])
-        end      
+        end
      else
         x[:groups].each do |g|
          ga.push(g['group_name'])
-        end     
-     end 
+        end
+     end
      return ga
- end  
- 
- 
+ end
+
+
  def ops_terminate
    instance = @ops_server['Instance_ID'].text
    answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm Termination","Confirm Termination of Server Instance "+instance)
@@ -192,23 +201,23 @@ def group_array(x)
           r = @ec2_main.environment.servers.delete_server(instance)
        rescue
           error_message("Terminate Instance Failed",$!)
-       end      
-   end 
- end 
- 
+       end
+   end
+ end
+
   def ops_get_chef_node
        instance_id = @ops_server['Instance_ID'].text
        if @ec2_chef_node[instance_id] != nil and @ec2_chef_node[instance_id] != ""
    	cn =  @ec2_chef_node[instance_id]
-       else  
+       else
          cn = @ec2_main.launch.get('Chef_Node')
          if cn == nil or cn == ""
-          cn = @secgrp
+          cn = @ops_server['Name'].text
          end
-       end   
+       end
        return cn
-  end 
-  
+  end
+
 
 
 end

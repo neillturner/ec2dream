@@ -1,0 +1,52 @@
+.rake_test_cache
+
+##############################
+# Chef key files and secrets #
+##############################
+.chef
+
+########
+# Chef #
+########
+.kitchen/
+.kitchen.local.yml
+
+# ignore the cookbooks
+# since we manage cookbook dependencies with Berkshelf
+cookbooks/
+
+###########
+# Vagrant #
+###########
+.vagrant
+tmp/
+
+#############
+# Berkshelf #
+#############
+Berksfile.lock
+*~
+*#
+.#*
+\#*#
+.*.sw[a-z]
+*.un~
+/cookbooks
+
+###########
+# Bundler #
+###########
+Gemfile.lock
+bin/*
+.bundle/*
+
+######################
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

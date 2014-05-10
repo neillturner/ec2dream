@@ -24,9 +24,9 @@ class EC2_Settings
 	@settings = {}
 	@system_properties = {}
 	@properties = {}
-        @tags_filter = nil 
+        @tags_filter = nil
  	@disk = @ec2_main.makeIcon("page_save.png")
-	@disk.create 
+	@disk.create
 	@link = @ec2_main.makeIcon("link_break.png")
 	@link.create
 	@magnifier = @ec2_main.makeIcon("magnifier.png")
@@ -36,9 +36,9 @@ class EC2_Settings
     @repository = @ec2_main.makeIcon("drawer.png")
 	@repository.create
 	@puppet_icon = @ec2_main.makeIcon("puppet.png")
-	@puppet_icon.create	
+	@puppet_icon.create
 	@chef_icon = @ec2_main.makeIcon("chef.png")
-	@chef_icon.create		
+	@chef_icon.create
         tab4 = FXTabItem.new(@ec2_main.tabBook, " Environment ")
         page1 = FXVerticalFrame.new(@ec2_main.tabBook)
         page1a = FXHorizontalFrame.new(page1,LAYOUT_FILL_X, :padding => 0)
@@ -59,21 +59,21 @@ class EC2_Settings
 	   FXLabel.new(page1a, "In PuTTYgen press OK and then press SAVE PRIVATE KEY" )
 	   @settings['PUTTY_GENERATE_BUTTON'].connect(SEL_COMMAND) do
 	      puts "settings.PuttyGenerateButton.connect"
-	      if @settings['EC2_SSH_PRIVATE_KEY'].text != nil and @settings['EC2_SSH_PRIVATE_KEY'].text != ''  
+	      if @settings['EC2_SSH_PRIVATE_KEY'].text != nil and @settings['EC2_SSH_PRIVATE_KEY'].text != ''
 	         system("cmd.exe /C "+ENV['EC2DREAM_HOME']+"/putty//puttygen "+"\""+@settings['EC2_SSH_PRIVATE_KEY'].text+"\""+"  -t rsa")
-	      else  
+	      else
 	         error_message("Error","No EC2_SSH_PRIVATE_KEY setting specified")
-	      end  
+	      end
            end
            @settings['PUTTY_GENERATE_BUTTON'].connect(SEL_UPDATE) do |sender, sel, data|
 	       	    enable_if_env_set(sender)
-    	   end    	
+    	   end
     	end
-    	
+
         frame1 = FXMatrix.new(page1, 3, MATRIX_BY_COLUMNS|LAYOUT_FILL)
 		       FXLabel.new(frame1, "ENVIRONMENT" )
 	@settings['ENV_NAME'] = FXTextField.new(frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
-    FXLabel.new(frame1, "" )	
+    FXLabel.new(frame1, "" )
 		       FXLabel.new(frame1, "ENV_REPOSITORY" )
 	@settings['REPOSITORY_LOCATION'] = FXTextField.new(frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
 	@settings['REPOSITORY_LOCATION_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
@@ -83,7 +83,7 @@ class EC2_Settings
 		   if @ec2_main.treeCache.status != "loading"
               dialog = EC2_SystemDialog.new(@ec2_main)
               dialog.execute(PLACEMENT_DEFAULT)
-              if dialog.selected 
+              if dialog.selected
 				loc = get_system("REPOSITORY_LOCATION")
 				if loc !=  ENV['EC2DREAM_HOME']+"/env"
 					@settings['REPOSITORY_LOCATION'].text = "#{loc}"
@@ -91,8 +91,8 @@ class EC2_Settings
 					@settings['REPOSITORY_LOCATION'].text = " "
 				end
 				FXMessageBox.warning(@ec2_main,MBOX_OK,"REPOSITORY_LOCATION","Restart to use new repository")
-              end   
-           end   
+              end
+           end
         end
         #
         #  Amazon EC2 Access Settings
@@ -111,8 +111,8 @@ class EC2_Settings
             it = dialog.selected
             if it != nil and it != ""
                @settings['EC2_PLATFORM'].text = it
-            end	    
-        end        
+            end
+        end
 	@settings['AMAZON_ACCESS_KEY_ID_LABEL'] = FXLabel.new(frame1, "ACCESS_KEY_ID" )
 	@settings['AMAZON_ACCESS_KEY_ID'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
  	FXLabel.new(frame1, "" )
@@ -123,11 +123,11 @@ class EC2_Settings
 	@settings['AMAZON_SECRET_ACCESS_KEY_BUTTON'].tipText = "Show Secret Access Key"
 	@settings['AMAZON_SECRET_ACCESS_KEY_BUTTON'].connect(SEL_COMMAND) do
 	   dialog = EC2_ShowPasswordDialog.new(@ec2_main,"AMAZON_SECRET_ACCESS_KEY",@settings['AMAZON_SECRET_ACCESS_KEY'].text)
-           dialog.execute	
-	end 	
+           dialog.execute
+	end
     @settings['AMAZON_ACCOUNT_ID_LABEL'] = FXLabel.new(frame1, "ACCOUNT_ID" )
 	@settings['AMAZON_ACCOUNT_ID'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
-	FXLabel.new(frame1, "" ) 	
+	FXLabel.new(frame1, "" )
  	@settings['EC2_URL_LABEL'] = FXLabel.new(frame1, "URL" )
 	@settings['EC2_URL'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
 	@settings['EC2_URL_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
@@ -139,7 +139,7 @@ class EC2_Settings
             it = dialog.selected
             if it != nil and it != ""
                @settings['EC2_URL'].text = it
-            end	    
+            end
         end
     @settings['AVAILABILITY_ZONE_LABEL'] = FXLabel.new(frame1, "AVAILABILITY_ZONE" )
 	@settings['AVAILABILITY_ZONE'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
@@ -152,8 +152,8 @@ class EC2_Settings
             it = dialog.selected
             if it != nil and it != ""
                @settings['AVAILABILITY_ZONE'].text = it
-            end	    
-        end        
+            end
+        end
     @settings['AMAZON_NICKNAME_TAG'] = FXLabel.new(frame1, "NICKNAME TAG" )
 	@settings['AMAZON_NICKNAME_TAG'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
         FXLabel.new(frame1, "" )
@@ -211,7 +211,7 @@ class EC2_Settings
            r['bastion_putty_key'] = @properties['BASTION_PUTTY_KEY']
 	   dialog = EC2_BastionEditDialog.new(@ec2_main,r)
 	   dialog.execute
-	   if dialog.saved 
+	   if dialog.saved
 	      r = dialog.selected
 	      if r != nil and r != ""
 	         @properties['BASTION_HOST']=r['bastion_host']
@@ -220,10 +220,10 @@ class EC2_Settings
 	         @properties['BASTION_SSH_KEY']=r['bastion_ssh_key']
                  @properties['BASTION_PUTTY_KEY']=r['bastion_putty_key']
                  save
-              end   
-	   end   
+              end
+	   end
 	end
-	
+
 	FXLabel.new(frame1, "" )
 	#
 	#   Global and General Settings
@@ -238,7 +238,11 @@ class EC2_Settings
 	@settings['CHEF_REPOSITORY_BUTTON'].tipText = "Browse..."
 	@settings['CHEF_REPOSITORY_BUTTON'].connect(SEL_COMMAND) do
 	   dialog = FXDirDialog.new(frame1, "Select Chef Repository Directory")
-           dialog.directory = "#{ENV['EC2DREAM_HOME']}/chef/chef-repo"
+	   if @settings['CHEF_REPOSITORY'].text==nil or @settings['CHEF_REPOSITORY'].text==""
+              dialog.directory = "#{ENV['EC2DREAM_HOME']}/chef/chef-repo"
+           else
+              dialog.directory = @settings['CHEF_REPOSITORY'].text
+           end
 	   if dialog.execute != 0
 	      @settings['CHEF_REPOSITORY'].text = dialog.directory
            end
@@ -250,11 +254,31 @@ class EC2_Settings
 	@settings['PUPPET_REPOSITORY_BUTTON'].tipText = "Browse..."
 	@settings['PUPPET_REPOSITORY_BUTTON'].connect(SEL_COMMAND) do
 	   dialog = FXDirDialog.new(frame1, "Select Puppet Repository Directory")
-           dialog.directory = "#{ENV['EC2DREAM_HOME']}/puppet/puppet_repo"
+	   if @settings['PUPPET_REPOSITORY'].text==nil or @settings['PUPPET_REPOSITORY'].text==""
+              dialog.directory = "#{ENV['EC2DREAM_HOME']}/puppet/puppet_repo"
+           else
+              dialog.directory = @settings['PUPPET_REPOSITORY'].text
+           end
 	   if dialog.execute != 0
 	      @settings['PUPPET_REPOSITORY'].text = dialog.directory
             end
-	end		
+	end
+	FXLabel.new(frame1, "TEST_KITCHEN_PATH" )
+ 	@settings['TEST_KITCHEN_PATH'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+ 	@settings['TEST_KITCHEN_PATH_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
+	@settings['TEST_KITCHEN_PATH_BUTTON'].icon = @magnifier
+	@settings['TEST_KITCHEN_PATH_BUTTON'].tipText = "Browse..."
+	@settings['TEST_KITCHEN_PATH_BUTTON'].connect(SEL_COMMAND) do
+	   dialog = FXDirDialog.new(frame1, "Select Test Kitchen Path")
+	   if @settings['TEST_KITCHEN_PATH'].text==nil or @settings['TEST_KITCHEN_PATH'].text==""
+              dialog.directory = "#{ENV['EC2DREAM_HOME']}/chef/chef-repo/site-cookbooks/mycompany_webserver"
+           else
+              dialog.directory = @settings['TEST_KITCHEN_PATH'].text
+           end
+	   if dialog.execute != 0
+	      @settings['TEST_KITCHEN_PATH'].text = dialog.directory
+           end
+	end
 	FXLabel.new(frame1, "VAGRANT_REPOSITORY" )
  	@settings['VAGRANT_REPOSITORY'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
  	@settings['VAGRANT_REPOSITORY_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
@@ -262,15 +286,20 @@ class EC2_Settings
 	@settings['VAGRANT_REPOSITORY_BUTTON'].tipText = "Browse..."
 	@settings['VAGRANT_REPOSITORY_BUTTON'].connect(SEL_COMMAND) do
 	   dialog = FXDirDialog.new(frame1, "Select Vagrant Repository Directory")
-           dialog.directory = "#{ENV['EC2DREAM_HOME']}/vagrant"
+	   if @settings['VAGRANT_REPOSITORY'].text==nil or @settings['VAGRANT_REPOSITORY'].text==""
+               dialog.directory = "#{ENV['EC2DREAM_HOME']}/vagrant"
+           else
+              dialog.directory = @settings['VAGRANT_REPOSITORY'].text
+           end
+
 	   if dialog.execute != 0
 	      @settings['VAGRANT_REPOSITORY'].text = dialog.directory
            end
-	end		
+	end
 	FXLabel.new(frame1, "CLOUD_ADMIN_URL" )
 	@settings['CLOUD_ADMIN_URL'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
         FXLabel.new(frame1, "" )
-	if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil  
+	if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
 	   FXLabel.new(frame1, "TERMINAL_EMULATOR" )
            @settings['TERMINAL_EMULATOR'] = FXTextField.new(frame1, 20, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
            @settings['TERMINAL_EMULATOR'].text = "xterm"
@@ -283,8 +312,8 @@ class EC2_Settings
               it = dialog.selected
               if it != nil and it != ""
                  @settings['EC2_PLATFORM'].text = it
-              end	    
-           end                
+              end
+           end
         end
         FXLabel.new(frame1, "EXTERNAL_EDITOR" )
 	@settings['EXTERNAL_EDITOR'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
@@ -327,13 +356,13 @@ class EC2_Settings
 	   timezone = dialog.selected
 	   if timezone != nil and timezone != ""
 	       @settings['TIMEZONE'].text = timezone
-	   end   
-	end	
- 	
-  end 
-  
- 
- 
+	   end
+	end
+
+  end
+
+
+
   def load
      puts "Settings.load"
      @properties = {}
@@ -349,70 +378,76 @@ class EC2_Settings
      env_path = get_system('ENV_PATH')
      if File.exists?(env_path+"/env.properties")
         @properties=read_properties(env_path+"/env.properties",true)
-	    load_panel('EC2_PLATFORM')  
+	load_panel('EC2_PLATFORM')
         @settings['EC2_PLATFORM'].text =  (@settings['EC2_PLATFORM'].text).downcase  if @settings['EC2_PLATFORM'].text != nil or @settings['EC2_PLATFORM'].text = ""
-	    @properties['EC2_PLATFORM'] = @properties['EC2_PLATFORM'].downcase  if @properties['EC2_PLATFORM'] != nil or @properties['EC2_PLATFORM'] = ""
+	@properties['EC2_PLATFORM'] = @properties['EC2_PLATFORM'].downcase  if @properties['EC2_PLATFORM'] != nil or @properties['EC2_PLATFORM'] = ""
         load_panel('EC2_URL')
         load_panel('EC2_SSH_PRIVATE_KEY')
         load_panel('AMAZON_ACCOUNT_ID')
         load_panel('AMAZON_ACCESS_KEY_ID')
         load_panel('AMAZON_SECRET_ACCESS_KEY')
-		load_panel('CHEF_REPOSITORY')
-		load_panel('PUPPET_REPOSITORY')
+	load_panel('CHEF_REPOSITORY')
+	load_panel('PUPPET_REPOSITORY')
+	load_panel('TEST_KITCHEN_PATH')
+	if @settings['TEST_KITCHEN_PATH'].text == nil or @settings['TEST_KITCHEN_PATH'].text == ""
+	   @properties['TEST_KITCHEN_PATH']  = "#{ENV['EC2DREAM_HOME']}/chef/chef-repo/site-cookbooks/mycompany_webserver"
+	   @settings['TEST_KITCHEN_PATH'].text = "#{ENV['EC2DREAM_HOME']}/chef/chef-repo/site-cookbooks/mycompany_webserver"
+        end
         load_panel('VAGRANT_REPOSITORY')
-        if @settings['VAGRANT_REPOSITORY'].text == nil or @settings['VAGRANT_REPOSITORY'].text == "" 
+        if @settings['VAGRANT_REPOSITORY'].text == nil or @settings['VAGRANT_REPOSITORY'].text == ""
            @properties['VAGRANT_REPOSITORY']  = "#{ENV['EC2DREAM_HOME']}/chef/vagrant"
            @settings['VAGRANT_REPOSITORY'].text = "#{ENV['EC2DREAM_HOME']}/chef/vagrant"
-        end   
+        end
         load_panel('AVAILABILITY_ZONE')
         load_panel('AMAZON_NICKNAME_TAG')
         if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
            load_panel('TERMINAL_EMULATOR')
-        end   
+        end
         @settings['EXTERNAL_EDITOR'].text = get_system('EXTERNAL_EDITOR')
         @settings['EXTERNAL_BROWSER'].text = get_system('EXTERNAL_BROWSER')
         @settings['TIMEZONE'].text = get_system('TIMEZONE')
-	    if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil        
+	    if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
           load_panel('PUTTY_PRIVATE_KEY')
-        end 
+        end
         load_panel('CLOUD_ADMIN_URL')
-		if @settings['EC2_PLATFORM'].text=="google" 
+		if @settings['EC2_PLATFORM'].text=="google"
 			@settings['AMAZON_ACCESS_KEY_ID_LABEL'].text="CLIENT_EMAIL"
 			@settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].text="KEY_LOCATION"
 			@settings['AMAZON_ACCOUNT_ID_LABEL'].text=""
-		    @settings['EC2_URL_LABEL'].text="PROJECT" 
+		    @settings['EC2_URL_LABEL'].text="PROJECT"
 			@settings['AVAILABILITY_ZONE_LABEL'].text = "ZONE"
 			@settings['AMAZON_NICKNAME_TAG'].text=""
-		else	
+		else
 			@settings['AMAZON_ACCESS_KEY_ID_LABEL'].text="ACCESS_KEY"
 			@settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].text="SECRET_ACCESS_KEY"
 			@settings['AMAZON_ACCOUNT_ID_LABEL'].text="ACCOUNT_ID"
-		    @settings['EC2_URL_LABEL'].text="URL" 
-			@settings['AVAILABILITY_ZONE_LABEL'].text = "AVAILABILITY_ZONE"	
-            @settings['AMAZON_NICKNAME_TAG'].text="NICKNAME TAG"			
-	    end		
+		    @settings['EC2_URL_LABEL'].text="URL"
+			@settings['AVAILABILITY_ZONE_LABEL'].text = "AVAILABILITY_ZONE"
+            @settings['AMAZON_NICKNAME_TAG'].text="NICKNAME TAG"
+	    end
      end
      @ec2_main.app.forceRefresh
-  end 
-  
+  end
+
   def load_panel(key)
-   puts "Settings.load_panel "+key  
+   puts "Settings.load_panel "+key
    if @properties[key] != nil
       @settings[key].text = @properties[key]
    end
-  end 
-  
+  end
+
   def clear_panel
     clear('ENV_NAME')
     clear('REPOSITORY_LOCATION')
-    clear('EC2_PLATFORM')	
+    clear('EC2_PLATFORM')
     clear('EC2_URL')
     clear('EC2_SSH_PRIVATE_KEY')
     clear('AMAZON_ACCOUNT_ID')
     clear('AMAZON_ACCESS_KEY_ID')
     clear('AMAZON_SECRET_ACCESS_KEY')
-	clear('CHEF_REPOSITORY')
-	clear('PUPPET_REPOSITORY')
+    clear('CHEF_REPOSITORY')
+    clear('PUPPET_REPOSITORY')
+    clear('TEST_KITCHEN_PATH')
     clear('VAGRANT_REPOSITORY')
     clear('AVAILABILITY_ZONE')
     clear('AMAZON_NICKNAME_TAG')
@@ -422,95 +457,95 @@ class EC2_Settings
     if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
        clear('PUTTY_PRIVATE_KEY')
     end
-    if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil   
+    if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
        @settings['TERMINAL_EMULATOR'].text = "xterm"
-    end   
+    end
     clear('CLOUD_ADMIN_URL')
-  end 
-  
+  end
+
   def clear(key)
     @settings[key].text = ""
-    if key.index("EC2_")==0 or key.index("AMAZON_")==0 or key.index("S3_")==0 
+    if key.index("EC2_")==0 or key.index("AMAZON_")==0 or key.index("S3_")==0
      ENV[key]=""
-    end 
-  end  
-  
+    end
+  end
+
   def get(key)
      #puts "Settings.get #{key}"
-     if @properties[key] != nil 
+     if @properties[key] != nil
         return @properties[key]
-     else 
+     else
         return ""
      end
   end
 
   def amazon
        if get("EC2_PLATFORM") == "amazon"
-         return true 
+         return true
        else
          return false
        end
-  end 
+  end
 
   def google
        if get("EC2_PLATFORM") == "google"
-         return true 
+         return true
        else
          return false
        end
-  end    
-  
+  end
+
  def cloudstack
        if get("EC2_PLATFORM") == "cloudstack"
-         return true 
+         return true
        else
          return false
        end
-  end  
+  end
 
   def eucalyptus
        if get("EC2_PLATFORM") == "eucalyptus"
-         return true 
+         return true
        else
          return false
        end
-  end 
-  
+  end
+
   #def openstack
   #   if get("EC2_PLATFORM").start_with?("openstack")
-  #     return true 
+  #     return true
   #   else
   #     return false
   #   end
   #end
-  
+
   def openstack
       begin
        if $ec2_main.cloud.api == 'openstack'
-          true 
+          true
        else
           false
        end
-	  rescue 
+	  rescue
 	   false
 	  end
-  end 
+  end
 
  def aws
      begin
        if $ec2_main.cloud.api == 'aws'
-          true 
+          true
        else
           false
        end
-	 rescue 
+	 rescue
        false
-     end	   
-  end 
-  
+     end
+  end
+
   def openstack_hp
        if get("EC2_PLATFORM") == "openstack_hp"
-         return true 
+         return true
        else
          return false
        end
@@ -518,43 +553,44 @@ class EC2_Settings
 
   def openstack_rackspace
        if get("EC2_PLATFORM") == "openstack_rackspace"
-         return true 
+         return true
        else
          return false
        end
   end
-  
+
   def cloudfoundry
        if get("EC2_PLATFORM") == "cloudfoundry"
-         return true 
+         return true
        else
          return false
        end
-  end  
-  
+  end
+
   def put(key,value)
      puts "Settings.put"
      @properties[key] = value
-     begin 
+     begin
         @settings[key].text = value
-     rescue 
+     rescue
      end
-     if key.index("EC2_")==0 or key.index("AMAZON_")==0 or key.index("S3_")==0 
+     if key.index("EC2_")==0 or key.index("AMAZON_")==0 or key.index("S3_")==0
        ENV[key] = value
      end
-  end 
-  
+  end
+
   def save
      puts "Settings.save"
      @settings['EC2_PLATFORM'].text = (@settings['EC2_PLATFORM'].text).downcase
-     save_setting('EC2_PLATFORM') 
+     save_setting('EC2_PLATFORM')
      save_setting("EC2_URL")
      save_setting("EC2_SSH_PRIVATE_KEY")
      save_setting("AMAZON_ACCOUNT_ID")
      save_setting("AMAZON_ACCESS_KEY_ID")
      save_setting("AMAZON_SECRET_ACCESS_KEY")
-	 save_setting("CHEF_REPOSITORY")
-	 save_setting("PUPPET_REPOSITORY")
+     save_setting("CHEF_REPOSITORY")
+     save_setting("PUPPET_REPOSITORY")
+     save_setting("TEST_KITCHEN_PATH")
      save_setting("VAGRANT_REPOSITORY")
      save_setting("AVAILABILITY_ZONE")
      save_setting("AMAZON_NICKNAME_TAG")
@@ -566,7 +602,7 @@ class EC2_Settings
      save_properties(@properties,env_path+"/env.properties")
      @ec2_main.environment.reset_connection
   end
-  
+
   def save_system_screen_values
      if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
         put_system("TERMINAL_EMULATOR",@settings["TERMINAL_EMULATOR"].text)
@@ -576,77 +612,77 @@ class EC2_Settings
      put_system("TIMEZONE",@settings["TIMEZONE"].text)
      save_system()
   end
-  
+
   def save_setting(key)
-    puts "Settings.save_setting "+key  
+    puts "Settings.save_setting "+key
     if @settings[key].text != nil
       @properties[key] =  @settings[key].text
     else
       @properties[key] = nil
     end
-    if key.index("EC2_")==0 or key.index("AMAZON_")==0 or key.index("S3_")==0 
+    if key.index("EC2_")==0 or key.index("AMAZON_")==0 or key.index("S3_")==0
        ENV[key]=@properties[key]
-    end  
-  end 
-  
-  
+    end
+  end
+
+
   #
   # System property settings
   #
-  
+
    def load_system
        puts "Settings.load_system"
        begin
           @system_properties = read_properties(ENV['EC2DREAM_HOME']+"/env/system.properties")
-       rescue 
+       rescue
           {}
        end
     end
-    
+
     def get_system(key)
          #puts "Settings.get_system "+key
-         r = nil 
+         r = nil
          if key == "ENV_PATH"
-            loc = @system_properties["REPOSITORY_LOCATION"] 
-            if loc == nil or loc == "" 
+            loc = @system_properties["REPOSITORY_LOCATION"]
+            if loc == nil or loc == ""
               r = ENV['EC2DREAM_HOME']+"/env/"+@system_properties['ENVIRONMENT']
             else
               r = loc +"/"+@system_properties['ENVIRONMENT']
-            end  
+            end
          else
             if key == "REPOSITORY_LOCATION"
-               r = @system_properties["REPOSITORY_LOCATION"] 
+               r = @system_properties["REPOSITORY_LOCATION"]
                if r == nil or r == ""
                   r = ENV['EC2DREAM_HOME']+"/env"
                end
                @settings['REPOSITORY_LOCATION'].text = r
-            else   
+            else
               r = @system_properties[key]
-            end  
+            end
          end
          return r
     end
-    
+
     def put_system(key, value)
         puts "Settings.put_system "+key
         if key != nil
           @system_properties[key] =  value
         end
-        if key == 'EXTERNAL_EDITOR' 
+        if key == 'EXTERNAL_EDITOR'
            @settings['EXTERNAL_EDITOR'].text = value
-        end   
+        end
         if key == 'EXTERNAL_BROWSER'
            @settings['EXTERNAL_BROWSER'].text = value
         end
         if key == 'TIMEZONE'
            @settings['TIMEZONE'].text = value
-        end           
+        end
     end
-     
+
     def save_system()
         puts "Settings.save_system"
         save_properties(@system_properties,ENV['EC2DREAM_HOME']+"/env/system.properties")
-    end 
+    end
 
   #
   # Filter property settings
@@ -667,12 +703,12 @@ class EC2_Settings
                @tags_filter = Marshal.load(f)
             end
          else
-            @tags_filter = {}  
+            @tags_filter = {}
          end
       end
-      return @tags_filter  
+      return @tags_filter
     end
-     
+
     def enable_if_env_set(sender)
             @env = @ec2_main.environment.env
             if @env != nil and @env.length>0
@@ -680,14 +716,14 @@ class EC2_Settings
             else
               sender.enabled = false
             end
-    end 
-        
+    end
+
     def enable_if_server_loaded(sender)
            if @server.loaded
                sender.enabled = true
            else
                sender.enabled = false
-           end 
+           end
     end
-  
-end 
+
+end

@@ -4,7 +4,7 @@ class EC2_Launch
     puts "launch.launch_ops_instance"
     if @ops_launch['Name'].text != nil and @ops_launch['Name'].text != ""
         server = @ops_launch['Name'].text
-    else 
+    else
         error_message("Error","Name not specified")
         return
     end
@@ -23,11 +23,11 @@ class EC2_Launch
          launch_parm['max_count']= (@ops_launch['Maximum_Server_Count'].text).to_i
        else
          launch_parm['max_count']= 1
-       end       
+       end
        if @ops_launch['Keyname'].text != nil and @ops_launch['Keyname'].text != ""
           launch_parm['key_name']= @ops_launch['Keyname'].text
-       # rackspace does not have keynames   
-       #else 
+       # rackspace does not have keynames
+       #else
        #   error_message("Launch Error","Keyname not specified")
        #   return
        end
@@ -37,7 +37,7 @@ class EC2_Launch
           sa = (a).split(",")
           sa.each do |s|
             g.push(s)
-          end          
+          end
        end
        flavor_ref = @ops_launch['Flavor'].text
        launch_parm['security_groups'] = g
@@ -52,47 +52,49 @@ class EC2_Launch
        server = @ops_launch['Security_Group'].text
        if @ops_launch['Name'].text != nil and @ops_launch['Name'].text != ""
          server = @ops_launch['Name'].text
-       end  
+       end
        image_ref = @ops_launch['Image_Id'].text
-      
-       if @ops_launch['AccessIPv4'] != nil 
+
+       if @ops_launch['AccessIPv4'].text != nil and @ops_launch['AccessIPv4'].text != ""
           launch_parm['accessIPv4'] =  @ops_launch['AccessIPv4'].text
-       end 
-       if @ops_launch['AccessIPv6'] != nil 
+       end
+       if @ops_launch['AccessIPv6'].text != nil and @ops_launch['AccessIPv6'].text != ""
           launch_parm['accessIPv6'] =  @ops_launch['AccessIPv6'].text
-       end        
+       end
        puts "launch server "+server
        item_server = ""
        item = []
        begin
           puts "Create #{server}, #{image_ref}, #{flavor_ref}, #{launch_parm}"
           r =  @ec2_main.environment.servers.create_server(server, image_ref, flavor_ref, launch_parm)
+          puts "*** returned from create server #{r}"
        rescue
           error_message("Launch of Server Failed",$!)
           return
        end
-        instance_id = r['id'].to_s
+       instance_id = r['id'].to_s
        r[:aws_instance_id] = instance_id
-       if r.instance_of?(Hash) and r['adminPass'] != nil 
+       if r.instance_of?(Hash) and r['adminPass'] != nil
           @ops_launch['Admin_Password'].text = r['adminPass']
           ops_save
        end
        item_server = "#{r[:name]}/#{instance_id}"
-        if launch_parm['min_count']>1 or launch_parm['max_count']>1
+       if launch_parm['min_count']>1 or launch_parm['max_count']>1
           @ec2_main.treeCache.refresh
        else
           @ec2_main.serverCache.addInstance(r)
-       end   
+       end
+       @ec2_main.server.ops_clear_panel
        @ec2_main.server.load_server(item_server)
        @ec2_main.tabBook.setCurrent(1)
     end
- end 
- 
- 
- 
+ end
+
+
+
   def load_ops(parm)
        puts "Launch.load_ops"
-       clear_ops_panel      
+       clear_ops_panel
        @type = "ops"
        @profile_type = "secgrp"
        @profile_folder = "opslaunch"
@@ -122,7 +124,7 @@ class EC2_Launch
         	  end
         	 end
          end
-      
+
          load_ops_panel('Security_Group')
          load_ops_panel('Chef_Node')
          load_ops_panel('Image_Id')
@@ -135,7 +137,7 @@ class EC2_Launch
          load_ops_panel('Putty_Private_Key')
          load_ops_panel('Minimum_Server_Count')
          load_ops_panel('Maximum_Server_Count')
-         load_ops_panel('Availability_Zone')         
+         load_ops_panel('Availability_Zone')
          load_ops_panel('User_Data')
          load_ops_panel('User_Data_File')
          load_ops_panel('AccessIPv4')
@@ -149,13 +151,13 @@ class EC2_Launch
        end
        load_notes
        @ec2_main.app.forceRefresh
- end 
- 
+ end
+
    def clear_ops_panel
-     puts "Launch.clear_ops_panel" 
+     puts "Launch.clear_ops_panel"
      @type = "ops"
      @profile = ""
-     @resource_tags = nil 
+     @resource_tags = nil
      @frame1.hide()
      @frame3.hide()
      @frame4.show()
@@ -172,52 +174,52 @@ class EC2_Launch
      ops_clear('SSH_Private_Key')
      ops_clear('Minimum_Server_Count')
      ops_clear('Maximum_Server_Count')
-     ops_clear('Availability_Zone')         
+     ops_clear('Availability_Zone')
      ops_clear('User_Data')
      ops_clear('User_Data_File')
      ops_clear('AccessIPv4')
-     ops_clear('AccessIPv6')        
+     ops_clear('AccessIPv6')
      ops_clear('Image_Id')
      ops_clear('EC2_SSH_User')
      if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
         ops_clear('Putty_Private_Key')
      end
-     clear_notes     
+     clear_notes
      @launch_loaded = false
      #puts @launch['Security_Group'].text
-   end  
-   
+   end
+
    def ops_clear(key)
       if key == 'Admin_Password'
          @properties.each_pair do |key, value|
             if key.start_with?('Admin_Password')
                @properties[key] = ""
             end
-         end   
-      else   
+         end
+      else
          @properties[key] = ""
-      end   
+      end
       @ops_launch[key].text = ""
-   end     
+   end
 
    def ops_put(key,value)
       puts "Launch.ops_put "+key
       if key == 'Admin_Password' and @properties['Name'] != nil and @properties['Name'] != ""
          @properties[key+"_"+@properties['Name']] = value
-         @ops_launch[key].text = value      
+         @ops_launch[key].text = value
       else
          @properties[key] = value
          @ops_launch[key].text = value
-      end   
-   end 
+      end
+   end
 
    def ops_save
      puts "Launch.save_ops"
      @profile = @ops_launch['Name'].text
      @profile_folder = "opslaunch"
      if @profile == nil or @profile == ""
-        error_message("Error","No Server Name specified") 
-     else       
+        error_message("Error","No Server Name specified")
+     else
       load_ops_image  if !@ec2_main.settings.openstack_hp
       save_ops_launch('Security_Group')
       save_ops_launch('Chef_Node')
@@ -231,18 +233,18 @@ class EC2_Launch
       save_ops_launch('Putty_Private_Key')
       save_ops_launch('Minimum_Server_Count')
       save_ops_launch('Maximum_Server_Count')
-      save_ops_launch('Availability_Zone')       
+      save_ops_launch('Availability_Zone')
       save_ops_launch('User_Data')
       save_ops_launch('User_Data_File')
       save_ops_launch('AccessIPv4')
-      save_ops_launch('AccessIPv6')      
+      save_ops_launch('AccessIPv6')
       doc = ""
       @properties.each_pair do |key, value|
-         if value != nil 
+         if value != nil
             puts "#{key}=#{value}\n"
             doc = doc + "#{key}=#{value}\n"
-         end 
-      end      
+         end
+      end
       fn = @ec2_main.settings.get_system('ENV_PATH')+"/"+@profile_folder+"/"+@profile+".properties"
       begin
          File.open(fn, "w") do |f|
@@ -252,21 +254,21 @@ class EC2_Launch
          @launch_loaded = true
       rescue
          puts "launch loaded false"
-         @launch_loaded = false      
+         @launch_loaded = false
       end
-     end 
+     end
    end
-   
+
    def load_ops_panel(key)
        if key == 'Admin_Password' and @properties['Name'] != nil and @properties['Name'] != ""
-	  @ops_launch[key].text = @properties[key+"_"+@properties['Name']]    
+	  @ops_launch[key].text = @properties[key+"_"+@properties['Name']]
        elsif @properties[key] != nil
          @ops_launch[key].text = @properties[key]
        end
-   end 
-   
+   end
+
    def save_ops_launch(key)
-        puts "Launch.save_ops_launch" 
+        puts "Launch.save_ops_launch"
         if key == 'Admin_Password' and @properties['Name'] != nil and @properties['Name'] != ""
 	   @properties[key+"_"+@properties['Name']] = @ops_launch[key].text
         elsif @ops_launch[key].text != nil
@@ -281,7 +283,7 @@ class EC2_Launch
 	 return @properties[key+"_"+@properties['Name']]
       else
           return @properties[key]
-      end   
+      end
    end
 
    def ops_delete
@@ -298,29 +300,30 @@ class EC2_Launch
               load_ops(@profile)
             end
          else
-            error_message("Error","No Launch Profile for "+@profile+" to delete") 
+            error_message("Error","No Launch Profile for "+@profile+" to delete")
          end
-      rescue 
+      rescue
       end
-   end 
-   
+   end
 
-  
+
+
 
 def load_ops_image
       puts "Launch.load_ops_image"
        image_id = @properties['Image_Id']
        if image_id != nil and image_id != ""
-         begin 
-          r = @ec2_main.environment.images.get(image_id) 
-          if r != nil 
-            ops_put('Image_Name',r[:name]) 
-          end            
+         begin
+          r = @ec2_main.environment.images.get(image_id)
+          if r != nil
+            ops_put('Image_Name',r[:name])
+          end
+          #return r[:server]['links'][0]['href'] if !@ec2_main.settings.openstack_hp and !@ec2_main.settings.openstack_rackspace
          rescue
-          puts "ERROR: Image not found"
-          error_message("Error","Launch Profile: Image Id not found")
+           puts "ERROR: Image not found"
+           error_message("Error","Launch Profile: Image Id not found")
          end
-       end   
+       end
    end
 
 end

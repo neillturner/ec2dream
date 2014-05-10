@@ -8,8 +8,8 @@ class Data_volumes
 
   def initialize(owner)
      puts "data_security_group.initialize"
-     @ec2_main = owner  
-  end 
+     @ec2_main = owner
+  end
 
   # Describe EBS volumes.
   #
@@ -37,25 +37,25 @@ class Data_volumes
   #        :aws_created_at => Wed Jun 18 08:19:21 UTC 2008,}, ... ]
   #
   #  ec2.describe_volumes(:filters => { 'availability-zone' => 'us-east-1a', 'size' => '10' })
-  #  
+  #
   def all(filter=nil)
     data = Array.new
     #conn = @ec2_main.environment.connection
     conn = @ec2_main.environment.volume_connection
     if conn != nil
        begin
-          if  @ec2_main.settings.openstack  
+          if  @ec2_main.settings.openstack
              x = conn.volumes.all
              x.each do |y|
 	        r = {}
                 r[:aws_id] = y.id.to_s
                 r[:aws_created_at]  = y.created_at.to_s
                 r[:zone] = y.availability_zone
-                r[:aws_size]  = y.size.to_s                
-                r[:aws_instance_id] = nil                     
+                r[:aws_size]  = y.size.to_s
+                r[:aws_instance_id] = nil
                 r[:aws_attachment_status] = nil
                 r[:aws_device] = nil
-                
+
                 if  @ec2_main.settings.openstack_rackspace
                    r[:name] = y.display_name
                    r[:description] = y.display_description
@@ -70,7 +70,7 @@ class Data_volumes
                    r[:type] = y.type
                    r[:aws_status] =y.status
                    r[:snapshot_id] = y.snapshot_id.to_s
-                end   
+                end
                 r[:attachments] = y.attachments
                 if y.attachments != nil and y.attachments.instance_of? Array and y.attachments[0] != nil
                      if y.attachments[0]['serverId'] != nil and y.attachments[0]['serverId'] != ""
@@ -81,11 +81,11 @@ class Data_volumes
                       r[:aws_attachment_status] = "attached"
                       r[:aws_instance_id] = y.attachments[0]['server_id'].to_s
                       r[:aws_device] = y.attachments[0]['device'].to_s
-                   end   
-                end   
+                   end
+                end
                   data.push(r)
              end
-		  elsif @ec2_main.settings.google 
+		  elsif @ec2_main.settings.google
 					response = conn.list_disks($google_zone)
 					if response.status == 200
 						x = response.body['items']
@@ -94,7 +94,7 @@ class Data_volumes
 						end
 					else
 						data = []
-					end			 
+					end
           elsif conn.instance_of?(Fog::Compute)
              x = conn.volumes.all(filters)
              x.each do |y|
@@ -102,47 +102,47 @@ class Data_volumes
                 r[:aws_id] = y.id.to_s
                 r[:aws_created_at]  = y.created_at.to_s
                 r[:zone] = y.availability_zone
-                r[:aws_size]  = y.size.to_s                
-                r[:aws_instance_id] = y.server_id.to_s                     
+                r[:aws_size]  = y.size.to_s
+                r[:aws_instance_id] = y.server_id.to_s
                 r[:aws_status] =y.state
                 r[:aws_attachment_status] = nil
                 r[:aws_device] = y.device
                 r[:snapshot_id] = y.snapshot_id.to_s
                 r[:tags] = y.tags
                 data.push(r)
-             end                  
-          else             
+             end
+          else
               data = conn.describe_volumes([],{:filters => filter})
-          end   
+          end
        rescue
           puts "ERROR: getting all volumes  #{$!}"
        end
-    end   
+    end
     return data
   end
-  
-  
+
+
   def get(volume_id)
     if  @ec2_main.settings.google
-     data = {}	
+     data = {}
      conn = @ec2_main.environment.connection
      if conn != nil
         data = conn.disks.get(volume_id,$goggle_zone)
-     else 
+     else
         raise "Connection Error"
      end
-     return data  	   
-	else 
+     return data
+	else
      data = {}
      conn = @ec2_main.environment.volume_connection
      if conn != nil
         data = conn.volumes.get(volume_id)
-     else 
+     else
         raise "Connection Error"
      end
      return data
-	end 
-  end 
+	end
+  end
 
   # Create new EBS volume based on previously created snapshot.
   # +Size+ in Gigabytes.
@@ -154,7 +154,7 @@ class Data_volumes
   #       :zone           => "merlot",
   #       :aws_created_at => "2008-06-24T18:13:32.000Z",
   #       :aws_size       => 94}
-  #  
+  #
   def create_volume(availability_zone, size, snapshot_id = nil, name="", description="",type="", iops=0)
      data = {}
      conn = @ec2_main.environment.volume_connection
@@ -163,7 +163,7 @@ class Data_volumes
            options = {}
            if !snapshot_id.nil? and !snapshot_id.empty?
               options['snapshot_id'] = snapshot_id
-           end   
+           end
            if  @ec2_main.settings.openstack_rackspace
               options[:display_name] = name
 	      options[:display_description] = description
@@ -172,7 +172,7 @@ class Data_volumes
               response = conn.create_volume(size.to_i, options)
            else
               response = conn.create_volume(name, description, size.to_i, options)
-           end   
+           end
            if response.status == 200 or response.status == 202
 	      response = response.body["volume"]
 	      # this might be hash when implemented
@@ -185,7 +185,7 @@ class Data_volumes
               data[:type] = response['volumeType']
               data[:name] = response['displayName']
               data[:description] = response['displayDescription']
-	   else   
+	   else
 	      data = {}
 	   end
 	elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
@@ -206,15 +206,15 @@ class Data_volumes
               data[:iops] = response['iops']
            else
               data = {}
-           end  	    
-        else   	   	   
+           end
+        else
            data  = conn.create_volume(snapshot_id, size, availability_zone)
         end
-     else 
+     else
         raise "Connection Error"
      end
      return data
-  end 
+  end
 
   # Attach the specified EBS volume to a specified instance, exposing the
   # volume using the specified device name.
@@ -225,12 +225,12 @@ class Data_volumes
   #      :aws_status      => "attaching",
   #      :aws_attached_at => "2008-03-28T14:14:39.000Z",
   #      :aws_id          => "vol-898a6fe0" }
-  #  
+  #
   def attach_volume(instance_id, volume_id, device)
      data = {}
      conn = @ec2_main.environment.connection
      if conn != nil
-        if  @ec2_main.settings.openstack 
+        if  @ec2_main.settings.openstack_hp or @ec2_main.settings.openstack_rackspace
             response = conn.attach_volume(instance_id, volume_id, device)
             if response.status == 200
               response = response.body
@@ -242,7 +242,20 @@ class Data_volumes
               data[:aws_id] = response['volumeId']
             else
               data = {}
-            end               
+            end
+        elsif  @ec2_main.settings.openstack
+            response = conn.attach_volume(volume_id, instance_id, device)
+            if response.status == 200
+              response = response.body
+              #data[:aws_attached_at] = response['attachTime']
+              #data[:aws_device] = response['device']
+              #data[:aws_instance_id] = response['instanceId']
+              data[:request_id] = response['id']
+              #data[:aws_attachment_status] = response['status']
+              data[:aws_id] = response['volumeId']
+            else
+              data = {}
+            end
 	elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
 	    response = conn.attach_volume(instance_id, volume_id, device)
             if response.status == 200
@@ -255,14 +268,14 @@ class Data_volumes
               data[:aws_id] = response['volumeId']
             else
               data = {}
-            end               
-        else                     
+            end
+        else
            data = conn.attach_volume(volume_id, instance_id, device)
-        end   
-     else 
+        end
+     else
         raise "Connection Error"
      end
-     return data  
+     return data
   end
 
   # Detach the specified EBS volume from the instance to which it is attached.
@@ -273,7 +286,7 @@ class Data_volumes
   #       :aws_status      => "detaching",
   #       :aws_attached_at => "2008-03-28T14:38:34.000Z",
   #       :aws_id          => "vol-898a6fe0"}
-  #  
+  #
   def detach_volume(volume_id, instance_id="", options = {})
      data = {}
      conn = @ec2_main.environment.connection
@@ -283,7 +296,7 @@ class Data_volumes
                response = conn.delete_attachment(instance_id, volume_id)
             else
                response = conn.detach_volume(instance_id, volume_id)
-            end   
+            end
             if response.status == 202
               #response = response.body
               #data[:aws_attached_at] = response['attachTime']
@@ -294,7 +307,7 @@ class Data_volumes
               #data[:aws_id] = response['volumeId']
             else
               data = {}
-            end 
+            end
 	elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
 	   response = conn.detach_volume(volume_id, options)
            if response.status == 200
@@ -307,15 +320,15 @@ class Data_volumes
               data[:aws_id] = response['volumeId']
            else
               data = {}
-           end            
-        else                       
+           end
+        else
            data = conn.detach_volume(volume_id)
-        end  
-     else 
+        end
+     else
         raise "Connection Error"
      end
-     return data  
-  end  
+     return data
+  end
 
   # Delete the specified EBS volume.
   # This does not deletes any snapshots created from this volume.
@@ -332,24 +345,24 @@ class Data_volumes
               data = response.body
            else
               data = {}
-           end                  
+           end
 	elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
 	   response = conn.delete_volume(volume_id)
            if response.status == 200
               data = true
            else
               data = false
-           end            
-        else            
+           end
+        else
            data = conn.delete_volume(volume_id)
-        end   
-     else 
+        end
+     else
         raise "Connection Error"
      end
-     return data  
-  end  
-  
-  
+     return data
+  end
+
+
   # Attach a google disk
   def  attach_disk(instance, zone, disk_name, device_name=nil, disk_mode='READ_WRITE', disk_type='PERSISTENT')
      data = false
@@ -360,13 +373,13 @@ class Data_volumes
            data = response.body
         else
            data = {}
-        end                  
-     else 
+        end
+     else
         raise "Connection Error"
      end
-     return data  
-  end  
-  
+     return data
+  end
+
   # Detach a google disk
   def  detach_disk(instance, zone, device_name)
      data = false
@@ -377,13 +390,13 @@ class Data_volumes
            data = response.body
         else
            data = {}
-        end                  
-     else 
+        end
+     else
         raise "Connection Error"
      end
-     return data  
-  end  
-  
+     return data
+  end
+
   # Delete a google disk
   def  delete_disk(name, zone_name)
      data = false
@@ -394,13 +407,13 @@ class Data_volumes
            data = response.body
         else
            data = {}
-        end                  
-     else 
+        end
+     else
         raise "Connection Error"
      end
-     return data  
-  end  
-  
+     return data
+  end
+
    # Insert a google disk
   def  insert_disk(disk_name, zone_name, image_name=nil, opts={})
      data = false
@@ -411,13 +424,13 @@ class Data_volumes
            data = response.body
         else
            data = {}
-        end                  
-     else 
+        end
+     else
         raise "Connection Error"
      end
-     return data  
-  end  
+     return data
+  end
 
-  
+
 
 end

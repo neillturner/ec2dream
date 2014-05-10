@@ -2,18 +2,18 @@
  "Cloud":{
    "Compute":{
     "Launch": {},
-    "Chef Test Kitchen":{
+    "Test Kitchen":{
           "request":"",
-          "name":"chef_test_kitchen",
+          "name":"test_kitchen",
           "response": "",
           "response_code": 200,
-          "action": ["edit","logs","select","","","","","",""],
-          "icon": ["@edit","@script","@server","","@csv","","","",""],
-          "tooltip":["Edit kitchen.yml","View Logs"," Select Server ",""," Csv Data ","","","",""],
-          "dialog":["edit(@ec2_main.settings.get('CHEF_REPOSITORY')+'/.kitchen.yml')","KIT_LogSelectDialog","$ec2_main.server.kit_load(@curr_item,@curr_driver,@curr_provisioner,@curr_last_action);$ec2_main.tabBook.setCurrent(1)","","","","","",""],
-          "dialog_parm": ["","","","","","","","",""], 
+          "action": ["config","logs","select","edit","","","","",""],
+          "icon": ["@edit","@script","@server","@script_edit","@csv","","","",""],
+          "tooltip":["Configure Test Kitchen Path","View Logs"," Select Server ","Edit kitchen.yml"," Csv Data ","","","",""],
+          "dialog":["KIT_PathCreateDialog","KIT_LogSelectDialog","$ec2_main.server.kit_load(@curr_item,@curr_driver,@curr_provisioner,@curr_last_action);$ec2_main.tabBook.setCurrent(1)","edit(@ec2_main.settings.get('TEST_KITCHEN_PATH')+'/.kitchen.yml')","","","","",""],
+          "dialog_parm": ["","","","","","","","",""],
           "keys": ["Instance"]
-    },   	 	
+    },
     "Vagrant":{
           "request":"",
           "name":"vagrant",
@@ -23,9 +23,9 @@
           "icon": ["@create","@delete","@edit","@rocket","@csv","@disconnect","","",""],
           "tooltip":[" Create Vagrantfile ","  Delete Vagrantfile "," Edit Vagrantfile "," vagrant up "," Csv Data "," vagrant destroy ","","",""],
           "dialog":["VAG_CreateDialog","VAG_DeleteDialog","edit(@vagrant_file)","VAG_UpDialog","","VAG_DestroyDialog","","",""],
-          "dialog_parm": ["","","","","","","","",""], 
+          "dialog_parm": ["","","","","","","","",""],
           "keys": []
-    },  	    
+    },
     "Security Groups":{
       "request":"describe_security_groups",
       "name":"security_group",
@@ -35,7 +35,7 @@
       "icon": ["@create", "@edit", "","","@csv","","","",""],
       "tooltip":[" Create Security Group "," Edit Security Group ", "","","","","","",""],
       "dialog":["EC2_SecGrp_CreateDialog","$ec2_main.secgrp.load(@curr_item);$ec2_main.tabBook.setCurrent(3)","","","","","","",""],
-      "dialog_parm": ["","", "","","","","","",""], 
+      "dialog_parm": ["","", "","","","","","",""],
       "keys": ["groupName"]
     },
    "Servers":{
@@ -47,9 +47,9 @@
       "icon": ["@view","","","","@csv","","","",""],
       "tooltip":[" View ","","",""," Csv Data ","","","",""],
       "dialog":["$ec2_main.server.load(@curr_item);$ec2_main.tabBook.setCurrent(1)","","","","","","","",""],
-      "dialog_parm": ["","","","","","","","",""], 
+      "dialog_parm": ["","","","","","","","",""],
       "keys": ["instanceId"]
-    },	
+    },
    "Images":{
       "request":"describe_images",
       "name":"image",
@@ -59,7 +59,7 @@
       "icon": ["@magnifier","@delete","","","@csv","","@view","",""],
       "tooltip":["  Select Images  ","  Delete and Deregister EBS Image  ","",""," Csv Data "," Launch Server Instance ","  Image Attributes  ","",""],
       "dialog":["EC2_ImageSelectDialog","EC2_ImageEBSDeleteDialog","","","","","EC2_ImageAttributeDialog","",""],
-      "dialog_parm": ["","","","","","","","",""], 
+      "dialog_parm": ["","","","","","","","",""],
       "keys": ["imageId","imageLocation"]
     },
   "Volumes":{
@@ -71,7 +71,7 @@
       "icon": ["@create","@delete","@link","@link_break","@csv","","@camera","",""],
       "tooltip":["  Create  ","Delete"," Attach Volume "," Detach Volume "," Csv Data ","","  Create Snapshot  ","",""],
       "dialog": ["EC2_EBSCreateDialog","EC2_EBSDeleteDialog","EC2_EBSAttachDialog","EC2_EBSDetachDialog","","","EC2_SnapVolumeDialog","",""],
-      "dialog_parm": ["","","","@curr_instance","","","","",""], 
+      "dialog_parm": ["","","","@curr_instance","","","","",""],
       "keys": ["volumeId"]
     },
   "Snapshots":{
@@ -83,7 +83,7 @@
       "icon": ["@create","@delete","","@create_image_icon","@csv","","","",""],
       "tooltip":[" Create Volume ","Delete",""," Register Image "," Csv Data ","","","",""],
       "dialog":["EC2_EBSCreateDialog","EC2_SnapDeleteDialog","","EC2_SnapRegisterDialog","","","","",""],
-      "dialog_parm": ["@curr_item,@volumeSize","","","","","","","",""], 
+      "dialog_parm": ["@curr_item,@volumeSize","","","","","","","",""],
       "keys": ["snapshotId"]
     },
    "Key Pairs":{
@@ -95,7 +95,7 @@
       "icon": ["@create","@delete","","","@csv","","","",""],
       "tooltip":["  Create  ","Delete","",""," Csv Data ","","","",""],
       "dialog":["EC2_KeypairCreateDialog","EC2_KeypairDeleteDialog","","","","","","",""],
-      "dialog_parm": ["","","","","","","","",""], 
+      "dialog_parm": ["","","","","","","","",""],
       "keys": ["keyName"]
     },
   "IP Addresses":{
@@ -107,7 +107,7 @@
       "icon": ["@create","@delete","@link","@link_break","@csv","","","",""],
       "tooltip":["  Allocate  ","Delete"," Associate IP Address "," Dis-associate IP Address "," Csv Data ","","","",""],
       "dialog":["EC2_EIPCreateDialog","EC2_EIPDeleteDialog","EC2_EIPAssociateDialog","EC2_EIPDisassociateDeleteDialog","","","","",""],
-      "dialog_parm": ["","","","@curr_instance","","","","",""], 
+      "dialog_parm": ["","","","@curr_instance","","","","",""],
       "keys": []
     },
 	"Local Servers":{
@@ -119,16 +119,15 @@
           "icon": ["@create","","@edit","","@csv","","","",""],
           "tooltip":[" Create Config ",""," Edit Config ",""," Csv Data ","","","",""],
           "dialog":["LOC_CreateDialog","","$ec2_main.server.loc_load(@curr_item);$ec2_main.tabBook.setCurrent(1)","","","","","",""],
-          "dialog_parm": ["","","","","","","","",""], 
+          "dialog_parm": ["","","","","","","","",""],
           "keys": ["server"]
-    }  	
-  }   
- } 
+    }
+  }
+ }
 }
 
- 
 
- 
-   
- 
-   
+
+
+
+

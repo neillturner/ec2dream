@@ -4,6 +4,7 @@ require 'fog'
 require 'net/http'
 require 'resolv'
 require 'date'
+require 'pathname'
 
 require 'dialog/EC2_SecGrp_CreateDialog'
 
@@ -49,7 +50,7 @@ require 'dialog/ELB_HealthDialog'
 require 'dialog/ELB_PolicyDialog'
 require 'dialog/ELB_InstancesDialog'
 
-require 'dialog/AS_CapacityDialog' 
+require 'dialog/AS_CapacityDialog'
 require 'dialog/AS_LaunchConfigurationDeleteDialog'
 require 'dialog/AS_InstancesDialog'
 require 'dialog/AS_GroupDialog'
@@ -77,6 +78,7 @@ require 'dialog/CFY_ServiceDeleteDialog'
 require 'dialog/LOC_CreateDialog'
 
 require 'dialog/KIT_LogSelectDialog'
+require 'dialog/KIT_PathCreateDialog'
 
 require 'dialog/VAG_CreateDialog'
 require 'dialog/VAG_DeleteDialog'
@@ -134,7 +136,7 @@ class EC2_List
 	@search_search = ""
         @search_type = "Owned By Me"
         @search_platform = "All Platforms"
-        @search_root = "" 
+        @search_root = ""
 	@connection = "Compute"
 	@snap_owner = "self"
 	@db_parm_grp = ""
@@ -150,7 +152,7 @@ class EC2_List
 	@cdn_distribution = ""
 	@curr_association_id = nil
 	@arrow_refresh = @ec2_main.makeIcon("arrow_redo.png")
-	@arrow_refresh.create 
+	@arrow_refresh.create
 	@create = @ec2_main.makeIcon("new.png")
 	@create.create
 	@csv = @ec2_main.makeIcon("doc_excel_csv.png")
@@ -160,11 +162,11 @@ class EC2_List
         @market_icon = @ec2_main.makeIcon("cloudmarket.png")
 	@market_icon.create
 	@monitor = @ec2_main.makeIcon("monitor.png")
-	@monitor.create	
+	@monitor.create
 	@chef_icon = @ec2_main.makeIcon("chef.png")
 	@chef_icon.create
 	@zones = @ec2_main.makeIcon("zones.png")
-	@zones.create	
+	@zones.create
 	@rocket = @ec2_main.makeIcon("rocket.png")
 	@rocket.create
 	@tag_blue = @ec2_main.makeIcon("tag_blue.png")
@@ -178,13 +180,13 @@ class EC2_List
 	@delete_icon = @ec2_main.makeIcon("kill.png")
 	@delete_icon.create
 	@disconnect = @ec2_main.makeIcon("disconnect.png")
-	@disconnect.create	
+	@disconnect.create
 	@delete = @ec2_main.makeIcon("kill.png")
-	@delete.create	
+	@delete.create
 	@stop_icon = @ec2_main.makeIcon("cancel.png")
 	@stop_icon.create
 	@start_icon = @ec2_main.makeIcon("arrow_right.png")
-	@start_icon.create	
+	@start_icon.create
 	@viewstack = @ec2_main.makeIcon("viewstack.png")
 	@viewstack.create
         @put = @ec2_main.makeIcon("application_put.png")
@@ -206,7 +208,7 @@ class EC2_List
 	@server = @ec2_main.makeIcon("server.png")
 	@server.create
 	@camera = @ec2_main.makeIcon("camera.png")
-	@camera.create	
+	@camera.create
 	@link = @ec2_main.makeIcon("link.png")
 	@link.create
 	@script = @ec2_main.makeIcon("script.png")
@@ -216,7 +218,7 @@ class EC2_List
 	@check = @ec2_main.makeIcon("spellcheck.png")
 	@check.create
 	@create_image_icon = @ec2_main.makeIcon("package.png")
-	@create_image_icon.create	
+	@create_image_icon.create
 	@link_break = @ec2_main.makeIcon("link_break.png")
 	@link_break.create
         @help = @ec2_main.makeIcon("help.png")
@@ -226,35 +228,35 @@ class EC2_List
 	@chart = @ec2_main.makeIcon("chart_stock.png")
 	@chart.create
         @puppet = @ec2_main.makeIcon("puppet.png")
-	@puppet.create	
+	@puppet.create
 	@tunnel = @ec2_main.makeIcon("tunnel.png")
 	@tunnel.create
-	
+
     tab1 = FXTabItem.new($ec2_main.tabBook, "  List  ")
   	page1 = FXVerticalFrame.new($ec2_main.tabBook, LAYOUT_FILL, :padding => 0)
    	page1a = FXHorizontalFrame.new(page1,LAYOUT_FILL_X, :padding => 0)
         FXLabel.new(page1a, " ",:opts => LAYOUT_LEFT )
-        
-        @refresh_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)   
+
+        @refresh_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@refresh_button.icon = @arrow_refresh
 	@refresh_button.tipText = " Status Refresh "
 	@refresh_button.connect(SEL_COMMAND) do |sender, sel, data|
 	   if @type == "Images"
 	      @ec2_main.imageCache.set_status("empty")
-	   end  
+	   end
 	   load_sort(@type,@curr_sort,@connection)
 	   if @type == "Cloud Formation Stacks"
 	      @ec2_main.treeCache.refresh
-	   end   
-	end	
+	   end
+	end
 	@refresh_button.connect(SEL_UPDATE) do |sender, sel, data|
 	   if @loaded
 	       	sender.enabled = true
 	   else
 	       sender.enabled = false
            end
-	end 
-	
+	end
+
 	@create_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@create_button.icon = @create
 	@create_button.connect(SEL_COMMAND) do |sender, sel, data|
@@ -269,10 +271,10 @@ class EC2_List
 	       @search_search =  dialog.search
 	       @search_type = dialog.type
                @search_platform = dialog.platform
-               @search_root = dialog.root_device_type               
-               if dialog.selected 
+               @search_root = dialog.root_device_type
+               if dialog.selected
                  load_sort(@type,@curr_sort,@connection)
-               end            
+               end
  	    when "Cloud Formation Stacks"
 	      dialog = CF_StackDialog.new(@ec2_main)
               dialog.execute
@@ -280,10 +282,10 @@ class EC2_List
                  @stack_name = dialog.stack_name
                  load_sort(@type,@curr_sort,"CloudFormation")
               end
-         else 
+         else
 			  call_dialog(0)
-            end 
-         end 
+            end
+         end
 	@create_button.connect(SEL_UPDATE) do |sender, sel, data|
 	   if   @config != nil and @config['icon'] != nil and @config['icon'][0] != ""
 	        button_config(sender, eval(@config['icon'][0]), @config['tooltip'][0])
@@ -291,13 +293,13 @@ class EC2_List
 	   else
 	       sender.enabled = false
            end
-	end         
-        
+	end
+
         @delete_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@delete_button.icon = @delete
 	@delete_button.connect(SEL_COMMAND) do |sender, sel, data|
-           call_dialog(1)	   
-         end 
+           call_dialog(1)
+         end
 	@delete_button.connect(SEL_UPDATE) do |sender, sel, data|
 	   if @loaded and @config['icon'] != nil and @config['icon'][1] != ""
 	        button_config(sender, eval(@config['icon'][1]), @config['tooltip'][1])
@@ -305,10 +307,10 @@ class EC2_List
 	   else
 	       sender.enabled = false
            end
-	end  
-	
+	end
+
         @link_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
-	@link_button.icon = @link        
+	@link_button.icon = @link
 	@link_button.connect(SEL_COMMAND) do |sender, sel, data|
 	   case @type
           when "Snapshots"
@@ -317,11 +319,11 @@ class EC2_List
 	      if dialog.selected
 	         @snap_owner = dialog.snap_owner
 	         load_sort(@type,@curr_sort,@connection)
-              end     		
-           else  
+              end
+           else
 	      call_dialog(2)
            end
-	end    
+	end
 	@link_button.connect(SEL_UPDATE) do |sender, sel, data|
 	   if @loaded and @config['icon'] != nil and @config['icon'][2] != ""
 	        button_config(sender, eval(@config['icon'][2]), @config['tooltip'][2])
@@ -329,13 +331,13 @@ class EC2_List
 	   else
 	       sender.enabled = false
            end
-	end	
+	end
 
 	@link_break_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
-	@link_break_button.icon = @link_break	
+	@link_break_button.icon = @link_break
 	@link_break_button.connect(SEL_COMMAND) do |sender, sel, data|
 	   call_dialog(3)
- 	end 
+ 	end
 	@link_break_button.connect(SEL_UPDATE) do |sender, sel, data|
 	   if @loaded and @config['icon'] != nil and @config['icon'][3] != ""
 	        button_config(sender, eval(@config['icon'][3]), @config['tooltip'][3])
@@ -343,7 +345,7 @@ class EC2_List
 	   else
 	       sender.enabled = false
            end
-	end	
+	end
 
 	@csv_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@csv_button.icon = @csv
@@ -352,8 +354,8 @@ class EC2_List
 	   csv_text = ""
 	   @header1.each do |item|
 	     t = ""
-		 t = item.text if item != nil  
-	     csv_text = csv_text+",#{t}" if csv_text != "" 
+		 t = item.text if item != nil
+	     csv_text = csv_text+",#{t}" if csv_text != ""
 	     csv_text = "#{t}" if csv_text == ""
 	   end
 	   csv_text = csv_text +"\n"
@@ -361,73 +363,73 @@ class EC2_List
 	     csv_line = ""
 	     items.each do |item|
 		    t = ""
-		    t = item.text if item != nil 
+		    t = item.text if item != nil
 	        csv_line = csv_line+",#{t}" if csv_line != ""
 	        csv_line = "#{t}" if csv_line == ""
          end
 		 csv_text = csv_text + csv_line + "\n"
-        end   	      
+        end
         csvdialog = EC2_CSVDialog.new(@ec2_main,csv_text,@type)
         csvdialog.execute
 	end
 	@csv_button.connect(SEL_UPDATE) do |sender, sel, data|
-	   if @loaded == true 
+	   if @loaded == true
 	       sender.enabled = true
 	   else
 	       sender.enabled = false
-	   end 
-	end	
-	
+	   end
+	end
+
 	@launch_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
-	@launch_button.icon = @rocket	
+	@launch_button.icon = @rocket
 	@launch_button.connect(SEL_COMMAND) do |sender, sel, data|
 	   call_dialog(5)
 	end
 	@launch_button.connect(SEL_UPDATE) do |sender, sel, data|
-	   if @loaded and @config['icon'] != nil and @config['icon'][5] != "" 
+	   if @loaded and @config['icon'] != nil and @config['icon'][5] != ""
 	        button_config(sender, eval(@config['icon'][5]), @config['tooltip'][5])
 	       	sender.enabled = true
 	   else
 	       sender.enabled = false
            end
-	end		
-	
+	end
+
 	@attributes_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
       	@view = $ec2_main.makeIcon('application_view_icons.png')
-      	@view.create	
-	@attributes_button.icon = @view	
+      	@view.create
+	@attributes_button.icon = @view
 	@attributes_button.connect(SEL_COMMAND) do |sender, sel, data|
 	   call_dialog(6)
  	end
 	@attributes_button.connect(SEL_UPDATE) do |sender, sel, data|
-	   if @loaded and @config['icon'] != nil and @config['icon'][6] != "" 
+	   if @loaded and @config['icon'] != nil and @config['icon'][6] != ""
 	        button_config(sender, eval(@config['icon'][6]), @config['tooltip'][6])
 	       	sender.enabled = true
 	   else
 	       sender.enabled = false
            end
-	end	
-	
+	end
+
 	@tags_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
-	@tags_button.icon = @tag_red	
+	@tags_button.icon = @tag_red
 	@tags_button.connect(SEL_COMMAND) do |sender, sel, data|
  	   call_dialog(7)
  	end
-	@tags_button.connect(SEL_UPDATE) do |sender, sel, data|	
-	   if @loaded and @config['icon'] != nil and @config['icon'][7] != "" 
+	@tags_button.connect(SEL_UPDATE) do |sender, sel, data|
+	   if @loaded and @config['icon'] != nil and @config['icon'][7] != ""
 	        button_config(sender, eval(@config['icon'][7]), @config['tooltip'][7])
 	       	sender.enabled = true
 	   else
 	       sender.enabled = false
            end
 	end
-	
+
 	@filter_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
-	@filter_button.icon = @funnel	
+	@filter_button.icon = @funnel
 	@filter_button.connect(SEL_COMMAND) do |sender, sel, data|
 	    case @type
           when "Images"
-            # to do 
+            # to do
            else
             if @config["dialog"][8] == "EC2_TagsFilterDialog"
                dialog = EC2_TagsFilterDialog.new(@ec2_main,@type,@tags_filter[@config["name"]])
@@ -436,12 +438,12 @@ class EC2_List
 		   @tags_filter[@config["name"]] = dialog.tag_filter
 		   @ec2_main.settings.save_filter(@tags_filter)
 		   load_sort(@type,@curr_sort,@connection)
-               end            
+               end
               else
                  call_dialog(8)
              end
             end
-     end  
+     end
 	@filter_button.connect(SEL_UPDATE) do |sender, sel, data|
 	   if @loaded and @config['icon'] != nil and @config['icon'][8] != ""
 	        button_config(sender, eval(@config['icon'][8]), @config['tooltip'][8])
@@ -449,8 +451,8 @@ class EC2_List
 	   else
 	       sender.enabled = false
            end
-	end	
-	
+	end
+
 	@help_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_RIGHT)
 	@help_button.icon = @help
 	@help_button.tipText = " View Help "
@@ -462,9 +464,9 @@ class EC2_List
                browser("http://thecloudmarket.com/stats#/spot_prices")
             when "Auto Scaling Groups"
                browser("http://aws.amazon.com/documentation/autoscaling/")
-            else 
+            else
                browser("http://ec2dream.github.com/")
-            end   
+            end
 	end
         @help_button.connect(SEL_UPDATE) do |sender, sel, data|
              case @type
@@ -475,16 +477,16 @@ class EC2_List
                else
                   button_config(sender, @help, " View Help ")
                end
-	end	
+	end
 
-	
+
         @title = FXLabel.new(page1a, "", nil,:opts => LAYOUT_RIGHT)
 	@title.font = FXFont.new(app, "Arial", 11)
-	
+
         contents = FXVerticalFrame.new(page1,LAYOUT_SIDE_TOP|LAYOUT_FILL_X|LAYOUT_FILL_Y,
-       :padLeft => 0, :padRight => 0, :padTop => 0, :padBottom => 0,	      
+       :padLeft => 0, :padRight => 0, :padTop => 0, :padBottom => 0,
 	       :hSpacing => 0, :vSpacing => 0)
-	
+
 	@table = FXTable.new(contents, :opts => LAYOUT_FILL|TABLE_COL_SIZABLE|TABLE_ROW_SIZABLE|TABLE_READONLY  )
 	@table.rowHeaderWidth = 0
 	# Make header control
@@ -492,11 +494,11 @@ class EC2_List
 	@header1.connect(SEL_COMMAND) do |sender, sel, which|
 	     if @curr_type ==  @type and @curr_sort == sender.getItemText(which) and @curr_order == "down"
 	        @curr_order = "up"
-	     else   
-	        @curr_type = @type 
+	     else
+	        @curr_type = @type
 	        @curr_sort = sender.getItemText(which)
 	        @curr_order = "down"
-	     end   
+	     end
 	     load_sort_reload(@type,@curr_sort,false,@connection)
 	end
 	@table.connect(SEL_COMMAND) do |sender, sel, which|
@@ -509,8 +511,8 @@ class EC2_List
 		  puts "item selected #{@curr_item}  type #{@type}"
 	      case @type
 	       when "Images"
-		    #  need find this. 
-	        # @curr_image_type = @table.getItemText(which.row,5).to_s  
+		    #  need find this.
+	        # @curr_image_type = @table.getItemText(which.row,5).to_s
 	       when "Volumes","IP Addresses"
 		       @curr_instance = ""
 			   if @ec2_main.settings.openstack
@@ -524,8 +526,8 @@ class EC2_List
                   else
                      @curr_instance = find_value('instance_id',which.row)
 
-                  end						 
-			   elsif @ec2_main.settings.amazon	  
+                  end
+			   elsif @ec2_main.settings.amazon
 	              as = find_value('attachmentSet',which.row)
 	              if as != nil and as != ""
 				     sa = as.split","
@@ -537,66 +539,66 @@ class EC2_List
                   end
 				  @curr_association_id = find_value('associationId',which.row)
 				  @curr_allocation_id = find_value('allocationId',which.row)
-                  @curr_domain = find_value('domain',which.row)				  
-  		      else 
+                  @curr_domain = find_value('domain',which.row)
+  		      else
 		        as = find_value('aws_instance_id',which.row)
 				if as == nil or as == ""
 				   as = find_value('instance_id',which.row)
 				end
 			        if as != nil and as != ""
 		           @curr_instance = as
-				end	
+				end
 			  end
-		when "Security Groups"	  
+		when "Security Groups"
 		   @group_id = 	 find_value('groupId',which.row)
 		   @curr_vpc_id =  find_value('vpcId',which.row)
 	       when "Snapshots"
-	         @volumeSize  =  find_value('volumeSize',which.row) 
+	         @volumeSize  =  find_value('volumeSize',which.row)
 	       when "Load Balancers"
 	        @curr_listeners  = find_value('ListenerDiscriptions',which.row)
-	        @curr_policies  = find_value('Policies',which.row) 
-	        @curr_avail_zone  = find_value('AvailabilityZones',which.row) 
+	        @curr_policies  = find_value('Policies',which.row)
+	        @curr_avail_zone  = find_value('AvailabilityZones',which.row)
 	       when "Auto Scaling Groups"
 	         @as_group = @curr_item
 	         @curr_desired_capacity  = find_value('DesiredCapacity',which.row)
-			when "Scheduled Actions","Auto Scaling Policies" 
+			when "Scheduled Actions","Auto Scaling Policies"
 			  @as_group  = find_value('AutoScalingGroupName',which.row)
 	       when "Templates"
-		     @template_file  = find_value('template_file',which.row) 
-	         @cf_parameters = find_value('parameters',which.row) 
+		     @template_file  = find_value('template_file',which.row)
+	         @cf_parameters = find_value('parameters',which.row)
            when "Stacks"
 	         @stack_id  =  find_value('StackId',which.row)
-			when "Distributions" 
+			when "Distributions"
 			 @cdn_distribution  = @curr_item
-			when "Users" 
+			when "Users"
 			 @user_name =  @curr_item
 			when "Vagrant"
-	         @vagrant_file  =  find_value('Vagrantfile',which.row) 
+	         @vagrant_file  =  find_value('Vagrantfile',which.row)
 			when "Local Servers"
-	         call_dialog(2)  
-			when "Chef Test Kitchen"
+	         call_dialog(2)
+			when "Test Kitchen"
 			 @curr_driver = find_value('Driver',which.row)
 			 @curr_provisioner = find_value('Provisioner',which.row)
 			 @curr_last_action = find_value('Last-Action',which.row)
-	         call_dialog(2)   
- 	      end 	         
+	         call_dialog(2)
+ 	      end
 	  # else
 	  #    @curr_row = nil
 	  #    @curr_item = ""
 	  #    @curr_image_type = ""
 	  #    @curr_size = ""
-	  # end 
-	end 
-  end 
-  
+	  # end
+	end
+  end
+
   def convert_to_array_of_hashs(a,name)
    x = []
    a.each do |e|
-     x.push({name => e}) 
-   end 
+     x.push({name => e})
+   end
    x
 end
-  
+
   def find_value(name,row)
    i=0
    j=nil
@@ -604,19 +606,19 @@ end
       if @table.getColumnText(i) == name
 	     j = i
 	  end
-	i=i+1 
+	i=i+1
    end
-   if j != nil 
+   if j != nil
       @table.getItemText(row,j).to_s
-   else 
+   else
       ""
-   end   
+   end
   end
-  
+
   def call_dialog(i)
      name = @config['dialog'][i]
 	 parms = @config['dialog_parm'][i]
-	 type = @type 
+	 type = @type
 	 type = type[0..-2] if @type.end_with? ("s")
     if  !name.end_with?("Dialog")
 	    if  name.include?("@curr_item")  and (@curr_item == nil or @curr_item == "")
@@ -624,7 +626,7 @@ end
 		else
 		   puts "#{name}"
            eval(name)
-        end		   
+        end
      elsif (!name.end_with?("CreateDialog") and !name.end_with?("SelectDialog"))  and (@curr_item == nil or @curr_item == "")
         error_message("No #{type} selected","No #{type} selected to #{@config['action'][i]}")
      else
@@ -636,7 +638,7 @@ end
                  cmd = "#{name}.new(@ec2_main,#{parms})"
 			     puts "#{cmd}"
 			     dialog = eval(cmd)
-              end			  
+              end
 		else
 		   if parms == nil or parms == ""
 		      puts "#{name}.new(@ec2_main,#{@curr_item}"
@@ -645,52 +647,52 @@ end
               cmd = "#{name}.new(@ec2_main,@curr_item,#{parms})"
 			  puts "#{cmd}"
 			  dialog = eval(cmd)
-            end		   
-        end 
-        begin 
+            end
+        end
+        begin
            dialog.execute if !name.end_with?("DeleteDialog")
-           if dialog.success 
+           if dialog.success
               load_sort(@type,@curr_sort,@connection)
            end
-        rescue 
+        rescue
           puts "call_dialog: Dialog already finished"
         end
      end
-  end		   
-  
-  def clear 
+  end
+
+  def clear
      @table.setTableSize(0,0)
      @table.rowHeaderWidth = 0
   end
-  
+
   def load(type,connection="Compute")
      @connection = connection
      @tags_filter= @ec2_main.settings.load_filter()
      if type != "Images"
         @image_type = "Owned By Me"
-        @image_platform = "All Platforms"     
+        @image_platform = "All Platforms"
         @image_root = ""
         @image_search = ""
-     end 
+     end
      @curr_sort = ""
     load_sort(type,"",connection)
   end
-  
+
   def load_sort(type,sort_col,connection="Compute")
      @connection = connection
      load_sort_reload(type,sort_col,true,connection)
-  end 
-  
-  
+  end
+
+
   def load_sort_reload(type,sort_col,reload,connection="Compute")
-      @connection = connection  
+      @connection = connection
       @type = type
        @curr_item = ""
-       if @type == "Images" 
+       if @type == "Images"
           status = $ec2_main.imageCache.status
-          if status == "loaded" 
+          if status == "loaded"
              @title.text = @type + " (Cached)"
-          else 
+          else
              @title.text = @type + " (Cache not loaded)"
           end
        elsif @type == "Cloud Formation Stacks" or @type == "Cloud Formation Events"
@@ -699,33 +701,33 @@ end
           else
              @title.text = @type + "    "
           end
-       else   
+       else
           @title.text = @type + "    "
-       end  
+       end
       puts "cloud.config['Cloud'][#{@connection}][#{@type}]"
       @config = $ec2_main.cloud.config["Cloud"][connection][@type]
       @data = []
-      if @type == "Images" 
+      if @type == "Images"
   	   @data = @ec2_main.environment.images.get_images(@image_type, @image_platform, @image_root, @image_search, @tags_filter)
   	   if @data.empty?
   	      image_error_message = @ec2_main.environment.images.error_message
   	      if image_error_message != nil and image_error_message != ""
-  	         error_message("Error",image_error_message)    
+  	         error_message("Error",image_error_message)
   	      end
-  	   end   
+  	   end
   	#end
   	   if @tags_filter[:image] == nil or  @tags_filter[:image].empty?
- 	     if @image_type == "Public Images"  
+ 	     if @image_type == "Public Images"
               @title.text = "Images (Cached)"
-         else    
+         else
               if @image_type != "Private Images"
                  @title.text = "Images (Cached)"
-              end   
-        end  
+              end
+        end
        end
-      elsif type == "Local Servers"	
+      elsif type == "Local Servers"
          loc = EC2_Properties.new
-         if loc != nil 
+         if loc != nil
                 if reload == true
                    @data = []
                    i = 0
@@ -733,11 +735,13 @@ end
                       @data[i] = r
                       i = i+1
                    end
-                end	
+                end
 		end
-      elsif type == "Chef Test Kitchen"	
+      elsif type == "Test Kitchen"
          @data = kitchen_cmd("list")
-      elsif type == "Vagrant"	
+         path = Pathname.new($ec2_main.settings.get("TEST_KITCHEN_PATH")).basename
+         @title.text = "#{@type} - #{Pathname.new($ec2_main.settings.get("TEST_KITCHEN_PATH")).basename}"
+      elsif type == "Vagrant"
              begin
                 envs = Dir.entries($ec2_main.settings.get("VAGRANT_REPOSITORY"))
              rescue
@@ -748,13 +752,13 @@ end
                 @data = []
                 envs.each do |r|
 				   vf = "#{$ec2_main.settings.get('VAGRANT_REPOSITORY')}/#{r}/Vagrantfile"
-                   @data.push({"server" => r, "Vagrantfile" => vf  }) if r != '.' and r != '..' and File.directory?("#{$ec2_main.settings.get('VAGRANT_REPOSITORY')}/#{r}") 
+                   @data.push({"server" => r, "Vagrantfile" => vf  }) if r != '.' and r != '..' and File.directory?("#{$ec2_main.settings.get('VAGRANT_REPOSITORY')}/#{r}")
                 end
-             end				 
-	 
-      elsif type == "Templates"	
+             end
+
+      elsif type == "Templates"
          cf = EC2_Properties.new
-         if cf != nil 
+         if cf != nil
                 if reload == true
                    @data = Array.new
                    i = 0
@@ -762,23 +766,23 @@ end
                       @data[i] = r
                       i = i+1
                    end
-                end 
-		end		
-      else 
-        conn = $ec2_main.cloud.conn(connection) 
+                end
+		end
+      else
+        conn = $ec2_main.cloud.conn(connection)
         request = @config["request"]
         if conn != nil
-           begin 
+           begin
               filter = @tags_filter[@config["name"]]
               if filter != nil and filter != ""
                  cmd = "conn.#{request}(filter)"
-              else 
+              else
                  cmd = "conn.#{request}"
-              end 
-              #    puts "CMD #{cmd}"
+              end
+                  puts "CMD #{cmd}"
  	          response = eval(cmd)
- 	          # puts "RESPONSE.BODY #{response.body}"
-			  if @ec2_main.settings.cloudfoundry 
+ 	           puts "RESPONSE.BODY #{response.body}"
+			  if @ec2_main.settings.cloudfoundry
 			    @data = response
 			  else
 				  if response.status == @config["response_code"]
@@ -790,38 +794,38 @@ end
 		                end
 		                @data = @data + r['instancesSet']
 		             end
-				 elsif @type == "Key Pairs" and @ec2_main.settings.openstack_hp 
-				     
+				 elsif @type == "Key Pairs" and @ec2_main.settings.openstack and !@ec2_main.settings.openstack_rackspace
+
 		            d = eval(@config["response"])
 		            @data = []
 		            d.each do |v|
 		              @data.push(v["keypair"])
-		            end	 
+		            end
                  else
                      @data = eval(@config["response"])
                  end
               end
-			 end 
-           rescue 
+			 end
+           rescue
               puts "ERROR: #{request} #{$!}"
            end
         end
       end
-	  @data = [] if @data == nil 
+	  @data = [] if @data == nil
       if  !@data.empty?  or @data.size>0
         @data_title = []
         @data.each do |r|
           r.each do |k, v|
 		     k = k.to_s
-		     if !@config['keys'].include?(k) 
+		     if !@config['keys'].include?(k)
                 @data_title.push(k) if !@data_title.include? k
              end
           end
-        end       
+        end
         table_size=@data_title.size+@config['keys'].size
         if @curr_sort != "" and @data[0][@curr_sort].class == String
             @data = @data.sort_by {|r| r[@curr_sort] || ""}
-        end   
+        end
         lists = create_lists(table_size)
          i=0
         j=0
@@ -834,7 +838,7 @@ end
 			   rk = r[k.to_sym] if r[k.to_sym] != nil
                if rk != nil
                   item = ""
-                  if rk.kind_of?(Array) 
+                  if rk.kind_of?(Array)
                      rk.each do |d|
                        if d.kind_of?(Hash)
                           x = ""
@@ -844,42 +848,42 @@ end
                              else
                                 x = "#{x},#{y}=#{z}"
                              end
-                          end 
+                          end
                           d = x
-                        end  
+                        end
                         if item == ""
                            item = d.to_s
                         else
                            item = "#{item},#{d}"
                          end
                      end
-                  elsif rk.kind_of?(Hash) 
+                  elsif rk.kind_of?(Hash)
                      rk.each do |y,z|
                         if item == ""
                            item = "#{y}=#{z}"
                         else
                            item = "#{item},#{y}=#{z}"
                         end
-                     end 
-                  elsif rk.kind_of?(EC2_ResourceTags)   
-                     item = rk.show   
-                  else 
+                     end
+                  elsif rk.kind_of?(EC2_ResourceTags)
+                     item = rk.show
+                  else
                      item = rk.to_s if (rk.class).to_s != "Fog::Time"
 					 item = convert_time(rk) if (rk.class).to_s == "Fog::Time"
-                  end   
+                  end
                   lists[j][i] = item
                   @max_data_size[k] = item.length if  @max_data_size[k] == nil or item.length >  @max_data_size[k]
                   j=j+1
-               end 
+               end
 			  rescue
-                puts "internal error parsing data in ec2_list #{$!}"		  
-              end			  	  
-            end 
+                puts "internal error parsing data in ec2_list #{$!}"
+              end
+            end
             r.each do |k, v|
                if !@config['keys'].include?(k)
                    begin
                      item = ""
-                     if v.kind_of?(Array) 
+                     if v.kind_of?(Array)
                         v.each do |d|
                           if d.kind_of?(Hash)
                              x = ""
@@ -889,16 +893,16 @@ end
                                 else
                                    x = "#{x},#{y}=#{z}"
                                 end
-                             end 
+                             end
                              d = x
-                           end                          
+                           end
                            if item == ""
                               item = d
                            else
                               item = "#{item},#{d}"
                            end
                         end
-                     elsif v.kind_of?(Hash) 
+                     elsif v.kind_of?(Hash)
                         v.each do |y,z|
                            if item == ""
                               item = "#{y}=#{z}"
@@ -906,36 +910,36 @@ end
                               item = "#{item},#{y}=#{z}"
                            end
                         end
-                     elsif v.kind_of?(EC2_ResourceTags)   
-                        item = v.show                       
-                     else 
+                     elsif v.kind_of?(EC2_ResourceTags)
+                        item = v.show
+                     else
                         #item = v.to_s
 						item = v.to_s if (v.class).to_s != "Fog::Time"
 					    item = convert_time(v) if (v.class).to_s == "Fog::Time"
-                     end 
+                     end
                      data_index = @data_title.index(k.to_s)
-                     if data_index != nil 
-                        lists[data_index+@config['keys'].size][i] = item  
+                     if data_index != nil
+                        lists[data_index+@config['keys'].size][i] = item
                         @max_data_size[k] = item.length if  @max_data_size[k] == nil or item.length >  @max_data_size[k]
                      end
                      j=j+1
-                  rescue 
+                  rescue
                     puts "error processing  data for #{k} lists[#{j},#{i}] = #{v}"
                   end
-               end   
+               end
             end
             i=i+1
-         end  
+         end
          i = lists[0].length
          @table.setTableSize(i, table_size)
          set_table_titles(@data[0],@max_data_size)
          set_table_data(lists,table_size)
-       else 
+       else
          @table.setTableSize(0,0)
       end
       @loaded = true
    end
-   
+
   def create_lists(list_size)
      lists = Array.new
      i =0
@@ -944,26 +948,26 @@ end
         i = i+1
      end
      return lists
-  end                
-  
+  end
+
   def set_table_data(lists,table_size)
       i = lists[0].length
       if @curr_order == "" or @curr_order == "down"
          while i>0
             i = i-1
-  	    k = 0 
+  	    k = 0
   	    #puts "*** table_data #{k} #{i} #{lists[k][i]}"
             while k < table_size
    	           @table.setItemText(i, k, lists[k][i].to_s)
     	       @table.setItemJustify(i, k, FXTableItem::LEFT)
     	       k = k+1
-    	    end                        
+    	    end
          end
       else
          j = 0
          while i>0
             i = i-1
-            k = 0 
+            k = 0
             #puts "*** table_data #{k} #{i} #{j} #{lists[k][j]}"
             while k < table_size
     	       @table.setItemText(i, k, lists[k][j].to_s)
@@ -974,7 +978,7 @@ end
          end
       end
   end
-  
+
   def set_table_titles(data,max)
    i=0
    @config['keys'].each do |k|
@@ -988,7 +992,7 @@ end
      rescue
      end
      i=i+1
-   end 
+   end
    @data_title.each do |k|
         begin
           @table.setColumnText(i,k)
@@ -996,11 +1000,11 @@ end
          len = 10*k.size if k.size>15
          len = 7*max[k] if max[k]>15 and max[k]>k.size
          len = 500 if len >500
-         @table.setColumnWidth(i,len)  if len>0        
+         @table.setColumnWidth(i,len)  if len>0
         rescue
         end
         i=i+1
     end
-  end  
- 
- end 
+  end
+
+ end

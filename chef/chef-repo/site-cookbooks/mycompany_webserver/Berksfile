@@ -1,0 +1,5 @@
+site :opscode
+
+cookbook 'aws'
+cookbook 'apache2'
+cookbook  'mycompany_webserver'  , path:  '.'

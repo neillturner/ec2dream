@@ -4,12 +4,12 @@ require 'net/http'
 require 'resolv'
 require 'fog'
 
-class Data_security_group 
+class Data_security_group
 
   def initialize(owner)
      puts "data_security_group.initialize"
-     @ec2_main = owner  
-  end 
+     @ec2_main = owner
+  end
 
   # Retrieve Security Groups information.
   #
@@ -45,7 +45,7 @@ class Data_security_group
                  r[:name] = 'default'
                  r[:aws_group_name] = 'default'
                  r[:description] = 'dummy default security group'
-                 data.push(r)           
+                 data.push(r)
            elsif  @ec2_main.settings.openstack
               x = conn.security_groups.all
               x.each do |y|
@@ -55,7 +55,7 @@ class Data_security_group
                  r[:name] = y.name
                  r[:aws_group_name] = y.name
                  r[:description] = y.description
-                 r[:rules] = y.rules
+                 r[:rules] = y.security_group_rules
                  r[:tenant_id] = y.tenant_id
                  data.push(r)
               end
@@ -65,48 +65,49 @@ class Data_security_group
 	             data = response.body['items']
              else
 	      	     data = []
-              end			 
-            elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"  
+              end
+            elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
               if filter != nil
                   response = conn.describe_security_groups(filter)
-              else 
+              else
                  response = conn.describe_security_groups
-              end   
+              end
 	      if response.status == 200
 	         data = response.body['securityGroupInfo']
 	         data.each do |r|
 			r[:id] = r['groupId']
                  	r[:name] = r['groupName'].to_s
                  	r[:aws_group_name] = r['groupName'].to_s
-                 	r[:aws_description] = r['groupDescription']           
-                 	r[:group_id] = r['groupId']             
+                 	r[:aws_description] = r['groupDescription']
+                 	r[:group_id] = r['groupId']
                  	r[:owner_id] = r['ownerId']
-                 	r[:vpc_id] = r['vpcId']	         
+                 	r[:vpc_id] = r['vpcId']
 	         end
 	      else
 	      	 data = []
               end
-            else  
+            else
               data = conn.describe_security_groups
-           end   
+           end
          rescue
             puts "ERROR: getting all security groups #{$!}"
          end
-      end   
+      end
       return data
   end
-  
-  def get(security_group_id) 
+
+  def get(security_group_id)
      data = {}
      conn = @ec2_main.environment.connection
      if conn != nil
        data = conn.security_groups.get(security_group_id)
-     else 
+       puts "*** sec_grp #{security_group_id} #{data}"
+     else
        raise "Connection Error"
      end
      return data
-  end 
-  
+  end
+
   # Create new Security Group. Returns +true+ or an exception.
   # Options: :vpc_id
   #
@@ -117,46 +118,46 @@ class Data_security_group
        data = nil
        conn = @ec2_main.environment.connection
        if conn != nil
-          if  @ec2_main.settings.openstack 
+          if  @ec2_main.settings.openstack
              data = conn.create_security_group(sec_group, desc)
              if data.status == 200
 	        data = data.body["security_group"]
-	     else   
+	     else
 	        data = nil
-	     end 
+	     end
 	  elsif  @ec2_main.settings.amazon
 	     response = conn.create_security_group(sec_group, desc,vpc_id)
 	     data = response.body
-          else	     	     
+          else
              data = conn.create_security_group(sec_group,desc)
           end
-       else 
+       else
          raise "Connection Error"
        end
        return data
-  end 
+  end
 
   # Add permission to a security group. Returns +true+ or an exception. +protocol+ is one of :'tcp'|'udp'|'icmp'.
   #
   #  ec2.authorize_security_group_IP_ingress('my_awesome_group', 80, 82, 'udp', '192.168.1.0/8') #=> true
   #  ec2.authorize_security_group_IP_ingress('my_awesome_group', -1, -1, 'icmp') #=> true
-  #  
+  #
   def create_security_group_rule(parent_group_id, ip_protocol, from_port, to_port, cidr, group_id=nil, group_name=nil, group_auth=nil, group_auth_id=nil )
-  
+
      puts "Data_security_group.create_security_group_rule( #{parent_group_id}, #{ip_protocol}, #{from_port}, #{to_port}, #{cidr}, #{group_id}, #{group_name}, #{group_auth}, #{group_auth_id})"
       # group_id field not necessary
        data = nil
        conn = @ec2_main.environment.connection
        if conn != nil
-          if  @ec2_main.settings.openstack 
-               parent_group_id = group_id if group_id != nil  
+          if  @ec2_main.settings.openstack
+               parent_group_id = group_id if group_id != nil
                data = conn.create_security_group_rule(parent_group_id, ip_protocol, from_port, to_port, cidr, nil)
              if data.status == 200
 	        data = data.body["security_group_rule"]
-	     else   
+	     else
 	        data = nil
 	     end
-	  elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS" 
+	  elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
 	      opt = {}
 	      opt['Groups']=[{'GroupId' => group_auth_id}] if group_auth_id!=nil
 	      opt['Groups']=[{'GroupName' => group_auth}] if group_auth!=nil and group_auth_id==nil
@@ -167,25 +168,25 @@ class Data_security_group
 	      options = {}
 	      options['IpPermissions']=[opt]
 	      if group_id != nil and group_id != "0"
-	        options['GroupId']= group_id 
+	        options['GroupId']= group_id
 	        group_name = nil
-	      else 
+	      else
 		options = {}
 	        options['IpProtocol']=ip_protocol
 	        options['FromPort']=from_port.to_i
 	        options['ToPort']=to_port.to_i
 	        options['CidrIp']=cidr  if cidr!=nil and cidr!=""
-	      end 
+	      end
 	      data = conn.authorize_security_group_ingress(group_name, options)
           else
               data = conn.authorize_security_group_IP_ingress(group_name, from_port, to_port, ip_protocol, cidr)
-          end            
-       else 
+          end
+       else
          raise "Connection Error"
        end
-       return data  
+       return data
   end
-  
+
   # Authorize named ingress for security group. Allows instances that are member of someone
   # else's security group to open connections to instances in my group.
   #
@@ -195,38 +196,38 @@ class Data_security_group
          data = nil
          conn = @ec2_main.environment.connection
          if conn != nil
-            if  @ec2_main.settings.openstack 
+            if  @ec2_main.settings.openstack
              response = conn.create_security_group_rule( current_group_id, nil, nil, nil, nil, group_id)
              if response.status == 200
 	        data = response.body["security_group_rule"]
 	     else
 	        data = nil
-	     end 
-	    elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS" 
+	     end
+	    elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
 	      options = {}
-              options['IpProtocol']='tcp' 
+              options['IpProtocol']='tcp'
               options['SourceSecurityGroupName']= group
-	      data = conn.authorize_security_group_ingress(current_group, options)	     
-            else	     	     
+	      data = conn.authorize_security_group_ingress(current_group, options)
+            else
                 data = conn.authorize_security_group_named_ingress(current_group, id ,group)
-            end            
-         else 
+            end
+         else
            raise "Connection Error"
          end
-         return data  
+         return data
   end
 
   # Remove permission from a security group. Returns +true+ or an exception. +protocol+ is one of :'tcp'|'udp'|'icmp' ('tcp' is default).
   #
   #  ec2.revoke_security_group_IP_ingress('my_awesome_group', 80, 82, 'udp', '192.168.1.0/8') #=> true
-  #  
+  #
   def delete_security_group_rule(sec_group, protocol, from_port, to_port, ip_address, rule_id=nil, group_auth=nil, group_id=nil, group_auth_id=nil)
        data = nil
        conn = @ec2_main.environment.connection
        if conn != nil
           if  @ec2_main.settings.openstack
              data = conn.delete_security_group_rule(rule_id)
-          elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS" 
+          elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
  	      opt = {}
  	      opt['Groups']=[{'GroupId' => group_auth_id}] if group_auth_id!=nil
 	      opt['Groups']=[{'GroupName' => group_auth}] if group_auth!=nil and group_auth_id==nil
@@ -235,40 +236,40 @@ class Data_security_group
 	      opt['ToPort']=to_port.to_i
 	      opt['IpRanges']=[{'CidrIp' => ip_address}] if ip_address!=nil and ip_address!=""
 	      options = {}
-	      options['IpPermissions']=[opt] 
+	      options['IpPermissions']=[opt]
               if group_id != nil and group_id != "0"
-	        options['GroupId']= group_id 
+	        options['GroupId']= group_id
 	        sec_group = nil
-	      end 	      
+	      end
               data = conn.revoke_security_group_ingress(sec_group, options)
-          else                     
+          else
              data = conn.revoke_security_group_IP_ingress(sec_group, from_port, to_port, protocol, ip_address)
           end
-       else 
+       else
          raise "Connection Error"
        end
-       return data  
-  end  
-  
+       return data
+  end
+
   # Revoke named ingress for security group.
   #
   #  ec2.revoke_security_group_named_ingress('my_awesome_group', aws_user_id, 'another_group_name') #=> true
-  #  
+  #
   def revoke_security_group_named_ingress(sec_group, id ,group, rule_id=nil)
            data = nil
            conn = @ec2_main.environment.connection
            if conn != nil
               if  @ec2_main.settings.openstack
                   data = conn.delete_security_group_rule(rule_id)
-               else                        
+               else
                   data = conn.revoke_security_group_named_ingress(sec_group, id ,group)
-              end            
-           else 
+              end
+           else
              raise "Connection Error"
            end
-           return data  
+           return data
   end
-   
+
   # Remove Security Group. Returns +true+ or an exception.
   # Options: :group_name, :group_id
   #
@@ -278,7 +279,7 @@ class Data_security_group
   #
   #  # Delete security group by name (EC2 only):
   #  ec2.delete_security_group(:group_name => 'my-group']) #=> true
-  #  
+  #
   def delete(group_id, group_name=nil)
        response = false
        conn = @ec2_main.environment.connection
@@ -289,14 +290,14 @@ class Data_security_group
 	         data = conn.delete_security_group(nil, group_id)
 	      else
 	         data = conn.delete_security_group(group_name, nil)
-          end       
+          end
           response = true
-       else 
+       else
           raise "Connection Error"
        end
-       return response  
+       return response
   end
-  
+
   # Delete a google firewall
   def  delete_firewall(name)
      data = false
@@ -307,13 +308,13 @@ class Data_security_group
            data = response.body
         else
            data = {}
-        end                  
-     else 
+        end
+     else
         raise "Connection Error"
      end
-     return data  
-  end  
-  
+     return data
+  end
+
    # Insert a google firewall
   def  insert_firewall(name, source_range, source_tags, allowed, network=nil)
      data = false
@@ -324,12 +325,12 @@ class Data_security_group
            data = response.body
         else
            data = {}
-        end                  
-     else 
+        end
+     else
         raise "Connection Error"
      end
-     return data  
-  end  
+     return data
+  end
 
 
 end

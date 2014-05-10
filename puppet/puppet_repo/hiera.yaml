@@ -2,7 +2,7 @@
 :backends:
   - yaml
 :yaml:
-  :datadir: /var/local/pocketknife/hieradata
+  :datadir: /var/lib/hiera
 :hierarchy:
   - "nodes/%{hostname}"
   - "%{::environment}/roles/%{role_name1}"
