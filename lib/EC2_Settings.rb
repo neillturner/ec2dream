@@ -231,38 +231,42 @@ class EC2_Settings
     FXLabel.new(frame1, "" )
  	FXLabel.new(frame1, "  Global and General Settings", nil, LAYOUT_CENTER_X)
 	FXLabel.new(frame1, "" )
-	FXLabel.new(frame1, "CHEF_REPOSITORY" )
+	FXLabel.new(frame1, "" )
  	@settings['CHEF_REPOSITORY'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
- 	@settings['CHEF_REPOSITORY_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
-	@settings['CHEF_REPOSITORY_BUTTON'].icon = @magnifier
-	@settings['CHEF_REPOSITORY_BUTTON'].tipText = "Browse..."
-	@settings['CHEF_REPOSITORY_BUTTON'].connect(SEL_COMMAND) do
-	   dialog = FXDirDialog.new(frame1, "Select Chef Repository Directory")
-	   if @settings['CHEF_REPOSITORY'].text==nil or @settings['CHEF_REPOSITORY'].text==""
-              dialog.directory = "#{ENV['EC2DREAM_HOME']}/chef/chef-repo"
-           else
-              dialog.directory = @settings['CHEF_REPOSITORY'].text
-           end
-	   if dialog.execute != 0
-	      @settings['CHEF_REPOSITORY'].text = dialog.directory
-           end
-	end
-	FXLabel.new(frame1, "PUPPET_REPOSITORY" )
+ 	@settings['CHEF_REPOSITORY'].visible=false
+ 	FXLabel.new(frame1, "" )
+ 	#@settings['CHEF_REPOSITORY_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
+	#@settings['CHEF_REPOSITORY_BUTTON'].icon = @magnifier
+	#@settings['CHEF_REPOSITORY_BUTTON'].tipText = "Browse..."
+	#@settings['CHEF_REPOSITORY_BUTTON'].connect(SEL_COMMAND) do
+	#   dialog = FXDirDialog.new(frame1, "Select Chef Repository Directory")
+	#   if @settings['CHEF_REPOSITORY'].text==nil or @settings['CHEF_REPOSITORY'].text==""
+        #      dialog.directory = "#{ENV['EC2DREAM_HOME']}/chef/chef-repo"
+        #   else
+        #      dialog.directory = @settings['CHEF_REPOSITORY'].text
+        #   end
+	#   if dialog.execute != 0
+	#      @settings['CHEF_REPOSITORY'].text = dialog.directory
+        #   end
+	#end
+	FXLabel.new(frame1, "" )
  	@settings['PUPPET_REPOSITORY'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
- 	@settings['PUPPET_REPOSITORY_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
-	@settings['PUPPET_REPOSITORY_BUTTON'].icon = @magnifier
-	@settings['PUPPET_REPOSITORY_BUTTON'].tipText = "Browse..."
-	@settings['PUPPET_REPOSITORY_BUTTON'].connect(SEL_COMMAND) do
-	   dialog = FXDirDialog.new(frame1, "Select Puppet Repository Directory")
-	   if @settings['PUPPET_REPOSITORY'].text==nil or @settings['PUPPET_REPOSITORY'].text==""
-              dialog.directory = "#{ENV['EC2DREAM_HOME']}/puppet/puppet_repo"
-           else
-              dialog.directory = @settings['PUPPET_REPOSITORY'].text
-           end
-	   if dialog.execute != 0
-	      @settings['PUPPET_REPOSITORY'].text = dialog.directory
-            end
-	end
+ 	@settings['PUPPET_REPOSITORY'].visible=false
+ 	FXLabel.new(frame1, "" )
+ 	#@settings['PUPPET_REPOSITORY_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
+	#@settings['PUPPET_REPOSITORY_BUTTON'].icon = @magnifier
+	#@settings['PUPPET_REPOSITORY_BUTTON'].tipText = "Browse..."
+	#@settings['PUPPET_REPOSITORY_BUTTON'].connect(SEL_COMMAND) do
+	#   dialog = FXDirDialog.new(frame1, "Select Puppet Repository Directory")
+	#   if @settings['PUPPET_REPOSITORY'].text==nil or @settings['PUPPET_REPOSITORY'].text==""
+        #      dialog.directory = "#{ENV['EC2DREAM_HOME']}/puppet/puppet_repo"
+        #   else
+        #      dialog.directory = @settings['PUPPET_REPOSITORY'].text
+        #   end
+	#   if dialog.execute != 0
+	#      @settings['PUPPET_REPOSITORY'].text = dialog.directory
+        #    end
+	#end
 	FXLabel.new(frame1, "TEST_KITCHEN_PATH" )
  	@settings['TEST_KITCHEN_PATH'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
  	@settings['TEST_KITCHEN_PATH_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)

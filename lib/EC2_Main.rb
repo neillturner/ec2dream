@@ -11,6 +11,7 @@ require 'EC2_SecGrp'
 require 'EC2_Launch'
 require 'EC2_Environment'
 require 'EC2_List'
+require 'EC2_Kitchen'
 require 'dialog/EC2_SystemDialog'
 require 'dialog/EC2_EnvCreateDialog'
 require 'dialog/EC2_EnvDeleteDialog'
@@ -92,11 +93,13 @@ class EC2_Main < FXMainWindow
     # SecGrp panel
      @secgrp = EC2_SecGrp.new(self)
 
+    # Kitchen panel
+     @kitchen = EC2_Kitchen.new(self)
+
     # Settings panel
      @settings = EC2_Settings.new(self)
     # load system parameters
      @settings.load_system
-
 
      # need to cope with case of no system.properties file and the value not set.
      @environment.initial_load
@@ -146,10 +149,10 @@ class EC2_Main < FXMainWindow
   def tree_top_level(item)
      if item.text == "Environments"
         puts "environment"
-        @tabBook.setCurrent(4)
+        @tabBook.setCurrent(5)
      elsif item.text == "Env - #{@environment.env}"
         puts "environment"
-        @tabBook.setCurrent(4)
+        @tabBook.setCurrent(5)
      end
   end
 
@@ -285,11 +288,13 @@ class EC2_Main < FXMainWindow
        return @list
   end
 
-
   def settings
    return @settings
   end
 
+  def kitchen
+   return @kitchen
+  end
 
   def environment
    return @environment

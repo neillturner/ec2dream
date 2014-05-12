@@ -9,12 +9,12 @@ class EC2_Launch
         @image_bm = EC2_Block_Mapping.new
         @as_bm = EC2_Block_Mapping.new
         @read_replica = Array.new
-        @read_replica_curr_row = nil 
+        @read_replica_curr_row = nil
         @launch_loaded = false
         @type = ""
         @curr_item = ""
-        @resource_tags = nil 
-		@google_metadata = nil 
+        @resource_tags = nil
+		@google_metadata = nil
         @profile_type = "secgrp"
         @profile_folder = "launch"
         @arrow_refresh = @ec2_main.makeIcon("arrow_refresh.png")
@@ -22,7 +22,7 @@ class EC2_Launch
 	@save = @ec2_main.makeIcon("disk.png")
 	@save.create
 	@delete = @ec2_main.makeIcon("kill.png")
-	@delete.create	
+	@delete.create
 	@rocket = @ec2_main.makeIcon("rocket.png")
 	@rocket.create
 	@rocketdb = @ec2_main.makeIcon("rocketdb.png")
@@ -63,11 +63,11 @@ class EC2_Launch
 	            clear_cfy_panel
 	         else
 	            load_cfy(selected)
-	         end   
-	       end	    
+	         end
+	       end
 	    else
 	       @ec2_main.treeCache.refresh
-	    end   
+	    end
 	end
 	@refresh_button.connect(SEL_UPDATE) do |sender, sel, data|
 	  if @type == "cfy"
@@ -77,9 +77,9 @@ class EC2_Launch
 	  else
 	     enable_if_env_set(sender)
 	     @refresh_button.icon = @arrow_refresh
-	     @refresh_button.tipText = "Refresh Environment"	  
-	  end		
-	   
+	     @refresh_button.tipText = "Refresh Environment"
+	  end
+
 	end
 	@save_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@save_button.icon = @save
@@ -88,13 +88,13 @@ class EC2_Launch
 	    if @type == "ec2"
 	       save
 	    elsif @type == "ops"
-	       ops_save	 
+	       ops_save
 	    elsif @type == "google"
-	       google_save	  		   
+	       google_save
 	    elsif @type == "as"
 	       as_save
 	    elsif @type == "cfy"
-	       cfy_save	       
+	       cfy_save
 	    end
 	end
 	@save_button.connect(SEL_UPDATE) do |sender, sel, data|
@@ -105,7 +105,7 @@ class EC2_Launch
 	    #   else
 	    #      sender.enabled = true
 	    #   end
-	    #end   
+	    #end
 	end
 	@delete_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@delete_button.icon = @delete
@@ -116,17 +116,17 @@ class EC2_Launch
 	    elsif @type == "ops"
 	       ops_delete
 	    elsif @type == "google"
-	       google_delete	  		  	       
+	       google_delete
 	    elsif @type == "cfy"
 	       cfy_delete
-	    elsif @type == "as"   
+	    elsif @type == "as"
 	       as_delete
 	    end
 	end
 	@delete_button.connect(SEL_UPDATE) do |sender, sel, data|
 	   enable_if_launch_loaded(sender)
 	end
-	
+
 	@launch_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@launch_button.icon = @rocket
 	@launch_button.tipText = " Launch Server Instance "
@@ -138,12 +138,12 @@ class EC2_Launch
 	          request_spot_instance
 	       end
 	    elsif @type == "ops"
-               launch_ops_instance	
+               launch_ops_instance
 	    elsif @type == "google"
-	           launch_google_instance	  		  	       			   
+	           launch_google_instance
 	    elsif @type == "cfy"
-               launch_cfy_instance               
-	    end		
+               launch_cfy_instance
+	    end
 	end
 	@launch_button.connect(SEL_UPDATE) do |sender, sel, data|
          sender.enabled = false
@@ -154,57 +154,57 @@ class EC2_Launch
 	   elsif @type == "cfy"
               enable_if_launch_loaded(sender)
 	      @launch_button.icon =  @rocket
-	      @launch_button.tipText = " Create App "	      
-	   end	   
+	      @launch_button.tipText = " Create App "
+	   end
 	end
 	@launch_snap_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@launch_snap_button.icon = @rocketdb_snap
-	@launch_snap_button.tipText = " Restore  "   
+	@launch_snap_button.tipText = " Restore  "
 	@launch_snap_button.connect(SEL_COMMAND) do |sender, sel, data|
 	    if @type == "cfy"
 	       @ec2_main.tabBook.setCurrent(0)
 	       @ec2_main.list.load("Apps","CloudFoundry")
-        elsif @type == "google"	
+        elsif @type == "google"
 		   md = {}
-		   begin 
+		   begin
 		      r = @ec2_main.environment.servers.get_project
-		   rescue 
-           end		   
-		   if r != nil 
+		   rescue
+           end
+		   if r != nil
 		      items = r['commonInstanceMetadata']['items']
-			  if items != nil 
+			  if items != nil
 			    items.each do |i|
-			       md[i['key']] = i['value']  
+			       md[i['key']] = i['value']
                  end
-			  end	 
+			  end
 			  metadata = GOG_Metadata.new(@ec2_main,md)
 	          dialog = GOG_MetadataEditDialog.new(@ec2_main,"Common Instance",metadata)
               dialog.execute
               if dialog.saved
-			     begin 
+			     begin
 				    mr = dialog.metadata_tags
 			        r = @ec2_main.environment.servers.set_common_instance_metadata(mr.get)
-				 rescue 
+				 rescue
                      error_message("Set Common Instance Metadata Failed",$!)
-                 end 				 
-			  end	 
-           end   
+                 end
+			  end
+           end
         end
 	end
 	@launch_snap_button.connect(SEL_UPDATE) do |sender, sel, data|
              if @type == "cfy"
                  sender.enabled = true
 	         @launch_snap_button.icon = @view
-	         @launch_snap_button.tipText = " List Apps "  
+	         @launch_snap_button.tipText = " List Apps "
          elsif @type == "google"
                  sender.enabled = true
 	         @launch_snap_button.icon = @edit
-	         @launch_snap_button.tipText = " Edit Common Instance Metadata "      			 
-	     else 
+	         @launch_snap_button.tipText = " Edit Common Instance Metadata "
+	     else
                  sender.enabled = false
-             end 
+             end
 	end
-	@select_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)	
+	@select_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@select_button.icon = @magnifier
 	@select_button.tipText = "  Select Launch Profile  "
 	@select_button.connect(SEL_COMMAND) do |sender, sel, data|
@@ -214,28 +214,28 @@ class EC2_Launch
 	      if dialog.selected != nil and dialog.selected != ""
 	         selected = dialog.selected
                  load_as(selected)
-	      end		      
-	   else   
+	      end
+	   else
 	      dialog = EC2_LaunchDialog.new(owner,@type)
 	      dialog.execute
 	      if dialog.selected != nil and dialog.selected != ""
 	         selected = dialog.selected
                  load(selected)
 	      end
-	   end    	   
-	end	
+	   end
+	end
 	@select_button.connect(SEL_UPDATE) do |sender, sel, data|
 	   sender.enabled = true
-	end	
+	end
 	@create_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@create_button.icon = @create
 	@create_button.tipText = "  Create Launch Profile "
 	@create_button.connect(SEL_COMMAND) do |sender, sel, data|
-	    clear_panel	     
+	    clear_panel
 	end
 	@create_button.connect(SEL_UPDATE) do |sender, sel, data|
 	    sender.enabled = true
-	end	
+	end
 	#
 	# ec2 launch frame
 	#
@@ -245,8 +245,9 @@ class EC2_Launch
         @frame1s = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
  	@launch['Name'] = FXTextField.new(@frame1s, 20, nil, 0, :opts => FRAME_SUNKEN)
  	FXLabel.new(@frame1s, "" )
- 	FXLabel.new(@frame1s, "Chef Node/Puppet Roles" )
+ 	#FXLabel.new(@frame1s, "Chef Node/Puppet Roles" )
  	@launch['Chef_Node'] = FXTextField.new(@frame1s, 21, nil, 0, :opts => FRAME_SUNKEN)
+ 	@launch['Chef_Node'].visible=false
  	FXLabel.new(@frame1, "" )
  	FXLabel.new(@frame1, "Subnet Id" )
  	@frame1v = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
@@ -259,11 +260,11 @@ class EC2_Launch
 	   dialog.execute
 	   selected = dialog.selected
 	   put('Subnet_Id',selected) if selected != nil and selected != ""
-	end 	
+	end
  	FXLabel.new(@frame1v, "" )
  	FXLabel.new(@frame1v, "         Private IP  " )
  	@launch['Private_IP'] = FXTextField.new(@frame1v, 15, nil, 0, :opts => FRAME_SUNKEN)
- 	FXLabel.new(@frame1, "" )	 	
+ 	FXLabel.new(@frame1, "" )
  	FXLabel.new(@frame1, "Security_Groups" )
  	@frame1x = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
  	@launch['Security_Group'] = FXTextField.new(@frame1x, 20, nil, 0, :opts => FRAME_SUNKEN)
@@ -276,11 +277,12 @@ class EC2_Launch
 	   selected = dialog.sec_grp
 	   if selected != nil and selected != ""
 	      put('Security_Group',selected)
-	   end   
+	   end
 	end
 	FXLabel.new(@frame1x, "" )
-	FXLabel.new(@frame1x, "Puppet Manifest" )
+	#FXLabel.new(@frame1x, "Puppet Manifest" )
 	@launch['Puppet_Manifest'] = FXTextField.new(@frame1x, 17, nil, 0, :opts => FRAME_SUNKEN)
+	@launch['Puppet_Manifest'].visible=false
  	FXLabel.new(@frame1, "" )
  	FXLabel.new(@frame1, "Tags" )
         @launch['Tags'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_READONLY)
@@ -293,7 +295,7 @@ class EC2_Launch
            if dialog.saved
 	      @resource_tags = dialog.resource_tags
 	      @launch['Tags'].text = @resource_tags.show
-           end   
+           end
         end
  	FXLabel.new(@frame1, "Image Id" )
  	@launch['Image_Id'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN)
@@ -308,7 +310,7 @@ class EC2_Launch
 	   if img != nil and img != ""
 	      put('Image_Id',img)
 	      image_info
-	   end   
+	   end
 	end
 	@launch['attributes_button'] = FXButton.new(@frame1z, " ",:opts => BUTTON_TOOLBAR)
 	@launch['attributes_button'].icon = @view
@@ -327,7 +329,7 @@ class EC2_Launch
 	@launch['market_button'].tipText = "  CloudMarket Info  "
 	@launch['market_button'].connect(SEL_COMMAND) do |sender, sel, data|
            browser("http://thecloudmarket.com/image/#{@launch['Image_Id'].text}")
-	end	
+	end
  	FXLabel.new(@frame1, "Image Manifest" )
  	@launch['Image_Manifest'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
  	FXLabel.new(@frame1, "" )
@@ -345,23 +347,23 @@ class EC2_Launch
 	@launch['Image_Block_Devices'].connect(SEL_COMMAND) do |sender, sel, which|
 	   @image_bm.set_curr_row(which.row)
 	   @launch['Image_Block_Devices'].selectRow(@image_bm.curr_row)
-	end 
+	end
         @launch['Image_Block_Devices_Button'] = FXButton.new(@frame1, " ",:opts => BUTTON_TOOLBAR)
 	@launch['Image_Block_Devices_Button'].icon = @edit
 	@launch['Image_Block_Devices_Button'].tipText = "  Edit Image Block Device  "
 	@launch['Image_Block_Devices_Button'].connect(SEL_COMMAND) do |sender, sel, data|
 	      if @image_bm.curr_row == nil
 		 error_message("No Block Device selected","No Block Device selected to edit")
-              else	
+              else
 	         dialog = EC2_BlockMappingEditDialog.new(@ec2_main,@image_bm.get,true)
                  dialog.execute
-                 if dialog.saved 
+                 if dialog.saved
                     bm = dialog.block_mapping
                     @image_bm.update(bm)
                     @image_bm.load_table(@launch['Image_Block_Devices'])
                   end
-              end   
-        end		
+              end
+        end
 
  	FXLabel.new(@frame1, "Instance Type" )
  	@frame1d = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
@@ -375,7 +377,7 @@ class EC2_Launch
 	   type = dialog.selected
 	   if type != nil and type != ""
 	      put('Instance_Type',type)
-	   end   
+	   end
 	end
  	FXLabel.new(@frame1d, "    Availability Zone     ")
  	@launch['Availability_Zone'] = FXTextField.new(@frame1d, 15, nil, 0, :opts => FRAME_SUNKEN)
@@ -388,7 +390,7 @@ class EC2_Launch
 	   az = dialog.selected
 	   if az != nil and az != ""
 	      put('Availability_Zone',az)
-	   end   
+	   end
 	end
 	FXLabel.new(@frame1, "" )
  	FXLabel.new(@frame1, "Keypair" )
@@ -403,12 +405,12 @@ class EC2_Launch
 	   keypair = dialog.selected
 	   if keypair != nil and keypair != ""
 	      put('Keypair',keypair)
-	   end   
+	   end
 	end
 	FXLabel.new(@frame1e, "   Monitoring State      " )
 	@launch['Monitoring_State'] = FXComboBox.new(@frame1e, 15, :opts => COMBOBOX_STATIC|COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
-	@launch['Monitoring_State'].numVisible = 2      
-	@launch['Monitoring_State'].appendItem("disabled")	
+	@launch['Monitoring_State'].numVisible = 2
+	@launch['Monitoring_State'].appendItem("disabled")
 	@launch['Monitoring_State'].appendItem("enabled")
 	@launch['Monitoring_State'].setCurrentItem(0)
 	FXLabel.new(@frame1, "" )
@@ -423,25 +425,25 @@ class EC2_Launch
 	end
 	FXLabel.new(@frame1b, "    Addressing (Eucalyptus)" )
 	@launch['Addressing'] = FXTextField.new(@frame1b, 15, nil, 0, :opts => FRAME_SUNKEN)
- 	FXLabel.new(@frame1, "" )	
+ 	FXLabel.new(@frame1, "" )
  	FXLabel.new(@frame1, "Minimum Server Count" )
  	@frame1c = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
  	@launch['Minimum_Server_Count'] = FXTextField.new(@frame1c, 15, nil, 0, :opts => FRAME_SUNKEN)
  	FXLabel.new(@frame1c, "" )
  	FXLabel.new(@frame1c, "         Max Server Count  " )
  	@launch['Maximum_Server_Count'] = FXTextField.new(@frame1c, 15, nil, 0, :opts => FRAME_SUNKEN)
- 	FXLabel.new(@frame1, "" )	
+ 	FXLabel.new(@frame1, "" )
         FXLabel.new(@frame1, "Disable Api Termination" )
         @frame1f = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
 	@launch['Disable_Api_Termination'] = FXComboBox.new(@frame1f, 15, :opts => COMBOBOX_STATIC|COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
-	@launch['Disable_Api_Termination'].numVisible = 2      
-	@launch['Disable_Api_Termination'].appendItem("true")	
+	@launch['Disable_Api_Termination'].numVisible = 2
+	@launch['Disable_Api_Termination'].appendItem("true")
 	@launch['Disable_Api_Termination'].appendItem("false")
-	@launch['Disable_Api_Termination'].setCurrentItem(1)	
+	@launch['Disable_Api_Termination'].setCurrentItem(1)
         FXLabel.new(@frame1f, "  Instance Init Shutdown" )
 	@launch['Instance_Initiated_Shutdown_Behavior'] = FXComboBox.new(@frame1f, 10, :opts => COMBOBOX_STATIC|COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
-	@launch['Instance_Initiated_Shutdown_Behavior'].numVisible = 2      
-	@launch['Instance_Initiated_Shutdown_Behavior'].appendItem("stop")	
+	@launch['Instance_Initiated_Shutdown_Behavior'].numVisible = 2
+	@launch['Instance_Initiated_Shutdown_Behavior'].appendItem("stop")
 	@launch['Instance_Initiated_Shutdown_Behavior'].appendItem("terminate")
 	@launch['Instance_Initiated_Shutdown_Behavior'].setCurrentItem(0)
 	FXLabel.new(@frame1, "" )
@@ -473,7 +475,7 @@ class EC2_Launch
 	   fn = @launch['User_Data_File'].text
 	   puts "#{editor} #{fn}"
 	   system editor+" "+fn
-	end 
+	end
         FXLabel.new(@frame1, "" )
 	FXLabel.new(@frame1, "EC2 SSH Private Key" )
 	@frame1pk = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
@@ -491,7 +493,7 @@ class EC2_Launch
 	      @launch['EC2_SSH_Private_Key'].text = dialog.filename
 	   end
 	end
-        if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil	
+        if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
 	   FXLabel.new(@frame1pk, "Putty Private Key" )
 	   @launch['Putty_Private_Key'] = FXTextField.new(@frame1pk, 20, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
 	   @launch['Putty_Private_Key_Button'] = FXButton.new(@frame1pk, "", :opts => BUTTON_TOOLBAR)
@@ -524,13 +526,13 @@ class EC2_Launch
 	@launch['Local_Port_Button'].connect(SEL_COMMAND) do
 	   dialog = EC2_BastionEditDialog.new(@ec2_main,@bastion)
 	   dialog.execute
-	   if dialog.saved 
+	   if dialog.saved
 	      r = dialog.selected
 	      if r != nil and r != ""
 	         @bastion=r
 	         save
-              end   
-	   end   
+              end
+	   end
 	end
 	FXLabel.new(@frame1, "" )
         FXLabel.new(@frame1, "Additional Info" )
@@ -538,10 +540,10 @@ class EC2_Launch
 	@launch['Additional_Info'] = FXTextField.new(@frame1g, 30, nil, 0, :opts => FRAME_SUNKEN)
         FXLabel.new(@frame1g, "  Ebs Optimized" )
 	@launch['Ebs_Optimized'] = FXComboBox.new(@frame1g, 10, :opts => COMBOBOX_STATIC|COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
-	@launch['Ebs_Optimized'].numVisible = 2      
-	@launch['Ebs_Optimized'].appendItem("true")	
+	@launch['Ebs_Optimized'].numVisible = 2
+	@launch['Ebs_Optimized'].appendItem("true")
 	@launch['Ebs_Optimized'].appendItem("false")
-	@launch['Ebs_Optimized'].setCurrentItem(1)		
+	@launch['Ebs_Optimized'].setCurrentItem(1)
 	FXLabel.new(@frame1, "" )
 	FXLabel.new(@frame1, "Additional Block Devices")
 	@launch['Block_Devices'] = FXTable.new(@frame1,:height => 60, :opts => LAYOUT_FIX_HEIGHT|LAYOUT_FILL|TABLE_COL_SIZABLE|TABLE_ROW_SIZABLE|TABLE_READONLY  )
@@ -558,7 +560,7 @@ class EC2_Launch
 	@create_button.connect(SEL_COMMAND) do |sender, sel, data|
 	      dialog = EC2_BlockMappingEditDialog.new(@ec2_main,nil)
               dialog.execute
-              if dialog.saved 
+              if dialog.saved
                 bm = dialog.block_mapping
                 @block_mapping.push(bm)
                 @block_mapping.load_table(@launch['Block_Devices'])
@@ -573,16 +575,16 @@ class EC2_Launch
 	@edit_button.connect(SEL_COMMAND) do |sender, sel, data|
 	      if @block_mapping.curr_row == nil
 		 error_message("No Block Device selected","No Block Device selected to edit")
-              else	
+              else
 	         dialog = EC2_BlockMappingEditDialog.new(@ec2_main,@block_mapping.get)
                  dialog.execute
-                 if dialog.saved 
+                 if dialog.saved
                     bm = dialog.block_mapping
                     @block_mapping.update(bm)
                     @block_mapping.load_table(@launch['Block_Devices'])
                  end
-              end   
-        end	
+              end
+        end
 	@delete_button = FXButton.new(page1a, " ",:opts => BUTTON_TOOLBAR)
 
 	@delete_button.icon = @delete
@@ -595,13 +597,13 @@ class EC2_Launch
                    answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm delete","Confirm delete of Block Device #{m[:device_name]}")
                    if answer == MBOX_CLICKED_YES
                       @block_mapping.delete
-                      @block_mapping.load_table(@launch['Block_Devices'])                   
-                   end   
-	        end  
+                      @block_mapping.load_table(@launch['Block_Devices'])
+                   end
+	        end
 	end
 	@delete_button.connect(SEL_UPDATE) do |sender, sel, data|
 	       sender.enabled = true
-	end		
+	end
 	FXLabel.new(@frame1, "Notes")
 	@text_area = FXText.new(@frame1, :height => 100, :opts => LAYOUT_FIX_HEIGHT|TEXT_WORDWRAP|LAYOUT_FILL, :padding => 0)
 	#
@@ -627,8 +629,8 @@ class EC2_Launch
 	   selected = dialog.sec_grp
 	   if selected != nil and selected != ""
 	      as_put('Security_Groups',selected)
-	   end   
-	end 	
+	   end
+	end
  	FXLabel.new(@frame3, "Image Id" )
  	@as_launch['Image_Id'] = FXTextField.new(@frame3, 60, nil, 0, :opts => FRAME_SUNKEN)
  	@frame3z = FXHorizontalFrame.new(@frame3,LAYOUT_FILL_X, :padding => 0)
@@ -641,7 +643,7 @@ class EC2_Launch
 	   selected = dialog.selected
 	   if selected != nil and selected != ""
 	      as_put('Image_Id',selected)
-	   end   
+	   end
 	end
 	@as_launch['attributes_button'] = FXButton.new(@frame3z, " ",:opts => BUTTON_TOOLBAR)
 	@as_launch['attributes_button'].icon = @view
@@ -661,20 +663,20 @@ class EC2_Launch
 	@as_launch['market_button'].tipText = "  CloudMarket Info  "
 	@as_launch['market_button'].connect(SEL_COMMAND) do |sender, sel, data|
            browser("http://thecloudmarket.com/image/#{@as_launch['Image_Id'].text}")
-	end	
+	end
  	FXLabel.new(@frame3, "Kernel Id" )
  	@as_launch['Kernel_Id'] = FXTextField.new(@frame3, 60, nil, 0, :opts => FRAME_SUNKEN)
  	FXLabel.new(@frame3, "" )
  	FXLabel.new(@frame3, "RamdiskId" )
  	@as_launch['Ramdisk_Id'] = FXTextField.new(@frame3, 60, nil, 0, :opts => FRAME_SUNKEN)
  	FXLabel.new(@frame3, "" )
-	# not available yet 
+	# not available yet
 	#FXLabel.new(@frame3, "Spot Price" )
  	#@as_launch['SpotPrice'] = FXTextField.new(@frame3, 20, nil, 0, :opts => FRAME_SUNKEN)
- 	#FXLabel.new(@frame3, "" ) 
+ 	#FXLabel.new(@frame3, "" )
 	#FXLabel.new(@frame3, "Iam Instance Profile" )
  	#@as_launch['IamInstanceProfile'] = FXTextField.new(@frame3, 60, nil, 0, :opts => FRAME_SUNKEN)
- 	#FXLabel.new(@frame3, "" )  	
+ 	#FXLabel.new(@frame3, "" )
 	FXLabel.new(@frame3, "UserData" )
  	#@as_launch['UserData'] = FXTextField.new(@frame3, 60, nil, 0, :opts => FRAME_SUNKEN)
  	@as_launch['UserData'] = FXText.new(@frame3, :height => 150, :opts => LAYOUT_FIX_HEIGHT|TEXT_WORDWRAP|LAYOUT_FILL, :padding => 0)
@@ -691,11 +693,11 @@ class EC2_Launch
 	   type = dialog.selected
 	   if type != nil and type != ""
 	      @as_launch['Instance_Type'].text = type
-	   end   
+	   end
 	end
 	FXLabel.new(@frame3, "" )
  	FXLabel.new(@frame3, "KeyName" )
-	@frame3e = FXHorizontalFrame.new(@frame3,LAYOUT_FILL_X, :padding => 0) 	
+	@frame3e = FXHorizontalFrame.new(@frame3,LAYOUT_FILL_X, :padding => 0)
  	@as_launch['KeyName'] = FXTextField.new(@frame3e, 15, nil, 0, :opts => FRAME_SUNKEN)
  	@as_launch['KeyName_Button'] = FXButton.new(@frame3e, "", :opts => BUTTON_TOOLBAR)
 	@as_launch['KeyName_Button'].icon = @magnifier
@@ -706,22 +708,22 @@ class EC2_Launch
 	   keypair = dialog.selected
 	   if keypair != nil and keypair != ""
 	      @as_launch['KeyName'].text=keypair
-	   end   
+	   end
 	end
 	FXLabel.new(@frame3, "" )
 	FXLabel.new(@frame3, "Instance Monitoring" )
 	@as_launch['Instance_Monitoring'] = FXComboBox.new(@frame3, 15, :opts => COMBOBOX_STATIC|COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
 	@as_launch['Instance_Monitoring'].numVisible = 2
 	@as_launch['Instance_Monitoring'].appendItem("true")
-	@as_launch['Instance_Monitoring'].appendItem("false")	
+	@as_launch['Instance_Monitoring'].appendItem("false")
 	@as_launch['Instance_Monitoring'].setCurrentItem(0)
-	FXLabel.new(@frame3, "" )	
+	FXLabel.new(@frame3, "" )
 	FXLabel.new(@frame3, "Block Device Mappings")
 	@as_launch['Block_Device_Mappings'] = FXTable.new(@frame3,:height => 40, :opts => LAYOUT_FIX_HEIGHT|LAYOUT_FILL|TABLE_COL_SIZABLE|TABLE_ROW_SIZABLE|TABLE_READONLY  )
 	@as_launch['Block_Device_Mappings'].connect(SEL_COMMAND) do |sender, sel, which|
 	   @as_bm.set_curr_row(which.row)
 	   @as_launch['Block_Device_Mappings'].selectRow(@as_bm.curr_row)
-	end 
+	end
    	page3a = FXHorizontalFrame.new(@frame3,LAYOUT_FILL_X, :padding => 0)
         FXLabel.new(page3a, " ",:opts => LAYOUT_LEFT )
         @as_launch['Block_Device_Mappings_Create_Button'] = FXButton.new(page3a, " ",:opts => BUTTON_TOOLBAR)
@@ -730,12 +732,12 @@ class EC2_Launch
 	@as_launch['Block_Device_Mappings_Create_Button'].connect(SEL_COMMAND) do |sender, sel, data|
 	      dialog = AS_BlockMappingEditDialog.new(@ec2_main,nil)
               dialog.execute
-              if dialog.saved 
+              if dialog.saved
                 bm = dialog.block_mapping
                 @as_bm.push(bm)
                 @as_bm.load_table(@as_launch['Block_Device_Mappings'])
               end
-        end	
+        end
         @as_launch['Block_Device_Mappings_Create_Button'].connect(SEL_UPDATE) do |sender, sel, data|
 	    sender.enabled = true
 	end
@@ -745,16 +747,16 @@ class EC2_Launch
 	@as_launch['Block_Device_Mappings_Edit_Button'].connect(SEL_COMMAND) do |sender, sel, data|
 	      if @as_bm.curr_row == nil
 		 error_message("No Block Device selected","No Block Device selected to edit")
-              else	
+              else
 	         dialog = AS_BlockMappingEditDialog.new(@ec2_main,@as_bm.get)
                  dialog.execute
-                 if dialog.saved 
+                 if dialog.saved
                     bm = dialog.block_mapping
                     @as_bm.update(bm)
                     @as_bm.load_table(@as_launch['Block_Device_Mappings'])
                  end
-              end   
-        end	
+              end
+        end
 	@as_launch['Block_Device_Mappings_Delete_Button'] = FXButton.new(page3a, " ",:opts => BUTTON_TOOLBAR)
 	@as_launch['Block_Device_Mappings_Delete_Button'].icon = @delete
 	@as_launch['Block_Device_Mappings_Delete_Button'].tipText = "  Delete Block Device  "
@@ -766,10 +768,10 @@ class EC2_Launch
                    answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm delete","Confirm delete of Block Device #{m[:device_name]}")
                    if answer == MBOX_CLICKED_YES
                       @as_bm.delete
-                      @as_bm.load_table(@as_launch['Block_Device_Mappings'])                   
-                   end   
-	        end  
-	end	
+                      @as_bm.load_table(@as_launch['Block_Device_Mappings'])
+                   end
+	        end
+	end
 	@as_launch['Block_Device_Mappings_Delete_Button'].connect(SEL_UPDATE) do |sender, sel, data|
 	       sender.enabled = true
 	end
@@ -782,13 +784,14 @@ class EC2_Launch
  	FXLabel.new(@frame4, "Server Name" )
  	@frame4s = FXHorizontalFrame.new(@frame4,LAYOUT_FILL_X, :padding => 0)
  	@ops_launch['Name'] = FXTextField.new(@frame4s, 20, nil, 0, :opts => FRAME_SUNKEN)
- 	FXLabel.new(@frame4s, "" ) 	        
- 	FXLabel.new(@frame4s, "Chef Node/Puppet Roles" )
+ 	FXLabel.new(@frame4s, "" )
+ 	#FXLabel.new(@frame4s, "Chef Node/Puppet Roles" )
  	@ops_launch['Chef_Node'] = FXTextField.new(@frame4s, 20, nil, 0, :opts => FRAME_SUNKEN)
+ 	@ops_launch['Chef_Node'].visible=false
  	FXLabel.new(@frame4, "" )
         FXLabel.new(@frame4, "Security Groups" )
         @frame4s = FXHorizontalFrame.new(@frame4,LAYOUT_FILL_X, :padding => 0)
- 	@ops_launch['Security_Group'] = FXTextField.new(@frame4s, 25, nil, 0, :opts => FRAME_SUNKEN)	
+ 	@ops_launch['Security_Group'] = FXTextField.new(@frame4s, 25, nil, 0, :opts => FRAME_SUNKEN)
  	@ops_launch['Security_Group_Button'] = FXButton.new(@frame4s, "", :opts => BUTTON_TOOLBAR)
 	@ops_launch['Security_Group_Button'].icon = @magnifier
 	@ops_launch['Security_Group_Button'].tipText = "Select Security Group"
@@ -798,9 +801,9 @@ class EC2_Launch
 	   selected = dialog.sec_grp
 	   if selected != nil and selected != ""
 	      ops_put('Security_Group',selected)
-	   end   
+	   end
 	end
-	FXLabel.new(@frame4, "" ) 
+	FXLabel.new(@frame4, "" )
  	FXLabel.new(@frame4, "Image Id" )
  	@frame4z = FXHorizontalFrame.new(@frame4,LAYOUT_FILL_X, :padding => 0)
  	@ops_launch['Image_Id'] = FXTextField.new(@frame4z, 20, nil, 0, :opts => FRAME_SUNKEN)
@@ -815,7 +818,7 @@ class EC2_Launch
 	   if img != nil and img != ""
 	      ops_put('Image_Id',img)
 	      ops_put('Image_Name',img_name)
-	   end   
+	   end
 	end
 	@ops_launch['attributes_button'] = FXButton.new(@frame4z, " ",:opts => BUTTON_TOOLBAR)
 	@ops_launch['attributes_button'].icon = @view
@@ -839,7 +842,7 @@ class EC2_Launch
  	FXLabel.new(@frame4c, "" )
  	FXLabel.new(@frame4c, "         Max Server Count  " )
  	@ops_launch['Maximum_Server_Count'] = FXTextField.new(@frame4c, 15, nil, 0, :opts => FRAME_SUNKEN)
- 	FXLabel.new(@frame4, "" ) 	
+ 	FXLabel.new(@frame4, "" )
  	FXLabel.new(@frame4, "Flavor" )
  	@frame4d = FXHorizontalFrame.new(@frame4,LAYOUT_FILL_X, :padding => 0)
  	@ops_launch['Flavor'] = FXTextField.new(@frame4d, 15, nil, 0, :opts => FRAME_SUNKEN)
@@ -852,7 +855,7 @@ class EC2_Launch
 	   type = dialog.selected
 	   if type != nil and type != ""
 	      ops_put('Flavor',type)
-	   end   
+	   end
 	end
 	FXLabel.new(@frame4, "" )
  	FXLabel.new(@frame4, "Availability Zone     ")
@@ -867,12 +870,12 @@ class EC2_Launch
 	   az = dialog.selected
 	   if az != nil and az != ""
 	      ops_put('Availability_Zone',az)
-	   end   
+	   end
 	end
-	FXLabel.new(@frame4, "" ) 
+	FXLabel.new(@frame4, "" )
  	FXLabel.new(@frame4, "Keyname" )
  	@frame4e = FXHorizontalFrame.new(@frame4,LAYOUT_FILL_X, :padding => 0)
- 	@ops_launch['Keyname'] = FXTextField.new(@frame4e, 15, nil, 0, :opts => FRAME_SUNKEN) 	
+ 	@ops_launch['Keyname'] = FXTextField.new(@frame4e, 15, nil, 0, :opts => FRAME_SUNKEN)
  	@ops_launch['Keyname_Button'] = FXButton.new(@frame4e, "", :opts => BUTTON_TOOLBAR)
 	@ops_launch['Keyname_Button'].icon = @magnifier
 	@ops_launch['Keyname_Button'].tipText = "Select Keypair"
@@ -882,7 +885,7 @@ class EC2_Launch
 	   keypair = dialog.selected
 	   if keypair != nil and keypair != ""
 	      ops_put('Keyname',keypair)
-	   end   
+	   end
 	end
 	FXLabel.new(@frame4, "" )
  	FXLabel.new(@frame4, "Metadata (Up to 5 Key Value pairs)")
@@ -919,13 +922,13 @@ class EC2_Launch
 	FXLabel.new(@frame4, "" )
 	FXLabel.new(@frame4, "Access IP v6" )
 	@ops_launch['AccessIPv6'] = FXTextField.new(@frame4, 25, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
-	FXLabel.new(@frame4, "" )	
+	FXLabel.new(@frame4, "" )
 	FXLabel.new(@frame4, "Admin Password" )
 	@ops_launch['Admin_Password'] = FXTextField.new(@frame4, 25, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
-	FXLabel.new(@frame4, "" )	
+	FXLabel.new(@frame4, "" )
 	FXLabel.new(@frame4, "Override SSH User" )
 	@ops_launch['EC2_SSH_User'] = FXTextField.new(@frame4, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
-	FXLabel.new(@frame4, "" )	
+	FXLabel.new(@frame4, "" )
 	FXLabel.new(@frame4, "Override SSH Private Key" )
 	@ops_launch['SSH_Private_Key'] = FXTextField.new(@frame4, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
 	@ops_launch['SSH_Private_Key_Button'] = FXButton.new(@frame4, "", :opts => BUTTON_TOOLBAR)
@@ -941,7 +944,7 @@ class EC2_Launch
 	      @ops_launch['SSH_Private_Key'].text = dialog.filename
 	   end
 	end
-        if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil	
+        if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
 	   FXLabel.new(@frame4, "Override Putty Private Key" )
 	   @ops_launch['Putty_Private_Key'] = FXTextField.new(@frame4, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
 	   @ops_launch['Putty_Private_Key_Button'] = FXButton.new(@frame4, "", :opts => BUTTON_TOOLBAR)
@@ -957,7 +960,7 @@ class EC2_Launch
 	         @ops_launch['Putty_Private_Key'].text = dialog.filename
 	      end
 	   end
-        end	 	
+        end
 	FXLabel.new(@frame4, "Notes")
 	@ops_text_area = FXText.new(@frame4, :height => 100, :opts => LAYOUT_FIX_HEIGHT|TEXT_WORDWRAP|LAYOUT_FILL, :padding => 0)
 	#
@@ -983,8 +986,8 @@ class EC2_Launch
 	   selected = dialog.selected
 	   if selected != nil and selected != ""
 	     cfy_put('Memory_Size',selected)
-	   end   
-	end 	
+	   end
+	end
   	FXLabel.new(@frame5, "Type" )
  	@cfy_launch['Type'] = FXTextField.new(@frame5, 60, nil, 0, :opts => FRAME_SUNKEN)
         @cfy_launch['Type_Button'] = FXButton.new(@frame5, "", :opts => BUTTON_TOOLBAR)
@@ -996,11 +999,11 @@ class EC2_Launch
 	   selected = dialog.selected
 	   if selected != nil and selected != ""
 	     cfy_put('Type',selected)
-	   end   
+	   end
 	end
   	FXLabel.new(@frame5, "URL" )
  	@cfy_launch['URL'] = FXTextField.new(@frame5, 60, nil, 0, :opts => FRAME_SUNKEN)
- 	FXLabel.new(@frame5, "" ) 	
+ 	FXLabel.new(@frame5, "" )
   	FXLabel.new(@frame5, "Bind Service" )
  	@cfy_launch['Bind_Service'] = FXTextField.new(@frame5, 60, nil, 0, :opts => FRAME_SUNKEN)
         @cfy_launch['Bind_Service_Button'] = FXButton.new(@frame5, "", :opts => BUTTON_TOOLBAR)
@@ -1012,7 +1015,7 @@ class EC2_Launch
 	   selected = dialog.selected
 	   if selected != nil and selected != ""
 	     cfy_put('Bind_Service',selected)
-	   end   
+	   end
 	end
 	#
 	# google launch frame
@@ -1022,13 +1025,14 @@ class EC2_Launch
         @google_launch = {}
  	FXLabel.new(@frame6, "Server Name" )
  	@google_launch['Name'] = FXTextField.new(@frame6, 20, nil, 0, :opts => FRAME_SUNKEN)
- 	FXLabel.new(@frame6, "" ) 	        
- 	FXLabel.new(@frame6, "Chef Node/Puppet Roles" )
+ 	FXLabel.new(@frame6, "" )
+ 	#FXLabel.new(@frame6, "Chef Node/Puppet Roles" )
  	@google_launch['Chef_Node'] = FXTextField.new(@frame6, 20, nil, 0, :opts => FRAME_SUNKEN)
+ 	@google_launch['Chef_Node'].visible=false
  	FXLabel.new(@frame6, "" )
 	FXLabel.new(@frame6, "Puppet Manifest" )
 	@google_launch['Puppet_Manifest'] = FXTextField.new(@frame6, 20, nil, 0, :opts => FRAME_SUNKEN)
-	FXLabel.new(@frame6, "" )	
+	FXLabel.new(@frame6, "" )
    	FXLabel.new(@frame6, "Machine Type" )
  	@frame6z = FXHorizontalFrame.new(@frame6,LAYOUT_FILL_X, :padding => 0)
  	@google_launch['Flavor'] = FXTextField.new(@frame6z, 20, nil, 0, :opts => FRAME_SUNKEN)
@@ -1041,8 +1045,8 @@ class EC2_Launch
 	   type = dialog.selected
 	   if type != nil and type != ""
 	      google_put('Flavor',type)
-	   end   
-	end	
+	   end
+	end
 	FXLabel.new(@frame6, "" )
 
   	FXLabel.new(@frame6, "Boot Disk" )
@@ -1057,7 +1061,7 @@ class EC2_Launch
 	   b = dialog.selected
 	   if b != nil and b != ""
 	      google_put('Boot_Disk',b)
-	   end   
+	   end
 	end
  	@google_launch['Boot_Disk_Create_Button'] = FXButton.new(@frame6d, "", :opts => BUTTON_TOOLBAR)
 	@google_launch['Boot_Disk_Create_Button'].icon = @create
@@ -1068,13 +1072,13 @@ class EC2_Launch
 	   b = dialog.name
 	   if b != nil and b != ""
 	      google_put('Boot_Disk',b)
-	   end   
-	end	
+	   end
+	end
 	FXLabel.new(@frame6, "" )
 	FXLabel.new(@frame6, "Boot Disk Device" )
 	@google_launch['Boot_Disk_Device'] = FXTextField.new(@frame6, 20, nil, 0, :opts => FRAME_SUNKEN)
-	
-	FXLabel.new(@frame6, "" )	
+
+	FXLabel.new(@frame6, "" )
 	FXLabel.new(@frame6, "Additional Disks" )
 	@frame6e = FXHorizontalFrame.new(@frame6,LAYOUT_FILL_X, :padding => 0)
  	@google_launch['Disks'] = FXTextField.new(@frame6e, 20, nil, 0, :opts => FRAME_SUNKEN)
@@ -1087,18 +1091,18 @@ class EC2_Launch
 	   b = dialog.selected
 	   if b != nil and b != ""
 	      google_append('Disks',b)
-	   end   
+	   end
 	end
 	FXLabel.new(@frame6, "" )
  	FXLabel.new(@frame6, "Tags")
  	@google_launch['Tags'] = FXTextField.new(@frame6, 30, nil, 0, :opts => FRAME_SUNKEN)
-	FXLabel.new(@frame6, "" ) 	
+	FXLabel.new(@frame6, "" )
  	FXLabel.new(@frame6, "Zone")
  	@google_launch['Availability_Zone'] = FXTextField.new(@frame6, 30, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_READONLY)
-	FXLabel.new(@frame6, "" ) 
+	FXLabel.new(@frame6, "" )
  	FXLabel.new(@frame6, "Metadata")
  	@frame6m = FXHorizontalFrame.new(@frame6,LAYOUT_FILL_X, :padding => 0)
- 	@google_launch['User_Data'] = FXTextField.new(@frame6m, 60, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_READONLY)	
+ 	@google_launch['User_Data'] = FXTextField.new(@frame6m, 60, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_READONLY)
  	@google_launch['User_Data_Button'] = FXButton.new(@frame6m, "", :opts => BUTTON_TOOLBAR)
 	@google_launch['User_Data_Button'].icon = @edit
 	@google_launch['User_Data_Button'].tipText = "Edit Metadata"
@@ -1108,7 +1112,7 @@ class EC2_Launch
         if dialog.saved
 	         @google_metadata = dialog.metadata_tags
 	         @google_launch['User_Data'].text = @google_metadata.show
-           end   
+           end
         end
  	FXLabel.new(@frame6, "" )
 	FXLabel.new(@frame6, "Networks" )
@@ -1123,7 +1127,7 @@ class EC2_Launch
 	   n = dialog.selected
 	   if n != nil and n != ""
 	      google_append('Network',n)
-	   end   
+	   end
 	end
 	FXLabel.new(@frame6, "" )
 	FXLabel.new(@frame6, "External Ip" )
@@ -1138,8 +1142,8 @@ class EC2_Launch
 	   item = dialog.selected
 	   if item != nil and item != ""
 	      google_put('External_Ip',item)
-	   end   
-	end	
+	   end
+	end
 	@google_launch['External_Ip_Create_Button'] = FXButton.new(@frame6i, "", :opts => BUTTON_TOOLBAR)
 	@google_launch['External_Ip_Create_Button'].icon = @create
 	@google_launch['External_Ip_Create_Button'].tipText = "Create Address"
@@ -1150,16 +1154,16 @@ class EC2_Launch
 	   if item != nil and item != ""
 	      google_put('External_Ip',item)
 	   else
-	      google_put('External_Ip',"")	  
-	   end   
-	end		
-	FXLabel.new(@frame6, "" )	
+	      google_put('External_Ip',"")
+	   end
+	end
+	FXLabel.new(@frame6, "" )
 	FXLabel.new(@frame6, "Admin Password" )
 	@google_launch['Admin_Password'] = FXTextField.new(@frame6, 25, nil, 0, :opts => FRAME_SUNKEN)
-	FXLabel.new(@frame6, "" )	
+	FXLabel.new(@frame6, "" )
 	FXLabel.new(@frame6, "Override SSH User" )
 	@google_launch['EC2_SSH_User'] = FXTextField.new(@frame6, 60, nil, 0, :opts => FRAME_SUNKEN)
-	FXLabel.new(@frame6, "" )	
+	FXLabel.new(@frame6, "" )
 	FXLabel.new(@frame6, "Override SSH Private Key" )
 	@google_launch['SSH_Private_Key'] = FXTextField.new(@frame6, 60, nil, 0, :opts => FRAME_SUNKEN)
 	@google_launch['SSH_Private_Key_Button'] = FXButton.new(@frame6, "", :opts => BUTTON_TOOLBAR)
@@ -1175,7 +1179,7 @@ class EC2_Launch
 	      @google_launch['SSH_Private_Key'].text = dialog.filename
 	   end
 	end
-        if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil	
+        if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
 	   FXLabel.new(@frame6, "Override Putty Private Key" )
 	   @google_launch['Putty_Private_Key'] = FXTextField.new(@frame6, 60, nil, 0, :opts => FRAME_SUNKEN)
 	   @google_launch['Putty_Private_Key_Button'] = FXButton.new(@frame6, "", :opts => BUTTON_TOOLBAR)
@@ -1191,12 +1195,12 @@ class EC2_Launch
 	         @google_launch['Putty_Private_Key'].text = dialog.filename
 	      end
 	   end
-        end	 	
+        end
 	FXLabel.new(@frame6, "Notes")
-	@google_text_area = FXText.new(@frame6, :height => 100, :opts => LAYOUT_FIX_HEIGHT|TEXT_WORDWRAP|LAYOUT_FILL, :padding => 0)	
-  end 	
-  
- 	
+	@google_text_area = FXText.new(@frame6, :height => 100, :opts => LAYOUT_FIX_HEIGHT|TEXT_WORDWRAP|LAYOUT_FILL, :padding => 0)
+  end
+
+
  def enable_if_env_set(sender)
        @env = @ec2_main.environment.env
        if @env != nil and @env.length>0
@@ -1205,21 +1209,21 @@ class EC2_Launch
          sender.enabled = false
        end
  end
- 
+
   def loaded
       @launch_loaded
-  end   
- 
+  end
+
  def enable_if_launch_loaded(sender)
-       if loaded 
+       if loaded
            sender.enabled = true
        else
            sender.enabled = false
-       end 
+       end
  end
- 
+
  def launchPanel(item)
        load(item.text)
- end 
- 
+ end
+
 end

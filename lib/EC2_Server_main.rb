@@ -420,7 +420,8 @@ class EC2_Server
 	    end
 	end
 	@chef_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
-
+        @chef_button.icon = @chef_icon
+        @chef_button.enabled = false
 	@chef_button.connect(SEL_COMMAND) do |sender, sel, data|
 	     if @type == "loc"
 	       loc_chef
@@ -431,21 +432,23 @@ class EC2_Server
 		 end
 	end
 	@chef_button.connect(SEL_UPDATE) do |sender, sel, data|
-	     if @type == "kit"
-		    sender.enabled = true
-	        @chef_button.icon = @start_icon
-	        @chef_button.tipText = " Kitchen test instance "
-		 else
-		    @chef_button.icon = @chef_icon
-	        @chef_button.tipText = " Run Chef Solo Roles and Recipes "
-            enable_if_ec2_server_loaded(sender)
-         end
+	     sender.enabled = false
+	    # if @type == "kit"
+		#    sender.enabled = true
+	   #     @chef_button.icon = @start_icon
+	   #     @chef_button.tipText = " Kitchen test instance "
+	#	 else
+	#	    @chef_button.icon = @chef_icon
+	 #       @chef_button.tipText = " Run Chef Solo Roles and Recipes "
+        #    enable_if_ec2_server_loaded(sender)
+        # end
 	end
 	@puppet_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@puppet_button.icon = @puppet_icon
-	@puppet_button.tipText = " Run Puppet Apply "
+	@puppet_button.enabled = false
 	@puppet_button.connect(SEL_COMMAND) do |sender, sel, data|
-	    if @type == "loc"
+
+	   if @type == "loc"
 	       loc_puppet
 		elsif @type == "kit"
 	       kit_foodcritic
@@ -454,15 +457,16 @@ class EC2_Server
 		 end
 	end
 	@puppet_button.connect(SEL_UPDATE) do |sender, sel, data|
-	     if @type == 'kit'
-		    @puppet_button.icon = @style
-	        @puppet_button.tipText = " Run Foodcritic "
-		    sender.enabled = true
-		 else
-		   @puppet_button.icon = @puppet_icon
-	       @puppet_button.tipText = " Run Puppet Apply "
-           enable_if_ec2_server_loaded(sender)
-         end
+	     sender.enabled = false
+	    # if @type == 'kit'
+	#	    @puppet_button.icon = @style
+	 #       @puppet_button.tipText = " Run Foodcritic "
+	#	    sender.enabled = true
+	#	 else
+	#	   @puppet_button.icon = @puppet_icon
+	#       @puppet_button.tipText = " Run Puppet Apply "
+        #   enable_if_ec2_server_loaded(sender)
+        # end
 	end
 	@graph_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@graph_button.icon = @chart
@@ -512,8 +516,9 @@ class EC2_Server
         @frame1s = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
  	@server['Security_Groups'] = FXTextField.new(@frame1s, 20, nil, 0, :opts => TEXTFIELD_READONLY)
  	FXLabel.new(@frame1s, "" )
- 	FXLabel.new(@frame1s, "Chef Node/Puppet Roles" )
+ 	#FXLabel.new(@frame1s, "Chef Node/Puppet Roles" )
  	@server['Chef_Node'] = FXTextField.new(@frame1s, 20, nil, 0, :opts => FRAME_SUNKEN)
+ 	@server['Chef_Node'].visible=false
 	@server['Chef_Node'].connect(SEL_COMMAND) do
            instance_id = @server['Instance_ID'].text
            @ec2_chef_node[instance_id] = @server['Chef_Node'].text
@@ -538,8 +543,9 @@ class EC2_Server
                dialog.execute
             end
 	end
- 	FXLabel.new(@frame1t, "Puppet Manifest" )
+ 	#FXLabel.new(@frame1t, "Puppet Manifest" )
  	@server['Puppet_Manifest'] = FXTextField.new(@frame1t, 20, nil, 0, :opts => FRAME_SUNKEN)
+ 	@server['Puppet_Manifest'].visible=false
 	@server['Puppet_Manifest'].connect(SEL_COMMAND) do
            instance_id = @server['Instance_ID'].text
            @ec2_puppet_manifest[instance_id] = @server['Puppet_Manifest'].text
@@ -855,8 +861,9 @@ class EC2_Server
         @frame3s = FXHorizontalFrame.new(@frame3,LAYOUT_FILL_X, :padding => 0)
  	@ops_server['Name'] = FXTextField.new(@frame3s, 20, nil, 0, :opts => TEXTFIELD_READONLY)
  	FXLabel.new(@frame3s, "" )
- 	FXLabel.new(@frame3s, "Chef Node/Puppet Roles" )
+ 	#FXLabel.new(@frame3s, "Chef Node/Puppet Roles" )
  	@ops_server['Chef_Node'] = FXTextField.new(@frame3s, 21, nil, 0, :opts => FRAME_SUNKEN)
+ 	@ops_server['Chef_Node'].visible=false
 	@ops_server['Chef_Node'].connect(SEL_COMMAND) do
            instance_id = @ops_server['Instance_ID'].text
            @ec2_chef_node[instance_id] = @ops_server['Chef_Node'].text
@@ -869,8 +876,9 @@ class EC2_Server
 	FXLabel.new(@frame3, "Security Groups" )
 	@frame3t = FXHorizontalFrame.new(@frame3,LAYOUT_FILL_X, :padding => 0)
 	@ops_server['Security_Groups'] = FXTextField.new(@frame3t, 25, nil, 0, :opts => TEXTFIELD_READONLY)
- 	FXLabel.new(@frame3t, "Puppet Manifest" )
+ 	#FXLabel.new(@frame3t, "Puppet Manifest" )
  	@ops_server['Puppet_Manifest'] = FXTextField.new(@frame3t, 15, nil, 0, :opts => FRAME_SUNKEN)
+ 	@ops_server['Puppet_Manifest'].visible=false
 	@ops_server['Puppet_Manifest'].connect(SEL_COMMAND) do
            instance_id = @ops_server['Instance_ID'].text
            @ec2_puppet_manifest[instance_id] = @ops_server['Puppet_Manifest'].text
@@ -1306,15 +1314,15 @@ class EC2_Server
           @loc_server['putty_key'].text = dialog.filename
        end
     end
-    FXLabel.new(@frame5, "Chef Node" )
-    @loc_server['chef_node'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
-    FXLabel.new(@frame5, "" )
-    FXLabel.new(@frame5, "Puppet Manifest" )
-    @loc_server['puppet_manifest'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
-    FXLabel.new(@frame5, "" )
-    FXLabel.new(@frame5, "Puppet Roles" )
-    @loc_server['puppet_roles'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
-    FXLabel.new(@frame5, "" )
+    #FXLabel.new(@frame5, "Chef Node" )
+    #@loc_server['chef_node'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    #FXLabel.new(@frame5, "" )
+    #FXLabel.new(@frame5, "Puppet Manifest" )
+    #@loc_server['puppet_manifest'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    #FXLabel.new(@frame5, "" )
+    #FXLabel.new(@frame5, "Puppet Roles" )
+    #@loc_server['puppet_roles'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    #FXLabel.new(@frame5, "" )
     FXLabel.new(@frame5, "Windows Server" )
     @loc_server['windows_server'] = FXComboBox.new(@frame5, 15, :opts => COMBOBOX_STATIC|COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
     @loc_server['windows_server'].numVisible = 2
@@ -1382,11 +1390,12 @@ class EC2_Server
 	@frame6 = FXMatrix.new(@page1, 3, MATRIX_BY_COLUMNS|LAYOUT_FILL)
 	@frame6.hide()
  	FXLabel.new(@frame6, "Name" )
-    @frame6s = FXHorizontalFrame.new(@frame6,LAYOUT_FILL_X, :padding => 0)
+        @frame6s = FXHorizontalFrame.new(@frame6,LAYOUT_FILL_X, :padding => 0)
  	@google_server['Name'] = FXTextField.new(@frame6s, 20, nil, 0, :opts => TEXTFIELD_READONLY)
  	FXLabel.new(@frame6s, "" )
- 	FXLabel.new(@frame6s, "Chef Node/Puppet Roles" )
+ 	#FXLabel.new(@frame6s, "Chef Node/Puppet Roles" )
  	@google_server['Chef_Node'] = FXTextField.new(@frame6s, 21, nil, 0, :opts => FRAME_SUNKEN)
+ 	@google_server['Chef_Node'].visible=false
 	@google_server['Chef_Node'].connect(SEL_COMMAND) do
            instance_id = @google_server['Instance_ID'].text
            @ec2_chef_node[instance_id] = @google_server['Chef_Node'].text
@@ -1399,8 +1408,9 @@ class EC2_Server
  	FXLabel.new(@frame6, "Instance ID" )
  	@frame6t = FXHorizontalFrame.new(@frame6,LAYOUT_FILL_X, :padding => 0)
  	@google_server['Instance_ID'] = FXTextField.new(@frame6t, 25, nil, 0, :opts => TEXTFIELD_READONLY)
- 	FXLabel.new(@frame6t, "Puppet Manifest" )
+ 	#FXLabel.new(@frame6t, "Puppet Manifest" )
  	@google_server['Puppet_Manifest'] = FXTextField.new(@frame6t, 15, nil, 0, :opts => FRAME_SUNKEN)
+ 	@google_server['Puppet_Manifest'].visible=false
 	@google_server['Puppet_Manifest'].connect(SEL_COMMAND) do
            instance_id = @google_server['Instance_ID'].text
            @ec2_puppet_manifest[instance_id] = @google_server['Puppet_Manifest'].text
