@@ -68,10 +68,12 @@ class EC2_Server
 	@stop_icon.create
 	@create_image_icon = @ec2_main.makeIcon("package.png")
 	@create_image_icon.create
-	@chef_icon = @ec2_main.makeIcon("chef.png")
-	@chef_icon.create
-	@puppet_icon = @ec2_main.makeIcon("puppet.png")
-	@puppet_icon.create
+	#@chef_icon = @ec2_main.makeIcon("chef.png")
+	#@chef_icon.create
+	@kitchenci = @ec2_main.makeIcon("kitchenci.png")
+	@kitchenci.create
+	#@puppet_icon = @ec2_main.makeIcon("puppet.png")
+	#@puppet_icon.create
 	@view = @ec2_main.makeIcon("application_view_icons.png")
 	@view.create
         @tag_red = @ec2_main.makeIcon("tag_red.png")
@@ -420,44 +422,27 @@ class EC2_Server
 	    end
 	end
 	@chef_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
-        @chef_button.icon = @chef_icon
-        @chef_button.enabled = false
+        @chef_button.icon = @kitchenci
 	@chef_button.connect(SEL_COMMAND) do |sender, sel, data|
-	     if @type == "loc"
-	       loc_chef
-		elsif @type == "kit"
-	       kit_test
-		 else
-           run_chef
-		 end
+          run_kitchen
 	end
 	@chef_button.connect(SEL_UPDATE) do |sender, sel, data|
-	     sender.enabled = false
-	    # if @type == "kit"
-		#    sender.enabled = true
-	   #     @chef_button.icon = @start_icon
-	   #     @chef_button.tipText = " Kitchen test instance "
+           enable_if_ec2_server_loaded(sender)
+	end
+	#@puppet_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
+	#@puppet_button.icon = @puppet_icon
+	#@puppet_button.enabled = false
+	#@puppet_button.connect(SEL_COMMAND) do |sender, sel, data|
+	#   if @type == "loc"
+	#       loc_puppet
+	#	elsif @type == "kit"
+	#       kit_foodcritic
 	#	 else
-	#	    @chef_button.icon = @chef_icon
-	 #       @chef_button.tipText = " Run Chef Solo Roles and Recipes "
-        #    enable_if_ec2_server_loaded(sender)
-        # end
-	end
-	@puppet_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
-	@puppet_button.icon = @puppet_icon
-	@puppet_button.enabled = false
-	@puppet_button.connect(SEL_COMMAND) do |sender, sel, data|
-
-	   if @type == "loc"
-	       loc_puppet
-		elsif @type == "kit"
-	       kit_foodcritic
-		 else
-           run_puppet
-		 end
-	end
-	@puppet_button.connect(SEL_UPDATE) do |sender, sel, data|
-	     sender.enabled = false
+        #   run_puppet
+	#	 end
+	#end
+	#@puppet_button.connect(SEL_UPDATE) do |sender, sel, data|
+	#     sender.enabled = false
 	    # if @type == 'kit'
 	#	    @puppet_button.icon = @style
 	 #       @puppet_button.tipText = " Run Foodcritic "
@@ -467,7 +452,7 @@ class EC2_Server
 	#       @puppet_button.tipText = " Run Puppet Apply "
         #   enable_if_ec2_server_loaded(sender)
         # end
-	end
+	#end
 	@graph_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@graph_button.icon = @chart
 	@graph_button.tipText = " Monitoring Graphs "
@@ -494,7 +479,7 @@ class EC2_Server
 	end
 	@tunnel_button = FXButton.new(page1a," ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@tunnel_button.icon = @tunnel
-    @tunnel_button.tipText = " Setup SSH Tunnel"
+        @tunnel_button.tipText = " Setup SSH Tunnel"
 	@tunnel_button.connect(SEL_COMMAND) do |sender, sel, data|
 	    if @type == "ec2" or @type == "ops"  or @type == "google"
                run_ssh_tunnel
@@ -516,9 +501,8 @@ class EC2_Server
         @frame1s = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
  	@server['Security_Groups'] = FXTextField.new(@frame1s, 20, nil, 0, :opts => TEXTFIELD_READONLY)
  	FXLabel.new(@frame1s, "" )
- 	#FXLabel.new(@frame1s, "Chef Node/Puppet Roles" )
+ 	FXLabel.new(@frame1s, "Kitchen Instance" )
  	@server['Chef_Node'] = FXTextField.new(@frame1s, 20, nil, 0, :opts => FRAME_SUNKEN)
- 	@server['Chef_Node'].visible=false
 	@server['Chef_Node'].connect(SEL_COMMAND) do
            instance_id = @server['Instance_ID'].text
            @ec2_chef_node[instance_id] = @server['Chef_Node'].text
@@ -800,8 +784,8 @@ class EC2_Server
 	end
 	FXLabel.new(@frame1, "" )
 	FXLabel.new(@frame1, "AMI Launch Index" )
-    @server['Ami_Launch_Index'] = FXTextField.new(@frame1, 20, nil, 0, :opts => TEXTFIELD_READONLY)
-    FXLabel.new(@frame1, "" )
+        @server['Ami_Launch_Index'] = FXTextField.new(@frame1, 20, nil, 0, :opts => TEXTFIELD_READONLY)
+        FXLabel.new(@frame1, "" )
 	FXLabel.new(@frame1, "Kernel Id" )
 	@frame1f = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
         @server['Kernel_Id'] = FXTextField.new(@frame1f, 20, nil, 0, :opts => TEXTFIELD_READONLY)
@@ -861,9 +845,8 @@ class EC2_Server
         @frame3s = FXHorizontalFrame.new(@frame3,LAYOUT_FILL_X, :padding => 0)
  	@ops_server['Name'] = FXTextField.new(@frame3s, 20, nil, 0, :opts => TEXTFIELD_READONLY)
  	FXLabel.new(@frame3s, "" )
- 	#FXLabel.new(@frame3s, "Chef Node/Puppet Roles" )
+ 	FXLabel.new(@frame3s, "Kitchen Instance" )
  	@ops_server['Chef_Node'] = FXTextField.new(@frame3s, 21, nil, 0, :opts => FRAME_SUNKEN)
- 	@ops_server['Chef_Node'].visible=false
 	@ops_server['Chef_Node'].connect(SEL_COMMAND) do
            instance_id = @ops_server['Instance_ID'].text
            @ec2_chef_node[instance_id] = @ops_server['Chef_Node'].text
@@ -1291,6 +1274,9 @@ class EC2_Server
     @loc_server['ssh_key_button'].tipText = "Browse..."
     @loc_server['ssh_key_button'].connect(SEL_COMMAND) do
        dialog = FXFileDialog.new(@frame5, "Select pem file")
+       if @loc_server['ssh_key'].text!=nil and  @loc_server['ssh_key'].text==""
+          dialog.directory = @loc_server['ssh_key'].text
+       end
        dialog.patternList = [
           "Pem Files (*.pem)"
        ]
@@ -1305,7 +1291,10 @@ class EC2_Server
     @loc_server['putty_key_button'].icon = @magnifier
     @loc_server['putty_key_button'].tipText = "Browse..."
     @loc_server['putty_key_button'].connect(SEL_COMMAND) do
-       dialog = FXFileDialog.new(@frame5, "Select pem file")
+       dialog = FXFileDialog.new(@frame5, "Select puttyfile")
+       if @loc_server['putty_key'].text!=nil and  @loc_server['putty_key'].text==""
+          dialog.directory = @loc_server['putty_key'].text
+       end
        dialog.patternList = [
           "Pem Files (*.ppk)"
        ]
@@ -1314,9 +1303,9 @@ class EC2_Server
           @loc_server['putty_key'].text = dialog.filename
        end
     end
-    #FXLabel.new(@frame5, "Chef Node" )
-    #@loc_server['chef_node'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
-    #FXLabel.new(@frame5, "" )
+    FXLabel.new(@frame5, "Kitchen Instance" )
+    @loc_server['chef_node'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    FXLabel.new(@frame5, "" )
     #FXLabel.new(@frame5, "Puppet Manifest" )
     #@loc_server['puppet_manifest'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     #FXLabel.new(@frame5, "" )
@@ -1361,6 +1350,9 @@ class EC2_Server
     @loc_server['bastion_ssh_key_button'].tipText = "Browse..."
     @loc_server['bastion_ssh_key_button'].connect(SEL_COMMAND) do
        dialog = FXFileDialog.new(@frame5, "Select pem file")
+       if @loc_server['bastion_ssh_key'].text!=nil and  @loc_server['bastion_ssh_key'].text==""
+          dialog.directory = @loc_server['bastion_ssh_key'].text
+       end
        dialog.patternList = [
           "Pem Files (*.pem)"
        ]
@@ -1376,6 +1368,9 @@ class EC2_Server
     @loc_server['bastion_putty_key_button'].tipText = "Browse..."
     @loc_server['bastion_putty_key_button'].connect(SEL_COMMAND) do
        dialog = FXFileDialog.new(@frame5, "Select pem file")
+       if @loc_server['bastion_putty_key'].text!=nil and  @loc_server['bastion_putty_key'].text==""
+          dialog.directory = @loc_server['bastion_putty_key'].text
+       end
        dialog.patternList = [
           "Pem Files (*.ppk)"
        ]
@@ -1393,9 +1388,8 @@ class EC2_Server
         @frame6s = FXHorizontalFrame.new(@frame6,LAYOUT_FILL_X, :padding => 0)
  	@google_server['Name'] = FXTextField.new(@frame6s, 20, nil, 0, :opts => TEXTFIELD_READONLY)
  	FXLabel.new(@frame6s, "" )
- 	#FXLabel.new(@frame6s, "Chef Node/Puppet Roles" )
+ 	FXLabel.new(@frame6s, "Kitchen Instance" )
  	@google_server['Chef_Node'] = FXTextField.new(@frame6s, 21, nil, 0, :opts => FRAME_SUNKEN)
- 	@google_server['Chef_Node'].visible=false
 	@google_server['Chef_Node'].connect(SEL_COMMAND) do
            instance_id = @google_server['Instance_ID'].text
            @ec2_chef_node[instance_id] = @google_server['Chef_Node'].text
@@ -1589,54 +1583,54 @@ class EC2_Server
 	#
 	@frame7 = FXMatrix.new(@page1, 3, MATRIX_BY_COLUMNS|LAYOUT_FILL)
 	@frame7.hide()
-    FXLabel.new(@frame7, "Instance" )
-    @kit_server['instance'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
-    FXLabel.new(@frame7, "" )
-    FXLabel.new(@frame7, "Driver" )
-    @kit_server['driver'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
-    FXLabel.new(@frame7, "" )
-    FXLabel.new(@frame7, "Provisioner" )
-    @kit_server['provisioner'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
-    FXLabel.new(@frame7, "" )
-    FXLabel.new(@frame7, "Last Action" )
-    @kit_server['last_action'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
-    FXLabel.new(@frame7, "" )
-    FXLabel.new(@frame7, "" )
-    FXLabel.new(@frame7, "" )
-    FXLabel.new(@frame7, "" )
-    FXLabel.new(@frame7, "" )
-    FXLabel.new(@frame7, "" )
-    FXLabel.new(@frame7, "" )
-    FXLabel.new(@frame7, "Test Kitchen Path" )
-    @kit_server['test_kitchen_path'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
-    @kit_server['test_kitchen_path_button'] = FXButton.new(@frame7, " ",:opts => BUTTON_TOOLBAR)
-    @kit_server['test_kitchen_path_button'].icon = @modify
-    @kit_server['test_kitchen_path_button'].tipText = "  Configure Test Kitchen Path  "
-    @kit_server['test_kitchen_path_button'].connect(SEL_COMMAND) do |sender, sel, data|
-        dialog = KIT_PathCreateDialog.new(@ec2_main)
-        dialog.execute
-        if dialog.success
-            @ec2_main.tabBook.setCurrent(0)
-            @ec2_main.list.load("Test Kitchen")
-        end
-    end
-    FXLabel.new(@frame7, "SSH User" )
- 	@kit_server['ssh_user'] = FXTextField.new(@frame7, 30, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
-    FXLabel.new(@frame7, "" )
-    FXLabel.new(@frame7, "Foodcritic cookbook_path" )
-    @kit_server['chef_foodcritic'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
-	@kit_server['chef_foodcritic'].connect(SEL_COMMAND) do
-	    @ec2_main.settings.put('CHEF_FOODCRITIC',@kit_server['chef_foodcritic'].text)
-		@ec2_main.settings.save
-	end
-    FXLabel.new(@frame7, "path of cookbook from TEST_KITCHEN_PATH" )
-    FXLabel.new(@frame7, "RSpec spec files" )
-    @kit_server['chef_rspec_test'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
-	@kit_server['chef_rspec_test'].connect(SEL_COMMAND) do
-	    @ec2_main.settings.put('CHEF_RSPEC_TEST',@kit_server['chef_rspec_test'].text)
-		@ec2_main.settings.save
-	end
-    FXLabel.new(@frame7, "spec files to run  from TEST_KITCHEN_PATH" )
+    #FXLabel.new(@frame7, "Instance" )
+    #@kit_server['instance'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
+    #FXLabel.new(@frame7, "" )
+    #FXLabel.new(@frame7, "Driver" )
+    #@kit_server['driver'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
+    #FXLabel.new(@frame7, "" )
+    #FXLabel.new(@frame7, "Provisioner" )
+    #@kit_server['provisioner'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
+    #FXLabel.new(@frame7, "" )
+    #FXLabel.new(@frame7, "Last Action" )
+   # @kit_server['last_action'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
+   # FXLabel.new(@frame7, "" )
+   # FXLabel.new(@frame7, "" )
+   # FXLabel.new(@frame7, "" )
+   # FXLabel.new(@frame7, "" )
+   # FXLabel.new(@frame7, "" )
+   # FXLabel.new(@frame7, "" )
+   # FXLabel.new(@frame7, "" )
+   # FXLabel.new(@frame7, "Test Kitchen Path" )
+   # @kit_server['test_kitchen_path'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
+   # @kit_server['test_kitchen_path_button'] = FXButton.new(@frame7, " ",:opts => BUTTON_TOOLBAR)
+   # @kit_server['test_kitchen_path_button'].icon = @modify
+   # @kit_server['test_kitchen_path_button'].tipText = "  Configure Test Kitchen Path  "
+   # @kit_server['test_kitchen_path_button'].connect(SEL_COMMAND) do |sender, sel, data|
+   #     dialog = KIT_PathCreateDialog.new(@ec2_main)
+   #     dialog.execute
+   #     if dialog.success
+   #         @ec2_main.tabBook.setCurrent(0)
+   #         @ec2_main.list.load("Test Kitchen")
+   #     end
+   # end
+   # FXLabel.new(@frame7, "SSH User" )
+ #	@kit_server['ssh_user'] = FXTextField.new(@frame7, 30, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
+  #  FXLabel.new(@frame7, "" )
+  #  FXLabel.new(@frame7, "Foodcritic cookbook_path" )
+  #  @kit_server['chef_foodcritic'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+#	@kit_server['chef_foodcritic'].connect(SEL_COMMAND) do
+#	    @ec2_main.settings.put('CHEF_FOODCRITIC',@kit_server['chef_foodcritic'].text)
+#		@ec2_main.settings.save
+#	end
+#    FXLabel.new(@frame7, "path of cookbook from TEST_KITCHEN_PATH" )
+#    FXLabel.new(@frame7, "RSpec spec files" )
+#    @kit_server['chef_rspec_test'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+#	@kit_server['chef_rspec_test'].connect(SEL_COMMAND) do
+#	    @ec2_main.settings.put('CHEF_RSPEC_TEST',@kit_server['chef_rspec_test'].text)
+#		@ec2_main.settings.save
+#	end
+ #   FXLabel.new(@frame7, "spec files to run  from TEST_KITCHEN_PATH" )
   end
 
   def run_scp
@@ -1753,7 +1747,7 @@ class EC2_Server
       else
         cn = @ec2_main.launch.get('Chef_Node')
         if cn == nil or cn == ""
-         cn = @secgrp
+         cn = "default_server"
         end
       end
       puts "chef_node #{cn}"
@@ -1912,8 +1906,8 @@ class EC2_Server
         return true
      elsif @type == "loc"
         return true
-     elsif @type == "kit"
-        return true
+     #elsif @type == "kit"
+     #   return true
      else
         return false
      end
@@ -1980,84 +1974,35 @@ class EC2_Server
          end
   end
 
-    def run_chef
-            server = currentServer
-            address = @server['Public_IP'].text
-            chef_node = ""
-            password =""
-            platform = ""
-            local_port =""
-            if @type == "ops"
-               if @ops_server['Chef_Node'].text != nil and @ops_server['Chef_Node'].text != ""
-                  chef_node = @ops_server['Chef_Node'].text
-               end
-               #user = @ops_server['EC2_SSH_User'].text
-               # workaround this line below returns empty
-               user = @ec2_main.launch.ops_get('EC2_SSH_User')
-               puts "*** ops user #{user}"
-               password = @ops_server['Admin_Password'].text
-               local_port = nil  # not added yet
- 	    elsif @type == "google"
-               if @google_server['Chef_Node'].text != nil and @google_server['Chef_Node'].text != ""
-                  chef_node = @google_server['Chef_Node'].text
-               end
-               user = @ec2_main.launch.google_get("EC2_SSH_User")
-               local_port = nil  # not added yet
- 	    else
-               if @server['Chef_Node'].text != nil and @server['Chef_Node'].text != ""
-                  chef_node = @server['Chef_Node'].text
-               end
-               user = @ec2_main.launch.get("EC2_SSH_User")
-               platform = @server['Platform'].text
-               if platform == "windows" and @server['Win_Admin_Password'].text != ""
-                  password = @server['Win_Admin_Password'].text
-               end
-               local_port = @server['Local_Port'].text
-            end
-            private_key = get_pk
-	    dialog = EC2_ChefEditDialog.new(@ec2_main,server, address,  chef_node, user, private_key, password, platform, local_port)
-            dialog.execute
-     end
-
-     def run_puppet
-             server = currentServer
-             address = @server['Public_IP'].text
-             puppet_manifest = ""
-             password =""
-             platform = ""
-             local_port =""
-			 roles = ""
-             if @type == "ops"
-                if @ops_server['Puppet_Manifest'].text != nil and @ops_server['Puppet_Manifest'].text != ""
-                   puppet_manifest = @ops_server['Puppet_Manifest'].text
-                end
-                user = @ec2_main.launch.ops_get("SSH_User")
-                password = @ops_server['Admin_Password'].text
-                local_port = nil  # not added yet
-				roles = @ops_server['Chef_Node'].text
-  	        elsif @type == "google"
-                if @google_server['Puppet_Manifest'].text != nil and @google_server['Puppet_Manifest'].text != ""
-                   puppet_manifest = @google_server['Puppet_Manifest'].text
-                end
-                user = @ec2_main.launch.google_get("EC2_SSH_User")
-                local_port = nil  # not added yet
-				roles = @google_server['Chef_Node'].text
-  	        else
-                if @server['Puppet_Manifest'].text != nil and @server['Puppet_Manifest'].text != ""
-                   puppet_manifest = @server['Puppet_Manifest'].text
-                end
-                user = @ec2_main.launch.get("EC2_SSH_User")
-                platform = @server['Platform'].text
-                if platform == "windows" and @server['Win_Admin_Password'].text != ""
-                   password = @server['Win_Admin_Password'].text
-                end
-                local_port = @server['Local_Port'].text
-				roles = @server['Chef_Node'].text
-             end
-             private_key = get_pk
-			 dialog = EC2_PuppetEditDialog.new(@ec2_main, server, address,  puppet_manifest, user, private_key, password, platform, local_port, roles)
-             dialog.execute
-      end
+  def run_kitchen
+    data = kitchen_cmd("list")
+    instance = ""
+    if @type == "ec2"
+      instance = @server['Chef_Node'].text if @server['Chef_Node'].text != nil
+    elsif @type == "ops"
+      instance = @ops_server['Chef_Node'].text if @ops_server['Chef_Node'].text != nil
+    elsif @type == "google"
+      instance = @google_server['Chef_Node'].text if @google_server['Chef_Node'].text != nil
+    elsif @type == "loc"
+      instance = @loc_server['chef_node'].text if @loc_server['chef_node'].text != nil
+    end
+    driver = ""
+    provisioner = ""
+    last_action = ""
+    data.each do |r|
+      if r['Instance']==instance
+         driver = r['Driver']
+         provisioner = r['Provisioner']
+         last_action = r['Last-Action']
+       end
+    end
+    if driver == ""
+       error_message("Kitchen Instance not found","Kitchen Instance #{instance} not found")
+    else
+       $ec2_main.kitchen.kit_load(instance,driver,provisioner,last_action)
+       $ec2_main.tabBook.setCurrent(4)
+    end
+  end
 
  end
 

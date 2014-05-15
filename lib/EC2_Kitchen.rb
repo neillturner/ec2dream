@@ -49,10 +49,10 @@ class EC2_Kitchen
 	@style.create
 	@lightbulb = @ec2_main.makeIcon("lightbulb.png")
 	@lightbulb.create
+	@bookshelf = @ec2_main.makeIcon("bookshelf.png")
+	@bookshelf.create
 	@tunnel = @ec2_main.makeIcon("tunnel.png")
 	@tunnel.create
-
-
 
         tab6 = FXTabItem.new(@ec2_main.tabBook, " Kitchen ")
         @page1 = FXVerticalFrame.new(@ec2_main.tabBook, LAYOUT_FILL, :padding => 0)
@@ -187,6 +187,15 @@ class EC2_Kitchen
 	@graph_button.connect(SEL_UPDATE) do |sender, sel, data|
 	    sender.enabled = true
 	end
+	@bookshelf_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
+	@bookshelf_button.icon = @bookshelf
+	@bookshelf_button.tipText = " Run berks --debug "
+	@bookshelf_button.connect(SEL_COMMAND) do |sender, sel, data|
+	    kit_berks
+ 	end
+	@bookshelf_button.connect(SEL_UPDATE) do |sender, sel, data|
+	    sender.enabled = true
+	end
 	@tunnel_button = FXButton.new(page1a," ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@tunnel_button.icon = @tunnel
         @tunnel_button.tipText = " Setup SSH Tunnel"
@@ -318,6 +327,10 @@ class EC2_Kitchen
 
   def kit_winscp
     kit_ssh('scp')
+  end
+
+  def kit_berks
+    kitchen_cmd('berks --debug')
   end
 
   def kit_edit

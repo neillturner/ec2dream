@@ -22,24 +22,24 @@ class EC2_Server
        cfy_clear('meta')
        @frame1.hide()
        @frame3.hide()
-	   @frame5.hide()
+       @frame5.hide()
        @frame6.hide()
-       @frame7.hide()	   
+       #@frame7.hide()
        @frame4.show()
-       @page1.width=300       
+       @page1.width=300
        @server_status = ""
        @secgrp = ""
-  end 
-     
+  end
+
   def cfy_clear(key)
     @cfy_server[key].text = ""
-  end 
-  
+  end
+
   def cfy_refresh(app_name)
      @ec2_main.treeCache.refresh
      cfy_load(app_name)
   end
- 
+
   def cfy_load(app_name)
       puts "server.cfy_load "+app_name
       @type = "cfy"
@@ -47,13 +47,13 @@ class EC2_Server
       @frame3.hide()
       @frame5.hide()
       @frame6.hide()
-      @frame7.hide()	  
+      #@frame7.hide()
       @frame4.show()
       @page1.width=300
       @appname = app_name
       r = @ec2_main.serverCache.instance(app_name)
-      if r != nil	 
-    	@cfy_server['name'].text = r[:name] 
+      if r != nil
+    	@cfy_server['name'].text = r[:name]
         @cfy_server['state'].text = r[:state]
         @cfy_server['model'].text = r[:staging][:model]
         @cfy_server['stack'].text = r[:staging][:stack]
@@ -69,16 +69,16 @@ class EC2_Server
         @cfy_server['meta'].text  = r[:meta].to_s
      end
      @ec2_main.app.forceRefresh
-  end 
-  
+  end
+
     def cfy_load_table(field,title,env=[])
-            if env == nil 
+            if env == nil
                env = []
-            end   
+            end
             field.clearItems
-            field.rowHeaderWidth = 0	
+            field.rowHeaderWidth = 0
             field.setTableSize(env.size, 1)
-            field.setColumnText(0, title) 
+            field.setColumnText(0, title)
             field.setColumnWidth(0,360)
             i = 0
             env.each do |j|
@@ -86,11 +86,11 @@ class EC2_Server
                  field.setItemText(i, 0, "#{j}")
                  field.setItemJustify(i, 0, FXTableItem::LEFT)
                  i = i+1
-              end   
-            end   
+              end
+            end
   end
-  
- 
+
+
   def cfy_start
      name = @cfy_server['name'].text
      answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm Start","Confirm Start of App "+name)
@@ -102,9 +102,9 @@ class EC2_Server
             r = @ec2_main.environment.cfy_app.start(name)
          rescue
             error_message("Start App Failed",$!)
-         end      
-     end 
- end 
+         end
+     end
+ end
 
   def cfy_stop
      name = @cfy_server['name'].text
@@ -114,9 +114,9 @@ class EC2_Server
             r = @ec2_main.environment.cfy_app.stop(name)
          rescue
             error_message("Stop App Failed",$!)
-         end      
-     end 
- end 
+         end
+     end
+ end
 
   def cfy_restart
      name = @cfy_server['name'].text
@@ -126,9 +126,9 @@ class EC2_Server
             r = @ec2_main.environment.cfy_app.restart(name)
          rescue
             error_message("Restart App Failed",$!)
-         end      
-     end 
- end 
+         end
+     end
+ end
 
   def cfy_delete
      name = @cfy_server['name'].text
@@ -138,8 +138,8 @@ class EC2_Server
             r = @ec2_main.environment.cfy_app.delete(name)
          rescue
             error_message("Delete App Failed",$!)
-         end      
-     end 
- end 
+         end
+     end
+ end
 
 end

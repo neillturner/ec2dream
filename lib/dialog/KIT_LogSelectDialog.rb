@@ -11,9 +11,9 @@ class KIT_LogSelectDialog < FXDialogBox
   def initialize(owner)
     @curr_env = ""
     @ec2_main = owner
-	logs = nil
-	chef_repository = $ec2_main.settings.get('CHEF_REPOSITORY')
-	d = "#{chef_repository}/.kitchen/logs"
+    logs = nil
+    kit_repository = $ec2_main.settings.get('TEST_KITCHEN_PATH')
+    d = "#{kit_repository}/.kitchen/logs"
     begin
  	   logs = Dir.entries(d)
     rescue
@@ -23,11 +23,11 @@ class KIT_LogSelectDialog < FXDialogBox
     loglist = FXList.new(self, :opts => LIST_SINGLESELECT|LAYOUT_FILL)
      if logs != nil
        logs.each do |e|
-          if e != "." and e != ".." 
+          if e != "." and e != ".."
              loglist.appendItem(e)
-          end 
+          end
        end
-     end   
+     end
      loglist.connect(SEL_COMMAND) do |sender, sel, data|
        selected_item = ""
        loglist.each do |item|
@@ -35,11 +35,11 @@ class KIT_LogSelectDialog < FXDialogBox
        end
        puts "item "+selected_item
 	   editor = @ec2_main.settings.get_system('EXTERNAL_EDITOR')
-	   c="\"#{editor}\" \"#{chef_repository}/.kitchen/logs/#{selected_item}\""
+	   c="\"#{editor}\" \"#{kit_repository}/.kitchen/logs/#{selected_item}\""
 	   puts c
-	   system(c)  	   
+	   system(c)
        self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
     end
   end
-   
+
 end

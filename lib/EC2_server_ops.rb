@@ -32,7 +32,7 @@ class EC2_Server
        @frame4.hide()
 	   @frame5.hide()
        @frame6.hide()
-	   @frame7.hide()
+	   #@frame7.hide()
        @frame3.show()
        @server_status = ""
        @secgrp = ""
@@ -50,7 +50,7 @@ class EC2_Server
       @frame4.hide()
 	  @frame5.hide()
       @frame6.hide()
-	  @frame7.hide()
+	  #@frame7.hide()
       @frame3.show()
       @ops_server['Instance_ID'].text = instance_id
       ENV['EC2_INSTANCE'] = instance_id
@@ -212,7 +212,7 @@ def group_array(x)
        else
          cn = @ec2_main.launch.get('Chef_Node')
          if cn == nil or cn == ""
-          cn = @ops_server['Name'].text
+          cn = "default_server"
          end
        end
        return cn

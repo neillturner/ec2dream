@@ -57,7 +57,7 @@ def kitchen_cmd(cmd='list',instance=nil,debug=false)
            c="\"#{editor}\" \"#{repository}/.kitchen.yml\""
            puts c
            system(c)
-   when 'foodcritic','rspec'
+   when 'foodcritic','rspec','berks --debug'
        c = "#{cmd} #{instance}"
        answer = FXMessageBox.question($ec2_main.tabBook,MBOX_YES_NO,"Confirm Command","Confirm Running #{c}")
        if answer == MBOX_CLICKED_YES
