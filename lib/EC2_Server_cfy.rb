@@ -24,7 +24,6 @@ class EC2_Server
        @frame3.hide()
        @frame5.hide()
        @frame6.hide()
-       #@frame7.hide()
        @frame4.show()
        @page1.width=300
        @server_status = ""
@@ -47,7 +46,6 @@ class EC2_Server
       @frame3.hide()
       @frame5.hide()
       @frame6.hide()
-      #@frame7.hide()
       @frame4.show()
       @page1.width=300
       @appname = app_name

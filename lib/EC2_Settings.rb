@@ -33,12 +33,8 @@ class EC2_Settings
 	@magnifier.create
 	@tunnel = @ec2_main.makeIcon("tunnel.png")
 	@tunnel.create
-    @repository = @ec2_main.makeIcon("drawer.png")
+        @repository = @ec2_main.makeIcon("drawer.png")
 	@repository.create
-	@puppet_icon = @ec2_main.makeIcon("puppet.png")
-	@puppet_icon.create
-	@chef_icon = @ec2_main.makeIcon("chef.png")
-	@chef_icon.create
         tab4 = FXTabItem.new(@ec2_main.tabBook, " Environment ")
         page1 = FXVerticalFrame.new(@ec2_main.tabBook)
         page1a = FXHorizontalFrame.new(page1,LAYOUT_FILL_X, :padding => 0)
@@ -227,46 +223,10 @@ class EC2_Settings
 	FXLabel.new(frame1, "" )
 	#
 	#   Global and General Settings
-    #
-    FXLabel.new(frame1, "" )
+        #
+        FXLabel.new(frame1, "" )
  	FXLabel.new(frame1, "  Global and General Settings", nil, LAYOUT_CENTER_X)
 	FXLabel.new(frame1, "" )
-	FXLabel.new(frame1, "" )
- 	@settings['CHEF_REPOSITORY'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
- 	@settings['CHEF_REPOSITORY'].visible=false
- 	FXLabel.new(frame1, "" )
- 	#@settings['CHEF_REPOSITORY_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
-	#@settings['CHEF_REPOSITORY_BUTTON'].icon = @magnifier
-	#@settings['CHEF_REPOSITORY_BUTTON'].tipText = "Browse..."
-	#@settings['CHEF_REPOSITORY_BUTTON'].connect(SEL_COMMAND) do
-	#   dialog = FXDirDialog.new(frame1, "Select Chef Repository Directory")
-	#   if @settings['CHEF_REPOSITORY'].text==nil or @settings['CHEF_REPOSITORY'].text==""
-        #      dialog.directory = "#{ENV['EC2DREAM_HOME']}/chef/chef-repo"
-        #   else
-        #      dialog.directory = @settings['CHEF_REPOSITORY'].text
-        #   end
-	#   if dialog.execute != 0
-	#      @settings['CHEF_REPOSITORY'].text = dialog.directory
-        #   end
-	#end
-	FXLabel.new(frame1, "" )
- 	@settings['PUPPET_REPOSITORY'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
- 	@settings['PUPPET_REPOSITORY'].visible=false
- 	FXLabel.new(frame1, "" )
- 	#@settings['PUPPET_REPOSITORY_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
-	#@settings['PUPPET_REPOSITORY_BUTTON'].icon = @magnifier
-	#@settings['PUPPET_REPOSITORY_BUTTON'].tipText = "Browse..."
-	#@settings['PUPPET_REPOSITORY_BUTTON'].connect(SEL_COMMAND) do
-	#   dialog = FXDirDialog.new(frame1, "Select Puppet Repository Directory")
-	#   if @settings['PUPPET_REPOSITORY'].text==nil or @settings['PUPPET_REPOSITORY'].text==""
-        #      dialog.directory = "#{ENV['EC2DREAM_HOME']}/puppet/puppet_repo"
-        #   else
-        #      dialog.directory = @settings['PUPPET_REPOSITORY'].text
-        #   end
-	#   if dialog.execute != 0
-	#      @settings['PUPPET_REPOSITORY'].text = dialog.directory
-        #    end
-	#end
 	FXLabel.new(frame1, "TEST_KITCHEN_PATH" )
  	@settings['TEST_KITCHEN_PATH'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
  	@settings['TEST_KITCHEN_PATH_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
@@ -390,8 +350,6 @@ class EC2_Settings
         load_panel('AMAZON_ACCOUNT_ID')
         load_panel('AMAZON_ACCESS_KEY_ID')
         load_panel('AMAZON_SECRET_ACCESS_KEY')
-	load_panel('CHEF_REPOSITORY')
-	load_panel('PUPPET_REPOSITORY')
 	load_panel('TEST_KITCHEN_PATH')
 	if @settings['TEST_KITCHEN_PATH'].text == nil or @settings['TEST_KITCHEN_PATH'].text == ""
 	   @properties['TEST_KITCHEN_PATH']  = "#{ENV['EC2DREAM_HOME']}/chef/chef-repo/site-cookbooks/mycompany_webserver"
@@ -449,8 +407,6 @@ class EC2_Settings
     clear('AMAZON_ACCOUNT_ID')
     clear('AMAZON_ACCESS_KEY_ID')
     clear('AMAZON_SECRET_ACCESS_KEY')
-    clear('CHEF_REPOSITORY')
-    clear('PUPPET_REPOSITORY')
     clear('TEST_KITCHEN_PATH')
     clear('VAGRANT_REPOSITORY')
     clear('AVAILABILITY_ZONE')
@@ -592,8 +548,6 @@ class EC2_Settings
      save_setting("AMAZON_ACCOUNT_ID")
      save_setting("AMAZON_ACCESS_KEY_ID")
      save_setting("AMAZON_SECRET_ACCESS_KEY")
-     save_setting("CHEF_REPOSITORY")
-     save_setting("PUPPET_REPOSITORY")
      save_setting("TEST_KITCHEN_PATH")
      save_setting("VAGRANT_REPOSITORY")
      save_setting("AVAILABILITY_ZONE")

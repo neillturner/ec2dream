@@ -33,7 +33,7 @@ class EC2_EnvCreateDialog < FXDialogBox
     mainFrame = FXVerticalFrame.new(self,LAYOUT_SIDE_TOP|LAYOUT_FILL_X|LAYOUT_FILL_Y|PACK_UNIFORM_WIDTH)
     topFrame = FXVerticalFrame.new(mainFrame,LAYOUT_FILL_X|LAYOUT_FILL_Y|PACK_UNIFORM_WIDTH)
     @tabbook = FXTabBook.new(topFrame,:opts => LAYOUT_FILL_X|LAYOUT_FILL_Y|PACK_UNIFORM_WIDTH)
-	
+
 	#
     # servers
     #
@@ -50,10 +50,10 @@ class EC2_EnvCreateDialog < FXDialogBox
 	FXLabel.new(frame0,"")
 	FXLabel.new(frame0,"")
     servers_env = textBox("Environment Name",frame0)
-    
+
     #
     # amazon aws
-    #       
+    #
     @amazontab = FXTabItem.new(@tabbook, "&Amazon EC2", nil)
     @amazonframe = FXHorizontalFrame.new(@tabbook )
     frame1 = FXMatrix.new(@amazonframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
@@ -75,7 +75,7 @@ class EC2_EnvCreateDialog < FXDialogBox
        it = @dialog.selected
        if it != nil and it != ""
           @ec2_url.text = it
-       end 
+       end
     end
     if ENV['AMAZON_ACCESS_KEY_ID'] != nil and ENV['AMAZON_ACCESS_KEY_ID'] != ""
          @amazon_access_key.text = ENV['AMAZON_ACCESS_KEY_ID']
@@ -116,25 +116,25 @@ class EC2_EnvCreateDialog < FXDialogBox
        it = @dialog.selected
        if it != nil and it != ""
           @google_zone.text = it
-       end 
-    end    
+       end
+    end
     if ENV['AMAZON_ACCESS_KEY_ID'] != nil and ENV['AMAZON_ACCESS_KEY_ID'] != ""
          @google_client_email.text = ENV['AMAZON_ACCESS_KEY_ID']
     end
     if ENV['AMAZON_SECRET_ACCESS_KEY'] != nil and ENV['AMAZON_SECRET_ACCESS_KEY'] != ""
          @google_key_location.text = ENV['AMAZON_SECRET_ACCESS_KEY']
-    end    
-    @google_project.text = 'google.com:xxxxxxxxxxxx'    
+    end
+    @google_project.text = 'google.com:xxxxxxxxxxxx'
     if ENV['AVAILABILITY_ZONE'] != nil and ENV['AVAILABILITY_ZONE'] != ""
          @google_zone.text = ENV['AVAILABILITY_ZONE']
-    else 
+    else
         @google_zone.text = "us-central1-a"
-    end	
-	
-	
+    end
+
+
     #
     # eucalyptus
-    #        
+    #
     @eucatab = FXTabItem.new(@tabbook, "&Eucalyptus", nil)
     @eucaframe = FXHorizontalFrame.new(@tabbook)
     frame2 = FXMatrix.new(@eucaframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
@@ -149,10 +149,10 @@ class EC2_EnvCreateDialog < FXDialogBox
           @eucazipfile.text = eucazip
         end
     }
-     
+
     #
     # openstack
-    #    
+    #
     @openstacktab = FXTabItem.new(@tabbook, "&OpenStack", nil)
     @openstackframe = FXHorizontalFrame.new(@tabbook )
     frame3 = FXMatrix.new(@openstackframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
@@ -165,21 +165,21 @@ class EC2_EnvCreateDialog < FXDialogBox
     @openstack_url = FXTextField.new(frame3, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame3, "" )
     FXLabel.new(frame3, "Tenant ID" )
-    @openstack_tenant = FXTextField.new(frame3, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)    
+    @openstack_tenant = FXTextField.new(frame3, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     if ENV['AMAZON_ACCESS_KEY_ID'] != nil and ENV['AMAZON_ACCESS_KEY_ID'] != ""
          @openstack_access_key.text = ENV['AMAZON_ACCESS_KEY_ID']
     end
     if ENV['AMAZON_SECRET_ACCESS_KEY'] != nil and ENV['AMAZON_SECRET_ACCESS_KEY'] != ""
          @openstack_secret_access_key.text = ENV['AMAZON_SECRET_ACCESS_KEY']
-    end    
+    end
     #if ENV['EC2_URL'] != nil and ENV['EC2_URL'] != ""
     #    @openstack_url.text =  ENV['EC2_URL']
     #else
-        @openstack_url.text = "https://nova-api.trystack.org:5443"    
+        @openstack_url.text = "https://nova-api.trystack.org:5443"
     #end
     if ENV['AMAZON_ACCOUNT_ID'] != nil and ENV['AMAZON_ACCOUNT_ID'] != ""
          @openstack_tenant.text = ENV['AMAZON_ACCOUNT_ID']
-    end    
+    end
     #
     # openstack_hp
     #
@@ -208,28 +208,28 @@ class EC2_EnvCreateDialog < FXDialogBox
        it = @dialog.selected
        if it != nil and it != ""
           @hp_avl_zone.text = it
-       end 
-    end    
+       end
+    end
     if ENV['AMAZON_ACCESS_KEY_ID'] != nil and ENV['AMAZON_ACCESS_KEY_ID'] != ""
          @hp_access_key.text = ENV['AMAZON_ACCESS_KEY_ID']
     end
     if ENV['AMAZON_SECRET_ACCESS_KEY'] != nil and ENV['AMAZON_SECRET_ACCESS_KEY'] != ""
          @hp_secret_access_key.text = ENV['AMAZON_SECRET_ACCESS_KEY']
-    end    
+    end
     #if ENV['AMAZON_SECRET_ACCESS_KEY'] != nil and ENV['AMAZON_SECRET_ACCESS_KEY'] != ""
     #     @openstack_secret_access_key.text = ENV['AMAZON_SECRET_ACCESS_KEY']
-    #end    
+    #end
     #if ENV['EC2_URL'] != nil and ENV['EC2_URL'] != ""
     #    @hp_url.text =  ENV['EC2_URL']
     #else
-        @hp_url.text = 'https://region-a.geo-1.identity.hpcloudsvc.com:35357/v2.0/'    
+        @hp_url.text = 'https://region-a.geo-1.identity.hpcloudsvc.com:35357/v2.0/'
     #end
     if ENV['AMAZON_ACCOUNT_ID'] != nil and ENV['AMAZON_ACCOUNT_ID'] != ""
          @hp_tenant.text = ENV['AMAZON_ACCOUNT_ID']
     end
     if ENV['AVAILABILITY_ZONE'] != nil and ENV['AVAILABILITY_ZONE'] != ""
          @hp_avl_zone.text = ENV['AVAILABILITY_ZONE']
-    else 
+    else
         @hp_avl_zone.text = "az-1.region-a.geo-1"
     end
     # NOTE: if strings don't work for avail zones try symbols like :az1
@@ -255,8 +255,8 @@ class EC2_EnvCreateDialog < FXDialogBox
        it = @dialog.selected
        if it != nil and it != ""
           @rack_url.text = it
-       end 
-    end    
+       end
+    end
     if ENV['AMAZON_ACCESS_KEY_ID'] != nil and ENV['AMAZON_ACCESS_KEY_ID'] != ""
          @rack_access_key.text = ENV['AMAZON_ACCESS_KEY_ID']
     end
@@ -264,7 +264,7 @@ class EC2_EnvCreateDialog < FXDialogBox
          @rack_secret_access_key.text = ENV['AMAZON_SECRET_ACCESS_KEY']
     end
     @rack_url.text = "https://servers.api.rackspacecloud.com/v2"
-    
+
     #
     # cloudstack
     #
@@ -286,13 +286,13 @@ class EC2_EnvCreateDialog < FXDialogBox
     end
     #if ENV['AMAZON_SECRET_ACCESS_KEY'] != nil and ENV['AMAZON_SECRET_ACCESS_KEY'] != ""
     #     @openstack_secret_access_key.text = ENV['AMAZON_SECRET_ACCESS_KEY']
-    #end    
+    #end
     #if ENV['EC2_URL'] != nil and ENV['EC2_URL'] != ""
     #    @cloudstack_url.text =  ENV['EC2_URL']
     #else
         # @cloudstack_url.text = "http://cloud-bridge-hostname:8090/bridge"  # cloudstack 4.0
-        @cloudstack_url.text = "http://localhost:7080/awsapi"                # cloudstack 4.1  
-        
+        @cloudstack_url.text = "http://localhost:7080/awsapi"                # cloudstack 4.1
+
     #end
     FXLabel.new(frame6, "")
     FXLabel.new(frame6, "")
@@ -306,7 +306,7 @@ class EC2_EnvCreateDialog < FXDialogBox
     FXLabel.new(frame6, "")
     FXLabel.new(frame6, "")
     FXLabel.new(frame6, "")
-    
+
     #
     # cloudfoundry
     #
@@ -329,18 +329,18 @@ class EC2_EnvCreateDialog < FXDialogBox
        it = @dialog.selected
        if it != nil and it != ""
           @cloudfoundry_url.text = it
-       end 
-    end    
+       end
+    end
     if ENV['AMAZON_ACCESS_KEY_ID'] != nil and ENV['AMAZON_ACCESS_KEY_ID'] != ""
          @cloudfoundry_access_key.text = ENV['AMAZON_ACCESS_KEY_ID']
     end
     if ENV['AMAZON_SECRET_ACCESS_KEY'] != nil and ENV['AMAZON_SECRET_ACCESS_KEY'] != ""
          @cloudfoundry_secret_access_key.text = ENV['AMAZON_SECRET_ACCESS_KEY']
     end
-    @cloudfoundry_url.text = "http://api.cloudfoundry.com/"     
+    @cloudfoundry_url.text = "http://api.cloudfoundry.com/"
 
-      	
-	
+
+
     amazon_env.connect(SEL_CHANGED) {
 	  google_env.text = amazon_env.text
       euca_env.text = amazon_env.text
@@ -353,7 +353,7 @@ class EC2_EnvCreateDialog < FXDialogBox
       @new_env = amazon_env.text
       @ec2_platform = "amazon"
     }
-	
+
 	google_env.connect(SEL_CHANGED) {
       amazon_env.text = google_env.text
 	  google_env.text = google_env.text
@@ -365,8 +365,8 @@ class EC2_EnvCreateDialog < FXDialogBox
 	  servers_env = google_env.text
       @new_env = google_env.text
       @ec2_platform = "google"
-    }    
-    
+    }
+
     euca_env.connect(SEL_CHANGED) {
       amazon_env.text = euca_env.text
 	  google_env.text = euca_env.text
@@ -379,7 +379,7 @@ class EC2_EnvCreateDialog < FXDialogBox
       @new_env = euca_env.text
       @ec2_platform = "eucalyptus"
     }
-    
+
     openstack_env.connect(SEL_CHANGED) {
       amazon_env.text = openstack_env.text
 	  google_env.text = openstack_env.text
@@ -392,7 +392,7 @@ class EC2_EnvCreateDialog < FXDialogBox
       @new_env = openstack_env.text
       @ec2_platform = "openstack"
     }
-    
+
     hp_env.connect(SEL_CHANGED) {
       amazon_env.text = hp_env.text
 	  google_env.text = hp_env.text
@@ -404,7 +404,7 @@ class EC2_EnvCreateDialog < FXDialogBox
 	  servers_env = hp_env.text
       @new_env = hp_env.text
       @ec2_platform = "openstack_hp"
-    }    
+    }
 
     rack_env.connect(SEL_CHANGED) {
       amazon_env.text = rack_env.text
@@ -418,7 +418,7 @@ class EC2_EnvCreateDialog < FXDialogBox
       @new_env = rack_env.text
       @ec2_platform = "openstack_rackspace"
     }
-    
+
     cloudstack_env.connect(SEL_CHANGED) {
       amazon_env.text = cloudstack_env.text
 	  google_env.text = cloudstack_env.text
@@ -431,7 +431,7 @@ class EC2_EnvCreateDialog < FXDialogBox
       @new_env = cloudstack_env.text
       @ec2_platform = "cloudstack"
     }
-    
+
     cloudfoundry_env.connect(SEL_CHANGED) {
       amazon_env.text = cloudfoundry_env.text
 	  google_env.text = cloudfoundry_env.text
@@ -442,7 +442,7 @@ class EC2_EnvCreateDialog < FXDialogBox
 	  servers_env = cloudfoundry_env.text
       @new_env = cloudfoundry_env.text
       @ec2_platform = "cloudfoundry"
-    }    
+    }
 
     servers_env.connect(SEL_CHANGED) {
       amazon_env.text = servers_env.text
@@ -453,7 +453,7 @@ class EC2_EnvCreateDialog < FXDialogBox
       openstack_env.text = servers_env.text
       @new_env = servers_env.text
       @ec2_platform = "servers"
-    }    	
+    }
     bottomFrame = FXVerticalFrame.new(mainFrame,LAYOUT_SIDE_BOTTOM|LAYOUT_FILL_X|LAYOUT_FILL_Y)
 
     FXLabel.new(bottomFrame, "" )
@@ -466,33 +466,33 @@ class EC2_EnvCreateDialog < FXDialogBox
         self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
       end
     end
-  
-  end 
-  
- 
+
+  end
+
+
   def create_env
    begin
     valid_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrisuvwxyz0123456789_"
     puts "CreateDialog.create_env "+ @env
     settings = @ec2_main.settings
     settings.load
-    
+
     raise 'Environment Not Specified' if @env == nil or @env.length==0
     raise 'Environment Name must only contain A-Z, 0-9 or _ characters' if @env  =~ /\W/
 
     d = @ec2_main.settings.get_system('REPOSITORY_LOCATION')+"/"+@env
-        
+
     raise 'Environment already exists' if File.exists?(d)
-    
-     
+
+
     Dir.mkdir(d)
-    
+
     if @eucazipfile.text != ""
         unzip(@eucazipfile.text,d)
         eucarcpath = d+"/euca/eucarc"
-        
+
         raise 'Not a valid Eucalyptus zipfile' unless File.exists?(eucarcpath)
-        
+
         eucarc = File.open(eucarcpath, 'r')
         eucarc.read.each_line do |configline|
           if configline =~ /EC2_ACCESS_KEY=\'(\w+)\'/
@@ -507,7 +507,7 @@ class EC2_EnvCreateDialog < FXDialogBox
         end
 	@ec2_platform = "eucalyptus"
         eucarc.close
-    end 
+    end
     Dir.mkdir(d+"/launch")
     save_env
     if  @ec2_platform.start_with?("openstack")
@@ -521,16 +521,16 @@ class EC2_EnvCreateDialog < FXDialogBox
       puts error.message
       FXMessageBox.warning(self,MBOX_OK,"Error",error.message)
    end
-  end 
-  
+  end
+
   def saved
      @created
   end
-  
-  def created 
+
+  def created
      @created
-  end   
-  
+  end
+
   def success
      @created
   end
@@ -538,106 +538,104 @@ class EC2_EnvCreateDialog < FXDialogBox
   def save_env
            puts "CreateDialog.save "+@env
            settings = @ec2_main.settings
-           
+
            settings.put_system('ENVIRONMENT', @env)
            settings.put_system('AUTO', 'false')
            settings.save_system
            settings.load
 	   settings.put("EC2_PLATFORM",@ec2_platform)
 	   if @ec2_platform == "openstack"
-              if @openstack_access_key.text != nil 
+              if @openstack_access_key.text != nil
                  settings.put("AMAZON_ACCESS_KEY_ID",@openstack_access_key.text)
               end
-              if @openstack_secret_access_key.text != nil 
+              if @openstack_secret_access_key.text != nil
                  settings.put("AMAZON_SECRET_ACCESS_KEY",@openstack_secret_access_key.text)
               end
-              if @openstack_url.text != nil 
+              if @openstack_url.text != nil
   	       settings.put("EC2_URL",@openstack_url.text)
   	      end
   	      settings.put('CLOUD_ADMIN_URL',"http://www.openstack.org/")
 	   elsif @ec2_platform == "openstack_hp"
-              if @hp_access_key.text != nil 
+              if @hp_access_key.text != nil
                  settings.put("AMAZON_ACCESS_KEY_ID",@hp_access_key.text)
               end
-              if @hp_secret_access_key.text != nil 
+              if @hp_secret_access_key.text != nil
                  settings.put("AMAZON_SECRET_ACCESS_KEY",@hp_secret_access_key.text)
               end
-              if @hp_url.text != nil 
+              if @hp_url.text != nil
   	       settings.put("EC2_URL",@hp_url.text)
   	      end
-	      if @hp_tenant.text != nil 
+	      if @hp_tenant.text != nil
   	         settings.put("AMAZON_ACCOUNT_ID",@hp_tenant.text)
   	      end
-  	      if @hp_avl_zone.text != nil 
+  	      if @hp_avl_zone.text != nil
 	         settings.put("AVAILABILITY_ZONE",@hp_avl_zone.text)
   	      end
   	      settings.put('CLOUD_ADMIN_URL',"https://www.hpcloud.com/")
 	   elsif @ec2_platform == "openstack_rackspace"
-              if @rack_access_key.text != nil 
+              if @rack_access_key.text != nil
                  settings.put("AMAZON_ACCESS_KEY_ID",@rack_access_key.text)
               end
-              if @rack_secret_access_key.text != nil 
+              if @rack_secret_access_key.text != nil
                  settings.put("AMAZON_SECRET_ACCESS_KEY",@rack_secret_access_key.text)
               end
-              if @rack_url.text != nil 
+              if @rack_url.text != nil
   	       settings.put("EC2_URL",@rack_url.text)
   	      end
-  	      settings.put('CLOUD_ADMIN_URL',"http://www.rackspace.com/")  	      
+  	      settings.put('CLOUD_ADMIN_URL',"http://www.rackspace.com/")
 	   elsif @ec2_platform == "cloudstack"
-              if @cloudstack_access_key.text != nil 
+              if @cloudstack_access_key.text != nil
                  settings.put("AMAZON_ACCESS_KEY_ID",@cloudstack_access_key.text)
               end
-              if @cloudstack_secret_access_key.text != nil 
+              if @cloudstack_secret_access_key.text != nil
                  settings.put("AMAZON_SECRET_ACCESS_KEY",@cloudstack_secret_access_key.text)
               end
-              if @cloudstack_url.text != nil 
+              if @cloudstack_url.text != nil
   	       settings.put("EC2_URL",@cloudstack_url.text)
   	      end
   	      settings.put('CLOUD_ADMIN_URL',"http://cloudstack.org/")
 	   elsif @ec2_platform == "cloudfoundry"
-              if @cloudfoundry_access_key.text != nil 
+              if @cloudfoundry_access_key.text != nil
                  settings.put("AMAZON_ACCESS_KEY_ID",@cloudfoundry_access_key.text)
               end
-              if @cloudfoundry_secret_access_key.text != nil 
+              if @cloudfoundry_secret_access_key.text != nil
                  settings.put("AMAZON_SECRET_ACCESS_KEY",@cloudfoundry_secret_access_key.text)
               end
-              if @cloudfoundry_url.text != nil 
+              if @cloudfoundry_url.text != nil
   	       settings.put("EC2_URL",@cloudfoundry_url.text)
   	      end
-  	      settings.put('CLOUD_ADMIN_URL',"http://cloudfoundry.com/") 
+  	      settings.put('CLOUD_ADMIN_URL',"http://cloudfoundry.com/")
 	   elsif @ec2_platform == "google"
-              if @google_client_email.text != nil 
+              if @google_client_email.text != nil
                  settings.put("AMAZON_ACCESS_KEY_ID",@google_client_email.text)
               end
-              if @google_key_location.text != nil 
+              if @google_key_location.text != nil
                  settings.put("AMAZON_SECRET_ACCESS_KEY",@google_key_location.text)
               end
-              if @google_project.text != nil 
+              if @google_project.text != nil
   	       settings.put("EC2_URL",@google_project.text)
   	      end
-  	      if @google_zone.text != nil 
+  	      if @google_zone.text != nil
 	         settings.put("AVAILABILITY_ZONE",@google_zone.text)
   	      end
-  	      settings.put('CLOUD_ADMIN_URL',"https://cloud.google.com/console") 	      
+  	      settings.put('CLOUD_ADMIN_URL',"https://cloud.google.com/console")
 	   else
-              if @amazon_access_key.text != nil 
+              if @amazon_access_key.text != nil
                  settings.put("AMAZON_ACCESS_KEY_ID",@amazon_access_key.text)
               end
-              if @amazon_secret_access_key.text != nil 
+              if @amazon_secret_access_key.text != nil
                  settings.put("AMAZON_SECRET_ACCESS_KEY",@amazon_secret_access_key.text)
               end
-              if @ec2_url.text != nil 
+              if @ec2_url.text != nil
   	       settings.put("EC2_URL",@ec2_url.text)
   	      end
   	      settings.put('AMAZON_NICKNAME_TAG',"Name")
   	      settings.put('CLOUD_ADMIN_URL',"http://aws.amazon.com/ec2/")
-  	   end  
-  	   settings.put('CHEF_REPOSITORY',"#{ENV['EC2DREAM_HOME']}/chef/chef-repo")
-  	   settings.put('PUPPET_REPOSITORY',"#{ENV['EC2DREAM_HOME']}/puppet/puppet-repo")
+  	   end
   	   settings.put('VAGRANT_REPOSITORY',"#{ENV['EC2DREAM_HOME']}/vagrant")
            settings.save
   end
-  
+
 
   def unzip(eucazip,envpath)
     Dir.mkdir(envpath+"/euca")

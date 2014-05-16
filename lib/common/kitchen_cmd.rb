@@ -14,23 +14,24 @@ def kitchen_cmd(cmd='list',instance=nil,debug=false)
         gem_install('test-kitchen') if `gem list test-kitchen -i`.include?('false')
         gem_install('kitchen-vagrant') if `gem list kitchen-vagrant -i`.include?('false')
         gem_install('kitchen-ec2') if `gem list kitchen-ec2 -i`.include?('false')
+        gem_install('kitchen-ssh') if `gem list kitchen-ssh -i`.include?('false')
         gem_install('berkshelf') if `gem list berkshelf -i`.include?('false')
         titles = []
         list = []
         `cd \"#{repository}\" && kitchen list #{instance}`.lines do |line|
               if titles == []
-                             line=line.gsub('Last Action','Last-Action')
+                 line=line.gsub('Last Action','Last-Action')
                  titles = line.split(' ')
-                          else
-                             line=line.gsub('<Not Created>','<Not-Created>')
-                                 line=line.gsub('Set Up','SetUp')
-                             entries = line.split(' ')
-                                 i=0
-                                 h = {}
-                             entries.each do |e|
-                                   h[titles[i]] = e
-                                   i=i+1
-                                 end
+              else
+                 line=line.gsub('<Not Created>','<Not-Created>')
+                 line=line.gsub('Set Up','SetUp')
+                 entries = line.split(' ')
+                 i=0
+                 h = {}
+                 entries.each do |e|
+                   h[titles[i]] = e
+                   i=i+1
+                 end
                  list.push(h)
               end
      end
@@ -43,13 +44,12 @@ def kitchen_cmd(cmd='list',instance=nil,debug=false)
      end
      require 'safe_yaml/load'
      config_file = "#{repository}/.kitchen/#{instance}.yml"
-     config = nil
+     config = []
      if File.exists?(config_file)
        config = YAML.load_file(config_file)
        #config = config.inspect
      else
        puts "ERROR: kitchen config file #{config_file} not found"
-       config = []
      end
      return config
    when "edit"

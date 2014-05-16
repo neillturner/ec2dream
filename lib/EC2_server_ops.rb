@@ -212,7 +212,7 @@ def group_array(x)
        else
          cn = @ec2_main.launch.get('Chef_Node')
          if cn == nil or cn == ""
-          cn = "default_server"
+          cn = "default-server"
          end
        end
        return cn

@@ -33,12 +33,6 @@ class CF_CreateDialog < FXDialogBox
            "Template Files (*.*)"
         ]
         dialog.selectMode = SELECTFILE_EXISTING
-        #chef_repository = $ec2_main.settings.get('CHEF_REPOSITORY')
-        #if dir.exists?("#{chef_repository}/cloudformation")
-        #   dialog.directory = "#{chef_repository}/cloudformation"
-        #elsif dir.exists?(chef_repository) 
-        #   dialog.directory = chef_repository
-        #end
         if dialog.execute != 0
            template_file.text = dialog.filename
         end
@@ -51,7 +45,7 @@ class CF_CreateDialog < FXDialogBox
     template_edit_button.connect(SEL_COMMAND) do |sender, sel, data|
        edit(template_file.text)
     end
-    FXLabel.new(frame1, "" )    
+    FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "Parameters" )
     parameters = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
     FXLabel.new(frame1, "" )
@@ -60,7 +54,7 @@ class CF_CreateDialog < FXDialogBox
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "Timeout in Minutes" )
     timeout_in_minutes = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
-    FXLabel.new(frame1, "" )    
+    FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "" )
@@ -75,7 +69,7 @@ class CF_CreateDialog < FXDialogBox
          if @saved == true
            self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
          end
-       end  
+       end
     end
     create = FXButton.new(frame2, "   &Create Stack   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     create = FXButton.new(frame2, "   &Create Stack   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
@@ -86,14 +80,14 @@ class CF_CreateDialog < FXDialogBox
          save_stack(stack_name.text,template_file.text,parameters.text,disable_rollback.text,timeout_in_minutes.text)
          if @saved == true
             answer = FXMessageBox.question(@ec2_main,MBOX_YES_NO,"Confirm Stack Create","Confirm Create of Stack #{stack_name}")
-            if answer == MBOX_CLICKED_YES         
+            if answer == MBOX_CLICKED_YES
                doc = File.open(template_file.text, 'rb') { |file| file.read }
                options = {}
                options['TemplateBody'] = doc
                if parameters.text != nil and parameters.text != ""
                   begin
                      h = {}
-		     (parameters.text).split(",").each do |x| 
+		     (parameters.text).split(",").each do |x|
 		        k,v = x.split('=')
 		        h[k] = v
                      end
@@ -101,14 +95,14 @@ class CF_CreateDialog < FXDialogBox
                   rescue
                      puts "ERROR: bad parameters on Create stack ignored"
                   end
-               end 
+               end
                if disable_rollback.text != nil and disable_rollback.text != ""
                  options['DisableRollback'] =  true if (disable_rollback.text).downcase == "true"
                  options['DisableRollback'] =  false if (disable_rollback.text).downcase == "false"
                end
 	       if timeout_in_minutes.text != nil and timeout_in_minutes.text != ""
                  options['TimeoutInMinutes'] = (timeout_in_minutes.text).to_i
-               end                         
+               end
                cf = @ec2_main.environment.cf_connection
                if cf != nil
 	          begin
@@ -118,19 +112,19 @@ class CF_CreateDialog < FXDialogBox
                      self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
                   rescue
                      error_message("Stack Creation failed",$!)
-	          end   
-               end   
+	          end
+               end
             end
          end
-       end           
+       end
     end
     update = FXButton.new(frame2, "   &Update Stack   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
-    update.connect(SEL_COMMAND) do |sender, sel, data| 
+    update.connect(SEL_COMMAND) do |sender, sel, data|
        if stack_name.text == nil or stack_name.text == ""
          error_message("Error","Stack Name not specified")
        else
          save_stack(stack_name.text,template_file.text,parameters.text,disable_rollback.text,timeout_in_minutes.text)
-         if @saved == true    
+         if @saved == true
 	    answer = FXMessageBox.question(@ec2_main,MBOX_YES_NO,"Confirm Stack Update","Confirm Update of Stack #{stack_name}")
             if answer == MBOX_CLICKED_YES
 	       doc = File.open(template_file.text, 'rb') { |file| file.read }
@@ -139,7 +133,7 @@ class CF_CreateDialog < FXDialogBox
                if parameters.text != nil and parameters.text != ""
                   begin
                      h = {}
-		     (parameters.text).split(",").each do |x| 
+		     (parameters.text).split(",").each do |x|
 		        k,v = x.split('=')
 		        h[k] = v
                      end
@@ -154,7 +148,7 @@ class CF_CreateDialog < FXDialogBox
                end
 	       if timeout_in_minutes.text != nil and timeout_in_minutes.text != ""
                  options['TimeoutInMinutes'] = (timeout_in_minutes.text).to_i
-               end                         
+               end
                cf = @ec2_main.environment.cf_connection
                if cf != nil
 	          begin
@@ -164,13 +158,13 @@ class CF_CreateDialog < FXDialogBox
                      self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
                   rescue
                      error_message("Stack Update failed",$!)
-	          end   
-               end            
+	          end
+               end
             end
-          end  
-        end        
-     end   
-    
+          end
+        end
+     end
+
     if curr_item != nil and curr_item != ""
        r = get_stack(curr_item)
        if r['stack_name'] != nil and r['stack_name'] != ""
@@ -181,16 +175,16 @@ class CF_CreateDialog < FXDialogBox
              disable_rollback.text = r['disable_rollback']
           else
              disable_rollback.text = ""
-          end 
+          end
           if r['timeout_in_minutes'] != nil and r['timeout_in_minutes'] != ""
              timeout_in_minutes.text = r['timeout_in_minutes']
           else
              timeout_in_minutes.text = ""
-          end   
-       end   
+          end
+       end
     end
-  end 
-  
+  end
+
   def get_stack(stack_name)
        folder = "cf_templates"
        properties = {}
@@ -199,39 +193,39 @@ class CF_CreateDialog < FXDialogBox
           properties = loc.get(folder, stack_name)
        end
        return properties
-  end 
-  
+  end
+
   def save_stack(stack_name,template_file,parameters,disable_rollback,timeout_in_minutes)
      folder = "cf_templates"
      loc = EC2_Properties.new
      if loc != nil
-      begin 
+      begin
         properties = {}
         properties['stack_name']=stack_name
         properties['template_file']=template_file
         properties['parameters']=parameters
         if disable_rollback != nil and disable_rollback != ""
            properties['disable_rollback'] = disable_rollback
-        end 
+        end
         if timeout_in_minutes != nil and timeout_in_minutes != ""
            properties['timeout_in_minutes'] = timeout_in_minutes
-        end        
+        end
         @saved = loc.save(folder, stack_name, properties)
         if @saved == false
            error_message("Update Stack Failed","Update Stack Failed")
            return
-        end   
+        end
       rescue
         error_message("Update Stack Failed",$!)
         return
       end
      end
-  end 
+  end
 
   def saved
     @saved
   end
-  
+
   def success
      @saved
   end

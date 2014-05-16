@@ -7,9 +7,9 @@ platforms:
   - name: server
     driver: ssh
     driver_config:
-      hostname: 192.168.0.4
+      hostname: <%= ENV['EC2DREAM_HOSTNAME'] %>
       username: root
-      ssh_key: C:/repository/testing/keys/centos63_x86.pem
+      ssh_key: C:/repository/keys/centos63_x86.pem
   - name: ubuntu-12.04
     driver:  vagrant
   - name: centos-6.3

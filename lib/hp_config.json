@@ -82,7 +82,7 @@
           "action": ["create","", "edit","","","","","",""],
           "icon": ["@create","","@edit","@put","@csv","@chef_icon","","",""],
           "tooltip":[" Create Config ",""," edit Config ",""," Csv Data ","","","",""],
-          "dialog":["LOC_CreateDialog","","LOC_EditDialog","","","","","",""],
+          "dialog":["LOC_CreateDialog","","$ec2_main.server.loc_load(@curr_item);$ec2_main.tabBook.setCurrent(1)","","","","","",""],
           "dialog_parm": ["","","","","","","","",""],
           "keys": ["server"]
     }

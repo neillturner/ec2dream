@@ -36,7 +36,6 @@ class EC2_Server
        @frame4.hide()
 	   @frame5.hide()
        @frame3.hide()
-	   #@frame7.hide()
 	   @frame6.show()
        @server_status = ""
        @secgrp = ""
@@ -54,7 +53,6 @@ class EC2_Server
       @frame4.hide()
 	  @frame5.hide()
       @frame3.hide()
-	  #@frame7.hide()
 	  @frame6.show()
       @google_server['Instance_ID'].text = instance_id
       ENV['EC2_INSTANCE'] = instance_id
@@ -203,7 +201,7 @@ class EC2_Server
        else
          cn = @ec2_main.launch.get('Chef_Node')
          if cn == nil or cn == ""
-          cn = "default_server"
+          cn = "default-server"
          end
        end
        return cn

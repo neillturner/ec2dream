@@ -7,12 +7,11 @@ class EC2_Server
 def loc_load(server_name)
     puts "server.loc_load "+server_name
     @type = "loc"
-	@terminate_button.icon = @save
+    @terminate_button.icon = @save
     @frame1.hide()
     @frame3.hide()
-	@frame4.hide()
-	@frame6.hide()
-	#@frame7.hide()
+    @frame4.hide()
+    @frame6.hide()
     @frame5.show()
     @page1.width=300
     r = loc_get_local_server(server_name)
@@ -21,9 +20,7 @@ def loc_load(server_name)
        @loc_server['address'].text = r['address']
        @loc_server['address_port'].text = r['address_port']
        @loc_server['chef_node'].text = r['chef_node']
-       @loc_server['chef_node'].text = 'default_server' if @loc_server['chef_node'].text == nil or @loc_server['chef_node'].text == ""
-       #@loc_server['puppet_manifest'].text = r['puppet_manifest']
-	#   @loc_server['puppet_roles'].text = r['puppet_roles']
+       @loc_server['chef_node'].text = 'default-server' if @loc_server['chef_node'].text == nil or @loc_server['chef_node'].text == ""
        @loc_server['ssh_user'].text = r['ssh_user']
        @loc_server['ssh_password'].text = r['ssh_password']
        @loc_server['ssh_key'].text = r['ssh_key']
@@ -62,8 +59,6 @@ def loc_load(server_name)
         properties['address']=@loc_server['address'].text
         properties['address_port']=@loc_server['address_port'].text
         properties['chef_node']=@loc_server['chef_node'].text
-        #properties['puppet_manifest']=@loc_server['puppet_manifest'].text
-	#properties['puppet_roles']=@loc_server['puppet_roles'].text
 	windows_server_value = "false"
         if @loc_server['windows_server'].itemCurrent?(0)
 	       windows_server_value = true
@@ -119,27 +114,6 @@ def loc_load(server_name)
      end
   end
 
-  #def loc_chef
-  #   if @loc_server['server'].text != nil and @loc_server['server'].text != ""
-  #      platform = ""
-  #      if @loc_server['windows_server'].itemCurrent?(0)
-  #         platform == "windows"
-  #      end
-  #      dialog = EC2_ChefEditDialog.new(@ec2_main,@loc_server['server'].text, @loc_server['address'].text, @loc_server['chef_node'].text, @loc_server['ssh_user'].text, @loc_server['ssh_key'].text, @loc_server['ssh_password'].text,platform,@loc_server['local_port'].text)
-  #      dialog.execute
-  #	 end
-  #end
-
-  #def loc_puppet
-  #   if @loc_server['server'].text != nil and @loc_server['server'].text != ""
-  #      platform = ""
-  #      if @loc_server['windows_server'].itemCurrent?(0)
-  #         platform == "windows"
-  #      end
-  #      dialog = EC2_PuppetEditDialog.new(@ec2_main,@loc_server['server'].text, @loc_server['address'].text, @loc_server['puppet_manifest'].text, @loc_server['ssh_user'].text, @loc_server['ssh_key'].text, @loc_server['ssh_password'].text,platform,@loc_server['local_port'].text,@loc_server['puppet_roles'].text)
- #	     dialog.execute
-#	 end
-#  end
 
   def loc_ssh_tunnel
      if @loc_server['server'].text != nil and @loc_server['server'].text != ""

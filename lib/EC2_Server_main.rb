@@ -29,8 +29,6 @@ class EC2_Server
         @cfy_env = []
         @cfy_env_curr_row = nil
 	@loc_server = {}
-	@kit_server = {}
-	@kit_debug = false
 	@saved = false
         @block_mapping = []
         @flavor = {}
@@ -68,12 +66,8 @@ class EC2_Server
 	@stop_icon.create
 	@create_image_icon = @ec2_main.makeIcon("package.png")
 	@create_image_icon.create
-	#@chef_icon = @ec2_main.makeIcon("chef.png")
-	#@chef_icon.create
 	@kitchenci = @ec2_main.makeIcon("kitchenci.png")
 	@kitchenci.create
-	#@puppet_icon = @ec2_main.makeIcon("puppet.png")
-	#@puppet_icon.create
 	@view = @ec2_main.makeIcon("application_view_icons.png")
 	@view.create
         @tag_red = @ec2_main.makeIcon("tag_red.png")
@@ -124,8 +118,6 @@ class EC2_Server
 		   end
 	    elsif @type == "cfy"
 	       cfy_refresh(@appname)
-	    elsif @type == "kit"
-	       kit_refresh
 	    end
 	end
 	@refresh_button.connect(SEL_UPDATE) do |sender, sel, data|
@@ -139,8 +131,6 @@ class EC2_Server
                run_ssh
 		   elsif @type == "loc"
 			   loc_ssh
-		   elsif @type == "kit"
-			   kit_ssh
            elsif @type == "cfy"
 	           dialog = CFY_AppUploadDialog.new(@ec2_main,@cfy_server['name'].text)
                dialog.execute
@@ -165,8 +155,6 @@ class EC2_Server
               run_scp
 	   elsif @type == "loc"
 			  loc_winscp
-	   elsif @type == "kit"
-			  kit_winscp
        elsif @type == "cfy"
               cfy_restart
         end
@@ -192,8 +180,6 @@ class EC2_Server
 	      puts "server.serverRemote_Desktop.connect"
 		  if @type == "loc"
 			   loc_rdp
-		  elsif @type == "kit"
-		       kit_rdp
 		  else
               run_remote_desktop
           end
@@ -216,8 +202,6 @@ class EC2_Server
 	       cfy_delete
         elsif @type == "loc"
 	       loc_save
-        elsif @type == "kit"
-	       kit_edit
 	    end
 	end
 	@terminate_button.connect(SEL_UPDATE) do |sender, sel, data|
@@ -233,10 +217,6 @@ class EC2_Server
 	    elsif @type == "cfy"
 	       sender.enabled = true
 	       @terminate_button.tipText = " Delete App "
-		elsif @type == "kit"
-		   @terminate_button.icon = @modify
-	       sender.enabled = true
-	       @terminate_button.tipText = " Edit Kitchem yml File "
  	    elsif @type == "loc"
 		   @terminate_button.icon = @save
 	       sender.enabled = true
@@ -251,10 +231,8 @@ class EC2_Server
 	      s = currentInstance()
 	      g =instance_group(s)
 	      dialog = EC2_System_ConsoleDialog.new(@ec2_main,g,s)
-          dialog.execute
-	   elsif @type == "kit"
-          kit_log
-       end
+              dialog.execute
+          end
  	end
 	@log_button.connect(SEL_UPDATE) do |sender, sel, data|
            if loaded or  @server_status == "pending" and @type == "ec2"
@@ -264,10 +242,6 @@ class EC2_Server
            elsif loaded and @type == "ops"
               @log_button.icon = @log
 	          @log_button.tipText = " Console Output "
-              sender.enabled = true
-          elsif @type == "kit"
-              @log_button.icon = @log
-	          @log_button.tipText = " Kitchen Log "
               sender.enabled = true
            else
               sender.enabled = false
@@ -279,9 +253,7 @@ class EC2_Server
 	@mon_button.connect(SEL_COMMAND) do |sender, sel, data|
 	    if @type == "loc"
 	       loc_delete
-		elsif @type == "kit"
-	       kit_destroy
-        else
+            else
 	       monitor
 		end
  	end
@@ -291,10 +263,6 @@ class EC2_Server
 		   @mon_button.icon = @delete
 		   sender.enabled = true
 	       @terminate_button.tipText = " Delete Configuration "
-		elsif @type == "kit"
-		   @mon_button.icon = @delete
-		   sender.enabled = true
-	       @mon_button.tipText = " Destroy Instance "
 		else
 		   @mon_button.icon = @mon
 	       @mon_button.tipText = " Monitor Instance "
@@ -304,20 +272,10 @@ class EC2_Server
 	@unmon_button.icon = @unmon
 	@unmon_button.tipText = " Stop Monitoring Instance "
 	@unmon_button.connect(SEL_COMMAND) do |sender, sel, data|
-		if @type == "kit"
-	       kit_create
-	    else
 	       unMonitor
-		end
  	end
 	@unmon_button.connect(SEL_UPDATE) do |sender, sel, data|
-	    if @type == "kit"
-	      sender.enabled = true
-	      @unmon_button.icon = @rocket
-	      @unmon_button.tipText = " Create Instance "
-	    else
 	      enable_if_ec2_server_loaded_or_pending(sender) unless (@type == "cfy" or @type == "loc")
-		end
 	end
 	@start_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@start_button.icon = @start_icon
@@ -325,21 +283,15 @@ class EC2_Server
 	@start_button.connect(SEL_COMMAND) do |sender, sel, data|
 	    if @type == "cfy"
 	       cfy_start
-	    elsif @type == "kit"
-	       kit_converge
 	    else
 	       start_instance
 	    end
  	end
 	@start_button.connect(SEL_UPDATE) do |sender, sel, data|
-        if loaded and @type == "cfy"
+           if loaded and @type == "cfy"
 	      sender.enabled = true
 	      @start_button.icon = @start_icon
 	      @start_button.tipText = " Start App "
-        elsif loaded and @type == "kit"
-	      sender.enabled = true
-	      @start_button.icon = @arrow_in
-	      @start_button.tipText = " Converge Instance "
 	    else
 	      enable_if_ebs_ec2_server_loaded(sender)
 	    end
@@ -352,8 +304,6 @@ class EC2_Server
            stop_instance
 	   elsif @type == "cfy"
 	       cfy_stop
-	   elsif @type == "kit"
-	       kit_verify
        elsif @type == "ops"
            instance = @ops_server['Instance_ID'].text
 	       dialog = EC2_InstanceRebootDialog.new(@ec2_main,instance)
@@ -376,10 +326,6 @@ class EC2_Server
 	      sender.enabled = true
 	      @stop_button.icon = @stop_icon
 	      @stop_button.tipText = " Stop App "
-       elsif loaded and @type == "kit"
-	      sender.enabled = true
-	      @stop_button.icon = @edit
-	      @stop_button.tipText = " Verify Instance "
   	   else
 	      sender.enabled = false
 	   end
@@ -404,19 +350,13 @@ class EC2_Server
               dialog = EC2_ImageRegisterDialog.new(@ec2_main)
               dialog.execute
            end
-  	   elsif @type == "kit"
-          kit_debug
-       end
+          end
  	end
 	@create_image_button.connect(SEL_UPDATE) do |sender, sel, data|
 	    if @type == "ec2" and @server_status != "terminated"
 	       sender.enabled = true
 	    elsif @type == "ops" and @server_status == "ACTIVE"
 	       sender.enabled = true
-	    elsif @type == "kit"
-	       sender.enabled = true
-	       @create_image_button.icon = @bug
-	       @create_image_button.tipText = " Set Kitchen Debug level logs "
 	    else
 	       sender.enabled = false
 	    end
@@ -429,50 +369,20 @@ class EC2_Server
 	@chef_button.connect(SEL_UPDATE) do |sender, sel, data|
            enable_if_ec2_server_loaded(sender)
 	end
-	#@puppet_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
-	#@puppet_button.icon = @puppet_icon
-	#@puppet_button.enabled = false
-	#@puppet_button.connect(SEL_COMMAND) do |sender, sel, data|
-	#   if @type == "loc"
-	#       loc_puppet
-	#	elsif @type == "kit"
-	#       kit_foodcritic
-	#	 else
-        #   run_puppet
-	#	 end
-	#end
-	#@puppet_button.connect(SEL_UPDATE) do |sender, sel, data|
-	#     sender.enabled = false
-	    # if @type == 'kit'
-	#	    @puppet_button.icon = @style
-	 #       @puppet_button.tipText = " Run Foodcritic "
-	#	    sender.enabled = true
-	#	 else
-	#	   @puppet_button.icon = @puppet_icon
-	#       @puppet_button.tipText = " Run Puppet Apply "
-        #   enable_if_ec2_server_loaded(sender)
-        # end
-	#end
 	@graph_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@graph_button.icon = @chart
 	@graph_button.tipText = " Monitoring Graphs "
 	@graph_button.connect(SEL_COMMAND) do |sender, sel, data|
 	   if @type == "ec2"
 	      dialog = EC2_MonitorSelectDialog.new(@ec2_main,@server['Instance_ID'].text,"InstanceId",@secgrp,@server['Platform'].text)
-          dialog.execute
-	   elsif @type == "kit"
-	       kit_rspec_test
-       end
+              dialog.execute
+          end
  	end
 	@graph_button.connect(SEL_UPDATE) do |sender, sel, data|
 	    if @type == "ec2"
 	       @graph_button.icon = @chart
 	       @graph_button.tipText = " Monitoring Graphs "
 	       sender.enabled = true
-	    elsif @type == 'kit'
-		    @graph_button.icon = @lightbulb
-	        @graph_button.tipText = " Run rspec "
-		    sender.enabled = true
 	    else
 	       sender.enabled = false
 	    end
@@ -483,12 +393,12 @@ class EC2_Server
 	@tunnel_button.connect(SEL_COMMAND) do |sender, sel, data|
 	    if @type == "ec2" or @type == "ops"  or @type == "google"
                run_ssh_tunnel
-		elsif @type == "loc"
+	    elsif @type == "loc"
 	       loc_ssh_tunnel
         end
 	end
 	@tunnel_button.connect(SEL_UPDATE) do |sender, sel, data|
-	   if @type == "cfy" or @type == "kit"
+	   if @type == "cfy"
 	      sender.enabled = false
   	   elsif loaded
 	      sender.enabled = true
@@ -527,18 +437,6 @@ class EC2_Server
                dialog.execute
             end
 	end
- 	#FXLabel.new(@frame1t, "Puppet Manifest" )
- 	@server['Puppet_Manifest'] = FXTextField.new(@frame1t, 20, nil, 0, :opts => FRAME_SUNKEN)
- 	@server['Puppet_Manifest'].visible=false
-	@server['Puppet_Manifest'].connect(SEL_COMMAND) do
-           instance_id = @server['Instance_ID'].text
-           @ec2_puppet_manifest[instance_id] = @server['Puppet_Manifest'].text
-           if @ec2_main.launch.loaded == true
-              @ec2_main.launch.put('Puppet_Manifest',@server['Puppet_Manifest'].text)
-    	      @ec2_main.launch.save
-    	   end
-	end
- 	FXLabel.new(@frame1, "" )
  	FXLabel.new(@frame1, "Tags" )
  	@server['Tags'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
 	@server['Tags_button'] = FXButton.new(@frame1, " ",:opts => BUTTON_TOOLBAR)
@@ -1306,12 +1204,6 @@ class EC2_Server
     FXLabel.new(@frame5, "Kitchen Instance" )
     @loc_server['chef_node'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     FXLabel.new(@frame5, "" )
-    #FXLabel.new(@frame5, "Puppet Manifest" )
-    #@loc_server['puppet_manifest'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
-    #FXLabel.new(@frame5, "" )
-    #FXLabel.new(@frame5, "Puppet Roles" )
-    #@loc_server['puppet_roles'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
-    #FXLabel.new(@frame5, "" )
     FXLabel.new(@frame5, "Windows Server" )
     @loc_server['windows_server'] = FXComboBox.new(@frame5, 15, :opts => COMBOBOX_STATIC|COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
     @loc_server['windows_server'].numVisible = 2
@@ -1577,60 +1469,6 @@ class EC2_Server
     @google_server['Metadata'].setVisibleRows(10)
     @google_server['Metadata'].setText("")
     FXLabel.new(@frame6, "" )
-
-	#
-	# kitchen  frame
-	#
-	@frame7 = FXMatrix.new(@page1, 3, MATRIX_BY_COLUMNS|LAYOUT_FILL)
-	@frame7.hide()
-    #FXLabel.new(@frame7, "Instance" )
-    #@kit_server['instance'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
-    #FXLabel.new(@frame7, "" )
-    #FXLabel.new(@frame7, "Driver" )
-    #@kit_server['driver'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
-    #FXLabel.new(@frame7, "" )
-    #FXLabel.new(@frame7, "Provisioner" )
-    #@kit_server['provisioner'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
-    #FXLabel.new(@frame7, "" )
-    #FXLabel.new(@frame7, "Last Action" )
-   # @kit_server['last_action'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
-   # FXLabel.new(@frame7, "" )
-   # FXLabel.new(@frame7, "" )
-   # FXLabel.new(@frame7, "" )
-   # FXLabel.new(@frame7, "" )
-   # FXLabel.new(@frame7, "" )
-   # FXLabel.new(@frame7, "" )
-   # FXLabel.new(@frame7, "" )
-   # FXLabel.new(@frame7, "Test Kitchen Path" )
-   # @kit_server['test_kitchen_path'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
-   # @kit_server['test_kitchen_path_button'] = FXButton.new(@frame7, " ",:opts => BUTTON_TOOLBAR)
-   # @kit_server['test_kitchen_path_button'].icon = @modify
-   # @kit_server['test_kitchen_path_button'].tipText = "  Configure Test Kitchen Path  "
-   # @kit_server['test_kitchen_path_button'].connect(SEL_COMMAND) do |sender, sel, data|
-   #     dialog = KIT_PathCreateDialog.new(@ec2_main)
-   #     dialog.execute
-   #     if dialog.success
-   #         @ec2_main.tabBook.setCurrent(0)
-   #         @ec2_main.list.load("Test Kitchen")
-   #     end
-   # end
-   # FXLabel.new(@frame7, "SSH User" )
- #	@kit_server['ssh_user'] = FXTextField.new(@frame7, 30, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
-  #  FXLabel.new(@frame7, "" )
-  #  FXLabel.new(@frame7, "Foodcritic cookbook_path" )
-  #  @kit_server['chef_foodcritic'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
-#	@kit_server['chef_foodcritic'].connect(SEL_COMMAND) do
-#	    @ec2_main.settings.put('CHEF_FOODCRITIC',@kit_server['chef_foodcritic'].text)
-#		@ec2_main.settings.save
-#	end
-#    FXLabel.new(@frame7, "path of cookbook from TEST_KITCHEN_PATH" )
-#    FXLabel.new(@frame7, "RSpec spec files" )
-#    @kit_server['chef_rspec_test'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
-#	@kit_server['chef_rspec_test'].connect(SEL_COMMAND) do
-#	    @ec2_main.settings.put('CHEF_RSPEC_TEST',@kit_server['chef_rspec_test'].text)
-#		@ec2_main.settings.save
-#	end
- #   FXLabel.new(@frame7, "spec files to run  from TEST_KITCHEN_PATH" )
   end
 
   def run_scp
@@ -1747,24 +1585,10 @@ class EC2_Server
       else
         cn = @ec2_main.launch.get('Chef_Node')
         if cn == nil or cn == ""
-         cn = "default_server"
+         cn = "default-server"
         end
       end
       puts "chef_node #{cn}"
-      return cn
-  end
-
-  def get_puppet_manifest
-      instance_id = @server['Instance_ID'].text
-      if @ec2_puppet_manifest[instance_id] != nil and @ec2_puppet_manifest[instance_id] != ""
-  	cn =  @ec2_puppet_manifest[instance_id]
-      else
-        cn = @ec2_main.launch.get('Puppet_Manifest')
-        if cn == nil or cn == ""
-         cn = 'init.pp'
-        end
-      end
-      puts "puppet_manifest #{cn}"
       return cn
   end
 
@@ -1875,19 +1699,6 @@ class EC2_Server
       return @ec2_main.serverCache.instance_group(i)
   end
 
-
-  #def securityGrps_Instances
-  #     return @ec2_main.serverCache.sg_instances
-  #end
-
-  #def running(group)
-  #    return @ec2_main.serverCache.running(group)
-  #end
-
-  #def active(group)
-  #      return @ec2_main.serverCache.active(group)
-  #end
-
   def load_server(server)
       sa = (server).split"/"
       if sa.size>1
@@ -1906,8 +1717,6 @@ class EC2_Server
         return true
      elsif @type == "loc"
         return true
-     #elsif @type == "kit"
-     #   return true
      else
         return false
      end
@@ -1975,33 +1784,28 @@ class EC2_Server
   end
 
   def run_kitchen
-    data = kitchen_cmd("list")
-    instance = ""
+    instance = "default-server"
+    ENV['EC2DREAM_HOSTNAME']=''
     if @type == "ec2"
       instance = @server['Chef_Node'].text if @server['Chef_Node'].text != nil
+      address = @server['Public_IP'].text
+      address = @server['Private_IP'].text if address == nil or address == ""
+      ENV['EC2DREAM_HOSTNAME']=address
     elsif @type == "ops"
       instance = @ops_server['Chef_Node'].text if @ops_server['Chef_Node'].text != nil
+      ENV['EC2DREAM_HOSTNAME'] = @ops_server['Public_Addr'].text if @ops_server['Public_Addr'].text != nil
     elsif @type == "google"
       instance = @google_server['Chef_Node'].text if @google_server['Chef_Node'].text != nil
+      ENV['EC2DREAM_HOSTNAME'] = @google_server['Public_Addr'].text if @google_server['Public_Addr'].text != nil
     elsif @type == "loc"
       instance = @loc_server['chef_node'].text if @loc_server['chef_node'].text != nil
+      ENV['EC2DREAM_HOSTNAME'] = @loc_server['address'].text if @loc_server['address'].text != nil
     end
-    driver = ""
+    driver = "Ssh"
     provisioner = ""
     last_action = ""
-    data.each do |r|
-      if r['Instance']==instance
-         driver = r['Driver']
-         provisioner = r['Provisioner']
-         last_action = r['Last-Action']
-       end
-    end
-    if driver == ""
-       error_message("Kitchen Instance not found","Kitchen Instance #{instance} not found")
-    else
-       $ec2_main.kitchen.kit_load(instance,driver,provisioner,last_action)
-       $ec2_main.tabBook.setCurrent(4)
-    end
+    $ec2_main.kitchen.kit_load(instance,driver,provisioner,last_action)
+    $ec2_main.tabBook.setCurrent(4)
   end
 
  end

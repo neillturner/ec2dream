@@ -13,7 +13,6 @@
        ENV['EC2_INSTANCE'] = ""
        clear('Security_Groups')
        clear('Chef_Node')
-       clear('Puppet_Manifest')
        clear('Tags')
        clear('Image_ID')
        clear('State')
@@ -33,7 +32,6 @@
        clear('EC2_SSH_User')
        clear('Win_Admin_Password')
        clear('Local_Port')
-       #clear('Command')
        clear('Ami_Launch_Index')
        clear('Kernel_Id')
        clear('Ramdisk_Id')
@@ -53,7 +51,6 @@
 	   @frame4.hide()
 	   @frame5.hide()
 	   @frame6.hide()
-	   #@frame7.hide()
        @server_status = ""
        @secgrp = ""
      end
@@ -78,7 +75,6 @@
 	   @frame4.hide()
 	   @frame5.hide()
 	   @frame6.hide()
-	   #@frame7.hide()
        @server['Instance_ID'].text = instance_id
        ENV['EC2_INSTANCE'] = instance_id
        r = @ec2_main.serverCache.instance(instance_id)
@@ -130,11 +126,6 @@
             @server['Local_Port'].text = data_temp
          end
 	 load_bastion
-    	 #if @command_stack[instance_id] != nil and @command_stack[instance_id] != ""
-    	 #  @server['Command'].text = @command_stack[instance_id]
-    	 #else
-    	 #  @server['Command'].text = ""
-    	 #end
     	 if r['monitoring']['state'] != nil and r['monitoring']['state'] == true
     	    @server['Monitoring_State'].text = "detailed"
     	 else

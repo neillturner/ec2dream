@@ -6,6 +6,8 @@ require 'net/http'
 require 'resolv'
 require 'dialog/KIT_LogSelectDialog'
 require 'common/kitchen_cmd'
+require 'common/ssh'
+require 'common/error_message'
 
 class EC2_Kitchen
 
@@ -298,14 +300,17 @@ class EC2_Kitchen
        @kit_server['test_kitchen_path'].text ="#{ENV['EC2DREAM_HOME']}/chef/chef-repo/site-cookbooks/mycompany_webserver" if @kit_server['test_kitchen_path'].text==nil or @kit_server['test_kitchen_path'].text==""
        @kit_server['chef_foodcritic'].text ="." if @kit_server['chef_foodcritic'].text==nil or @kit_server['chef_foodcritic'].text==""
        @kit_server['chef_rspec_test'].text ="./spec/unit/*_spec.rb" if @kit_server['chef_rspec_test'].text==nil or @kit_server['chef_rspec_test'].text==""
+    else
+      error_message("Kitchen Instance undefined","Kitchen Instance #{@kit_server['instance'].text} not defined in .kitchem.yaml file")
     end
   end
 
 
   def kit_ssh(utility='ssh')
         r = kitchen_cmd('config',@kit_server['instance'].text)
+        puts "*** kit #{r} #{r.class}"
 	username = 'root'
-	username = r['username'] if r['username'] != nil and r['username'] != ""
+	username = r['username'] if !r.empty? and r['username'] != nil and r['username'] != ""
 	username = @kit_server['ssh_user'].text if @kit_server['ssh_user'].text != nil and @kit_server['ssh_user'].text != ""
 	password = nil
 	password = 'vagrant' if @kit_server['driver'].text == 'Vagrant'
@@ -313,7 +318,7 @@ class EC2_Kitchen
         private_key = @ec2_main.settings.get('EC2_SSH_PRIVATE_KEY') if @kit_server['driver'].text != 'Vagrant'
 	putty_key = nil
         putty_key = @ec2_main.settings.get('PUTTY_PRIVATE_KEY') if @kit_server['driver'].text != 'Vagrant'
-	if r != nil
+	if !r.empty?
 	   if utility == 'scp'
 	      scp(@kit_server['instance'].text, r['hostname'], username, private_key, putty_key, password,r['port'])
 	   else
