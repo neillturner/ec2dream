@@ -15,6 +15,7 @@ class EC2_Server
        ops_clear('State')
        ops_clear('Addresses')
        ops_clear('Public_Addr')
+       set_ec2dream_hostname
        ops_clear('Progress')
        ops_clear('Personality')
        ops_clear('Flavor')
@@ -168,6 +169,8 @@ class EC2_Server
      else
 	ops_clear_panel
      end
+     @ops_server['test_kitchen_path'].text = @ec2_main.settings.get('TEST_KITCHEN_PATH')
+     set_ec2dream_hostname
      @ec2_main.app.forceRefresh
   end
 

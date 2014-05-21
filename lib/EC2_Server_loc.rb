@@ -37,6 +37,8 @@ def loc_load(server_name)
           @loc_server['windows_server'].setCurrentItem(0)
        end
     end
+    @loc_server['test_kitchen_path'].text=@ec2_main.settings.get('TEST_KITCHEN_PATH')
+    set_ec2dream_hostname
   end
 
   def loc_get_local_server(server)

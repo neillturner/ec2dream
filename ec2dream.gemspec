@@ -37,14 +37,13 @@ Gem::Specification.new do |spec|
   spec.description = 'Visual devops tool. Supports chef, puppet, test kitchen with Servers and Clouds including Amazon AWS, Eucalyptus, CloudStack, Openstack, Rackspace, HP Cloud, Google Compute Engines, CloudFoundry, and Vagrant.'
     candidates = Dir.glob("{lib}/**/*") +  ['History.md', 'README.md', 'ec2dream.ico', 'ec2dream.bmp' , 'ec2dream.gemspec']
     candidates = candidates +  Dir.glob("{chef}/**/*")
-        candidates = candidates +  Dir.glob("{chef}/**/.kitchen*.yml")
     candidates = candidates +  Dir.glob("{puppet}/**/*")
     candidates = candidates +  Dir.glob("{launchrdp}/*")
     candidates = candidates +  Dir.glob("{putty}/*")
-        candidates = candidates +  Dir.glob("{google}/*")
+    candidates = candidates +  Dir.glob("{google}/*")
     candidates = candidates +  Dir.glob("{tar}/*")
     candidates = candidates +  Dir.glob("{wget}/*")
     candidates = candidates +  Dir.glob("{WinSCP}/*")
-        candidates = candidates +  Dir.glob("{vagrant}/*")
-  spec.files = candidates.sort
+    candidates = candidates +  Dir.glob("{vagrant}/*")
+    spec.files = candidates.sort
 end

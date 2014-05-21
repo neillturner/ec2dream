@@ -21,6 +21,7 @@
        clear('Private_DSN')
        clear('Public_IP')
        clear('Private_IP')
+       set_ec2dream_hostname
        clear('Instance_Type')
        clear('Availability_Zone')
        clear('Launch_Time')
@@ -151,6 +152,8 @@
        else
          puts "ERROR: No Server cache for instances #{instance_id}"
        end
+       @server['test_kitchen_path'].text=@ec2_main.settings.get('TEST_KITCHEN_PATH')
+       set_ec2dream_hostname
        @ec2_main.app.forceRefresh
      end
   end

@@ -5,6 +5,7 @@ require 'fox16/scintilla'
 require 'net/http'
 require 'resolv'
 require 'dialog/KIT_LogSelectDialog'
+require 'dialog/KIT_PathCreateDialog'
 require 'common/kitchen_cmd'
 require 'common/ssh'
 require 'common/error_message'
@@ -29,6 +30,8 @@ class EC2_Kitchen
 	@disconnect.create
 	@log = @ec2_main.makeIcon("script.png")
 	@log.create
+	@script_edit = @ec2_main.makeIcon("script_edit.png")
+	@script_edit.create
 	@modify = @ec2_main.makeIcon("application_edit.png")
 	@modify.create
 	@mon = @ec2_main.makeIcon("dashboard.png")
@@ -99,7 +102,7 @@ class EC2_Kitchen
 	   end
 	end
 	@terminate_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
-	@terminate_button.icon = @modify
+	@terminate_button.icon = @script_edit
 	@terminate_button.tipText = " Edit Kitchem yml File "
 	@terminate_button.connect(SEL_COMMAND) do |sender, sel, data|
             kit_edit

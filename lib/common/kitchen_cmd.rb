@@ -1,21 +1,22 @@
 def kitchen_cmd(cmd='list',instance=nil,debug=false)
 
-  def gem_install(name)
+ def gem_install(name)
         puts "------>Installing #{name}....."
         begin
        system "gem install  --no-ri --no-rdoc #{name}"
         rescue
-           puts $!
+        puts $!
     end
   end
   repository = $ec2_main.settings.get('TEST_KITCHEN_PATH')
   case cmd
    when "list"
-        gem_install('test-kitchen') if `gem list test-kitchen -i`.include?('false')
-        gem_install('kitchen-vagrant') if `gem list kitchen-vagrant -i`.include?('false')
-        gem_install('kitchen-ec2') if `gem list kitchen-ec2 -i`.include?('false')
-        gem_install('kitchen-ssh') if `gem list kitchen-ssh -i`.include?('false')
-        gem_install('berkshelf') if `gem list berkshelf -i`.include?('false')
+        list = `gem list`
+        gem_install('test-kitchen')  unless list.include? "test-kitchen"
+        gem_install('kitchen-vagrant') unless list.include? "kitchen-vagrant"
+        gem_install('kitchen-ec2') unless list.include? "kitchen-ec2"
+        gem_install('kitchen-ssh') unless list.include? "kitchen-ssh"
+        gem_install('berkshelf') unless list.include? "berkshelf"
         titles = []
         list = []
         `cd \"#{repository}\" && kitchen list #{instance}`.lines do |line|

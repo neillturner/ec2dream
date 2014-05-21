@@ -14,6 +14,7 @@ class EC2_Server
 	   @google_server['Addresses'].setVisibleRows(5)
        @google_server['Addresses'].setText("")
        google_clear('Public_Addr')
+       set_ec2dream_hostname
  	   google_clear('Can_Ip_Forward')
        google_clear('Tags')
        google_clear('Kernel')
@@ -129,6 +130,7 @@ class EC2_Server
             end
          end
          @google_server['Addresses'].setText(addr_list)
+
     	 @google_server['Tags'].text = r['tags'].to_s
     	 #if r.personality != nil
     	 #   @google_server['Personality'].text = r.personality
@@ -178,6 +180,8 @@ class EC2_Server
 	    @google_server['Admin_Password'].text =  r[:password]
 	 end
      end
+     @google_server['test_kitchen_path'].text=@ec2_main.settings.get('TEST_KITCHEN_PATH')
+     set_ec2dream_hostname
      @ec2_main.app.forceRefresh
   end
 

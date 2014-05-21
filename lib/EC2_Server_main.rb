@@ -437,6 +437,19 @@ class EC2_Server
                dialog.execute
             end
 	end
+	FXLabel.new(@frame1t, "Kitchen Path" )
+	@server['test_kitchen_path'] = FXTextField.new(@frame1t, 25, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_READONLY)
+	@server['test_kitchen_path_button'] = FXButton.new(@frame1t, " ",:opts => BUTTON_TOOLBAR)
+	@server['test_kitchen_path_button'].icon = @modify
+	@server['test_kitchen_path_button'].tipText = "  Configure Test Kitchen Path  "
+	@server['test_kitchen_path_button'].connect(SEL_COMMAND) do |sender, sel, data|
+	    dialog = KIT_PathCreateDialog.new(@ec2_main)
+	    dialog.execute
+	    if dialog.success
+	        @server['test_kitchen_path'].text=@ec2_main.settings.get('TEST_KITCHEN_PATH')
+	    end
+        end
+        FXLabel.new(@frame1, "" )
  	FXLabel.new(@frame1, "Tags" )
  	@server['Tags'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
 	@server['Tags_button'] = FXButton.new(@frame1, " ",:opts => BUTTON_TOOLBAR)
@@ -757,17 +770,29 @@ class EC2_Server
 	FXLabel.new(@frame3, "Security Groups" )
 	@frame3t = FXHorizontalFrame.new(@frame3,LAYOUT_FILL_X, :padding => 0)
 	@ops_server['Security_Groups'] = FXTextField.new(@frame3t, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+	FXLabel.new(@frame3t, "Kitchen Path" )
+	@ops_server['test_kitchen_path'] = FXTextField.new(@frame3t, 25, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_READONLY)
+	@ops_server['test_kitchen_path_button'] = FXButton.new(@frame3t, " ",:opts => BUTTON_TOOLBAR)
+	@ops_server['test_kitchen_path_button'].icon = @modify
+	@ops_server['test_kitchen_path_button'].tipText = "  Configure Test Kitchen Path  "
+	@ops_server['test_kitchen_path_button'].connect(SEL_COMMAND) do |sender, sel, data|
+	    dialog = KIT_PathCreateDialog.new(@ec2_main)
+	    dialog.execute
+	    if dialog.success
+	        @ops_server['test_kitchen_path'].text=@ec2_main.settings.get('TEST_KITCHEN_PATH')
+	    end
+        end
  	#FXLabel.new(@frame3t, "Puppet Manifest" )
- 	@ops_server['Puppet_Manifest'] = FXTextField.new(@frame3t, 15, nil, 0, :opts => FRAME_SUNKEN)
- 	@ops_server['Puppet_Manifest'].visible=false
-	@ops_server['Puppet_Manifest'].connect(SEL_COMMAND) do
-           instance_id = @ops_server['Instance_ID'].text
-           @ec2_puppet_manifest[instance_id] = @ops_server['Puppet_Manifest'].text
-           if @ec2_main.launch.loaded == true
-              @ec2_main.launch.put('Puppet_Manifest',@ops_server['Puppet_Manifest'].text)
-    	      @ec2_main.launch.save
-    	   end
-	end
+ 	#@ops_server['Puppet_Manifest'] = FXTextField.new(@frame3t, 15, nil, 0, :opts => FRAME_SUNKEN)
+ 	#@ops_server['Puppet_Manifest'].visible=false
+	#@ops_server['Puppet_Manifest'].connect(SEL_COMMAND) do
+        #   instance_id = @ops_server['Instance_ID'].text
+        #   @ec2_puppet_manifest[instance_id] = @ops_server['Puppet_Manifest'].text
+       #    if @ec2_main.launch.loaded == true
+       #       @ec2_main.launch.put('Puppet_Manifest',@ops_server['Puppet_Manifest'].text)
+    	#      @ec2_main.launch.save
+    	#   end
+	#end
  	FXLabel.new(@frame3, "" )
  	FXLabel.new(@frame3, "Instance ID" )
  	@ops_server['Instance_ID'] = FXTextField.new(@frame3, 50, nil, 0, :opts => TEXTFIELD_READONLY)
@@ -1201,9 +1226,6 @@ class EC2_Server
           @loc_server['putty_key'].text = dialog.filename
        end
     end
-    FXLabel.new(@frame5, "Kitchen Instance" )
-    @loc_server['chef_node'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
-    FXLabel.new(@frame5, "" )
     FXLabel.new(@frame5, "Windows Server" )
     @loc_server['windows_server'] = FXComboBox.new(@frame5, 15, :opts => COMBOBOX_STATIC|COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
     @loc_server['windows_server'].numVisible = 2
@@ -1211,6 +1233,27 @@ class EC2_Server
     @loc_server['windows_server'].appendItem("false")
     @loc_server['windows_server'].setCurrentItem(1)
     FXLabel.new(@frame5, "" )
+    FXLabel.new(@frame5, "" )
+    FXLabel.new(@frame5, "" )
+    FXLabel.new(@frame5, "" )
+    FXLabel.new(@frame5, "" )
+    FXLabel.new(@frame5, "" )
+    FXLabel.new(@frame5, "" )
+    FXLabel.new(@frame5, "Kitchen Instance" )
+    @loc_server['chef_node'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    FXLabel.new(@frame5, "" )
+    FXLabel.new(@frame5, "Kitchen Path" )
+    @loc_server['test_kitchen_path'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
+    @loc_server['test_kitchen_path_button'] = FXButton.new(@frame5, " ",:opts => BUTTON_TOOLBAR)
+    @loc_server['test_kitchen_path_button'].icon = @modify
+    @loc_server['test_kitchen_path_button'].tipText = "  Configure Test Kitchen Path  "
+    @loc_server['test_kitchen_path_button'].connect(SEL_COMMAND) do |sender, sel, data|
+        dialog = KIT_PathCreateDialog.new(@ec2_main)
+        dialog.execute
+        if dialog.success
+            @loc_server['test_kitchen_path'].text=@ec2_main.settings.get('TEST_KITCHEN_PATH')
+        end
+    end
     FXLabel.new(@frame5, "" )
     FXLabel.new(@frame5, "" )
     FXLabel.new(@frame5, "" )
@@ -1294,17 +1337,29 @@ class EC2_Server
  	FXLabel.new(@frame6, "Instance ID" )
  	@frame6t = FXHorizontalFrame.new(@frame6,LAYOUT_FILL_X, :padding => 0)
  	@google_server['Instance_ID'] = FXTextField.new(@frame6t, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+	FXLabel.new(@frame6t, "Kitchen Path" )
+	@google_server['test_kitchen_path'] = FXTextField.new(@frame6t, 25, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_READONLY)
+	@google_server['test_kitchen_path_button'] = FXButton.new(@frame6t, " ",:opts => BUTTON_TOOLBAR)
+	@google_server['test_kitchen_path_button'].icon = @modify
+	@google_server['test_kitchen_path_button'].tipText = "  Configure Test Kitchen Path  "
+	@google_server['test_kitchen_path_button'].connect(SEL_COMMAND) do |sender, sel, data|
+	    dialog = KIT_PathCreateDialog.new(@ec2_main)
+	    dialog.execute
+	    if dialog.success
+	        @google_server['test_kitchen_path'].text=@ec2_main.settings.get('TEST_KITCHEN_PATH')
+	    end
+        end
  	#FXLabel.new(@frame6t, "Puppet Manifest" )
- 	@google_server['Puppet_Manifest'] = FXTextField.new(@frame6t, 15, nil, 0, :opts => FRAME_SUNKEN)
- 	@google_server['Puppet_Manifest'].visible=false
-	@google_server['Puppet_Manifest'].connect(SEL_COMMAND) do
-           instance_id = @google_server['Instance_ID'].text
-           @ec2_puppet_manifest[instance_id] = @google_server['Puppet_Manifest'].text
-           if @ec2_main.launch.loaded == true
-              @ec2_main.launch.put('Puppet_Manifest',@google_server['Puppet_Manifest'].text)
-    	      @ec2_main.launch.save
-    	   end
-	end
+ 	#@google_server['Puppet_Manifest'] = FXTextField.new(@frame6t, 15, nil, 0, :opts => FRAME_SUNKEN)
+ 	#@google_server['Puppet_Manifest'].visible=false
+	#@google_server['Puppet_Manifest'].connect(SEL_COMMAND) do
+        #   instance_id = @google_server['Instance_ID'].text
+        #   @ec2_puppet_manifest[instance_id] = @google_server['Puppet_Manifest'].text
+        #   if @ec2_main.launch.loaded == true
+        #      @ec2_main.launch.put('Puppet_Manifest',@google_server['Puppet_Manifest'].text)
+    	#      @ec2_main.launch.save
+    	#   end
+	#end
 	FXLabel.new(@frame6, "" )
  	FXLabel.new(@frame6, "State" )
  	@frame6j = FXHorizontalFrame.new(@frame6,LAYOUT_FILL_X, :padding => 0)
@@ -1783,24 +1838,35 @@ class EC2_Server
          end
   end
 
+  def set_ec2dream_hostname
+      ENV['EC2DREAM_HOSTNAME']=''
+      if @type == "ec2"
+        address = @server['Public_IP'].text
+        address = @server['Private_IP'].text if address == nil or address == ""
+        ENV['EC2DREAM_HOSTNAME']=address
+      elsif @type == "ops"
+        ENV['EC2DREAM_HOSTNAME'] = @ops_server['Public_Addr'].text if @ops_server['Public_Addr'].text != nil
+      elsif @type == "google"
+        ENV['EC2DREAM_HOSTNAME'] = @google_server['Public_Addr'].text if @google_server['Public_Addr'].text != nil
+      elsif @type == "loc"
+        ENV['EC2DREAM_HOSTNAME'] = @loc_server['address'].text if @loc_server['address'].text != nil
+    end
+ end
+
+
   def run_kitchen
     instance = "default-server"
     ENV['EC2DREAM_HOSTNAME']=''
     if @type == "ec2"
       instance = @server['Chef_Node'].text if @server['Chef_Node'].text != nil
-      address = @server['Public_IP'].text
-      address = @server['Private_IP'].text if address == nil or address == ""
-      ENV['EC2DREAM_HOSTNAME']=address
     elsif @type == "ops"
       instance = @ops_server['Chef_Node'].text if @ops_server['Chef_Node'].text != nil
-      ENV['EC2DREAM_HOSTNAME'] = @ops_server['Public_Addr'].text if @ops_server['Public_Addr'].text != nil
     elsif @type == "google"
       instance = @google_server['Chef_Node'].text if @google_server['Chef_Node'].text != nil
-      ENV['EC2DREAM_HOSTNAME'] = @google_server['Public_Addr'].text if @google_server['Public_Addr'].text != nil
     elsif @type == "loc"
       instance = @loc_server['chef_node'].text if @loc_server['chef_node'].text != nil
-      ENV['EC2DREAM_HOSTNAME'] = @loc_server['address'].text if @loc_server['address'].text != nil
     end
+    set_ec2dream_hostname
     driver = "Ssh"
     provisioner = ""
     last_action = ""
