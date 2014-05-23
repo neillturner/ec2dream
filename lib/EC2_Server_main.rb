@@ -1240,7 +1240,7 @@ class EC2_Server
     FXLabel.new(@frame5, "" )
     FXLabel.new(@frame5, "" )
     FXLabel.new(@frame5, "Kitchen Instance" )
-    @loc_server['chef_node'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    @loc_server['kitchen_instance'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     FXLabel.new(@frame5, "" )
     FXLabel.new(@frame5, "Kitchen Path" )
     @loc_server['test_kitchen_path'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
@@ -1864,7 +1864,7 @@ class EC2_Server
     elsif @type == "google"
       instance = @google_server['Chef_Node'].text if @google_server['Chef_Node'].text != nil
     elsif @type == "loc"
-      instance = @loc_server['chef_node'].text if @loc_server['chef_node'].text != nil
+      instance = @loc_server['kitchen_instance'].text if @loc_server['kitchen_instance'].text != nil
     end
     set_ec2dream_hostname
     driver = "Ssh"

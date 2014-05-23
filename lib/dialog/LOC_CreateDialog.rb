@@ -24,12 +24,14 @@ class LOC_CreateDialog < FXDialogBox
     FXLabel.new(frame1, "(Default 22)" )
     FXLabel.new(frame1, "SSH User" )
     ssh_user = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    ssh_user.text = 'root'
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "SSH Password" )
     ssh_password = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "SSH key" )
     ssh_key = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    ssh_key.text=@ec2_main.settings.get('EC2_SSH_PRIVATE_KEY')
     ssh_key_button = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @magnifier = @ec2_main.makeIcon("magnifier.png")
     @magnifier.create
@@ -47,6 +49,7 @@ class LOC_CreateDialog < FXDialogBox
     end
     FXLabel.new(frame1, "Putty Key" )
     putty_key = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    putty_key.text=@ec2_main.settings.get('PUTTY_PRIVATE_KEY')
     putty_key_button = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     putty_key_button.icon = @magnifier
     putty_key_button.tipText = "Browse..."

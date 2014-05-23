@@ -19,8 +19,8 @@ def loc_load(server_name)
        @loc_server['server'].text = r['server']
        @loc_server['address'].text = r['address']
        @loc_server['address_port'].text = r['address_port']
-       @loc_server['chef_node'].text = r['chef_node']
-       @loc_server['chef_node'].text = 'default-server' if @loc_server['chef_node'].text == nil or @loc_server['chef_node'].text == ""
+       @loc_server['kitchen_instance'].text = r['kitchen_instance']
+       @loc_server['kitchen_instance'].text = 'default-server' if @loc_server['kitchen_instance'].text == nil or @loc_server['kitchen_instance'].text == ""
        @loc_server['ssh_user'].text = r['ssh_user']
        @loc_server['ssh_password'].text = r['ssh_password']
        @loc_server['ssh_key'].text = r['ssh_key']
@@ -60,7 +60,7 @@ def loc_load(server_name)
         properties['server']=@loc_server['server'].text
         properties['address']=@loc_server['address'].text
         properties['address_port']=@loc_server['address_port'].text
-        properties['chef_node']=@loc_server['chef_node'].text
+        properties['kitchen_instance']=@loc_server['kitchen_instance'].text
 	windows_server_value = "false"
         if @loc_server['windows_server'].itemCurrent?(0)
 	       windows_server_value = true
