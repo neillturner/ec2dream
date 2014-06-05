@@ -30,13 +30,12 @@ All using the one client graphical interface and running on Windows, Linux or Ma
 *   Support for OpenStack HP Cloud and Rackspace including security groups, servers, keypairs, IP addresses, Block Storage volumes and
 *   Snapshots.
 *   Support for CloudFoundry
-*   Support for Local Servers -  Servers running in local virtualized environments like VMWare Player are supported and the Chef
-*   integration will work. Ideal for testing chef cookbooks.
+*   Support for Local and Hosted Servers -  Servers running in local virtualized environments like Vagrant, VMWare or Virtual box.
 *   Support for Chef - one click testing of chef cookbooks via chef solo , support for Hosted Chef. Can pass chef runlist in userdata at startup
 *   Support for Puppet - one click testing  via masterless puppet
 *   Support for ssh tunnelling allow support of servers in Amazon VPC.
 *   Support for Amazon AWS, Eucalyptus and Cloudstack
-*   Support for Test Kitchen
+*   Support for Test Kitchen to develop and test chef cookbooks and puppet modules.
 
 ### It contains:
 *   Ruby and Fog for scripting.

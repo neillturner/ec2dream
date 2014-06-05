@@ -1,9 +1,11 @@
 def kitchen_cmd(cmd='list',instance=nil,debug=false)
 
- def gem_install(name)
-        puts "------>Installing #{name}....."
+ def gem_install(name,version=nil)
+        puts "------>Installing #{name} #{version}....."
         begin
-       system "gem install  --no-ri --no-rdoc #{name}"
+          cmd = "gem install  --no-ri --no-rdoc #{name}"
+          cmd = cmd + " --version \"#{version}\"" if !version.nil?
+          system cmd
         rescue
         puts $!
     end
@@ -16,7 +18,7 @@ def kitchen_cmd(cmd='list',instance=nil,debug=false)
         gem_install('kitchen-vagrant') unless list.include? "kitchen-vagrant"
         gem_install('kitchen-ec2') unless list.include? "kitchen-ec2"
         gem_install('kitchen-ssh') unless list.include? "kitchen-ssh"
-        gem_install('berkshelf') unless list.include? "berkshelf"
+        gem_install('berkshelf','< 3') unless list.include? "berkshelf"
         titles = []
         list = []
         `cd \"#{repository}\" && kitchen list #{instance}`.lines do |line|

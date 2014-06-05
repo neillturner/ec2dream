@@ -1,5 +1,6 @@
 ### Version 3.7.5 June 2014
 fix crash when kitchen yaml file does not exist
+move to using test kitchen instead pocketknife
 
 ### Version 3.7.4 May 2014
 enhance test-kitchen support
