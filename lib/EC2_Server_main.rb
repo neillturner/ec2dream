@@ -363,6 +363,7 @@ class EC2_Server
 	end
 	@chef_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
         @chef_button.icon = @kitchenci
+        @chef_button.tipText = " Run Test Kitchen"
 	@chef_button.connect(SEL_COMMAND) do |sender, sel, data|
           run_kitchen
 	end

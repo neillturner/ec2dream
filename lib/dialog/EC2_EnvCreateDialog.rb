@@ -241,7 +241,7 @@ class EC2_EnvCreateDialog < FXDialogBox
     frame5 = FXMatrix.new(@rackframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
     rack_env = textBox("Environment Name",frame5)
     @rack_access_key = textBox("Rackspace User Name",frame5)
-    FXLabel.new(frame5, "Rackspace Password" )
+    FXLabel.new(frame5, "Rackspace API Key" )
     @rack_secret_access_key = FXTextField.new(frame5, 60, nil, 0, :opts => TEXTFIELD_PASSWD|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame5, "" )
     FXLabel.new(frame5, "Rackspace Endpoint (Default Dallas)" )
@@ -582,7 +582,7 @@ class EC2_EnvCreateDialog < FXDialogBox
               if @rack_url.text != nil
   	       settings.put("EC2_URL",@rack_url.text)
   	      end
-  	      settings.put('CLOUD_ADMIN_URL',"http://www.rackspace.com/")
+  	      settings.put('CLOUD_ADMIN_URL',"https://mycloud.rackspace.com/")
 	   elsif @ec2_platform == "cloudstack"
               if @cloudstack_access_key.text != nil
                  settings.put("AMAZON_ACCESS_KEY_ID",@cloudstack_access_key.text)

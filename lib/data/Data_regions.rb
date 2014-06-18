@@ -4,12 +4,12 @@ require 'net/http'
 require 'resolv'
 require 'fog'
 
-class Data_regions 
+class Data_regions
 
   def initialize(owner)
      puts "Data_regions.initialize"
-     @ec2_main = owner  
-  end 
+     @ec2_main = owner
+  end
 
   # List Regions
   #
@@ -22,7 +22,7 @@ class Data_regions
 	  when "EC2"
            data.push("https://ec2.us-east-1.amazonaws.com/ (Virgina)")
            data.push("https://ec2.us-west-1.amazonaws.com/ (California)")
-           data.push("https://ec2.us-west-2.amazonaws.com/ (Oregon)") 
+           data.push("https://ec2.us-west-2.amazonaws.com/ (Oregon)")
            data.push("https://ec2.eu-west-1.amazonaws.com/ (Ireland)")
            data.push("https://ec2.ap-southeast-1.amazonaws.com/ (Singapore)")
            data.push("https://ec2.ap-southeast-2.amazonaws.com/ (Sydney)")
@@ -32,22 +32,25 @@ class Data_regions
          when "AS"
            data.push("https://autoscaling.us-east-1.amazonaws.com/ (Virgina)")
            data.push("https://autoscaling.us-west-1.amazonaws.com/ (California)")
-           data.push("https://autoscaling.us-west-2.amazonaws.com/ (Oregon)") 
+           data.push("https://autoscaling.us-west-2.amazonaws.com/ (Oregon)")
            data.push("https://autoscaling.eu-west-1.amazonaws.com/ (Ireland)")
            data.push("https://autoscaling.ap-southeast-1.amazonaws.com/ (Singapore)")
            data.push("https://autoscaling.ap-southeast-2.amazonaws.com/ (Sydney)")
            data.push("https://autoscaling.ap-northeast-1.amazonaws.com/ (Tokyo)")
            data.push("https://autoscaling.sa-east-1.amazonaws.com/ (Sao Paulo)")
            data.push("https://autoscaling.us-gov-west-1.amazonaws.com/ (US GovCloud)")
-       end         
-     elsif  platform == "openstack_rackspace" and type == "EC2" 
+       end
+     elsif  platform == "openstack_rackspace" and type == "EC2"
            data.push('https://dfw.servers.api.rackspacecloud.com/v2 (Dallas)')
            data.push('https://ord.servers.api.rackspacecloud.com/v2 (Chicago)')
            data.push('https://lon.servers.api.rackspacecloud.com/v2 (London)')
-	 elsif  platform == "google"  
+           data.push('https://iad.servers.api.rackspacecloud.com/v2 (Northern Virginia)')
+           data.push('https://syd.servers.api.rackspacecloud.com/v2 (Sydney)')
+           data.push('https://hkg.servers.api.rackspacecloud.com/v2 (Hong Kong)')
+	 elsif  platform == "google"
            data.push('us-central1')
            data.push('europe-central1')
-      elsif  platform == "cloudfoundry"      
+      elsif  platform == "cloudfoundry"
 	   data.push("http://api.vcap.me                                   (Local CloudFoundry")
 	   data.push("http://api.aws.af.cm                                (AppFog - AWS service)")
 	   data.push("http://api.hp.af.cm                                  (AppFog - HP Cloud service)")
@@ -62,4 +65,4 @@ class Data_regions
      end
      return data
  end
-end 
+end

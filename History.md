@@ -1,6 +1,7 @@
 ### Version 3.7.6 July 2014
 add SSH_USER global environment setting
 fix bug in openstack server when changing ssh user
+fix rackspace cloud connection
 
 ### Version 3.7.5 June 2014
 fix crash when kitchen yaml file does not exist
