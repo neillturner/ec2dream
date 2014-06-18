@@ -153,6 +153,8 @@ class EC2_Server
          ssh_u = @ec2_main.launch.ops_get('EC2_SSH_User')
          if ssh_u != nil and ssh_u != ""
             @ops_server['EC2_SSH_User'].text = ssh_u
+         else
+            @ops_server['EC2_SSH_User'].text = @ec2_main.settings.get('EC2_SSH_USER')
          end
        	 if @ops_admin_pw[instance_id] != nil and @ops_admin_pw[instance_id] != ""
     	   @ops_server['Admin_Password'].text = @ops_admin_pw[instance_id]

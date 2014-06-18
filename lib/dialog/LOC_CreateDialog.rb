@@ -24,7 +24,7 @@ class LOC_CreateDialog < FXDialogBox
     FXLabel.new(frame1, "(Default 22)" )
     FXLabel.new(frame1, "SSH User" )
     ssh_user = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
-    ssh_user.text = 'root'
+    ssh_user.text = @ec2_main.settings.get('EC2_SSH_USER')
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "SSH Password" )
     ssh_password = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)

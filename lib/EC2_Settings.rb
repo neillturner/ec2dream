@@ -69,8 +69,8 @@ class EC2_Settings
         frame1 = FXMatrix.new(page1, 3, MATRIX_BY_COLUMNS|LAYOUT_FILL)
 		       FXLabel.new(frame1, "ENVIRONMENT" )
 	@settings['ENV_NAME'] = FXTextField.new(frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
-    FXLabel.new(frame1, "" )
-		       FXLabel.new(frame1, "ENV_REPOSITORY" )
+        FXLabel.new(frame1, "" )
+	FXLabel.new(frame1, "ENV_REPOSITORY" )
 	@settings['REPOSITORY_LOCATION'] = FXTextField.new(frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
 	@settings['REPOSITORY_LOCATION_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
 	@settings['REPOSITORY_LOCATION_BUTTON'].icon = @repository
@@ -121,7 +121,7 @@ class EC2_Settings
 	   dialog = EC2_ShowPasswordDialog.new(@ec2_main,"AMAZON_SECRET_ACCESS_KEY",@settings['AMAZON_SECRET_ACCESS_KEY'].text)
            dialog.execute
 	end
-    @settings['AMAZON_ACCOUNT_ID_LABEL'] = FXLabel.new(frame1, "ACCOUNT_ID" )
+        @settings['AMAZON_ACCOUNT_ID_LABEL'] = FXLabel.new(frame1, "ACCOUNT_ID" )
 	@settings['AMAZON_ACCOUNT_ID'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
 	FXLabel.new(frame1, "" )
  	@settings['EC2_URL_LABEL'] = FXLabel.new(frame1, "URL" )
@@ -137,7 +137,7 @@ class EC2_Settings
                @settings['EC2_URL'].text = it
             end
         end
-    @settings['AVAILABILITY_ZONE_LABEL'] = FXLabel.new(frame1, "AVAILABILITY_ZONE" )
+        @settings['AVAILABILITY_ZONE_LABEL'] = FXLabel.new(frame1, "AVAILABILITY_ZONE" )
 	@settings['AVAILABILITY_ZONE'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
 	@settings['AVAILABILITY_ZONE_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
 	@settings['AVAILABILITY_ZONE_BUTTON'].icon = @magnifier
@@ -150,7 +150,7 @@ class EC2_Settings
                @settings['AVAILABILITY_ZONE'].text = it
             end
         end
-    @settings['AMAZON_NICKNAME_TAG'] = FXLabel.new(frame1, "NICKNAME TAG" )
+        @settings['AMAZON_NICKNAME_TAG_LABEL'] = FXLabel.new(frame1, "NICKNAME TAG" )
 	@settings['AMAZON_NICKNAME_TAG'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
         FXLabel.new(frame1, "" )
  	#
@@ -159,6 +159,9 @@ class EC2_Settings
         FXLabel.new(frame1, "" )
  	FXLabel.new(frame1, "  PuTTY, ssh and SCP Settings", nil, LAYOUT_CENTER_X)
 	FXLabel.new(frame1, "" )
+        FXLabel.new(frame1, "SSH_USER" )
+	@settings['EC2_SSH_USER'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+        FXLabel.new(frame1, "" )
         FXLabel.new(frame1, "SSH_PRIVATE_KEY" )
 	@settings['EC2_SSH_PRIVATE_KEY'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
 	@settings['EC2_SSH_PRIVATE_KEY_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
@@ -346,6 +349,7 @@ class EC2_Settings
         @settings['EC2_PLATFORM'].text =  (@settings['EC2_PLATFORM'].text).downcase  if @settings['EC2_PLATFORM'].text != nil or @settings['EC2_PLATFORM'].text = ""
 	@properties['EC2_PLATFORM'] = @properties['EC2_PLATFORM'].downcase  if @properties['EC2_PLATFORM'] != nil or @properties['EC2_PLATFORM'] = ""
         load_panel('EC2_URL')
+        load_panel('EC2_SSH_USER')
         load_panel('EC2_SSH_PRIVATE_KEY')
         load_panel('AMAZON_ACCOUNT_ID')
         load_panel('AMAZON_ACCESS_KEY_ID')
@@ -403,6 +407,7 @@ class EC2_Settings
     clear('REPOSITORY_LOCATION')
     clear('EC2_PLATFORM')
     clear('EC2_URL')
+    clear('EC2_SSH_USER')
     clear('EC2_SSH_PRIVATE_KEY')
     clear('AMAZON_ACCOUNT_ID')
     clear('AMAZON_ACCESS_KEY_ID')
@@ -471,14 +476,6 @@ class EC2_Settings
        end
   end
 
-  #def openstack
-  #   if get("EC2_PLATFORM").start_with?("openstack")
-  #     return true
-  #   else
-  #     return false
-  #   end
-  #end
-
   def openstack
       begin
        if $ec2_main.cloud.api == 'openstack'
@@ -486,9 +483,9 @@ class EC2_Settings
        else
           false
        end
-	  rescue
-	   false
-	  end
+      rescue
+        false
+      end
   end
 
  def aws
@@ -544,6 +541,7 @@ class EC2_Settings
      @settings['EC2_PLATFORM'].text = (@settings['EC2_PLATFORM'].text).downcase
      save_setting('EC2_PLATFORM')
      save_setting("EC2_URL")
+     save_setting("EC2_SSH_USER")
      save_setting("EC2_SSH_PRIVATE_KEY")
      save_setting("AMAZON_ACCOUNT_ID")
      save_setting("AMAZON_ACCESS_KEY_ID")

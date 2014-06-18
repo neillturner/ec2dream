@@ -125,17 +125,17 @@ class EC2_Server
 	end
     	@putty_button = FXButton.new(page1a," ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@putty_button.icon = @monitor
-    @putty_button.tipText = " SSH "
+        @putty_button.tipText = " SSH "
 	@putty_button.connect(SEL_COMMAND) do |sender, sel, data|
-	       if @type == "ec2" or @type == "ops" or @type == "google"
+	   if @type == "ec2" or @type == "ops" or @type == "google"
                run_ssh
-		   elsif @type == "loc"
-			   loc_ssh
+	   elsif @type == "loc"
+	       loc_ssh
            elsif @type == "cfy"
-	           dialog = CFY_AppUploadDialog.new(@ec2_main,@cfy_server['name'].text)
+	       dialog = CFY_AppUploadDialog.new(@ec2_main,@cfy_server['name'].text)
                dialog.execute
            end
-    end
+        end
 	@putty_button.connect(SEL_UPDATE) do |sender, sel, data|
 	   enable_if_server_loaded(sender)
 	   if @type == "cfy"
@@ -763,7 +763,7 @@ class EC2_Server
            @ec2_chef_node[instance_id] = @ops_server['Chef_Node'].text
            if @ec2_main.launch.loaded == true
               @ec2_main.launch.ops_put('Chef_Node',@ops_server['Chef_Node'].text)
-    	      @ec2_main.launch.save
+    	      @ec2_main.launch.ops_save
     	   end
 	end
 	FXLabel.new(@frame3, "" )
@@ -782,17 +782,6 @@ class EC2_Server
 	        @ops_server['test_kitchen_path'].text=@ec2_main.settings.get('TEST_KITCHEN_PATH')
 	    end
         end
- 	#FXLabel.new(@frame3t, "Puppet Manifest" )
- 	#@ops_server['Puppet_Manifest'] = FXTextField.new(@frame3t, 15, nil, 0, :opts => FRAME_SUNKEN)
- 	#@ops_server['Puppet_Manifest'].visible=false
-	#@ops_server['Puppet_Manifest'].connect(SEL_COMMAND) do
-        #   instance_id = @ops_server['Instance_ID'].text
-        #   @ec2_puppet_manifest[instance_id] = @ops_server['Puppet_Manifest'].text
-       #    if @ec2_main.launch.loaded == true
-       #       @ec2_main.launch.put('Puppet_Manifest',@ops_server['Puppet_Manifest'].text)
-    	#      @ec2_main.launch.save
-    	#   end
-	#end
  	FXLabel.new(@frame3, "" )
  	FXLabel.new(@frame3, "Instance ID" )
  	@ops_server['Instance_ID'] = FXTextField.new(@frame3, 50, nil, 0, :opts => TEXTFIELD_READONLY)
@@ -827,7 +816,7 @@ class EC2_Server
  	   instance_id = @ops_server['Instance_ID'].text
  	   @ops_public_addr[instance_id] = data
 	   #@ec2_main.launch.ops_put('Public_Addr',data)
-    	   #@ec2_main.launch.save
+    	   #@ec2_main.launch.ops_save
 	end
  	FXLabel.new(@frame3, "" )
  	FXLabel.new(@frame3, "Progress" )
@@ -869,7 +858,7 @@ class EC2_Server
                  @ec2_ssh_private_key[instance_id] = @ops_server['SSH_Private_Key'].text
                  if @ec2_main.launch.loaded == true
                     @ec2_main.launch.ops_put('SSH_Private_Key',@ops_server['SSH_Private_Key'].text)
-    	 	    @ec2_main.launch.save
+    	 	    @ec2_main.launch.ops_save
     	 	 end
 	      end
 	   end
@@ -881,7 +870,7 @@ class EC2_Server
                @putty_private_key[instance_id] = @ops_server['Putty_Private_Key'].text
                if @ec2_main.launch.loaded == true
                   @ec2_main.launch.ops_put('Putty_Private_Key',@ops_server['Putty_Private_Key'].text)
-    	          @ec2_main.launch.save
+    	          @ec2_main.launch.ops_save
     	       end
 	   end
 	   @ops_server['Putty_Private_Key_Button'] = FXButton.new(@frame3, "", :opts => BUTTON_TOOLBAR)
@@ -899,7 +888,7 @@ class EC2_Server
                  @putty_private_key[instance_id] = @ops_server['Putty_Private_Key'].text
                  if @ec2_main.launch.loaded == true
                     @ec2_main.launch.ops_put('Putty_Private_Key',@ops_server['Putty_Private_Key'].text)
-    	            @ec2_main.launch.save
+    	            @ec2_main.launch.ops_save
     	         end
 	      end
 	   end
@@ -909,7 +898,7 @@ class EC2_Server
         @ops_server['EC2_SSH_User'].connect(SEL_COMMAND) do |sender, sel, data|
            if @ec2_main.launch.loaded == true
               @ec2_main.launch.ops_put('EC2_SSH_User',data)
-    	      @ec2_main.launch.save
+    	      @ec2_main.launch.ops_save
     	   end
 	end
 	FXLabel.new(@frame3, "" )
@@ -1530,17 +1519,20 @@ class EC2_Server
             server = currentServer
             if @type == "ops"
                user = @ec2_main.launch.ops_get("EC2_SSH_User")
+               user = @ec2_main.settings.get('EC2_SSH_USER') if user == nil or user == ''
                address = @ops_server['Public_Addr'].text
                password = @ops_server['Admin_Password'].text
                local_port = nil  # not added yet
             elsif @type == "google"
                user = @ec2_main.launch.google_get("EC2_SSH_User")
+               user = @ec2_main.settings.get('EC2_SSH_USER') if user == nil or user == ''
                address = @google_server['Public_Addr'].text
                password = ""
                local_port = nil  # not added yet
             else
                address = @server['Public_IP'].text
                user = @ec2_main.launch.get("EC2_SSH_User")
+               user = @ec2_main.settings.get('EC2_SSH_USER') if user == nil or user == ''
                password =""
                local_port = @server['Local_Port'].text
             end
@@ -1554,18 +1546,21 @@ class EC2_Server
             server = currentServer
             if @type == "ops"
                user = @ec2_main.launch.ops_get("EC2_SSH_User")
+               user = @ec2_main.settings.get('EC2_SSH_USER') if user == nil or user == ''
                address = @ops_server['Public_Addr'].text
                password = @ops_server['Admin_Password'].text
                local_port = nil  # not added yet
             elsif @type == "google"
                address = @google_server['Public_Addr'].text
                user = @ec2_main.launch.google_get("EC2_SSH_User")
+               user = @ec2_main.settings.get('EC2_SSH_USER') if user == nil or user == ''
                password = ""
                local_port = nil  # not added yet
             else
                address = @server['Public_IP'].text
                address = @server['Private_IP'].text if address == nil or address == ""
                user = @ec2_main.launch.get("EC2_SSH_User")
+               user = @ec2_main.settings.get('EC2_SSH_USER') if user == nil or user == ''
                password = ""
                local_port = @server['Local_Port'].text
             end
@@ -1583,12 +1578,14 @@ class EC2_Server
             r = @bastion[instance_id] if @bastion[instance_id] != nil
             if @type == "ops"
                user = @ec2_main.launch.ops_get("EC2_SSH_User")
+               user = @ec2_main.settings.get('EC2_SSH_USER') if user == nil or user == ''
                address = @ops_server['Public_Addr'].text
                password = @ops_server['Admin_Password'].text
                local_port = nil   # not added yet
                address_port = "22"
             elsif @type == "google"
                user = @ec2_main.launch.google_get("EC2_SSH_User")
+               user = @ec2_main.settings.get('EC2_SSH_USER') if user == nil or user == ''
                address = @google_server['Public_Addr'].text
                password = ""
                local_port = nil   # not added yet
@@ -1598,6 +1595,7 @@ class EC2_Server
                address = @server['Private_IP'].text if address == nil or address == ""
                instance_id = @server['Instance_ID'].text
                user = @ec2_main.launch.get("EC2_SSH_User")
+               user = @ec2_main.settings.get('EC2_SSH_USER') if user == nil or user == ''
                local_port = @server['Local_Port'].text
                password = ""
                address_port = "22"
@@ -1615,14 +1613,16 @@ class EC2_Server
              server = currentServer
              if @type == "ops"
                 user = @ec2_main.launch.ops_get("SSH_User")
+                user = @ec2_main.settings.get('EC2_SSH_USER') if user == nil or user == ''
                 address = @ops_server['Public_Addr'].text
                 pw = @ops_server['Admin_Password'].text
                 local_port = nil   # not added yet
-			elsif @type == "google"
+	     elsif @type == "google"
                 return   # no windows on google
               else
                 address = @server['Public_IP'].text
                 user = @ec2_main.launch.get("EC2_SSH_User")
+                user = @ec2_main.settings.get('EC2_SSH_USER') if user == nil or user == ''
                 pw = @server['Win_Admin_Password'].text
                 local_port = @server['Local_Port'].text
              end

@@ -111,6 +111,8 @@
          ssh_u = @ec2_main.launch.get('EC2_SSH_User')
          if ssh_u != nil and ssh_u != ""
             @server['EC2_SSH_User'].text = ssh_u
+         else
+            @server['EC2_SSH_User'].text = @ec2_main.settings.get('EC2_SSH_USER')
          end
      	 if @windows_admin_pw[instance_id] != nil and @windows_admin_pw[instance_id] != ""
     	   @server['Win_Admin_Password'].text = @windows_admin_pw[instance_id]

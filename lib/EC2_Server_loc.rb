@@ -92,10 +92,10 @@ def loc_load(server_name)
 
   def loc_delete
     dialog = LOC_DeleteDialog.new(@ec2_main,@loc_server['server'].text)
-	if dialog.success
- 	   @ec2_main.list.load('Local Servers')
+    if dialog.success
+       @ec2_main.list.load('Local Servers')
        @ec2_main.tabBook.setCurrent(0)
-     end
+    end
   end
 
   def loc_ssh
@@ -106,6 +106,7 @@ def loc_load(server_name)
 
   def loc_rdp
       if @loc_server['windows_server'].itemCurrent?(0)
+
          remote_desktop(@loc_server['server'].text, @loc_server['ssh_password'].text, @loc_server['ssh_user'].text, nil,@loc_server['local_port'])
       end
   end

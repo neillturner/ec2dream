@@ -283,6 +283,7 @@ class EC2_Kitchen
     @kit_server['provisioner'].text = provisioner
     @kit_server['last_action'].text = last_action
     @kit_server['test_kitchen_path'].text = @ec2_main.settings.get('TEST_KITCHEN_PATH')
+    @kit_server['ssh_user'].text = @ec2_main.settings.get('EC2_SSH_USER')
     @kit_server['chef_foodcritic'].text = @ec2_main.settings.get('CHEF_FOODCRITIC')
     @kit_server['chef_rspec_test'].text = @ec2_main.settings.get('CHEF_RSPEC_TEST')
     @kit_server['test_kitchen_path'].text ="#{ENV['EC2DREAM_HOME']}/chef/chef-repo/site-cookbooks/mycompany_webserver" if @kit_server['test_kitchen_path'].text==nil or @kit_server['test_kitchen_path'].text==""
@@ -298,6 +299,7 @@ class EC2_Kitchen
        @kit_server['provisioner'].text = data[0]['Provisioner']
        @kit_server['last_action'].text = data[0]['Last-Action']
        @kit_server['test_kitchen_path'].text = @ec2_main.settings.get('TEST_KITCHEN_PATH')
+       @kit_server['ssh_user'].text = @ec2_main.settings.get('EC2_SSH_USER')
        @kit_server['chef_foodcritic'].text = @ec2_main.settings.get('CHEF_FOODCRITIC')
        @kit_server['chef_rspec_test'].text = @ec2_main.settings.get('CHEF_RSPEC_TEST')
        @kit_server['test_kitchen_path'].text ="#{ENV['EC2DREAM_HOME']}/chef/chef-repo/site-cookbooks/mycompany_webserver" if @kit_server['test_kitchen_path'].text==nil or @kit_server['test_kitchen_path'].text==""

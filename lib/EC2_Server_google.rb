@@ -166,6 +166,8 @@ class EC2_Server
          ssh_u = @ec2_main.launch.google_get('EC2_SSH_User')
          if ssh_u != nil and ssh_u != ""
             @google_server['EC2_SSH_User'].text = ssh_u
+         else
+            @google_server['EC2_SSH_User'].text = @ec2_main.settings.get('EC2_SSH_USER')
          end
        	 if @google_admin_pw[instance_id] != nil and @google_admin_pw[instance_id] != ""
     	   @google_server['Admin_Password'].text = @google_admin_pw[instance_id]
