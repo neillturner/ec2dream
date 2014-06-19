@@ -157,7 +157,7 @@ class EC2_Server
  		 end
 		 @google_server['Disks'].setText(disk_list)
     	 if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
-            @google_server['EC2_SSH_Private_Key'].text = get_pk
+            @google_server['SSH_Private_Key'].text = get_pk
          else
             @google_server['Putty_Private_Key'].text = get_ppk
          end

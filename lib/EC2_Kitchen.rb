@@ -120,7 +120,7 @@ class EC2_Kitchen
            sender.enabled = true
 	end
 	@mon_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
-	@mon_button.icon = @delete
+	@mon_button.icon = @disconnect
         @mon_button.tipText = " Destroy Instance "
 	@mon_button.connect(SEL_COMMAND) do |sender, sel, data|
            kit_destroy
