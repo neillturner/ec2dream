@@ -176,7 +176,7 @@ class EC2_Kitchen
 	end
 	@puppet_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@puppet_button.icon = @style
-	@puppet_button.tipText = " Run Foodcritic "
+	@puppet_button.tipText = " Run Foodcritic/puppet-lint "
 	@puppet_button.connect(SEL_COMMAND) do |sender, sel, data|
 	    kit_foodcritic
 	end
@@ -248,13 +248,13 @@ class EC2_Kitchen
     FXLabel.new(@frame1, "SSH User" )
     @kit_server['ssh_user'] = FXTextField.new(@frame1, 30, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
     FXLabel.new(@frame1, "" )
-    FXLabel.new(@frame1, "Foodcritic cookbook_path" )
+    @kit_server['chef_foodcritic_label'] = FXLabel.new(@frame1, "Foodcritic cookbook_path" )
     @kit_server['chef_foodcritic'] = FXTextField.new(@frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     @kit_server['chef_foodcritic'].connect(SEL_COMMAND) do
         @ec2_main.settings.put('CHEF_FOODCRITIC',@kit_server['chef_foodcritic'].text)
 	@ec2_main.settings.save
     end
-    FXLabel.new(@frame1, "path of cookbook from TEST_KITCHEN_PATH" )
+    @kit_server['chef_foodcritic_comment'] = FXLabel.new(@frame1, "path of cookbook from TEST_KITCHEN_PATH" )
     FXLabel.new(@frame1, "RSpec spec files" )
     @kit_server['chef_rspec_test'] = FXTextField.new(@frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     @kit_server['chef_rspec_test'].connect(SEL_COMMAND) do
@@ -289,6 +289,13 @@ class EC2_Kitchen
     @kit_server['test_kitchen_path'].text ="#{ENV['EC2DREAM_HOME']}/chef/chef-repo/site-cookbooks/mycompany_webserver" if @kit_server['test_kitchen_path'].text==nil or @kit_server['test_kitchen_path'].text==""
     @kit_server['chef_foodcritic'].text ="." if @kit_server['chef_foodcritic'].text==nil or @kit_server['chef_foodcritic'].text==""
     @kit_server['chef_rspec_test'].text ="./spec/unit/*_spec.rb" if @kit_server['chef_rspec_test'].text==nil or @kit_server['chef_rspec_test'].text==""
+    if @kit_server['provisioner'].text == "PuppetApply"
+      @kit_server['chef_foodcritic_label'].text = "puppet-lint parameters"
+      @kit_server['chef_foodcritic_comment'].text = ""
+    else
+      @kit_server['chef_foodcritic_label'].text = "Foodcritic cookbook_path"
+      @kit_server['chef_foodcritic_comment'].text = "path of cookbook from TEST_KITCHEN_PATH"
+    end
   end
 
   def kit_refresh
@@ -305,6 +312,13 @@ class EC2_Kitchen
        @kit_server['test_kitchen_path'].text ="#{ENV['EC2DREAM_HOME']}/chef/chef-repo/site-cookbooks/mycompany_webserver" if @kit_server['test_kitchen_path'].text==nil or @kit_server['test_kitchen_path'].text==""
        @kit_server['chef_foodcritic'].text ="." if @kit_server['chef_foodcritic'].text==nil or @kit_server['chef_foodcritic'].text==""
        @kit_server['chef_rspec_test'].text ="./spec/unit/*_spec.rb" if @kit_server['chef_rspec_test'].text==nil or @kit_server['chef_rspec_test'].text==""
+       if @kit_server['provisioner'].text == "PuppetApply"
+         @kit_server['chef_foodcritic_label'].text = "puppet-lint parameters"
+         @kit_server['chef_foodcritic_comment'].text = ""
+       else
+         @kit_server['chef_foodcritic_label'].text = "Foodcritic cookbook_path"
+         @kit_server['chef_foodcritic_comment'].text = "path of cookbook from TEST_KITCHEN_PATH"
+       end
     else
       error_message("Kitchen Instance undefined","Kitchen Instance #{@kit_server['instance'].text} not defined in .kitchem.yaml file")
     end
@@ -383,11 +397,19 @@ class EC2_Kitchen
   end
 
   def kit_foodcritic
-     kitchen_cmd('foodcritic',@kit_server['chef_foodcritic'].text)
+     if @kit_server['provisioner'].text == "PuppetApply"
+        kitchen_cmd('puppet-lint',@kit_server['chef_foodcritic'].text)
+     else
+        kitchen_cmd('foodcritic',@kit_server['chef_foodcritic'].text)
+     end
   end
 
   def kit_rspec_test
-     kitchen_cmd('rspec',@kit_server['chef_rspec_test'].text)
+    if @kit_server['provisioner'].text == "PuppetApply"
+       kitchen_cmd('rspec-puppet',@kit_server['chef_rspec_test'].text)
+    else
+       kitchen_cmd('rspec',@kit_server['chef_rspec_test'].text)
+    end
   end
 
 end

@@ -6,10 +6,13 @@ def kitchen_cmd(cmd='list',instance=nil,debug=false)
           cmd = "gem install  --no-ri --no-rdoc #{name}"
           cmd = cmd + " --version \"#{version}\"" if !version.nil?
           system cmd
+          return true
         rescue
         puts $!
+        return false
     end
   end
+
   repository = $ec2_main.settings.get('TEST_KITCHEN_PATH')
   case cmd
    when "list"
@@ -18,7 +21,9 @@ def kitchen_cmd(cmd='list',instance=nil,debug=false)
         gem_install('kitchen-vagrant') unless list.include? "kitchen-vagrant"
         gem_install('kitchen-ec2') unless list.include? "kitchen-ec2"
         gem_install('kitchen-ssh') unless list.include? "kitchen-ssh"
-        gem_install('berkshelf','< 3') unless list.include? "berkshelf"
+        # only try and install berks once
+        $berkshelf_install_status = gem_install('berkshelf','< 3') unless list.include? "berkshelf" or $berkshelf_install_status != nil
+        $kitchen_puppet_install_status = gem_install('kitchen-puppet') unless list.include? "kitchen-puppet" or $kitchen_puppet_install_status != nil
         titles = []
         list = []
         `cd \"#{repository}\" && kitchen list #{instance}`.lines do |line|
@@ -69,6 +74,27 @@ def kitchen_cmd(cmd='list',instance=nil,debug=false)
                   else
                    gem_install('chefspec') if `gem list chefspec -i`.include?('false')
                    gem_install('fauxhai') if !`gem list`.lines.grep(/^fauxhai \(.*\)/)
+                  end
+          if RUBY_PLATFORM.index("mswin") != nil  or RUBY_PLATFORM.index("i386-mingw32") != nil
+             c = "cmd.exe /c \@start \"kitchen\" /D \"#{repository}\" #{c}"
+                 puts c
+                 system(c)
+              else
+                     c = " cd #{repository} && #{c}"
+                 puts c
+                 system(c)
+                 puts "kitchen #{cmd} return message #{$?}"
+              end
+       end
+     when 'puppet-lint','rspec-puppet'
+       cmd = 'rspec' if cmd == 'rspec-puppet'
+       c = "#{cmd} #{instance}"
+       answer = FXMessageBox.question($ec2_main.tabBook,MBOX_YES_NO,"Confirm Command","Confirm Running #{c}")
+       if answer == MBOX_CLICKED_YES
+              if cmd == 'puppet-lint'
+                   gem_install('puppet-lint') if `gem list puppet-lint -i`.include?('false')
+                  else
+                   gem_install('rspec-puppet') if `gem list rspec-puppet -i`.include?('false')
                   end
           if RUBY_PLATFORM.index("mswin") != nil  or RUBY_PLATFORM.index("i386-mingw32") != nil
              c = "cmd.exe /c \@start \"kitchen\" /D \"#{repository}\" #{c}"
