@@ -21,8 +21,7 @@ def kitchen_cmd(cmd='list',instance=nil,debug=false)
         gem_install('kitchen-vagrant') unless list.include? "kitchen-vagrant"
         gem_install('kitchen-ec2') unless list.include? "kitchen-ec2"
         gem_install('kitchen-ssh') unless list.include? "kitchen-ssh"
-        # only try and install berks once
-        $berkshelf_install_status = gem_install('berkshelf','< 3') unless list.include? "berkshelf" or $berkshelf_install_status != nil
+        # only try and install kitchen puppet once
         $kitchen_puppet_install_status = gem_install('kitchen-puppet') unless list.include? "kitchen-puppet" or $kitchen_puppet_install_status != nil
         titles = []
         list = []

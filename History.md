@@ -2,6 +2,8 @@
 add SSH_USER global environment setting
 fix bug in openstack server when changing ssh user
 fix rackspace cloud connection
+add support for test-kitchen and puppet.
+fix bugs in linux version install.
 
 ### Version 3.7.5 June 2014
 fix crash when kitchen yaml file does not exist
