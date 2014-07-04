@@ -34,7 +34,7 @@ class EC2_EnvCreateDialog < FXDialogBox
     topFrame = FXVerticalFrame.new(mainFrame,LAYOUT_FILL_X|LAYOUT_FILL_Y|PACK_UNIFORM_WIDTH)
     @tabbook = FXTabBook.new(topFrame,:opts => LAYOUT_FILL_X|LAYOUT_FILL_Y|PACK_UNIFORM_WIDTH)
 
-	#
+    #
     # servers
     #
     @serverstab = FXTabItem.new(@tabbook, "&Servers", nil)
@@ -129,6 +129,39 @@ class EC2_EnvCreateDialog < FXDialogBox
          @google_zone.text = ENV['AVAILABILITY_ZONE']
     else
         @google_zone.text = "us-central1-a"
+    end
+    #
+    # vcloud
+    #
+    @vcloudtab = FXTabItem.new(@tabbook, "&vCloud", nil)
+    @vcloudframe = FXHorizontalFrame.new(@tabbook )
+    frame9 = FXMatrix.new(@vcloudframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
+    vcloud_env = textBox("Environment Name",frame9)
+    @vcloud_access_key = textBox("User Name",frame9)
+    FXLabel.new(frame9, "Password" )
+    @vcloud_secret_access_key = FXTextField.new(frame9, 60, nil, 0, :opts => TEXTFIELD_PASSWD|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+    FXLabel.new(frame9, "" )
+    FXLabel.new(frame9, "URL" )
+    @vcloud_url = FXTextField.new(frame9, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+    FXLabel.new(frame9, "" )
+    FXLabel.new(frame9, "Organisation" )
+    @vcloud_org = FXTextField.new(frame9, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+    FXLabel.new(frame9, "" )
+    FXLabel.new(frame9, "VDC" )
+    @vcloud_vdc = FXTextField.new(frame9, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+    if ENV['AMAZON_ACCESS_KEY_ID'] != nil and ENV['AMAZON_ACCESS_KEY_ID'] != ""
+         @vcloud_access_key.text = ENV['AMAZON_ACCESS_KEY_ID']
+    end
+    if ENV['AMAZON_SECRET_ACCESS_KEY'] != nil and ENV['AMAZON_SECRET_ACCESS_KEY'] != ""
+         @vcloud_secret_access_key.text = ENV['AMAZON_SECRET_ACCESS_KEY']
+    end
+    #if ENV['EC2_URL'] != nil and ENV['EC2_URL'] != ""
+    #    @vcloud_url.text =  ENV['EC2_URL']
+    #else
+    #    @vcloud_url.text = "https://nova-api.trystack.org:5443"
+    #end
+    if ENV['AMAZON_ACCOUNT_ID'] != nil and ENV['AMAZON_ACCOUNT_ID'] != ""
+         @vcloud_org.text = ENV['AMAZON_ACCOUNT_ID']
     end
 
 
@@ -339,114 +372,133 @@ class EC2_EnvCreateDialog < FXDialogBox
     end
     @cloudfoundry_url.text = "http://api.cloudfoundry.com/"
 
-
-
     amazon_env.connect(SEL_CHANGED) {
-	  google_env.text = amazon_env.text
+      google_env.text = amazon_env.text
+      vcloud_env.text = amazon_env.text
       euca_env.text = amazon_env.text
       openstack_env.text = amazon_env.text
       hp_env.text = amazon_env.text
       rack_env.text = amazon_env.text
       cloudstack_env.text = amazon_env.text
       cloudfoundry_env = amazon_env.text
-	  servers_env = amazon_env.text
+      servers_env = amazon_env.text
       @new_env = amazon_env.text
       @ec2_platform = "amazon"
     }
 
-	google_env.connect(SEL_CHANGED) {
+    google_env.connect(SEL_CHANGED) {
       amazon_env.text = google_env.text
-	  google_env.text = google_env.text
+      vcloud_env.text = google_env.text
       euca_env.text = google_env.text
       openstack_env.text = google_env.text
       rack_env.text = google_env.text
       cloudstack_env.text = google_env.text
       cloudfoundry_env = google_env.text
-	  servers_env = google_env.text
+      servers_env = google_env.text
       @new_env = google_env.text
       @ec2_platform = "google"
     }
 
+    vcloud_env.connect(SEL_CHANGED) {
+      amazon_env.text = vcloud_env.text
+      google_env.text = vcloud_env.text
+      euca_env.text = vcloud_env.text
+      openstack_env.text = vcloud_env.text
+      rack_env.text = vcloud_env.text
+      cloudstack_env.text = vcloud_env.text
+      cloudfoundry_env = vcloud_env.text
+      servers_env = vcloud_env.text
+      @new_env = vcloud_env.text
+      @ec2_platform = "vcloud"
+    }
+
     euca_env.connect(SEL_CHANGED) {
       amazon_env.text = euca_env.text
-	  google_env.text = euca_env.text
+      google_env.text = euca_env.text
+      vcloud_env.text = euca_env.text
       openstack_env.text = euca_env.text
       hp_env.text = euca_env.text
       rack_env.text = euca_env.text
       cloudstack_env.text = euca_env.text
       cloudfoundry_env = euca_env.text
-	  servers_env = euca_env.text
+      servers_env = euca_env.text
       @new_env = euca_env.text
       @ec2_platform = "eucalyptus"
     }
 
     openstack_env.connect(SEL_CHANGED) {
       amazon_env.text = openstack_env.text
-	  google_env.text = openstack_env.text
+      google_env.text = openstack_env.text
+      vcloud_env.text = openstack_env.text
       euca_env.text = openstack_env.text
       hp_env.text = openstack_env.text
       rack_env.text = openstack_env.text
       cloudstack_env.text = openstack_env.text
       cloudfoundry_env = openstack_env.text
-	  servers_env = openstack_env.text
+      servers_env = openstack_env.text
       @new_env = openstack_env.text
       @ec2_platform = "openstack"
     }
 
     hp_env.connect(SEL_CHANGED) {
       amazon_env.text = hp_env.text
-	  google_env.text = hp_env.text
+      google_env.text = hp_env.text
+      vcloud_env.text = hp_env.text
       euca_env.text = hp_env.text
       openstack_env.text = hp_env.text
       rack_env.text = hp_env.text
       cloudstack_env.text = hp_env.text
       cloudfoundry_env = hp_env.text
-	  servers_env = hp_env.text
+      servers_env = hp_env.text
       @new_env = hp_env.text
       @ec2_platform = "openstack_hp"
     }
 
     rack_env.connect(SEL_CHANGED) {
       amazon_env.text = rack_env.text
-	  google_env.text = rack_env.text
+      google_env.text = rack_env.text
+      vcloud_env.text = rack_env.text
       euca_env.text = rack_env.text
       hp_env.text = rack_env.text
       cloudstack_env.text = rack_env.text
       openstack_env.text = rack_env.text
       cloudfoundry_env = rack_env.text
-	  servers_env = rack_env.text
+      servers_env = rack_env.text
       @new_env = rack_env.text
       @ec2_platform = "openstack_rackspace"
     }
 
     cloudstack_env.connect(SEL_CHANGED) {
       amazon_env.text = cloudstack_env.text
-	  google_env.text = cloudstack_env.text
+      google_env.text = cloudstack_env.text
+      vcloud_env.text = cloudstack_env.text
       euca_env.text = cloudstack_env.text
       hp_env.text = cloudstack_env.text
       rack_env.text = cloudstack_env.text
       openstack_env.text = cloudstack_env.text
       cloudfoundry_env = cloudstack_env.text
-	  servers_env = cloudstack_env.text
+      servers_env = cloudstack_env.text
       @new_env = cloudstack_env.text
       @ec2_platform = "cloudstack"
     }
 
     cloudfoundry_env.connect(SEL_CHANGED) {
       amazon_env.text = cloudfoundry_env.text
-	  google_env.text = cloudfoundry_env.text
+      google_env.text = cloudfoundry_env.text
+      vcloud_env.text = cloudfoundry_env.text
       euca_env.text = cloudfoundry_env.text
       hp_env.text = cloudfoundry_env.text
       rack_env.text = cloudfoundry_env.text
       openstack_env.text = cloudfoundry_env.text
-	  servers_env = cloudfoundry_env.text
+      servers_env = cloudfoundry_env.text
       @new_env = cloudfoundry_env.text
       @ec2_platform = "cloudfoundry"
     }
 
     servers_env.connect(SEL_CHANGED) {
       amazon_env.text = servers_env.text
-	  google_env.text = servers_env.text
+      google_env.text = servers_env.text
+      vcloud_env.text = servers_env.text
       euca_env.text = servers_env.text
       hp_env.text = servers_env.text
       rack_env.text = servers_env.text
@@ -619,6 +671,23 @@ class EC2_EnvCreateDialog < FXDialogBox
 	         settings.put("AVAILABILITY_ZONE",@google_zone.text)
   	      end
   	      settings.put('CLOUD_ADMIN_URL',"https://cloud.google.com/console")
+	   elsif @ec2_platform == "vcloud"
+              if @vcloud_access_key.text != nil
+                 settings.put("AMAZON_ACCESS_KEY_ID",@vcloud_access_key.text)
+              end
+              if @vcloud_secret_access_key.text != nil
+                 settings.put("AMAZON_SECRET_ACCESS_KEY",@vcloud_secret_access_key.text)
+              end
+              if @vcloud_url.text != nil
+  	       settings.put("EC2_URL",@vcloud_url.text)
+  	      end
+	      if @vcloud_org.text != nil
+  	         settings.put("AMAZON_ACCOUNT_ID",@vcloud_org.text)
+  	      end
+  	      if @vcloud_vdc.text != nil
+	         settings.put("AVAILABILITY_ZONE",@vcloud_vdc.text)
+  	      end
+  	      settings.put('CLOUD_ADMIN_URL',"http://vcloud.vmware.com/")
 	   else
               if @amazon_access_key.text != nil
                  settings.put("AMAZON_ACCESS_KEY_ID",@amazon_access_key.text)

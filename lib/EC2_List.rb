@@ -778,33 +778,33 @@ end
               else
                  cmd = "conn.#{request}"
               end
-                  puts "CMD #{cmd}"
- 	          response = eval(cmd)
- 	           puts "RESPONSE.BODY #{response.body}"
-			  if @ec2_main.settings.cloudfoundry
-			    @data = response
-			  else
-				  if response.status == @config["response_code"]
+              puts "CMD #{cmd}"
+ 	      response = eval(cmd)
+	      if @ec2_main.settings.cloudfoundry or @ec2_main.settings.vcloud
+	          puts "RESPONSE #{response}"
+	         @data = response
+	      else
+	        puts "RESPONSE.BODY #{response.body}"
+		if response.status == @config["response_code"]
                   if @type == "Servers" and (@ec2_main.settings.amazon  or @ec2_main.settings.eucalyptus or @ec2_main.settings.cloudstack)
                      response.body['reservationSet'].each do |r|
-		               r['instancesSet'].each do |item|
-		                  item['groupIds'] = r['groupIds']
-		                  item['groupNames'] = r['groupSet']
-		                end
-		                @data = @data + r['instancesSet']
-		             end
-				 elsif @type == "Key Pairs" and @ec2_main.settings.openstack and !@ec2_main.settings.openstack_rackspace
-
-		            d = eval(@config["response"])
-		            @data = []
-		            d.each do |v|
-		              @data.push(v["keypair"])
-		            end
+		        r['instancesSet'].each do |item|
+		           item['groupIds'] = r['groupIds']
+		           item['groupNames'] = r['groupSet']
+		        end
+		        @data = @data + r['instancesSet']
+		     end
+		 elsif @type == "Key Pairs" and @ec2_main.settings.openstack and !@ec2_main.settings.openstack_rackspace
+	            d = eval(@config["response"])
+		    @data = []
+		    d.each do |v|
+		       @data.push(v["keypair"])
+		    end
                  else
                      @data = eval(@config["response"])
                  end
               end
-			 end
+	     end
            rescue
               puts "ERROR: #{request} #{$!}"
            end

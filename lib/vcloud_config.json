@@ -1,0 +1,91 @@
+{
+ "Cloud":{
+   "Compute":{
+    "Launch": {},
+    "Test Kitchen":{
+          "request":"",
+          "name":"test_kitchen",
+          "response": "",
+          "response_code": 200,
+          "action": ["config","logs","select","edit","","","","",""],
+          "icon": ["@edit","@script","@server","@script_edit","@csv","","","",""],
+          "tooltip":["Configure Test Kitchen Path","View Logs"," Select Server ","Edit kitchen.yml"," Csv Data ","","","",""],
+          "dialog":["KIT_PathCreateDialog","KIT_LogSelectDialog","$ec2_main.kitchen.kit_load(@curr_item,@curr_driver,@curr_provisioner,@curr_last_action);$ec2_main.tabBook.setCurrent(4)","edit(@ec2_main.settings.get('TEST_KITCHEN_PATH')+'/.kitchen.yml')","","","","",""],
+          "dialog_parm": ["","","","","","","","",""],
+          "keys": ["Instance"]
+    },
+    "Vagrant":{
+          "request":"",
+          "name":"vagrant",
+          "response": "",
+          "response_code": 200,
+          "action": ["create","delete", "edit","vagrant up","","vagrant destroy","","",""],
+          "icon": ["@create","@delete","@edit","@rocket","@csv","@disconnect","","",""],
+          "tooltip":[" Create Vagrantfile ","  Delete Vagrantfile "," Edit Vagrantfile "," vagrant up "," Csv Data "," vagrant destroy ","","",""],
+          "dialog":["VAG_CreateDialog","VAG_DeleteDialog","edit(@vagrant_file)","VAG_UpDialog","","VAG_DestroyDialog","","",""],
+          "dialog_parm": ["","","","","","","","",""],
+          "keys": []
+    },
+   "VMs":{
+      "request":"get_vms",
+      "name":"vms",
+      "response": "",
+      "response_code": "",
+      "action": ["","", "","","","","","",""],
+      "icon": ["","","","","@csv","","","@tag_red","@funnel"],
+      "tooltip":["","","",""," Csv Data ","","","  Edit Tags  ","  Filter by Tags  "],
+      "dialog":["","","","","","","","EC2_TagsAssignDialog","EC2_TagsFilterDialog"],
+      "dialog_parm": ["","","","","","","","",""],
+      "keys": ["vapp","name"]
+    },
+    "VDCs":{
+          "request":"get_vdcs",
+          "name":"vdcs",
+          "response": "",
+          "response_code": 200,
+          "action": ["config","logs","select","edit","","","","",""],
+          "icon": ["@edit","@script","@server","@script_edit","@csv","","","",""],
+          "tooltip":["Configure Test Kitchen Path","View Logs"," Select Server ","Edit kitchen.yml"," Csv Data ","","","",""],
+          "dialog":["KIT_PathCreateDialog","KIT_LogSelectDialog","$ec2_main.kitchen.kit_load(@curr_item,@curr_driver,@curr_provisioner,@curr_last_action);$ec2_main.tabBook.setCurrent(4)","edit(@ec2_main.settings.get('TEST_KITCHEN_PATH')+'/.kitchen.yml')","","","","",""],
+          "dialog_parm": ["","","","","","","","",""],
+          "keys": ["name","href"]
+    },
+    "Catalogs":{
+          "request":"get_catalogs",
+          "name":"catalogs",
+          "response": "",
+          "response_code": 200,
+          "action": ["create","delete", "edit","vagrant up","","vagrant destroy","","",""],
+          "icon": ["@create","@delete","@edit","@rocket","@csv","@disconnect","","",""],
+          "tooltip":[" Create Vagrantfile ","  Delete Vagrantfile "," Edit Vagrantfile "," vagrant up "," Csv Data "," vagrant destroy ","","",""],
+          "dialog":["VAG_CreateDialog","VAG_DeleteDialog","edit(@vagrant_file)","VAG_UpDialog","","VAG_DestroyDialog","","",""],
+          "dialog_parm": ["","","","","","","","",""],
+          "keys": []
+    },
+    "Networks":{
+      "request":"get_networks",
+      "name":"networks",
+      "response": "",
+      "response_code": 200,
+      "action": ["create","edit", "",""," csv data ","","","",""],
+      "icon": ["@create", "@edit", "","","@csv","","","",""],
+      "tooltip":[" Create Security Group "," Edit Security Group ", "","","csv data","","","",""],
+      "dialog":["EC2_SecGrp_CreateDialog","$ec2_main.secgrp.load(@curr_item);$ec2_main.tabBook.setCurrent(3)", "","","","","","",""],
+      "dialog_parm": ["","", "","","","","","",""],
+      "keys": ["name","href"]
+    },
+   "Organizations":{
+      "request":"get_organizations",
+      "name":"organizations",
+      "response": "",
+      "response_code": 200,
+      "action": ["create","delete","","","","","","",""],
+      "icon": ["@create","@delete","","","@csv","","","",""],
+      "tooltip":["  Create  ","Delete","",""," csv data ","","","",""],
+      "dialog":["EC2_KeypairCreateDialog","EC2_KeypairDeleteDialog","","","","","","",""],
+      "dialog_parm": ["","","","","","","","",""],
+      "keys": ["name","href"]
+    }
+  }
+ }
+}

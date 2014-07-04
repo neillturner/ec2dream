@@ -27,6 +27,7 @@ require 'Eucalyptus'
 require 'CloudStack'
 require 'Cloud_Foundry'
 require 'Servers'
+require 'Vcloud'
 
 include Fox
 
@@ -52,7 +53,7 @@ class EC2_Main < FXMainWindow
     $ec2_main = self
     @initial_startup = false
     @app = app
-    super(app, "#{product} v3.7.6 - Build and Manage Cloud Servers", :opts => DECOR_ALL, :width => 900, :height => 650)
+    super(app, "#{product} v3.7.7 - Build and Manage Cloud Servers", :opts => DECOR_ALL, :width => 900, :height => 650)
 
     # Status bar
     status = FXStatusBar.new(self,
@@ -331,6 +332,12 @@ class EC2_Main < FXMainWindow
          else
            @Google = Google_compute.new
                  end
+        when "vcloud"
+             if @Vcloud != nil
+           @Vcloud
+         else
+           @Vcloud = Vcloud.new
+                 end
        when "openstack_hp"
              if @Hp != nil
            @Hp
@@ -378,14 +385,15 @@ class EC2_Main < FXMainWindow
 
   def cloud_reset
     @Amazon = nil
-        @Google = nil
+    @Google = nil
+    @Vcloud = nil
     @Hp = nil
     @Rackspace = nil
     @OpenStack = nil
     @Eucalyptus = nil
     @CloudStack = nil
     @Cloud_Foundry = nil
-        @Servers = nil
+    @Servers = nil
   end
 
   def app
