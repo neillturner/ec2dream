@@ -1,3 +1,6 @@
+### Version 3.7.7 Nov 2014
+various fixes for Amazon fog support bugs and changes
+
 ### Version 3.7.6 July 2014
 add SSH_USER global environment setting
 fix bug in openstack server when changing ssh user

@@ -89,7 +89,7 @@
    	     @server['Tags'].text =  ""
    	 end
     	 @server['Chef_Node'].text = get_chef_node
-    	 @server['Puppet_Manifest'].text =  get_puppet_manifest
+    	 #@server['Puppet_Manifest'].text = get_puppet_manifest
     	 @server['Image_ID'].text = r['imageId']
     	 @server['State'].text = r['instanceState']['name']
     	 @server_status = @server['State'].text

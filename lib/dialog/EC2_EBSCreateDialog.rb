@@ -17,7 +17,7 @@ class EC2_EBSCreateDialog < FXDialogBox
     puts "EBSCreateDialog.initialize"
     @ec2_main = owner
     ebs_size = snap_size.to_s
-    ebs_type = "Standard"
+    ebs_type = "standard"
     ebs_capacity = "GiB"
     ebs_zone = ""
     ebs_snap = snap_id.to_s
@@ -72,9 +72,11 @@ class EC2_EBSCreateDialog < FXDialogBox
        volume_type.appendItem("SSD")
        ebs_type = "SATA"
     else
-       volume_type.numVisible = 2
+       volume_type.numVisible = 3
        volume_type.appendItem("standard")
+       volume_type.appendItem("gp2")
        volume_type.appendItem("io1")
+        ebs_type = "standard"
     end
     volume_type.connect(SEL_COMMAND) do |sender, sel, data|
        ebs_type = data

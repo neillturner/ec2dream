@@ -780,12 +780,11 @@ end
               end
               puts "CMD #{cmd}"
  	      response = eval(cmd)
-	      if @ec2_main.settings.cloudfoundry or @ec2_main.settings.vcloud
-	          puts "RESPONSE #{response}"
+ 	      puts "RESPONSE.BODY #{response.body}"
+	      if @ec2_main.settings.cloudfoundry
 	         @data = response
 	      else
-	        puts "RESPONSE.BODY #{response.body}"
-		if response.status == @config["response_code"]
+	        if response.status == @config["response_code"]
                   if @type == "Servers" and (@ec2_main.settings.amazon  or @ec2_main.settings.eucalyptus or @ec2_main.settings.cloudstack)
                      response.body['reservationSet'].each do |r|
 		        r['instancesSet'].each do |item|
@@ -794,17 +793,17 @@ end
 		        end
 		        @data = @data + r['instancesSet']
 		     end
-		 elsif @type == "Key Pairs" and @ec2_main.settings.openstack and !@ec2_main.settings.openstack_rackspace
-	            d = eval(@config["response"])
-		    @data = []
-		    d.each do |v|
-		       @data.push(v["keypair"])
-		    end
-                 else
+		  elsif @type == "Key Pairs" and @ec2_main.settings.openstack and !@ec2_main.settings.openstack_rackspace
+		     d = eval(@config["response"])
+		     @data = []
+		     d.each do |v|
+		        @data.push(v["keypair"])
+		      end
+                  else
                      @data = eval(@config["response"])
-                 end
-              end
-	     end
+                  end
+                end
+	      end
            rescue
               puts "ERROR: #{request} #{$!}"
            end
@@ -813,6 +812,20 @@ end
 	  @data = [] if @data == nil
       if  !@data.empty?  or @data.size>0
         @data_title = []
+        empty_rows_deleted=false
+        @data.delete_if do |r|
+           empty_item = true
+           r.each do |k, v|
+             if v.class == Array or v.class == Hash
+               empty_item=false if !v.empty?
+             else
+               empty_item=false if v != nil
+             end
+           end
+           empty_rows_deleted = true if empty_item
+           empty_item
+        end
+        puts "WARNING: Some data rows empty ignoring" if empty_rows_deleted        
         @data.each do |r|
           r.each do |k, v|
 		     k = k.to_s

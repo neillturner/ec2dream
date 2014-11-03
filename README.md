@@ -1,4 +1,4 @@
-### EC2Dream - Build and Manage Cloud Servers Version 3.7.6 -  July 2014
+### EC2Dream - Build and Manage Cloud Servers Version 3.7.7 -  Nov 2014
 
 For installation see http://ec2dream.blogspot.co.uk/search/label/EC2Dream%20Installation
 

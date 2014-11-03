@@ -22,7 +22,7 @@
 
 Gem::Specification.new do |spec|
   spec.name = 'visual_devops'
-  spec.version = '3.7.6'
+  spec.version = '3.7.7'
   spec.authors = ['Neill Turner']
   spec.email = 'neillwturner@gmail.com'
   spec.executables = ["visual_devops"]

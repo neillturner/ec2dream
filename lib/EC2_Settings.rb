@@ -460,14 +460,6 @@ class EC2_Settings
        end
   end
 
-  def vcloud
-       if get("EC2_PLATFORM") == "vcloud"
-         return true
-       else
-         return false
-       end
-  end
-
  def cloudstack
        if get("EC2_PLATFORM") == "cloudstack"
          return true

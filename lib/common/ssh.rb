@@ -18,7 +18,7 @@
 	             c = "cmd.exe /c \@start \"\" /b \""+ENV['EC2DREAM_HOME']+"/putty/putty.exe\" -ssh "+s+" -i "+"\""+putty_key+"\""+" -l "+user
 	          else 
 	             puts "WARNING: no Putty Private Key specified" 
-	             c = "cmd.exe /c \@start \"\" /b \""+ENV['EC2DREAM_HOME']+"/putty/putty.exe\" -ssh "+s+" -pw "+"\""+password+"\""+" -l "+user
+	             c = "cmd.exe /c \@start \"\" /b \""+ENV['EC2DREAM_HOME']+"/putty/putty.exe\" -ssh #{s} -pw "+"\"#{password}\""+" -l #{user}"
 	          end 
 			  if local_port != nil and local_port != ""
 			    c = c +" -P #{local_port}" 

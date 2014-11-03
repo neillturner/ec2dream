@@ -237,7 +237,7 @@ class Data_addresses
   	      raise "Address Not Found"
   	   end
         elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
-           if allocation_id != nil
+           if allocation_id != nil and !allocation_id.empty? 
               data = conn.release_address(allocation_id)
 	      data = data.body
            else

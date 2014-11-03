@@ -248,6 +248,9 @@ class EC2_Kitchen
     FXLabel.new(@frame1, "SSH User" )
     @kit_server['ssh_user'] = FXTextField.new(@frame1, 30, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
     FXLabel.new(@frame1, "" )
+    FXLabel.new(@frame1, "SSH Password" )
+    @kit_server['ssh_password'] = FXTextField.new(@frame1, 30, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
+    FXLabel.new(@frame1, "" )    
     @kit_server['chef_foodcritic_label'] = FXLabel.new(@frame1, "Foodcritic cookbook_path" )
     @kit_server['chef_foodcritic'] = FXTextField.new(@frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     @kit_server['chef_foodcritic'].connect(SEL_COMMAND) do
@@ -284,6 +287,7 @@ class EC2_Kitchen
     @kit_server['last_action'].text = last_action
     @kit_server['test_kitchen_path'].text = @ec2_main.settings.get('TEST_KITCHEN_PATH')
     @kit_server['ssh_user'].text = @ec2_main.settings.get('EC2_SSH_USER')
+    @kit_server['ssh_password'].text = ""
     @kit_server['chef_foodcritic'].text = @ec2_main.settings.get('CHEF_FOODCRITIC')
     @kit_server['chef_rspec_test'].text = @ec2_main.settings.get('CHEF_RSPEC_TEST')
     @kit_server['test_kitchen_path'].text ="#{ENV['EC2DREAM_HOME']}/chef/chef-repo/site-cookbooks/mycompany_webserver" if @kit_server['test_kitchen_path'].text==nil or @kit_server['test_kitchen_path'].text==""
@@ -333,10 +337,12 @@ class EC2_Kitchen
 	username = @kit_server['ssh_user'].text if @kit_server['ssh_user'].text != nil and @kit_server['ssh_user'].text != ""
 	password = nil
 	password = 'vagrant' if @kit_server['driver'].text == 'Vagrant'
+	password = @kit_server['ssh_password'].text if @kit_server['ssh_password'].text != nil and @kit_server['ssh_password'].text != ""
+	
 	private_key = nil
-        private_key = @ec2_main.settings.get('EC2_SSH_PRIVATE_KEY') if @kit_server['driver'].text != 'Vagrant'
+        private_key = @ec2_main.settings.get('EC2_SSH_PRIVATE_KEY') if password == nil
 	putty_key = nil
-        putty_key = @ec2_main.settings.get('PUTTY_PRIVATE_KEY') if @kit_server['driver'].text != 'Vagrant'
+        putty_key = @ec2_main.settings.get('PUTTY_PRIVATE_KEY') if password == nil
 	if !r.empty?
 	   if utility == 'scp'
 	      scp(@kit_server['instance'].text, r['hostname'], username, private_key, putty_key, password,r['port'])

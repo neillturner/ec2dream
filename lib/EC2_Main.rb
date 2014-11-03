@@ -27,7 +27,6 @@ require 'Eucalyptus'
 require 'CloudStack'
 require 'Cloud_Foundry'
 require 'Servers'
-require 'Vcloud'
 
 include Fox
 
@@ -332,12 +331,6 @@ class EC2_Main < FXMainWindow
          else
            @Google = Google_compute.new
                  end
-        when "vcloud"
-             if @Vcloud != nil
-           @Vcloud
-         else
-           @Vcloud = Vcloud.new
-                 end
        when "openstack_hp"
              if @Hp != nil
            @Hp
@@ -385,15 +378,14 @@ class EC2_Main < FXMainWindow
 
   def cloud_reset
     @Amazon = nil
-    @Google = nil
-    @Vcloud = nil
+        @Google = nil
     @Hp = nil
     @Rackspace = nil
     @OpenStack = nil
     @Eucalyptus = nil
     @CloudStack = nil
     @Cloud_Foundry = nil
-    @Servers = nil
+        @Servers = nil
   end
 
   def app
