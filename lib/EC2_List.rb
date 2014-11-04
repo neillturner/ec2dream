@@ -357,7 +357,7 @@ class EC2_List
 	     csv_text = csv_text+",#{t}" if csv_text != ""
 	     csv_text = "#{t}" if csv_text == ""
 	   end
-	   csv_text = csv_text +"\n"
+	   csv_text = csv_text +"\n\n"
 	   @table.each_row do |items|
 	     csv_line = ""
 	     items.each do |item|
@@ -366,7 +366,7 @@ class EC2_List
 	        csv_line = csv_line+",#{t}" if csv_line != ""
 	        csv_line = "#{t}" if csv_line == ""
          end
-		 csv_text = csv_text + csv_line + "\n"
+		 csv_text = csv_text + csv_line + "\n\n"
         end
         csvdialog = EC2_CSVDialog.new(@ec2_main,csv_text,@type)
         csvdialog.execute
