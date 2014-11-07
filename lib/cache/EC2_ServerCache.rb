@@ -658,7 +658,7 @@ def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disco
        sa = Array.new
        i=0
        cache.each do |key, r|
-	     puts "**** aws_state #{r[:aws_state]}"
+	 #puts "**** aws_state #{r[:aws_state]}"
          if (@ec2_main.settings.openstack and r[:aws_state] == "ACTIVE") or (!@ec2_main.settings.openstack and r[:aws_state] != "terminated")
            gi = group_name(r)
            if r['name'] != nil

@@ -101,7 +101,7 @@ class Data_security_group
      conn = @ec2_main.environment.connection
      if conn != nil
        data = conn.security_groups.get(security_group_id)
-       puts "*** sec_grp #{security_group_id} #{data}"
+       #puts "*** sec_grp #{security_group_id} #{data}"
      else
        raise "Connection Error"
      end

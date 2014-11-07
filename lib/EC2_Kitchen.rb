@@ -13,6 +13,7 @@ require 'common/error_message'
 class EC2_Kitchen
 
   def initialize(owner)
+        puts "EC2_Kitchen.initialize"
         @ec2_main = owner
 
 	@kit_server = {}
@@ -279,7 +280,7 @@ class EC2_Kitchen
  end
 
  def kit_load(instance,driver,provisioner,last_action)
-    puts "server.kit_load #{instance},#{driver},#{provisioner},#{last_action}"
+    puts "EC2_kitchen.kit_load #{instance},#{driver},#{provisioner},#{last_action}"
     @page1.width=300
     @kit_server['instance'].text = instance
     @kit_server['driver'].text = driver
@@ -330,8 +331,8 @@ class EC2_Kitchen
 
 
   def kit_ssh(utility='ssh')
+        puts "EC2_Kitchen.kit_ssh"
         r = kitchen_cmd('config',@kit_server['instance'].text)
-        puts "*** kit #{r} #{r.class}"
 	username = 'root'
 	username = r['username'] if !r.empty? and r['username'] != nil and r['username'] != ""
 	username = @kit_server['ssh_user'].text if @kit_server['ssh_user'].text != nil and @kit_server['ssh_user'].text != ""

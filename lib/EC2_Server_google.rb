@@ -62,7 +62,7 @@ class EC2_Server
 	  if r == nil
         r = @ec2_main.environment.servers.get_server(instance_id,$google_zone)
 	  end
-	  puts "*** server #{r}"
+	  puts "Found google server #{r}"
       if r != nil
     	 if r['name'] == nil
     	   return

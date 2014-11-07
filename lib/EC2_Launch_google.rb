@@ -39,8 +39,8 @@ class EC2_Launch
         begin
           puts "Insert #{server}, #{zone}, #{launch_parm}"
           r =  @ec2_main.environment.servers.insert_server(server, zone, launch_parm)
-          puts "*** id #{r['id']}  clientOperationId #{r['clientOperationId']} targetId #{r['targetId']}"
-          puts "*** response #{r}"
+          puts "Launch id #{r['id']}  clientOperationId #{r['clientOperationId']} targetId #{r['targetId']}"
+          puts "Launch response #{r}"
 		  if r['error'] != nil 
 		    r['error']['errors'].each do |e|
 		      puts "INSERT SERVER ERROR: #{e['code']} #{e['location']} #{e['message']}"

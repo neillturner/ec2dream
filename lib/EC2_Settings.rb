@@ -380,17 +380,17 @@ class EC2_Settings
 			@settings['AMAZON_ACCESS_KEY_ID_LABEL'].text="CLIENT_EMAIL"
 			@settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].text="KEY_LOCATION"
 			@settings['AMAZON_ACCOUNT_ID_LABEL'].text=""
-		    @settings['EC2_URL_LABEL'].text="PROJECT"
+		        @settings['EC2_URL_LABEL'].text="PROJECT"
 			@settings['AVAILABILITY_ZONE_LABEL'].text = "ZONE"
-			@settings['AMAZON_NICKNAME_TAG'].text=""
+			@settings['AMAZON_NICKNAME_TAG_LABEL'].text=""
 		else
 			@settings['AMAZON_ACCESS_KEY_ID_LABEL'].text="ACCESS_KEY"
 			@settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].text="SECRET_ACCESS_KEY"
 			@settings['AMAZON_ACCOUNT_ID_LABEL'].text="ACCOUNT_ID"
-		    @settings['EC2_URL_LABEL'].text="URL"
+		        @settings['EC2_URL_LABEL'].text="URL"
 			@settings['AVAILABILITY_ZONE_LABEL'].text = "AVAILABILITY_ZONE"
-            @settings['AMAZON_NICKNAME_TAG'].text="NICKNAME TAG"
-	    end
+                        @settings['AMAZON_NICKNAME_TAG_LABEL'].text="NICKNAME TAG"
+	        end
      end
      @ec2_main.app.forceRefresh
   end

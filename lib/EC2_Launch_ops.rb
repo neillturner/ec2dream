@@ -67,7 +67,7 @@ class EC2_Launch
        begin
           puts "Create #{server}, #{image_ref}, #{flavor_ref}, #{launch_parm}"
           r =  @ec2_main.environment.servers.create_server(server, image_ref, flavor_ref, launch_parm)
-          puts "*** returned from create server #{r}"
+          puts "create server returned #{r}"
        rescue
           error_message("Launch of Server Failed",$!)
           return

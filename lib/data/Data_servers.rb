@@ -765,10 +765,10 @@ class Data_servers
      data = false
      conn = @ec2_main.environment.connection
      if conn != nil
-	    puts "*** get_server name #{name} zone_name #{zone_name}"
+	#puts "*** get_server name #{name} zone_name #{zone_name}"
         response = conn.get_server(name, zone_name)
-		puts "*** status #{response.status}"
-		puts "*** body #{response.body}"
+	#puts "*** status #{response.status}"
+	#puts "*** body #{response.body}"
         if response.status == 200
            data = response.body
         else
