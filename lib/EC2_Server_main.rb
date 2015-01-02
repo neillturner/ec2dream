@@ -631,7 +631,6 @@ class EC2_Server
 	         pk_text = f.read
 	         f.close
 	         begin
-	             #pw = ec2.get_initial_password(@server['Instance_ID'], pk_text)
 	             pw = @ec2_main.environment.servers.get_initial_password(@server['Instance_ID'], pk_text)
 	             if pw != nil and pw != ""
                         @server['Win_Admin_Password'].text = pw
@@ -1738,7 +1737,7 @@ class EC2_Server
           if @server['Public_DSN'].text != nil and @server['Public_DSN'].text != ""
              return @server['Public_DSN'].text
           else
-             return @server['Private_DSN'].text
+             return @server['Private_IP'].text
           end
       elsif @type == "ops"
           return @ops_server['Public_Addr'].text

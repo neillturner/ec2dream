@@ -550,15 +550,17 @@ class Data_servers
      if conn != nil
         if  @ec2_main.settings.openstack
         # openstack
-        ##elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
-        #   data = conn.get_password_data(instance)
-        #   data  = data['passwordData']
         elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
            response = conn.get_password_data(instance)
-           puts "ERROR: status #{response.status} response #{response.body}"
-           puts "ERROR: there is fog bug getting windows admin password"
            if response.status = 200
-              data = response.body['passwordData']
+              if response.body['passwordData'] == nil 
+                data = nil 
+              else
+                # decryprt password
+                private_key = OpenSSL::PKey::RSA.new pk_text
+	        pd = Base64.decode64 response.body['passwordData']
+	        data = private_key.private_decrypt pd
+	      end  
            end
         else
            data = conn.get_initial_password(instance, pk_text)
