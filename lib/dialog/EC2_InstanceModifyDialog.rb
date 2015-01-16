@@ -3,6 +3,7 @@ require 'fox16'
 require 'net/http'
 require 'resolv'
 require 'common/error_message'
+require 'dialog/EC2_SecGrp_SelectDialog'
 
 include Fox
 
@@ -12,6 +13,10 @@ class EC2_InstanceModifyDialog < FXDialogBox
         puts "InstanceModifyDialog.initialize"
         @ec2_main = owner
         @modified = false
+	@add = @ec2_main.makeIcon("add.png")
+	@add.create
+	@cross = @ec2_main.makeIcon("cross.png")
+	@cross.create        
         @orig_server = {}
         @server = {}
         @ec2_main.serverCache.refresh(instance_id)
@@ -23,53 +28,40 @@ class EC2_InstanceModifyDialog < FXDialogBox
  	@server['Instance_ID'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
  	@server['Instance_ID'].text = instance_id
  	FXLabel.new(@frame1, "" )
- 	FXLabel.new(@frame1, "Instance Type" )
- 	@server['Instance_Type'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN)
- 	@server['Instance_Type'].text = get_attribute(instance_id,"instanceType")
- 	@orig_server['Instance_Type'] = @server['Instance_Type'].text
-        @server['Instance_Type_Button'] = FXButton.new(@frame1, "", :opts => BUTTON_TOOLBAR)
- 	@magnifier = @ec2_main.makeIcon("magnifier.png")
-	@magnifier.create
-	@server['Instance_Type_Button'].icon = @magnifier
-	@server['Instance_Type_Button'].tipText = "Select Instance Type"
-	@server['Instance_Type_Button'].connect(SEL_COMMAND) do
-	   @dialog = EC2_InstanceDialog.new(@ec2_main)
-	   @dialog.execute
-	   type = @dialog.selected
-	   if type != nil and type != ""
-	      @server['Instance_Type'].text = type
-	   end   
-	end
- 	FXLabel.new(@frame1, "Kernel" )
- 	@server['Kernel'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN)
- 	@server['Kernel'].text = get_attribute(instance_id,"kernelId")
- 	@orig_server['Kernel'] = @server['Kernel'].text 	
- 	FXLabel.new(@frame1, "" ) 
- 	FXLabel.new(@frame1, "Ramdisk" )
- 	@server['Ramdisk'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN)
- 	@server['Ramdisk'].text = get_attribute(instance_id,"ramdiskId")
- 	@orig_server['Ramdisk'] = @server['Ramdisk'].text 	 	
- 	FXLabel.new(@frame1, "" )  	
-	FXLabel.new(@frame1, "User Data" )
-        @server['User_Data'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN)
- 	@server['User_Data'].text = "" # get_attribute(instance_id,"userData")
- 	@orig_server['User_Data'] = @server['User_Data'].text         
-        FXLabel.new(@frame1, "" )
-	FXLabel.new(@frame1, "User Data File")
- 	@server['User_Data_File'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN)
-	@server['User_Data_File_Button'] = FXButton.new(@frame1, "", :opts => BUTTON_TOOLBAR)
-	@server['User_Data_File_Button'].icon = @magnifier
-	@server['User_Data_File_Button'].tipText = "Browse..."
-	@server['User_Data_File_Button'].connect(SEL_COMMAND) do
-	   dialog = FXFileDialog.new(@frame1, "Select User Data file")
-	   dialog.patternList = [
-	          "Pem Files (*.*)"
-	   ]
-	   dialog.selectMode = SELECTFILE_EXISTING
-	   if dialog.execute != 0
-	      @server['User_Data_File'].text = dialog.filename
+ 	FXLabel.new(@frame1, "Security_Groups" )
+ 	@server['Security_Group'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
+	@server['Security_Group'].text = @ec2_main.serverCache.instance_groups_list(instance_id)
+ 	@orig_server['Security_Group'] = @server['Security_Group'].text 
+ 	@frame1x = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
+ 	@server['Security_Group_Button'] = FXButton.new(@frame1x, "", :opts => BUTTON_TOOLBAR)
+	@server['Security_Group_Button'].icon = @add
+	@server['Security_Group_Button'].tipText = "Add Security Group"
+	@server['Security_Group_Button'].connect(SEL_COMMAND) do
+	   dialog = EC2_SecGrp_SelectDialog.new(@ec2_main)
+	   dialog.execute
+	   selected = dialog.sec_grp
+	   if selected != nil and selected != ""
+	      current_sec_grp = @server['Security_Group'].text
+	      if current_sec_grp != nil and current_sec_grp != ""
+	         selected = "#{current_sec_grp},#{selected}"
+	      end   
+	      @server['Security_Group'].text=selected
 	   end
 	end
+ 	@server['Security_Group_Button_Delete'] = FXButton.new(@frame1x, "", :opts => BUTTON_TOOLBAR)
+	@server['Security_Group_Button_Delete'].icon = @cross
+	@server['Security_Group_Button_Delete'].tipText = "Remove Security Group"
+	@server['Security_Group_Button_Delete'].connect(SEL_COMMAND) do
+	   dialog = EC2_SecGrp_SelectDialog.new(@ec2_main,"ec2",@server['Security_Group'].text)
+	   dialog.execute
+	   selected = dialog.sec_grp
+	   if selected != nil and selected != ""
+	      sa = (@server['Security_Group'].text).split","
+	      sa.delete_if {|s| s == selected }
+	      @server['Security_Group'].text =sa.join(",")
+	   end
+	end	
+	FXLabel.new(@frame1x, "" ) 
         FXLabel.new(@frame1, "Disable Api Termination" )
 	@server['Disable_Api_Termination'] = FXComboBox.new(@frame1, 15, :opts => COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
 	@server['Disable_Api_Termination'].numVisible = 2      
@@ -120,6 +112,59 @@ class EC2_InstanceModifyDialog < FXDialogBox
         @server['Root_Device_Name'].text = get_attribute(instance_id,"rootDeviceName")
  	@orig_server['Root_Device_Name'] = @server['Root_Device_Name'].text 
         FXLabel.new(@frame1, "" )
+        FXLabel.new(@frame1, "" )
+        FXLabel.new(@frame1, "" )
+        FXLabel.new(@frame1, "" )
+        FXLabel.new(@frame1, "" )	
+	FXLabel.new(@frame1, "To modify following instance must be stopped" )
+	FXLabel.new(@frame1, "" )
+	FXLabel.new(@frame1, "Instance Type" )
+ 	@server['Instance_Type'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN)
+ 	@server['Instance_Type'].text = get_attribute(instance_id,"instanceType")
+ 	@orig_server['Instance_Type'] = @server['Instance_Type'].text
+        @server['Instance_Type_Button'] = FXButton.new(@frame1, "", :opts => BUTTON_TOOLBAR)
+ 	@magnifier = @ec2_main.makeIcon("magnifier.png")
+	@magnifier.create
+	@server['Instance_Type_Button'].icon = @magnifier
+	@server['Instance_Type_Button'].tipText = "Select Instance Type"
+	@server['Instance_Type_Button'].connect(SEL_COMMAND) do
+	   @dialog = EC2_InstanceDialog.new(@ec2_main)
+	   @dialog.execute
+	   type = @dialog.selected
+	   if type != nil and type != ""
+	      @server['Instance_Type'].text = type
+	   end   
+	end
+ 	FXLabel.new(@frame1, "Kernel" )
+ 	@server['Kernel'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN)
+ 	@server['Kernel'].text = get_attribute(instance_id,"kernelId")
+ 	@orig_server['Kernel'] = @server['Kernel'].text 	
+ 	FXLabel.new(@frame1, "" ) 
+ 	FXLabel.new(@frame1, "Ramdisk" )
+ 	@server['Ramdisk'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN)
+ 	@server['Ramdisk'].text = get_attribute(instance_id,"ramdiskId")
+ 	@orig_server['Ramdisk'] = @server['Ramdisk'].text 	 	
+ 	FXLabel.new(@frame1, "" )  	
+	FXLabel.new(@frame1, "User Data" )
+        @server['User_Data'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN)
+ 	@server['User_Data'].text = "" # get_attribute(instance_id,"userData")
+ 	@orig_server['User_Data'] = @server['User_Data'].text         
+        FXLabel.new(@frame1, "" )
+	FXLabel.new(@frame1, "User Data File")
+ 	@server['User_Data_File'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN)
+	@server['User_Data_File_Button'] = FXButton.new(@frame1, "", :opts => BUTTON_TOOLBAR)
+	@server['User_Data_File_Button'].icon = @magnifier
+	@server['User_Data_File_Button'].tipText = "Browse..."
+	@server['User_Data_File_Button'].connect(SEL_COMMAND) do
+	   dialog = FXFileDialog.new(@frame1, "Select User Data file")
+	   dialog.patternList = [
+	          "Pem Files (*.*)"
+	   ]
+	   dialog.selectMode = SELECTFILE_EXISTING
+	   if dialog.execute != 0
+	      @server['User_Data_File'].text = dialog.filename
+	   end
+	end        
         @frame2 = FXMatrix.new(self, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
         @frame2 = FXHorizontalFrame.new(@page1,LAYOUT_FILL, :padding => 0)
         FXLabel.new(@frame2, "" )
@@ -135,6 +180,7 @@ class EC2_InstanceModifyDialog < FXDialogBox
   
   def modify_instance
     modify_attribute(@server['Instance_ID'].text,'InstanceType.Value',@server['Instance_Type'].text, @orig_server['Instance_Type'])
+    modify_attribute(@server['Instance_ID'].text,'Security_Group.Value',@server['Security_Group'].text, @orig_server['Security_Group'])
     modify_attribute(@server['Instance_ID'].text,'Kernel.Value',@server['Kernel'].text, @orig_server['Kernel'])
     modify_attribute(@server['Instance_ID'].text,'Ramdisk.Value',@server['Ramdisk'].text, @orig_server['Ramdisk'])
     modify_attribute(@server['Instance_ID'].text,'UserData.Value',@server['User_Data'].text, @orig_server['User_Data'])
@@ -169,7 +215,10 @@ class EC2_InstanceModifyDialog < FXDialogBox
     if orig_value != value
           begin
              puts "attr #{attr} value #{value} orig_value #{orig_value}"
-             if attr == 'DisableApiTermination.Value'
+             if attr == 'Security_Group.Value'
+              # translate to sec grp ids
+              # call modify
+             elsif attr == 'DisableApiTermination.Value'
                bvalue = false
                bvalue = true if attr == 'DisableApiTermination.Value' and value == "true"
                @ec2_main.environment.servers.modify_instance_attribute(instance,attr,bvalue)

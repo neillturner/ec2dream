@@ -7,28 +7,32 @@ include Fox
 
 class EC2_SecGrp_SelectDialog < FXDialogBox
 
-  def initialize(owner, type="ec2")
+  def initialize(owner, type="ec2",existing="")
     puts "SecGrp_SelectDialog.initialize"
     @ec2_main = owner
     @curr_item = ""
     @selected = false
     @type = type
     @item_name = []
-    title = "Select Security Group"
-    super(owner, title, :opts => DECOR_ALL, :width => 300, :height => 200)
-    itemlist = FXList.new(self, :opts => LIST_SINGLESELECT|LAYOUT_FILL)
-    instances = Array.new
-    i=0
-    if @type == "ec2"
-       @ec2_main.environment.security_group.all.each do |r|
+    if existing != nil and existing != ""
+      title = "Remove Security Group"
+      @item_name = (existing).split","
+    else
+      title = "Add Security Group"
+      i=0
+      if @type == "ec2"
+        @ec2_main.environment.security_group.all.each do |r|
            if r['vpcId'] != nil and r['vpcId'] != ""
               @item_name[i] = "#{r[:aws_group_name]} (#{r['vpcId']})"
            else     
               @item_name[i] = r[:aws_group_name]
            end   
            i = i+1
-       end
-    end
+        end
+      end      
+    end  
+    super(owner, title, :opts => DECOR_ALL, :width => 300, :height => 200)
+    itemlist = FXList.new(self, :opts => LIST_SINGLESELECT|LAYOUT_FILL)
     @item_name = @item_name.sort_by { |x| x.downcase }
     @item_name.each do |e|
        itemlist.appendItem(e)

@@ -14,7 +14,7 @@ class EC2_Launch
         @type = ""
         @curr_item = ""
         @resource_tags = nil
-		@google_metadata = nil
+	@google_metadata = nil
         @profile_type = "secgrp"
         @profile_folder = "launch"
         @arrow_refresh = @ec2_main.makeIcon("arrow_refresh.png")
@@ -43,6 +43,10 @@ class EC2_Launch
 	@create.create
 	@tunnel = @ec2_main.makeIcon("tunnel.png")
 	@tunnel.create
+	@add = @ec2_main.makeIcon("add.png")
+	@add.create
+	@cross = @ec2_main.makeIcon("cross.png")
+	@cross.create
         tab = FXTabItem.new(@ec2_main.tabBook, " Launch ")
         page1 = FXVerticalFrame.new(@ec2_main.tabBook, LAYOUT_FILL, :padding => 0)
         #
@@ -245,9 +249,8 @@ class EC2_Launch
         @frame1s = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
  	@launch['Name'] = FXTextField.new(@frame1s, 20, nil, 0, :opts => FRAME_SUNKEN)
  	FXLabel.new(@frame1s, "" )
- 	#FXLabel.new(@frame1s, "Chef Node/Puppet Roles" )
- 	@launch['Chef_Node'] = FXTextField.new(@frame1s, 21, nil, 0, :opts => FRAME_SUNKEN)
- 	@launch['Chef_Node'].visible=false
+ 	FXLabel.new(@frame1s, "IAM Role Name" )
+ 	@launch['IAM_Role'] = FXTextField.new(@frame1s, 21, nil, 0, :opts => FRAME_SUNKEN)
  	FXLabel.new(@frame1, "" )
  	FXLabel.new(@frame1, "Subnet Id" )
  	@frame1v = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
@@ -267,18 +270,35 @@ class EC2_Launch
  	FXLabel.new(@frame1, "" )
  	FXLabel.new(@frame1, "Security_Groups" )
  	@frame1x = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
- 	@launch['Security_Group'] = FXTextField.new(@frame1x, 20, nil, 0, :opts => FRAME_SUNKEN)
+ 	@launch['Security_Group'] = FXTextField.new(@frame1x, 60, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_READONLY)
  	@launch['Security_Group_Button'] = FXButton.new(@frame1x, "", :opts => BUTTON_TOOLBAR)
-	@launch['Security_Group_Button'].icon = @magnifier
-	@launch['Security_Group_Button'].tipText = "Select Security Group"
+	@launch['Security_Group_Button'].icon = @add
+	@launch['Security_Group_Button'].tipText = "Add Security Group"
 	@launch['Security_Group_Button'].connect(SEL_COMMAND) do
 	   dialog = EC2_SecGrp_SelectDialog.new(@ec2_main)
 	   dialog.execute
 	   selected = dialog.sec_grp
 	   if selected != nil and selected != ""
+	      current_sec_grp = @launch['Security_Group'].text
+	      if current_sec_grp != nil and current_sec_grp != ""
+	         selected = "#{current_sec_grp},#{selected}"
+	      end   
 	      put('Security_Group',selected)
 	   end
 	end
+ 	@launch['Security_Group_Button_Delete'] = FXButton.new(@frame1x, "", :opts => BUTTON_TOOLBAR)
+	@launch['Security_Group_Button_Delete'].icon = @cross
+	@launch['Security_Group_Button_Delete'].tipText = "Remove Security Group"
+	@launch['Security_Group_Button_Delete'].connect(SEL_COMMAND) do
+	   dialog = EC2_SecGrp_SelectDialog.new(@ec2_main,"ec2",@launch['Security_Group'].text)
+	   dialog.execute
+	   selected = dialog.sec_grp
+	   if selected != nil and selected != ""
+	      sa = (@launch['Security_Group'].text).split","
+	      sa.delete_if {|s| s == selected }
+	      put('Security_Group',sa.join(","))
+	   end
+	end	
 	FXLabel.new(@frame1x, "" )
 	#FXLabel.new(@frame1x, "Puppet Manifest" )
 	@launch['Puppet_Manifest'] = FXTextField.new(@frame1x, 17, nil, 0, :opts => FRAME_SUNKEN)
@@ -295,6 +315,7 @@ class EC2_Launch
            if dialog.saved
 	      @resource_tags = dialog.resource_tags
 	      @launch['Tags'].text = @resource_tags.show
+	      save
            end
         end
  	FXLabel.new(@frame1, "Image Id" )
@@ -786,8 +807,8 @@ class EC2_Launch
  	@ops_launch['Name'] = FXTextField.new(@frame4s, 20, nil, 0, :opts => FRAME_SUNKEN)
  	FXLabel.new(@frame4s, "" )
  	#FXLabel.new(@frame4s, "Chef Node/Puppet Roles" )
- 	@ops_launch['Chef_Node'] = FXTextField.new(@frame4s, 20, nil, 0, :opts => FRAME_SUNKEN)
- 	@ops_launch['Chef_Node'].visible=false
+ 	@ops_launch['IAM_Role'] = FXTextField.new(@frame4s, 20, nil, 0, :opts => FRAME_SUNKEN)
+ 	@ops_launch['IAM_Role'].visible=false
  	FXLabel.new(@frame4, "" )
         FXLabel.new(@frame4, "Security Groups" )
         @frame4s = FXHorizontalFrame.new(@frame4,LAYOUT_FILL_X, :padding => 0)
@@ -1027,8 +1048,8 @@ class EC2_Launch
  	@google_launch['Name'] = FXTextField.new(@frame6, 20, nil, 0, :opts => FRAME_SUNKEN)
  	FXLabel.new(@frame6, "" )
  	#FXLabel.new(@frame6, "Chef Node/Puppet Roles" )
- 	@google_launch['Chef_Node'] = FXTextField.new(@frame6, 20, nil, 0, :opts => FRAME_SUNKEN)
- 	@google_launch['Chef_Node'].visible=false
+ 	@google_launch['IAM_Role'] = FXTextField.new(@frame6, 20, nil, 0, :opts => FRAME_SUNKEN)
+ 	@google_launch['IAM_Role'].visible=false
  	FXLabel.new(@frame6, "" )
 	FXLabel.new(@frame6, "Puppet Manifest" )
 	@google_launch['Puppet_Manifest'] = FXTextField.new(@frame6, 20, nil, 0, :opts => FRAME_SUNKEN)

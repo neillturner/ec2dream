@@ -66,8 +66,8 @@ class EC2_Server
 	@stop_icon.create
 	@create_image_icon = @ec2_main.makeIcon("package.png")
 	@create_image_icon.create
-	@kitchenci = @ec2_main.makeIcon("kitchenci.png")
-	@kitchenci.create
+	#@kitchenci = @ec2_main.makeIcon("kitchenci.png")
+	#@kitchenci.create
 	@view = @ec2_main.makeIcon("application_view_icons.png")
 	@view.create
         @tag_red = @ec2_main.makeIcon("tag_red.png")
@@ -361,15 +361,15 @@ class EC2_Server
 	       sender.enabled = false
 	    end
 	end
-	@chef_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
-        @chef_button.icon = @kitchenci
-        @chef_button.tipText = " Run Test Kitchen"
-	@chef_button.connect(SEL_COMMAND) do |sender, sel, data|
-          run_kitchen
-	end
-	@chef_button.connect(SEL_UPDATE) do |sender, sel, data|
-           enable_if_ec2_server_loaded(sender)
-	end
+	#@chef_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
+        #@chef_button.icon = @kitchenci
+        #@chef_button.tipText = " Run Test Kitchen"
+	#@chef_button.connect(SEL_COMMAND) do |sender, sel, data|
+        #  run_kitchen
+	#end
+	#@chef_button.connect(SEL_UPDATE) do |sender, sel, data|
+        #   enable_if_ec2_server_loaded(sender)
+	#end
 	@graph_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@graph_button.icon = @chart
 	@graph_button.tipText = " Monitoring Graphs "
@@ -410,18 +410,18 @@ class EC2_Server
 	@frame1 = FXMatrix.new(@page1, 3, MATRIX_BY_COLUMNS|LAYOUT_FILL)
  	FXLabel.new(@frame1, "Security Groups" )
         @frame1s = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
- 	@server['Security_Groups'] = FXTextField.new(@frame1s, 20, nil, 0, :opts => TEXTFIELD_READONLY)
- 	FXLabel.new(@frame1s, "" )
- 	FXLabel.new(@frame1s, "Kitchen Instance" )
- 	@server['Chef_Node'] = FXTextField.new(@frame1s, 20, nil, 0, :opts => FRAME_SUNKEN)
-	@server['Chef_Node'].connect(SEL_COMMAND) do
-           instance_id = @server['Instance_ID'].text
-           @ec2_chef_node[instance_id] = @server['Chef_Node'].text
-           if @ec2_main.launch.loaded == true
-              @ec2_main.launch.put('Chef_Node',@server['Chef_Node'].text)
-    	      @ec2_main.launch.save
-    	   end
-	end
+ 	@server['Security_Groups'] = FXTextField.new(@frame1s, 60, nil, 0, :opts => TEXTFIELD_READONLY)
+ 	#FXLabel.new(@frame1s, "" )
+ 	#FXLabel.new(@frame1s, "Kitchen Instance" )
+ 	#@server['Chef_Node'] = FXTextField.new(@frame1s, 20, nil, 0, :opts => FRAME_SUNKEN)
+	#@server['Chef_Node'].connect(SEL_COMMAND) do
+        #   instance_id = @server['Instance_ID'].text
+        #   @ec2_chef_node[instance_id] = @server['Chef_Node'].text
+        #   if @ec2_main.launch.loaded == true
+        #      @ec2_main.launch.put('Chef_Node',@server['Chef_Node'].text)
+    	#      @ec2_main.launch.save
+    	#   end
+	#end
  	FXLabel.new(@frame1, "" )
  	FXLabel.new(@frame1, "Instance Id" )
  	@frame1t = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
@@ -438,18 +438,18 @@ class EC2_Server
                dialog.execute
             end
 	end
-	FXLabel.new(@frame1t, "Kitchen Path" )
-	@server['test_kitchen_path'] = FXTextField.new(@frame1t, 25, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_READONLY)
-	@server['test_kitchen_path_button'] = FXButton.new(@frame1t, " ",:opts => BUTTON_TOOLBAR)
-	@server['test_kitchen_path_button'].icon = @modify
-	@server['test_kitchen_path_button'].tipText = "  Configure Test Kitchen Path  "
-	@server['test_kitchen_path_button'].connect(SEL_COMMAND) do |sender, sel, data|
-	    dialog = KIT_PathCreateDialog.new(@ec2_main)
-	    dialog.execute
-	    if dialog.success
-	        @server['test_kitchen_path'].text=@ec2_main.settings.get('TEST_KITCHEN_PATH')
-	    end
-        end
+	FXLabel.new(@frame1t, "IAM Role" )
+	@server['test_kitchen_path'] = FXTextField.new(@frame1t, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+	#@server['test_kitchen_path_button'] = FXButton.new(@frame1t, " ",:opts => BUTTON_TOOLBAR)
+	#@server['test_kitchen_path_button'].icon = @modify
+	#@server['test_kitchen_path_button'].tipText = "  Configure Test Kitchen Path  "
+	#@server['test_kitchen_path_button'].connect(SEL_COMMAND) do |sender, sel, data|
+	#    dialog = KIT_PathCreateDialog.new(@ec2_main)
+	#    dialog.execute
+	#    if dialog.success
+	#        @server['test_kitchen_path'].text=@ec2_main.settings.get('TEST_KITCHEN_PATH')
+	#    end
+        #end
         FXLabel.new(@frame1, "" )
  	FXLabel.new(@frame1, "Tags" )
  	@server['Tags'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
@@ -1854,25 +1854,25 @@ class EC2_Server
  end
 
 
-  def run_kitchen
-    instance = "default-server"
-    ENV['EC2DREAM_HOSTNAME']=''
-    if @type == "ec2"
-      instance = @server['Chef_Node'].text if @server['Chef_Node'].text != nil
-    elsif @type == "ops"
-      instance = @ops_server['Chef_Node'].text if @ops_server['Chef_Node'].text != nil
-    elsif @type == "google"
-      instance = @google_server['Chef_Node'].text if @google_server['Chef_Node'].text != nil
-    elsif @type == "loc"
-      instance = @loc_server['kitchen_instance'].text if @loc_server['kitchen_instance'].text != nil
-    end
-    set_ec2dream_hostname
-    driver = "Ssh"
-    provisioner = ""
-    last_action = ""
-    $ec2_main.kitchen.kit_load(instance,driver,provisioner,last_action)
-    $ec2_main.tabBook.setCurrent(4)
-  end
+ # def run_kitchen
+ #   instance = "default-server"
+ #   ENV['EC2DREAM_HOSTNAME']=''
+ #   if @type == "ec2"
+ #     instance = @server['Chef_Node'].text if @server['Chef_Node'].text != nil
+ #   elsif @type == "ops"
+ #     instance = @ops_server['Chef_Node'].text if @ops_server['Chef_Node'].text != nil
+ #   elsif @type == "google"
+ #     instance = @google_server['Chef_Node'].text if @google_server['Chef_Node'].text != nil
+ #   elsif @type == "loc"
+ #     instance = @loc_server['kitchen_instance'].text if @loc_server['kitchen_instance'].text != nil
+ #   end
+ #   set_ec2dream_hostname
+ #   driver = "Ssh"
+ #   provisioner = ""
+ #   last_action = ""
+ #   $ec2_main.kitchen.kit_load(instance,driver,provisioner,last_action)
+ #   $ec2_main.tabBook.setCurrent(4)
+ # end
 
  end
 

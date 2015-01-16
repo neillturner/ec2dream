@@ -12,7 +12,7 @@
        clear('Instance_ID')
        ENV['EC2_INSTANCE'] = ""
        clear('Security_Groups')
-       clear('Chef_Node')
+       #clear('Chef_Node')
        clear('Tags')
        clear('Image_ID')
        clear('State')
@@ -80,6 +80,7 @@
        ENV['EC2_INSTANCE'] = instance_id
        r = @ec2_main.serverCache.instance(instance_id)
        if r != nil
+         puts "#{r}"
     	 @server['Security_Groups'].text = @ec2_main.serverCache.instance_groups_list(instance_id)
     	 @secgrp = @ec2_main.serverCache.instance_groups_first(instance_id)
     	 if r['tagSet'].to_s != "{}"
@@ -88,7 +89,7 @@
    	 else
    	     @server['Tags'].text =  ""
    	 end
-    	 @server['Chef_Node'].text = get_chef_node
+    	 #@server['Chef_Node'].text = get_chef_node
     	 #@server['Puppet_Manifest'].text = get_puppet_manifest
     	 @server['Image_ID'].text = r['imageId']
     	 @server['State'].text = r['instanceState']['name']
@@ -117,7 +118,8 @@
      	 if @windows_admin_pw[instance_id] != nil and @windows_admin_pw[instance_id] != ""
     	   @server['Win_Admin_Password'].text = @windows_admin_pw[instance_id]
     	 else
-    	   if @ec2_main.launch.get('Security_Group') ==  @secgrp
+           win_admin_psw = @ec2_main.launch.get('Win_Admin_Password')
+    	   if  win_admin_psw != nil and  win_admin_psw != ''
     	      @server['Win_Admin_Password'].text = @ec2_main.launch.get('Win_Admin_Password')
     	   else
     	       @server['Win_Admin_Password'].text = ""
@@ -151,10 +153,16 @@
          load_block_mapping(r)
          @server['Instance_Life_Cycle'].text = r['instanceLifecycle']
          @server['Spot_Instance_Request_Id'].text = r['spotInstanceRequestId']
+         @server['test_kitchen_path'].text = ""
+         if !r["iamInstanceProfile"].empty? 
+            s=r["iamInstanceProfile"]["arn"]
+            sa = s.split"/"
+	    @server['test_kitchen_path'].text = sa.last if sa.size>1
+         end
        else
          puts "ERROR: No Server cache for instances #{instance_id}"
        end
-       @server['test_kitchen_path'].text=@ec2_main.settings.get('TEST_KITCHEN_PATH')
+       #@server['test_kitchen_path'].text=@ec2_main.settings.get('TEST_KITCHEN_PATH')
        set_ec2dream_hostname
        @ec2_main.app.forceRefresh
      end

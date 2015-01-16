@@ -69,7 +69,10 @@ class EC2_Launch
           launch_parm['SecurityGroupId'] = gi
        else             
           launch_parm['SecurityGroup'] = g 
-       end       
+       end 
+       if @launch['IAM_Role'].text != nil and @launch['IAM_Role'].text != ""
+          launch_parm['IamInstanceProfile.Name'] = @launch['IAM_Role'].text 
+       end   
        it = (@launch['Instance_Type'].text).downcase
        if @launch['Availability_Zone'].text != nil and @launch['Availability_Zone'].text != ""
              launch_parm['Placement.AvailabilityZone']= @launch['Availability_Zone'].text
@@ -368,7 +371,7 @@ class EC2_Launch
       @profile = profile
       @launch['Name'].text = @profile
       @launch['Name'].enabled = false
-      @launch['Chef_Node'].text = @profile
+      #@launch['IAM_Role'].text = ''
       @launch['Puppet_Manifest'].text = 'init.pp'
       @launch['Image_Id'].enabled = true
       @launch['Image_Id_Button'].enabled = true
@@ -396,7 +399,7 @@ class EC2_Launch
            @resource_tags = nil
         end        
         load_panel('Security_Group')
-        load_panel('Chef_Node')
+        load_panel('IAM_Role')
         load_panel('Puppet_Manifest')
 	load_panel('Addressing')
         load_panel('Image_Id')
@@ -518,7 +521,7 @@ class EC2_Launch
           	 end      
            end
            load_panel('Security_Group')
-           load_panel('Chef_Node')
+           load_panel('IAM_Role')
            load_panel('Puppet_Manifest')
 	   load_panel('Addressing')
            load_panel('Image_Id')
@@ -619,7 +622,7 @@ class EC2_Launch
      @launch['Name'].text = ""
      @launch['Name'].enabled = true
      clear('Security_Group')
-     clear('Chef_Node')
+     clear('IAM_Role')
      clear('Puppet_Manifest')
      clear('Tags')
      clear('Addressing')
@@ -701,7 +704,7 @@ class EC2_Launch
       load_panel('Image_Visibility')
       load_panel('Image_Root_Device_Type')      
       save_launch('Security_Group')
-      save_launch('Chef_Node')
+      save_launch('IAM_Role')
       save_launch('Puppet_Manifest')
       save_launch('Addressing')
       save_launch('Image_Manifest')
