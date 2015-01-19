@@ -411,6 +411,18 @@ class EC2_Server
  	FXLabel.new(@frame1, "Security Groups" )
         @frame1s = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
  	@server['Security_Groups'] = FXTextField.new(@frame1s, 60, nil, 0, :opts => TEXTFIELD_READONLY)
+ 	@server['Security_Groups_Button'] = FXButton.new(@frame1s, " ",:opts => BUTTON_TOOLBAR)
+	@server['Security_Groups_Button'].icon = @view
+	@server['Security_Groups_Button'].tipText = "  Modify Instance Attributes  "
+	@server['Security_Groups_Button'].connect(SEL_COMMAND) do |sender, sel, data|
+	    @curr_item = @server['Instance_ID'].text
+            if @curr_item == nil or @curr_item == ""
+               error_message("No Instance Id","No Instance Id to modify attributes")
+            else
+               dialog = EC2_InstanceModifyDialog.new(@ec2_main,@server['Instance_ID'].text)
+               dialog.execute
+            end
+	end 	
  	#FXLabel.new(@frame1s, "" )
  	#FXLabel.new(@frame1s, "Kitchen Instance" )
  	#@server['Chef_Node'] = FXTextField.new(@frame1s, 20, nil, 0, :opts => FRAME_SUNKEN)

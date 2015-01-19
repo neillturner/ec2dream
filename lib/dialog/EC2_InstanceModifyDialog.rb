@@ -4,6 +4,7 @@ require 'net/http'
 require 'resolv'
 require 'common/error_message'
 require 'dialog/EC2_SecGrp_SelectDialog'
+require 'cache/EC2_ServerCache'
 
 include Fox
 
@@ -180,7 +181,7 @@ class EC2_InstanceModifyDialog < FXDialogBox
   
   def modify_instance
     modify_attribute(@server['Instance_ID'].text,'InstanceType.Value',@server['Instance_Type'].text, @orig_server['Instance_Type'])
-    modify_attribute(@server['Instance_ID'].text,'Security_Group.Value',@server['Security_Group'].text, @orig_server['Security_Group'])
+    modify_attribute(@server['Instance_ID'].text,'GroupId',@server['Security_Group'].text, @orig_server['Security_Group'])
     modify_attribute(@server['Instance_ID'].text,'Kernel.Value',@server['Kernel'].text, @orig_server['Kernel'])
     modify_attribute(@server['Instance_ID'].text,'Ramdisk.Value',@server['Ramdisk'].text, @orig_server['Ramdisk'])
     modify_attribute(@server['Instance_ID'].text,'UserData.Value',@server['User_Data'].text, @orig_server['User_Data'])
@@ -215,9 +216,23 @@ class EC2_InstanceModifyDialog < FXDialogBox
     if orig_value != value
           begin
              puts "attr #{attr} value #{value} orig_value #{orig_value}"
-             if attr == 'Security_Group.Value'
-              # translate to sec grp ids
-              # call modify
+             if attr == 'GroupId'
+	        sa = (value).split","
+	        gi = []
+	        vpc = get_attribute(instance,'vpcId')
+	        if vpc == nil 
+	          error_message('Error','Can only change security groups of instances in vpcs')
+	          return
+	        end
+	        sa.each do |s|
+	          r=@ec2_main.serverCache.secGrps(s,vpc)
+	          gi.push(r[:group_id]) if r != nil
+	          if r == nil 
+	            error_message('Error', 'Group #{s} not found in vpc #{vpc} try refreshing')
+	            return
+	          end  
+	        end
+                @ec2_main.environment.servers.modify_instance_attribute(instance,attr,gi)
              elsif attr == 'DisableApiTermination.Value'
                bvalue = false
                bvalue = true if attr == 'DisableApiTermination.Value' and value == "true"

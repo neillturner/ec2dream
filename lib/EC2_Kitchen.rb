@@ -195,9 +195,14 @@ class EC2_Kitchen
 	end
 	@bookshelf_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@bookshelf_button.icon = @bookshelf
-	@bookshelf_button.tipText = " Run berks --debug "
+	@bookshelf_button.tipText = " Run berks --debug or librarian-puppet install --verbose "
 	@bookshelf_button.connect(SEL_COMMAND) do |sender, sel, data|
-	    kit_berks
+	    p = @kit_server['provisioner'].text
+	    if p[0..5]=="Puppet"
+	      kit_librarian_puppet
+	    else  
+	      kit_berks
+	    end   
  	end
 	@bookshelf_button.connect(SEL_UPDATE) do |sender, sel, data|
 	    sender.enabled = true
@@ -362,6 +367,10 @@ class EC2_Kitchen
 
   def kit_berks
     kitchen_cmd('berks --debug')
+  end
+  
+  def kit_librarian_puppet
+    kitchen_cmd('librarian-puppet install --verbose')
   end
 
   def kit_edit
