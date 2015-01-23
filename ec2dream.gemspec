@@ -19,10 +19,12 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #++
+$LOAD_PATH.unshift File.expand_path('../lib', __FILE__)
+require 'EC2_version'
 
 Gem::Specification.new do |spec|
   spec.name = 'ec2dream'
-  spec.version = '3.7.8'
+  spec.version = EC2Dream::VERSION
   spec.authors = ['Neill Turner']
   spec.email = 'neillwturner@gmail.com'
   spec.executables = ["ec2dream"]
