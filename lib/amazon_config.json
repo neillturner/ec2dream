@@ -863,6 +863,20 @@
            "dialog_parm": ["","","","","","","","",""],
            "keys": []
        }
+    },       
+    "SQS":{
+        "Queues":{
+           "request":"list_queues",
+           "name":"queues",
+           "response": "response.body['ListQueuesResult']",
+           "response_code": 200,
+           "action": ["","", "","","","","","",""],
+           "icon": ["","","","","@csv","","","",""],
+           "tooltip":["","","",""," Csv Data ","","","",""],
+           "dialog":["","","","","","","","",""],
+           "dialog_parm": ["","","","","","","","",""],
+           "keys": []
+       }       
     }
  }
 }
