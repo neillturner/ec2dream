@@ -13,7 +13,7 @@ class CF_CreateDialog < FXDialogBox
     puts "CF_CreateDialog.initialize"
     @saved = false
     @ec2_main = owner
-    super(@ec2_main, "Create or Update Stack", :opts => DECOR_ALL, :width => 600, :height => 200)
+    super(@ec2_main, "Create or Update Stack", :opts => DECOR_ALL, :width => 600, :height => 240)
     page1 = FXVerticalFrame.new(self, LAYOUT_FILL, :padding => 0)
     frame1 = FXMatrix.new(page1, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
     FXLabel.new(frame1, "Stack Name" )
@@ -44,6 +44,29 @@ class CF_CreateDialog < FXDialogBox
     template_edit_button.tipText = "Edit Template..."
     template_edit_button.connect(SEL_COMMAND) do |sender, sel, data|
        edit(template_file.text)
+    end    
+    FXLabel.new(frame1, "" )
+    FXLabel.new(frame1, "cfndsl File" )
+    frame1b = FXHorizontalFrame.new(frame1,LAYOUT_FILL_X, :padding => 0)
+    cfndsl_file = FXTextField.new(frame1b, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
+    cfndsl_file_button = FXButton.new(frame1b, "", :opts => BUTTON_TOOLBAR)
+    cfndsl_file_button.icon = @magnifier
+    cfndsl_file_button.tipText = "Browse..."
+    cfndsl_file_button.connect(SEL_COMMAND) do
+        dialog = FXFileDialog.new(frame1b, "Select cfndsl file")
+        dialog.patternList = [
+           "cfndsl Files (*.*)"
+        ]
+        dialog.selectMode = SELECTFILE_EXISTING
+        if dialog.execute != 0
+           cfndsl_file.text = dialog.filename
+        end
+    end
+    cfndsl_edit_button = FXButton.new(frame1b, "", :opts => BUTTON_TOOLBAR)
+    cfndsl_edit_button.icon = @script_edit
+    cfndsl_edit_button.tipText = "Edit cfndsl..."
+    cfndsl_edit_button.connect(SEL_COMMAND) do |sender, sel, data|
+       edit(cfndsl_file.text)
     end
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "Parameters" )
@@ -65,19 +88,18 @@ class CF_CreateDialog < FXDialogBox
        if stack_name.text == nil or stack_name.text == ""
          error_message("Error","Stack Name not specified")
        else
-         save_stack(stack_name.text,template_file.text,parameters.text,disable_rollback.text,timeout_in_minutes.text)
+         save_stack(stack_name.text,template_file.text,cfndsl_file.text,parameters.text,disable_rollback.text,timeout_in_minutes.text)
          if @saved == true
            self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
          end
        end
     end
     create = FXButton.new(frame2, "   &Create Stack   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
-    create = FXButton.new(frame2, "   &Create Stack   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     create.connect(SEL_COMMAND) do |sender, sel, data|
        if stack_name.text == nil or stack_name.text == ""
          error_message("Error","Stack Name not specified")
        else
-         save_stack(stack_name.text,template_file.text,parameters.text,disable_rollback.text,timeout_in_minutes.text)
+         save_stack(stack_name.text,template_file.text,cfndsl_file.text,parameters.text,disable_rollback.text,timeout_in_minutes.text)
          if @saved == true
             answer = FXMessageBox.question(@ec2_main,MBOX_YES_NO,"Confirm Stack Create","Confirm Create of Stack #{stack_name}")
             if answer == MBOX_CLICKED_YES
@@ -123,7 +145,7 @@ class CF_CreateDialog < FXDialogBox
        if stack_name.text == nil or stack_name.text == ""
          error_message("Error","Stack Name not specified")
        else
-         save_stack(stack_name.text,template_file.text,parameters.text,disable_rollback.text,timeout_in_minutes.text)
+         save_stack(stack_name.text,template_file.text,cfndsl_file.text,parameters.text,disable_rollback.text,timeout_in_minutes.text)
          if @saved == true
 	    answer = FXMessageBox.question(@ec2_main,MBOX_YES_NO,"Confirm Stack Update","Confirm Update of Stack #{stack_name}")
             if answer == MBOX_CLICKED_YES
@@ -195,7 +217,7 @@ class CF_CreateDialog < FXDialogBox
        return properties
   end
 
-  def save_stack(stack_name,template_file,parameters,disable_rollback,timeout_in_minutes)
+  def save_stack(stack_name,template_file,cfndsl_file,parameters,disable_rollback,timeout_in_minutes)
      folder = "cf_templates"
      loc = EC2_Properties.new
      if loc != nil
@@ -203,6 +225,7 @@ class CF_CreateDialog < FXDialogBox
         properties = {}
         properties['stack_name']=stack_name
         properties['template_file']=template_file
+        properties['cfndsl_file']=cfndsl_file
         properties['parameters']=parameters
         if disable_rollback != nil and disable_rollback != ""
            properties['disable_rollback'] = disable_rollback
@@ -220,6 +243,35 @@ class CF_CreateDialog < FXDialogBox
         return
       end
      end
+  end
+  
+  def gem_install(name,version=nil)
+            puts "------>Installing #{name} #{version}....."
+            begin
+              cmd = "gem install  --no-ri --no-rdoc #{name}"
+              cmd = cmd + " --version \"#{version}\"" if !version.nil?
+              system cmd
+              return true
+            rescue
+            puts $!
+            return false
+        end
+      end
+  
+    def cfndsl_run(cfndsl_file, template_file)
+      list = `gem list`
+      gem_install('cfndsl') unless list.include? "cfndsl"
+      cmd="cfndsl -o #{template_file} #{cfndsl_file}"
+      if RUBY_PLATFORM.index("mswin") != nil  or RUBY_PLATFORM.index("i386-mingw32") != nil
+        c = "cmd.exe /c \@start \"#{cmd}\" #{cmd}"
+        puts c
+        system(c)
+      else
+        c = " #{cmd}"
+        puts c
+        system(c)
+        puts "cfndsl #{cmd} return message #{$?}"
+      end
   end
 
   def saved
