@@ -1,4 +1,4 @@
-### EC2Dream - Build and Manage Cloud Servers Version 3.7.8 -  Jan 2015
+### EC2Dream - Build and Manage Cloud Servers Version 3.7.9 -  Feb 2015
 
 For installation see http://ec2dream.blogspot.co.uk/search/label/EC2Dream%20Installation
 
@@ -10,7 +10,7 @@ EC2Dream is visual cloud computing admin for the Fog ruby cloud services library
 *     Google Compute Engine
 *     Cloud Foundry.
 *     Vagrant.
-*     Test Kitchen (Chef, Puppet, Ansible Salt).
+*     Test Kitchen (Chef, Puppet, Ansible, Salt).
 
 All using the one client graphical interface and running on Windows, Linux or Mac OSX clients.
 (It is written in Ruby using the FXRuby graphics library).
@@ -29,7 +29,7 @@ All using the one client graphical interface and running on Windows, Linux or Ma
 *   Support for CloudFoundry
 *   Support for Local and Hosted Servers -  Servers running in local virtualized environments like Vagrant, VMWare or Virtual box.
 *   Support for ssh tunnelling allow support of servers in Amazon VPC.
-*   Support for Amazon AWS, Eucalyptus and openstack 
+*   Support for Amazon AWS including Cloud Formation, Eucalyptus and openstack
 *   Support for Test Kitchen to develop and test chef cookbooks, puppet modules, ansible and salt. 
 
 ### It contains:

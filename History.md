@@ -1,3 +1,9 @@
+### Version 3.7.9 Feb 2015
+Fix slow refresh of buttons in list panels
+
+### Version 3.7.8 Jan 2015
+Various AWS improvements including cfndsl support with cloud formation
+
 ### Version 3.7.7 Nov 2014
 various fixes for Amazon fog support bugs and changes
 
