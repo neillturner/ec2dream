@@ -53,7 +53,7 @@ class EC2_Main < FXMainWindow
     $ec2_main = self
     @initial_startup = false
     @app = app
-    super(app, "#{product} v3.7.9 - Build and Manage Cloud Servers", :opts => DECOR_ALL, :width => 900, :height => 650)
+    super(app, "#{product} v#{EC2Dream::VERSION} - Build and Manage Cloud Servers", :opts => DECOR_ALL, :width => 900, :height => 650)
 
     # Status bar
     status = FXStatusBar.new(self,

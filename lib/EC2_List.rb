@@ -675,6 +675,7 @@ end
      end
      @curr_sort = ""
     load_sort(type,"",connection)
+    @ec2_main.app.forceRefresh
   end
 
   def load_sort(type,sort_col,connection="Compute")
