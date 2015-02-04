@@ -184,6 +184,17 @@ class EC2_Kitchen
 	@puppet_button.connect(SEL_UPDATE) do |sender, sel, data|
 	    sender.enabled = true
 	end
+        @check = @ec2_main.makeIcon("spellcheck.png")
+        @check.create
+        @parser_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
+	@parser_button.icon = @check
+	@parser_button.tipText = " Run puppet parser validate "
+	@parser_button.connect(SEL_COMMAND) do |sender, sel, data|
+	    kit_puppet_parser
+	end
+	@puppet_button.connect(SEL_UPDATE) do |sender, sel, data|
+	    sender.enabled = true
+	end  
 	@graph_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@graph_button.icon = @lightbulb
 	@graph_button.tipText = " Run rspec "
@@ -300,7 +311,7 @@ class EC2_Kitchen
     @kit_server['chef_foodcritic'].text ="." if @kit_server['chef_foodcritic'].text==nil or @kit_server['chef_foodcritic'].text==""
     @kit_server['chef_rspec_test'].text ="./spec/unit/*_spec.rb" if @kit_server['chef_rspec_test'].text==nil or @kit_server['chef_rspec_test'].text==""
     if @kit_server['provisioner'].text == "PuppetApply"
-      @kit_server['chef_foodcritic_label'].text = "puppet-lint parameters"
+      @kit_server['chef_foodcritic_label'].text = "puppet-lint/parser parms"
       @kit_server['chef_foodcritic_comment'].text = ""
     else
       @kit_server['chef_foodcritic_label'].text = "Foodcritic cookbook_path"
@@ -323,7 +334,7 @@ class EC2_Kitchen
        @kit_server['chef_foodcritic'].text ="." if @kit_server['chef_foodcritic'].text==nil or @kit_server['chef_foodcritic'].text==""
        @kit_server['chef_rspec_test'].text ="./spec/unit/*_spec.rb" if @kit_server['chef_rspec_test'].text==nil or @kit_server['chef_rspec_test'].text==""
        if @kit_server['provisioner'].text == "PuppetApply"
-         @kit_server['chef_foodcritic_label'].text = "puppet-lint parameters"
+         @kit_server['chef_foodcritic_label'].text = "puppet-lint/parser parms"
          @kit_server['chef_foodcritic_comment'].text = ""
        else
          @kit_server['chef_foodcritic_label'].text = "Foodcritic cookbook_path"
@@ -419,6 +430,12 @@ class EC2_Kitchen
         kitchen_cmd('foodcritic',@kit_server['chef_foodcritic'].text)
      end
   end
+
+  def kit_puppet_parser
+     if @kit_server['provisioner'].text == "PuppetApply"
+        kitchen_cmd('puppet parser validate',@kit_server['chef_foodcritic'].text)
+     end
+  end	
 
   def kit_rspec_test
     if @kit_server['provisioner'].text == "PuppetApply"

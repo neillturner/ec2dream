@@ -85,7 +85,7 @@ def kitchen_cmd(cmd='list',instance=nil,debug=false)
                  puts "kitchen #{cmd} return message #{$?}"
               end
        end
-     when 'puppet-lint','rspec-puppet'
+     when 'puppet-lint','rspec-puppet','puppet parser validate'
        cmd = 'rspec' if cmd == 'rspec-puppet'
        c = "#{cmd} #{instance}"
        answer = FXMessageBox.question($ec2_main.tabBook,MBOX_YES_NO,"Confirm Command","Confirm Running #{c}")
