@@ -153,6 +153,7 @@ class CF_EditDialog < FXDialogBox
                      puts "Create Stack #{stack_name.text} parameters #{options['Parameters']} disable_rollback #{options['DisableRollback']} timeout_in_minutes #{options['TimeoutInMinutes']}"
                      response = cf.create_stack(stack_name.text, options)
                      @saved = true
+                     @ec2_main.list.load('Stack Events','CloudFormation')
                      self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
                   rescue
                      error_message("Stack Update failed",$!)

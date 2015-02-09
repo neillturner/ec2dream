@@ -59,8 +59,6 @@ class EC2_Kitchen
 	@bookshelf.create
 	@tunnel = @ec2_main.makeIcon("tunnel.png")
 	@tunnel.create
-	@check = @ec2_main.makeIcon("spellcheck.png")
-        @check.create
 
         tab6 = FXTabItem.new(@ec2_main.tabBook, " Kitchen ")
         @page1 = FXVerticalFrame.new(@ec2_main.tabBook, LAYOUT_FILL, :padding => 0)
@@ -186,7 +184,8 @@ class EC2_Kitchen
 	@puppet_button.connect(SEL_UPDATE) do |sender, sel, data|
 	    sender.enabled = true
 	end
-        
+        @check = @ec2_main.makeIcon("spellcheck.png")
+        @check.create
         @parser_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	@parser_button.icon = @check
 	@parser_button.tipText = " Run puppet parser validate "
