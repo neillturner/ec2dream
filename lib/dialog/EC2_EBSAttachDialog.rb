@@ -28,7 +28,7 @@ class EC2_EBSAttachDialog < FXDialogBox
     FXLabel.new(frame1, "Server     " )
     serverlist = FXComboBox.new(frame1, 35,
           	      :opts => COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
-    sa = @ec2_main.serverCache.instance_running_names
+    sa = @ec2_main.serverCache.instance_names
     i = 0
     while i<sa.length
        serverlist.appendItem(sa[i])
