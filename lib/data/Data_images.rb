@@ -39,7 +39,7 @@ def initialize(owner)
              when "Public Images"
                 executable = "all"
               when "Private Images"
-                executable = "self"
+                executable =  "self"
              else
                 search = type.downcase
      	        type = "Public Images"
@@ -141,11 +141,11 @@ def initialize(owner)
                 i=0
                 #ec2.describe_images_by_executable_by(executable).each do |r|
                 @ec2_main.environment.images.find_by_executable(executable).each do |r|
-				 if @ec2_main.settings.google
-				   image_locs[i] = r
+		 if @ec2_main.settings.google
+		   image_locs[i] = r
                    i = i+1
-				 else
-                  if r[:aws_is_public]
+		 else
+                  #if r[:aws_is_public]
                    if search != nil and search != ""
                       loc = r['imageLocation'].downcase
                       if loc.index(search) != nil
@@ -164,8 +164,8 @@ def initialize(owner)
                          end
                       end
                    end
-                  end
-				 end
+                  #end
+		 end
                 end
               end
              end
@@ -323,7 +323,7 @@ def initialize(owner)
                 end
              end
           elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
-             x = conn.describe_images('ExecutableBy' => executable)
+             x = conn.describe_images({'ExecutableBy' => executable})
 	         x = x.body['imagesSet']
              x.each do |y|
 	            data.push(hash_ops_image_aws(y))
@@ -458,7 +458,7 @@ def initialize(owner)
            else
               response = conn.create_image(instance_id,options[:name],options)
            end
-           puts response
+           #puts response
            if response.status == 202
 	      #data = response.body['image']['id']
 	      data  = options[:name]

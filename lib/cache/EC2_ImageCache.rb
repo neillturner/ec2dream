@@ -28,8 +28,18 @@ class EC2_ImageCache
               env_name = @ec2_main.environment.env
               cache_filename = @ec2_main.settings.get_system("REPOSITORY_LOCATION")+"/"+env_name+"/image_cache.txt"
               cache_self_filename = @ec2_main.settings.get_system("REPOSITORY_LOCATION")+"/"+env_name+"/image_cache_self.txt"
+              if !File.exist?(cache_filename)
+                 answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Load Image Cache","Do you wish to load the public image cache (this is will take several minutes but without the cache no public images can be listed)?")
+                 if answer == MBOX_CLICKED_NO
+                    puts "*********************************************************************"
+                    puts "*** No ImageCache Loading so unable to list any public images     ***"
+                    puts "*********************************************************************" 
+                    @status = "empty"
+                    return
+                 end
+              end   
               if File.exist?(cache_filename)
-                 answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Existing Cache","Do you wish to use the existing cache?")
+                 answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Existing Cache","Do you wish to use the existing public image cache (it takes several minutes to reload the cache)?")
                  if answer == MBOX_CLICKED_NO
                     File.delete(cache_filename)
                     begin 
@@ -148,9 +158,9 @@ class EC2_ImageCache
 
  def get(search,arch,root_device=nil,owner=nil)
    puts "ImageCache.get(#{search},#{arch},#{root_device},#{owner})"
-   while @status != "loaded"
-     sleep 10
-   end 
+   #while @status != "loaded" and @status != "empty"
+   #  sleep 10
+   #end 
    if owner != nil and owner == "self"
       return @image_self
    elsif (root_device == nil or root_device == "")

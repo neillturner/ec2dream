@@ -781,7 +781,7 @@ end
               end
               puts "CMD #{cmd}"
  	      response = eval(cmd)
- 	      puts "RESPONSE.BODY #{response.body}"
+ 	      #puts "RESPONSE.BODY #{response.body}"
 	      if @ec2_main.settings.cloudfoundry
 	         @data = response
 	      else
