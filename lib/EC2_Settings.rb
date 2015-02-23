@@ -9,6 +9,7 @@ require 'dialog/EC2_AvailZoneDialog'
 require 'dialog/EC2_PlatformsDialog'
 require 'dialog/EC2_TimezoneDialog'
 require 'dialog/EC2_ShowPasswordDialog'
+require 'dialog/EC2_GenerateKeyDialog'
 require 'dialog/EC2_SystemDialog'
 require 'dialog/EC2_TerminalsDialog'
 require 'dialog/EC2_BastionEditDialog'
@@ -51,16 +52,20 @@ class EC2_Settings
         if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
 	   @settings['PUTTY_GENERATE_BUTTON'] = FXButton.new(page1a, "PuTTygen Key Generator", :opts => BUTTON_NORMAL|LAYOUT_LEFT)
 	   @settings['PUTTY_GENERATE_BUTTON'].icon = @link
-	   @settings['PUTTY_GENERATE_BUTTON'].tipText = " PuTTYgen Key Generator"
-	   FXLabel.new(page1a, "In PuTTYgen press OK and then press SAVE PRIVATE KEY" )
+	   @settings['PUTTY_GENERATE_BUTTON'].tipText = " PuTTYgen Key Generator "
+	  # FXLabel.new(page1a, "In PuTTYgen press OK and then press SAVE PRIVATE KEY" )
 	   @settings['PUTTY_GENERATE_BUTTON'].connect(SEL_COMMAND) do
-	      puts "settings.PuttyGenerateButton.connect"
-	      if @settings['EC2_SSH_PRIVATE_KEY'].text != nil and @settings['EC2_SSH_PRIVATE_KEY'].text != ''
-	         system("cmd.exe /C "+ENV['EC2DREAM_HOME']+"/putty//puttygen "+"\""+@settings['EC2_SSH_PRIVATE_KEY'].text+"\""+"  -t rsa")
-	      else
-	         error_message("Error","No EC2_SSH_PRIVATE_KEY setting specified")
-	      end
-           end
+	      dialog = EC2_GenerateKeyDialog.new(@ec2_main,"SSH_PRIVATE_KEY",@settings['EC2_SSH_PRIVATE_KEY'].text)
+              dialog.execute
+	   end	   
+	  # @settings['PUTTY_GENERATE_BUTTON'].connect(SEL_COMMAND) do
+	  #    puts "settings.PuttyGenerateButton.connect"
+	  #    if @settings['EC2_SSH_PRIVATE_KEY'].text != nil and @settings['EC2_SSH_PRIVATE_KEY'].text != ''
+	  #       system("cmd.exe /C "+ENV['EC2DREAM_HOME']+"/putty//puttygen "+"\""+@settings['EC2_SSH_PRIVATE_KEY'].text+"\""+"  -t rsa")
+	  #    else
+	  #       error_message("Error","No EC2_SSH_PRIVATE_KEY setting specified")
+	  #    end
+          # end
            @settings['PUTTY_GENERATE_BUTTON'].connect(SEL_UPDATE) do |sender, sel, data|
 	       	    enable_if_env_set(sender)
     	   end

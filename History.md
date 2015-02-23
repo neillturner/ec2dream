@@ -1,3 +1,6 @@
+### Version 3.7.10 Feb 2015
+Fix tooltips and allow ssh key to be specified with doing puttygen
+
 ### Version 3.7.9 Feb 2015
 Fix slow refresh of buttons in list panels
 

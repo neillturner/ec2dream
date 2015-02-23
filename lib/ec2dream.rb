@@ -16,8 +16,8 @@ class Ec2dream
        #   application.setBaseColor(FXRGB(220, 220, 220))
        #end   
      end
-     application.setSleepTime(20)
-     FXToolTip.new(application, TOOLTIP_PERMANENT, 0)
+     application.setSleepTime(0)
+     FXToolTip.new(application)
      EC2_Main.new(application,"EC2Dream")
      application.create
      application.run
