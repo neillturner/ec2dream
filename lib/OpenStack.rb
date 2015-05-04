@@ -23,11 +23,12 @@ end
 
 def conn(type)
   #Fog.mock!
+  Excon.defaults[:ssl_verify_peer] = false
   if @conn[type] == nil
     begin
      case type
       when 'Image'
-	@conn[type] = Fog::Image.new({:provider => 'OpenStack', :openstack_auth_url => $ec2_main.settings.get('EC2_URL'), :openstack_api_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :openstack_username => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :openstack_tenant   => $ec2_main.settings.get("AMAZON_ACCOUNT_ID")})
+        @conn[type] = Fog::Image.new({:provider => 'OpenStack', :openstack_auth_url => $ec2_main.settings.get('EC2_URL'), :openstack_api_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :openstack_username => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :openstack_tenant   => $ec2_main.settings.get("AMAZON_ACCOUNT_ID")})
       when 'Volume'
         @conn[type] = Fog::Volume.new({:provider => 'OpenStack', :openstack_auth_url => $ec2_main.settings.get('EC2_URL'), :openstack_api_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :openstack_username => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :openstack_tenant   => $ec2_main.settings.get("AMAZON_ACCOUNT_ID")})
       when 'Compute'

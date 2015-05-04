@@ -23,6 +23,7 @@ end
 
 def conn(type)
    #Fog.mock!
+   Excon.defaults[:ssl_verify_peer] = false
    auth_url = "https://identity.api.rackspacecloud.com/v2.0"
    vol_url = "https://blockstorage.api.rackspacecloud.com/v2.0"
    ec2_url =  $ec2_main.settings.get('EC2_URL')
@@ -30,14 +31,14 @@ def conn(type)
    if ec2_url != nil and ec2_url !=""
       sa = (ec2_url).split"."
       if sa.size>1 and sa[0] != nil and sa[0].length>3
-	region = sa[0]
-	region = region[-3..-1]
-	region = region.downcase if region != nil
+        region = sa[0]
+        region = region[-3..-1]
+        region = region.downcase if region != nil
       end
       if region == "lon"
           auth_url = "https://lon.identity.api.rackspacecloud.com/v2.0"
-	  vol_url = "https://lon.blockstorage.api.rackspacecloud.com/v2.0"
-	  region = 'lon'
+          vol_url = "https://lon.blockstorage.api.rackspacecloud.com/v2.0"
+          region = 'lon'
       elsif region != 'dfw'
           vol_url = "https://#{region}.blockstorage.api.rackspacecloud.com/v2.0"
       end

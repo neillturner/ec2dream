@@ -24,6 +24,7 @@ end
 
 def conn(type)
   Fog.mock!
+  Excon.defaults[:ssl_verify_peer] = false
   if @conn[type] == nil
     begin
      case type

@@ -1,3 +1,7 @@
+### Version 3.7.11 May 2015
+Added cfndsl options and pretty printing generated json
+Ability to select when do a CSV display of the list.
+
 ### Version 3.7.10 Feb 2015
 Fix tooltips and allow ssh key to be specified with doing puttygen
 

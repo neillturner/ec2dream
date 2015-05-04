@@ -1,4 +1,4 @@
-### EC2Dream - Build and Manage Cloud Servers Version 3.7.10 -  Feb 2015
+### EC2Dream - Build and Manage Cloud Servers Version 3.7.11 -  May 2015
 
 [![Gem Version](https://badge.fury.io/rb/ec2dream.svg)](http://badge.fury.io/rb/ec2dream)
 
@@ -28,11 +28,11 @@ All using the one client graphical interface and running on Windows, Linux or Ma
 *   Save Launch profile
 *   Support for OpenStack HP Cloud and Rackspace including security groups, servers, keypairs, IP addresses, Block Storage volumes and
 *   Snapshots.
-*   Support for CloudFoundry
+*   Support for CloudFoundry and ruby dsl.
 *   Support for Local and Hosted Servers -  Servers running in local virtualized environments like Vagrant, VMWare or Virtual box.
 *   Support for ssh tunnelling allow support of servers in Amazon VPC.
 *   Support for Amazon AWS including Cloud Formation, Eucalyptus and openstack
-*   Support for Test Kitchen to develop and test chef cookbooks, puppet modules, ansible and salt. 
+*   Support for Test Kitchen to develop and test chef cookbooks, puppet modules, ansible and salt.
 
 ### It contains:
 *   Ruby and Fog for scripting.

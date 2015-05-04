@@ -14,38 +14,15 @@ class CF_EditDialog < FXDialogBox
     puts "CF_EditDialog.initialize"
     @saved = false
     @ec2_main = owner
-    super(@ec2_main, "Create or Update Stack", :opts => DECOR_ALL, :width => 600, :height => 240)
+    @magnifier = @ec2_main.makeIcon("magnifier.png")
+    @magnifier.create
+    @script_edit = @ec2_main.makeIcon("script_edit.png")
+    @script_edit.create
+    super(@ec2_main, "Create or Update Stack", :opts => DECOR_ALL, :width => 600, :height => 275)
     page1 = FXVerticalFrame.new(self, LAYOUT_FILL, :padding => 0)
     frame1 = FXMatrix.new(page1, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
     FXLabel.new(frame1, "Stack Name" )
     stack_name = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
-    FXLabel.new(frame1, "" )
-    FXLabel.new(frame1, "Template File" )
-    frame1a = FXHorizontalFrame.new(frame1,LAYOUT_FILL_X, :padding => 0)
-    template_file = FXTextField.new(frame1a, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
-    @magnifier = @ec2_main.makeIcon("magnifier.png")
-    @magnifier.create
-    template_file_button = FXButton.new(frame1a, "", :opts => BUTTON_TOOLBAR)
-    template_file_button.icon = @magnifier
-    template_file_button.tipText = "Browse..."
-    template_file_button.connect(SEL_COMMAND) do
-        dialog = FXFileDialog.new(frame1a, "Select template file")
-        dialog.patternList = [
-           "Template Files (*.*)"
-        ]
-        dialog.selectMode = SELECTFILE_EXISTING
-        if dialog.execute != 0
-           template_file.text = dialog.filename
-        end
-    end
-    @script_edit = @ec2_main.makeIcon("script_edit.png")
-    @script_edit.create
-    template_edit_button = FXButton.new(frame1a, "", :opts => BUTTON_TOOLBAR)
-    template_edit_button.icon = @script_edit
-    template_edit_button.tipText = "Edit Template..."
-    template_edit_button.connect(SEL_COMMAND) do |sender, sel, data|
-       edit(template_file.text)
-    end
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "cfndsl File" )
     frame1b = FXHorizontalFrame.new(frame1,LAYOUT_FILL_X, :padding => 0)
@@ -70,6 +47,40 @@ class CF_EditDialog < FXDialogBox
        edit(cfndsl_file.text)
     end
     FXLabel.new(frame1, "" )
+    FXLabel.new(frame1, "cfndsl Parameters" )
+    cfndsl_parameters = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
+    FXLabel.new(frame1, "" )
+    FXLabel.new(frame1, "Pretty Print JSON" )
+    pretty_print_json = FXComboBox.new(frame1, 15, :opts => COMBOBOX_STATIC|COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
+    pretty_print_json.numVisible = 2
+    pretty_print_json.appendItem("true")
+    pretty_print_json.appendItem("false")
+    pretty_print_json.setCurrentItem(0)
+    FXLabel.new(frame1, "" )
+
+    FXLabel.new(frame1, "Template File" )
+    frame1a = FXHorizontalFrame.new(frame1,LAYOUT_FILL_X, :padding => 0)
+    template_file = FXTextField.new(frame1a, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
+    template_file_button = FXButton.new(frame1a, "", :opts => BUTTON_TOOLBAR)
+    template_file_button.icon = @magnifier
+    template_file_button.tipText = "Browse..."
+    template_file_button.connect(SEL_COMMAND) do
+        dialog = FXFileDialog.new(frame1a, "Select template file")
+        dialog.patternList = [
+           "Template Files (*.*)"
+        ]
+        dialog.selectMode = SELECTFILE_EXISTING
+        if dialog.execute != 0
+           template_file.text = dialog.filename
+        end
+    end
+    template_edit_button = FXButton.new(frame1a, "", :opts => BUTTON_TOOLBAR)
+    template_edit_button.icon = @script_edit
+    template_edit_button.tipText = "Edit Template..."
+    template_edit_button.connect(SEL_COMMAND) do |sender, sel, data|
+       edit(template_file.text)
+    end
+    FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "Parameters" )
     parameters = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
     FXLabel.new(frame1, "" )
@@ -89,7 +100,7 @@ class CF_EditDialog < FXDialogBox
        if stack_name.text == nil or stack_name.text == ""
          error_message("Error","Stack Name not specified")
        else
-         save_stack(stack_name.text,template_file.text,cfndsl_file.text,parameters.text,disable_rollback.text,timeout_in_minutes.text)
+         save_stack(stack_name.text,cfndsl_file.text,cfndsl_parameters.text,pretty_print_json,template_file.text,parameters.text,disable_rollback.text,timeout_in_minutes.text)
        end
     end
     cfndsl = FXButton.new(frame2, "   &cfndsl   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
@@ -99,18 +110,18 @@ class CF_EditDialog < FXDialogBox
        elsif cfndsl_file.text == nil or cfndsl_file.text == ""
          error_message("Error","cfndsl File not specified")
        else
-         save_stack(stack_name.text,template_file.text,cfndsl_file.text,parameters.text,disable_rollback.text,timeout_in_minutes.text)
+         save_stack(stack_name.text,cfndsl_file.text,cfndsl_parameters.text,pretty_print_json,template_file.text,parameters.text,disable_rollback.text,timeout_in_minutes.text)
          if @saved == true
-            cfndsl_run(cfndsl_file.text,template_file.text)
+            cfndsl_run(cfndsl_file.text,cfndsl_parameters.text,template_file.text,pretty_print_json)
          end
        end
-    end       
+    end
     validate = FXButton.new(frame2, "   &Validate Template   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     validate.connect(SEL_COMMAND) do |sender, sel, data|
        if stack_name.text == nil or stack_name.text == ""
          error_message("Error","Stack Name not specified")
        else
-         save_stack(stack_name.text,template_file.text,cfndsl_file.text,parameters.text,disable_rollback.text,timeout_in_minutes.text)
+         save_stack(stack_name.text,cfndsl_file.text,cfndsl_parameters.text,pretty_print_json,template_file.text,parameters.text,disable_rollback.text,timeout_in_minutes.text)
          if @saved == true
             dialog = CF_ValidateDialog.new(@ec2_main,stack_name.text,template_file.text)
          end
@@ -121,7 +132,7 @@ class CF_EditDialog < FXDialogBox
        if stack_name.text == nil or stack_name.text == ""
          error_message("Error","Stack Name not specified")
        else
-         save_stack(stack_name.text,template_file.text,cfndsl_file.text,parameters.text,disable_rollback.text,timeout_in_minutes.text)
+         save_stack(stack_name.text,cfndsl_file.text,cfndsl_parameters.text,pretty_print_json,template_file.text,parameters.text,disable_rollback.text,timeout_in_minutes.text)
          if @saved == true
             answer = FXMessageBox.question(@ec2_main,MBOX_YES_NO,"Confirm Stack Create","Confirm Create of Stack #{stack_name}")
             if answer == MBOX_CLICKED_YES
@@ -168,7 +179,7 @@ class CF_EditDialog < FXDialogBox
        if stack_name.text == nil or stack_name.text == ""
          error_message("Error","Stack Name not specified")
        else
-         save_stack(stack_name.text,template_file.text,cfndsl_file.text,parameters.text,disable_rollback.text,timeout_in_minutes.text)
+         save_stack(stack_name.text,cfndsl_file.text,cfndsl_parameters.text,pretty_print_json,template_file.text,parameters.text,disable_rollback.text,timeout_in_minutes.text)
          if @saved == true
             answer = FXMessageBox.question(@ec2_main,MBOX_YES_NO,"Confirm Stack Update","Confirm Update of Stack #{stack_name}")
             if answer == MBOX_CLICKED_YES
@@ -218,8 +229,14 @@ class CF_EditDialog < FXDialogBox
        r = get_stack(curr_item)
        if r['stack_name'] != nil and r['stack_name'] != ""
           stack_name.text = r['stack_name']
-          template_file.text = r['template_file']
           cfndsl_file.text = r['cfndsl_file']
+          cfndsl_parameters.text = r['cfndsl_parameters']
+          if r['pretty_print_json'] == 'false'
+            pretty_print_json.setCurrentItem(1)
+          else
+            pretty_print_json.setCurrentItem(0)
+          end
+          template_file.text = r['template_file']
           parameters.text = r['parameters']
           if r['disable_rollback'] != nil and r['disable_rollback'] != ""
              disable_rollback.text = r['disable_rollback']
@@ -245,15 +262,21 @@ class CF_EditDialog < FXDialogBox
        return properties
   end
 
-  def save_stack(stack_name,template_file,cfndsl_file,parameters,disable_rollback,timeout_in_minutes)
+  def save_stack(stack_name,cfndsl_file,cfndsl_parameters,pretty_print_json,template_file,parameters,disable_rollback,timeout_in_minutes)
      folder = "cf_templates"
      loc = EC2_Properties.new
      if loc != nil
       begin
         properties = {}
         properties['stack_name']=stack_name
-        properties['template_file']=template_file
         properties['cfndsl_file']=cfndsl_file
+        properties['cfndsl_parameters']=cfndsl_parameters
+        if pretty_print_json.itemCurrent?(1)
+          properties['pretty_print_json'] = 'false'
+        else
+          properties['pretty_print_json'] = 'true'
+        end
+        properties['template_file']=template_file
         properties['parameters']=parameters
         if disable_rollback != nil and disable_rollback != ""
            properties['disable_rollback'] = disable_rollback
@@ -272,7 +295,7 @@ class CF_EditDialog < FXDialogBox
       end
      end
   end
-  
+
   def gem_install(name,version=nil)
           puts "------>Installing #{name} #{version}....."
           begin
@@ -286,21 +309,34 @@ class CF_EditDialog < FXDialogBox
       end
     end
 
-  def cfndsl_run(cfndsl_file, template_file)
+  def cfndsl_run(cfndsl_file, cfndsl_parameters, template_file, pretty_print_json)
     list = `gem list`
-    gem_install('cfndsl') unless list.include? "cfndsl"
-    cmd="cfndsl -o #{template_file} #{cfndsl_file}"
+    gem_install('cfndsl') unless list.include? "cfndsl" if pretty_print_json.itemCurrent?(0)
+    gem_install('ppjson') unless list.include? "ppjson" if pretty_print_json.itemCurrent?(0)
+    cmd="cfndsl -o #{template_file} #{cfndsl_parameters} #{cfndsl_file}"
+    cmd2="ppjson -f -i #{template_file}"
     if RUBY_PLATFORM.index("mswin") != nil  or RUBY_PLATFORM.index("i386-mingw32") != nil
       c = "cmd.exe /c \@start \"#{cmd}\" #{cmd}"
       puts c
       system(c)
+      if pretty_print_json.itemCurrent?(0)
+        c = "cmd.exe /c \@start \"#{cmd2}\" #{cmd2}"
+        puts c
+        system(c)
+      end
     else
-      c = " #{cmd}"
+      c = " #{cmd} "
       puts c
       system(c)
       puts "cfndsl #{cmd} return message #{$?}"
+      if pretty_print_json.itemCurrent?(0)
+        c = " #{cmd2} "
+        puts c
+        system(c)
+        puts "ppjson #{cmd} return message #{$?}"
+      end
     end
-  end    
+  end
 
   def saved
     @saved

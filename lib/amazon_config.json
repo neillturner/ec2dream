@@ -158,7 +158,7 @@
       "dialog_parm": ["","","","","","","","'vpc'",""],
       "keys": ["vpcId"]
     },
-	"DHCP Options":{
+        "DHCP Options":{
           "request":"describe_dhcp_options",
           "name":"dhcp_option",
           "response": "response.body['dhcpOptionsSet']",
@@ -170,7 +170,7 @@
           "dialog_parm": ["","","","","","","","'dhcp-options'",""],
           "keys": ["dhcpOptionsId"]
     },
-	"Internet Gateways":{
+        "Internet Gateways":{
           "request":"describe_internet_gateways",
           "name":"internet_gateway",
           "response": "response.body['internetGatewaySet']",
@@ -182,7 +182,7 @@
           "dialog_parm": ["","","","","","","","'internet-gateway'",""],
           "keys": ["internetGatewayId"]
     },
-	"Network Interfaces":{
+        "Network Interfaces":{
           "request":"describe_network_interfaces",
           "name":"network_interface",
           "response": "response.body['networkInterfaceSet']",
@@ -194,7 +194,7 @@
           "dialog_parm": ["","","","","","","","'network-interface'",""],
           "keys": ["networkInterfaceId","subnetId","vpcId"]
     },
-	"Placement Groups":{
+        "Placement Groups":{
           "request":"describe_placement_groups",
           "name":"placement_groups",
           "response": "response.body['placementGroupSet']",
@@ -206,7 +206,7 @@
           "dialog_parm": ["","","","","","","","",""],
           "keys": ["groupName"]
     },
-	"Subnets":{
+        "Subnets":{
           "request":" describe_subnets",
           "name":"subnet",
           "response": "response.body['subnetSet']",
@@ -218,7 +218,7 @@
           "dialog_parm": ["","","","","","","","'subnet'",""],
           "keys": ["subnetId","vpcId"]
     },
-	"Local Servers":{
+        "Local Servers":{
           "request":"",
           "name":"local_server",
           "response": "",
@@ -231,6 +231,58 @@
           "keys": ["server"]
     }
    },
+    "CloudFormation":{
+       "Templates":{
+          "request":"",
+          "name":"templates",
+          "response": "",
+          "response_code": 200,
+          "action": ["create configuration","delete configuration", "edit configuration, create or update stack"," cfndsl examples ","","validate","view stack events","view resources","edit"],
+          "icon": ["@create","@delete","@edit","@market_icon","@csv","@check","@events","@viewstack","@script_edit"],
+          "tooltip":[" New Configuration "," Delete Configuration ","Edit Configuration, Create or Update Stack"," cfndsl examples "," Csv Data "," Validate Template ","  View Stack Events  ","   View Stack Resources  ","   Edit Template  "],
+          "dialog":["CF_CreateDialog","CF_DeleteDialog","@stack_name = @curr_item;CF_EditDialog","browser('https://github.com/neillturner/cfndsl_examples')","","CF_ValidateDialog","@stack_name = @curr_item;load('Stack Events','CloudFormation')","@stack_name = @curr_item;load('Stack Resources','CloudFormation')","@stack_name = @curr_item;edit(@template_file)"],
+          "dialog_parm": ["","","","","","@template_file","@template_file","",""],
+          "keys": ["stack_name"]
+       },
+       "Stacks":{
+          "request":"describe_stacks",
+          "name":"stacks",
+          "response": "response.body['Stacks']",
+          "response_code": 200,
+          "action": ["create configuration","delete stack", "get template","","","","view stack events","view resources",""],
+          "icon": ["@create","@delete","@edit","","@csv","","@events","@viewstack",""],
+          "tooltip":[" New Configuration "," Delete Stack ","Get Template",""," Csv Data ",""," View Stack Events  ","  View Stack Resources  ",""],
+          "dialog":["CF_CreateDialog","CF_StackDeleteDialog","CF_GetTemplateDialog","","","","@stack_name = @curr_item;load('Stack Events','CloudFormation')","@stack_name = @curr_item;load('Stack Resources','CloudFormation')",""],
+          "dialog_parm": ["","","","","","","","",""],
+          "keys": ["StackName","StackStatus"]
+       },
+       "Stack Events":{
+          "request":"describe_stack_events(@stack_name)",
+          "name":"stack_events",
+          "response": "response.body['StackEvents']",
+          "response_code": 200,
+          "action": ["","delete stack", "","","","","","",""],
+          "icon": ["","@delete","","","@csv","","","",""],
+          "tooltip":[""," Delete Stack ","",""," Csv Data ","","","",""],
+          "dialog":["","CF_StackDeleteDialog","","","","","","",""],
+          "dialog_parm": ["","","","","","","","",""],
+          "menu": true,
+          "keys": ["StackName","LogicalResourceId","ResourceType","Timestamp"]
+       },
+       "Stack Resources":{
+          "request":"describe_stack_resources({'StackName' => @stack_name})",
+          "name":"stack_resources",
+          "response": "response.body['StackResources']",
+          "response_code": 200,
+          "action": ["","delete stack", "","","","","","",""],
+          "icon": ["","@delete","","","@csv","","","",""],
+          "tooltip":[""," Delete Stack ","",""," Csv Data ","","","",""],
+          "dialog":["","CF_StackDeleteDialog","","","","","","",""],
+          "dialog_parm": ["","","","","","","","",""],
+          "menu": true,
+          "keys": ["StackName","LogicalResourceId","ResourceType","Timestamp"]
+       }
+    },
    "AutoScaling":{
      "Auto Scaling Groups":{
       "request":"describe_auto_scaling_groups",
@@ -333,58 +385,7 @@
            "keys": ["Id"]
        }
     },
-    "CloudFormation":{
-       "Templates":{
-          "request":"",
-          "name":"templates",
-          "response": "",
-          "response_code": 200,
-          "action": ["create configuration","delete configuration", "edit configuration, create or update stack"," cfndsl examples ","","validate","view stack events","view resources","edit"],
-          "icon": ["@create","@delete","@edit","@market_icon","@csv","@check","@events","@viewstack","@script_edit"],
-          "tooltip":[" New Configuration "," Delete Configuration ","Edit Configuration, Create or Update Stack"," cfndsl examples "," Csv Data "," Validate Template ","  View Stack Events  ","   View Stack Resources  ","   Edit Template  "],
-          "dialog":["CF_CreateDialog","CF_DeleteDialog","@stack_name = @curr_item;CF_EditDialog","browser('https://github.com/neillturner/cfndsl_examples')","","CF_ValidateDialog","@stack_name = @curr_item;load('Stack Events','CloudFormation')","@stack_name = @curr_item;load('Stack Resources','CloudFormation')","@stack_name = @curr_item;edit(@template_file)"],
-          "dialog_parm": ["","","","","","@template_file","@template_file","",""],
-          "keys": ["stack_name"]
-       },
-       "Stacks":{
-          "request":"describe_stacks",
-          "name":"stacks",
-          "response": "response.body['Stacks']",
-          "response_code": 200,
-          "action": ["create configuration","delete stack", "get template","","","","view stack events","view resources",""],
-          "icon": ["@create","@delete","@edit","","@csv","","@events","@viewstack",""],
-          "tooltip":[" New Configuration "," Delete Stack ","Get Template",""," Csv Data ",""," View Stack Events  ","  View Stack Resources  ",""],
-          "dialog":["CF_CreateDialog","CF_StackDeleteDialog","CF_GetTemplateDialog","","","","@stack_name = @curr_item;load('Stack Events','CloudFormation')","@stack_name = @curr_item;load('Stack Resources','CloudFormation')",""],
-          "dialog_parm": ["","","","","","","","",""],
-          "keys": ["StackName","StackStatus"]
-       },
-       "Stack Events":{
-          "request":"describe_stack_events(@stack_name)",
-          "name":"stack_events",
-          "response": "response.body['StackEvents']",
-          "response_code": 200,
-          "action": ["","delete stack", "","","","","","",""],
-          "icon": ["","@delete","","","@csv","","","",""],
-          "tooltip":[""," Delete Stack ","",""," Csv Data ","","","",""],
-          "dialog":["","CF_StackDeleteDialog","","","","","","",""],
-          "dialog_parm": ["","","","","","","","",""],
-          "menu": true,
-          "keys": ["StackName","LogicalResourceId","ResourceType","Timestamp"]
-       },
-       "Stack Resources":{
-          "request":"describe_stack_resources({'StackName' => @stack_name})",
-          "name":"stack_resources",
-          "response": "response.body['StackResources']",
-          "response_code": 200,
-          "action": ["","delete stack", "","","","","","",""],
-          "icon": ["","@delete","","","@csv","","","",""],
-          "tooltip":[""," Delete Stack ","",""," Csv Data ","","","",""],
-          "dialog":["","CF_StackDeleteDialog","","","","","","",""],
-          "dialog_parm": ["","","","","","","","",""],
-          "menu": true,
-          "keys": ["StackName","LogicalResourceId","ResourceType","Timestamp"]
-       }
-    },
+
     "CloudWatch":{
        "Alarms":{
           "request":"describe_alarms",
@@ -863,7 +864,7 @@
            "dialog_parm": ["","","","","","","","",""],
            "keys": []
        }
-    },       
+    },
     "SQS":{
         "Queues":{
            "request":"list_queues",
@@ -876,7 +877,7 @@
            "dialog":["","","","","","","","",""],
            "dialog_parm": ["","","","","","","","",""],
            "keys": []
-       }       
+       }
     }
  }
 }
