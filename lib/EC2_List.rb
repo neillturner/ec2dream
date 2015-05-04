@@ -589,6 +589,8 @@ class EC2_List
                          @curr_driver = find_value('Driver',which.row)
                          @curr_provisioner = find_value('Provisioner',which.row)
                          @curr_last_action = find_value('Last-Action',which.row)
+                         @curr_verifier = find_value('Verifier',which.row)
+                         @curr_transport = find_value('Transport',which.row)
                  call_dialog(2)
               end
           # else

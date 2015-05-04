@@ -10,7 +10,7 @@
           "action": ["config","logs","select","edit","","","","",""],
           "icon": ["@edit","@script","@server","@script_edit","@csv","","","",""],
           "tooltip":["Configure Test Kitchen Path","View Logs"," Select Server ","Edit kitchen.yml"," Csv Data ","","","",""],
-          "dialog":["KIT_PathCreateDialog","KIT_LogSelectDialog","$ec2_main.kitchen.kit_load(@curr_item,@curr_driver,@curr_provisioner,@curr_last_action);$ec2_main.tabBook.setCurrent(4)","edit(@ec2_main.settings.get('TEST_KITCHEN_PATH')+'/.kitchen.yml')","","","","",""],
+          "dialog":["KIT_PathCreateDialog","KIT_LogSelectDialog","$ec2_main.kitchen.kit_load(@curr_item,@curr_driver,@curr_provisioner,@curr_last_action,@curr_verifier,@curr_transport);$ec2_main.tabBook.setCurrent(4)","edit(@ec2_main.settings.get('TEST_KITCHEN_PATH')+'/.kitchen.yml')","","","","",""],
           "dialog_parm": ["","","","","","","","",""],
           "keys": ["Instance"]
     },
@@ -110,7 +110,7 @@
       "dialog_parm": ["","@curr_allocation_id","@curr_allocation_id,@curr_domain","@curr_instance,@curr_association_id","","","","",""],
       "keys": []
     },
-	"Local Servers":{
+        "Local Servers":{
           "request":"",
           "name":"local_server",
           "response": "",
