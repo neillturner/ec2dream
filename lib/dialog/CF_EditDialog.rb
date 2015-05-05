@@ -311,7 +311,8 @@ class CF_EditDialog < FXDialogBox
 
   def cfndsl_run(cfndsl_file, cfndsl_parameters, template_file, pretty_print_json)
     list = `gem list`
-    gem_install('cfndsl') unless list.include? "cfndsl" if pretty_print_json.itemCurrent?(0)
+    gem_install('cfndsl') unless list.include? "cfndsl"
+    puts "WARNING: If ppjson does not install set pretty print json to false" if pretty_print_json.itemCurrent?(0)
     gem_install('ppjson') unless list.include? "ppjson" if pretty_print_json.itemCurrent?(0)
     cmd="cfndsl -o #{template_file} #{cfndsl_parameters} #{cfndsl_file}"
     cmd2="ppjson -f -i #{template_file}"
