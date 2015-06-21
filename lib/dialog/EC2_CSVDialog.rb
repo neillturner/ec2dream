@@ -16,8 +16,7 @@ class EC2_CSVDialog < FXDialogBox
     @text_area.text = csv_text
     cancel = FXButton.new(frame1, "   &Cancel   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     cancel.connect(SEL_COMMAND) do |sender, sel, data|
-       self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+      self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
     end
-  end 
-
+  end
 end

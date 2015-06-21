@@ -16,20 +16,19 @@ class GOG_DiskAttachDialog < FXDialogBox
     @created = false
     super(owner, "Attach Disk     ", :opts => DECOR_ALL, :width => 400, :height => 200)
     frame1 = FXMatrix.new(self, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
-    
     FXLabel.new(frame1, "Disk" )
     volume = FXTextField.new(frame1, 20, nil, 0, :opts => TEXTFIELD_READONLY)
     volume.text = disk_volume
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "Server     " )
     serverlist = FXComboBox.new(frame1, 35,
-          	      :opts => COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
+    :opts => COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
     sa = @ec2_main.serverCache.instance_running_names
     i = 0
     while i<sa.length
-       serverlist.appendItem(sa[i])
-       disk_server = sa[i] if disk_server == ""
-       i=i+1
+      serverlist.appendItem(sa[i])
+      disk_server = sa[i] if disk_server == ""
+      i=i+1
     end
     serverlist.numVisible = 9
     serverlist.connect(SEL_COMMAND) do |sender, sel, data|
@@ -37,7 +36,7 @@ class GOG_DiskAttachDialog < FXDialogBox
       sa = (disk_server).split"/" 
       disk_server = sa[0] if sa.size>1
     end
-	FXLabel.new(frame1, "" )
+    FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "Device     " )
     device = FXTextField.new(frame1, 25, nil, 0, :opts => FRAME_SUNKEN)
     FXLabel.new(frame1, "" )	
@@ -57,32 +56,28 @@ class GOG_DiskAttachDialog < FXDialogBox
       end
     end
   end 
-  
   def attach_disk(disk_volume, disk_server, disk_device)
-      if disk_server["/"] != nil
-         sa = (disk_server).split"/"
-         disk_server = (sa[0]) if sa.size>1
-       end
-      begin
-         disk_device = nil if disk_device == "" 	  
-	     puts "*** disk_server #{disk_server} disk_volume #{disk_volume}"
-         @ec2_main.environment.volumes.attach_disk(disk_server, $google_zone, disk_volume, disk_device)
-         @created = true
-      rescue
-         error_message("Attach Disk Failed",$!)
-      end
+    if disk_server["/"] != nil
+      sa = (disk_server).split"/"
+      disk_server = (sa[0]) if sa.size>1
+    end
+    begin
+      disk_device = nil if disk_device == "" 	  
+      puts "*** disk_server #{disk_server} disk_volume #{disk_volume}"
+      @ec2_main.environment.volumes.attach_disk(disk_server, $google_zone, disk_volume, disk_device)
+      @created = true
+    rescue
+      error_message("Attach Disk Failed",$!)
+    end
   end    
-  
   def saved
-     @created
+    @created
   end
-  
   def created
-     @created
+    @created
   end
 
   def success
-     @created
+    @created
   end
-  
 end

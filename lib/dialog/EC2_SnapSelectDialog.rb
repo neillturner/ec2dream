@@ -24,56 +24,53 @@ class EC2_SnapSelectDialog < FXDialogBox
     radio3 = FXRadioButton.new(frame1a, "AWS Account ID")
     FXLabel.new(frame1, "" )
     case snap_owner_id
-      when "self"
-        radio1.checkState = true
-        radio2.checkState = false
-        radio3.checkState = false
-      when "amazon"
-        radio1.checkState = false
-        radio2.checkState = true
-        radio3.checkState = false
-      else
-        radio1.checkState = false
-        radio2.checkState = false
-        radio3.checkState = true
-    end    
+    when "self"
+      radio1.checkState = true
+      radio2.checkState = false
+      radio3.checkState = false
+    when "amazon"
+      radio1.checkState = false
+      radio2.checkState = true
+      radio3.checkState = false
+    else
+      radio1.checkState = false
+      radio2.checkState = false
+      radio3.checkState = true
+    end
     FXLabel.new(frame1, "Snapshot Owner" )
     @snap_owner = FXTextField.new(frame1, 30, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     @snap_owner.text = snap_owner_id
     FXLabel.new(frame1, "" )
     radio1.connect(SEL_COMMAND) {
-       @snap_owner.text = "self"
-       radio2.checkState = false
-       radio3.checkState = false
+      @snap_owner.text = "self"
+      radio2.checkState = false
+      radio3.checkState = false
     }
     radio2.connect(SEL_COMMAND) {
-       @snap_owner.text = "amazon"
-       radio1.checkState = false
-       radio3.checkState = false
+      @snap_owner.text = "amazon"
+      radio1.checkState = false
+      radio3.checkState = false
     }
-    radio3.connect(SEL_COMMAND) { 
-          @snap_owner.text = ""
-          radio1.checkState = false
-          radio2.checkState = false
-    }    
+    radio3.connect(SEL_COMMAND) {
+      @snap_owner.text = ""
+      radio1.checkState = false
+      radio2.checkState = false
+    }
     frame2 = FXHorizontalFrame.new(page1,LAYOUT_FILL, :padding => 0)
     create = FXButton.new(frame2, "   &Return   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     create.connect(SEL_COMMAND) do |sender, sel, data|
-        @selected = true
-        self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+      @selected = true
+      self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
     end
   end
-  
   def snap_owner
     return @snap_owner.text
-  end  
-  
+  end
   def restorable_by
-     return nil
-  end 
-  
+    nil
+  end
   def selected
-     @selected
-  end  
+    @selected
+  end
 
 end

@@ -9,8 +9,8 @@ class Data_cfy_app
   end
 
   def find_all_apps()
-    conn = @ec2_main.environment.connection 
-    return {} if conn == nil  
+    conn = @ec2_main.environment.connection
+    return {} if conn == nil
     conn.list_apps || []
   end
 
@@ -24,15 +24,15 @@ class Data_cfy_app
     states.each do |state_key, state_value|
       if state_value > 0
         app_states << {:label => I18n.t('apps.model.' + state_key.to_s, :default => state_key.capitalize),
-                       :color => state_color(state_key), :data => state_value}
+        :color => state_color(state_key), :data => state_value}
       end
     end
     app_states
   end
 
   def find(name)
-    conn = @ec2_main.environment.connection 
-    return {} if conn == nil  
+    conn = @ec2_main.environment.connection
+    return {} if conn == nil
     app_info = conn.app_info(name) || {}
     unless app_info.empty?
       app_info[:instances_info] = find_app_instances(name)
@@ -47,8 +47,8 @@ class Data_cfy_app
   end
 
   def find_app_instances(name)
-    conn = @ec2_main.environment.connection 
-    return [] if conn == nil  
+    conn = @ec2_main.environment.connection
+    return [] if conn == nil
     app_instances = []
     instances_info = conn.app_instances(name) || {}
     instances_stats = instances_info[:instances].blank? ? [] : @cf_client.app_stats(name) || []
@@ -68,8 +68,8 @@ class Data_cfy_app
   end
 
   def find_app_crashes(name)
-    conn = @ec2_main.environment.connection 
-    return {} if conn == nil  
+    conn = @ec2_main.environment.connection
+    return {} if conn == nil
     conn.app_crashes(name)[:crashes] || {}
   end
 
@@ -89,7 +89,7 @@ class Data_cfy_app
     states.each do |state_key, state_value|
       if state_value > 0
         app_instances_states << {:label => I18n.t('apps.model.' + state_key.to_s, :default => state_key.capitalize),
-                                 :color => state_color(state_key), :data => state_value}
+        :color => state_color(state_key), :data => state_value}
       end
     end
     app_instances_states
@@ -97,8 +97,8 @@ class Data_cfy_app
 
   def create(name, instances, memsize, url, framework, runtime, service)
     #raise I18n.t('apps.model.name_invalid', :name => name) if (name =~ /^[\w-]+$/).nil?
-    conn = @ec2_main.environment.connection 
-    return {} if conn == nil  
+    conn = @ec2_main.environment.connection
+    return {} if conn == nil
     #begin
     #  app_info = conn.app_info(name)
     #rescue
@@ -123,14 +123,14 @@ class Data_cfy_app
       :staging => {:framework => framework, :runtime => runtime},
     }
     if service != nil and service != ""
-       manifest[:services] = [service]
-    end   
+      manifest[:services] = [service]
+    end
     conn.create_app(name, manifest)
   end
 
   def start(name)
-    conn = @ec2_main.environment.connection 
-    return {} if conn == nil  
+    conn = @ec2_main.environment.connection
+    return {} if conn == nil
     app = conn.app_info(name)
     app[:state] = "STARTED"
     conn.update_app(name, app)
@@ -148,8 +148,8 @@ class Data_cfy_app
 
   def stop(name)
     #raise I18n.t('apps.model.name_blank') if name.blank?
-    conn = @ec2_main.environment.connection 
-    return {} if conn == nil  
+    conn = @ec2_main.environment.connection
+    return {} if conn == nil
     app = conn.app_info(name)
     app[:state] = "STOPPED"
     conn.update_app(name, app)
@@ -164,8 +164,8 @@ class Data_cfy_app
 
   def delete(name)
     #raise I18n.t('apps.model.name_blank') if name.blank?
-    conn = @ec2_main.environment.connection 
-    return {} if conn == nil  
+    conn = @ec2_main.environment.connection
+    return {} if conn == nil
     conn.delete_app(name)
   end
 
@@ -174,8 +174,8 @@ class Data_cfy_app
     #raise I18n.t('apps.model.instances_blank') if instances.blank?
     #raise I18n.t('apps.model.instances_numeric') if (instances =~ /^\d+$/).nil?
     #raise I18n.t('apps.model.instances_lt1') if instances.to_i < 1
-    conn = @ec2_main.environment.connection 
-    return {} if conn == nil  
+    conn = @ec2_main.environment.connection
+    return {} if conn == nil
     app = conn.app_info(name)
     current_instances = app[:instances]
     wanted_mem = instances.to_i * app[:resources][:memory]
@@ -192,8 +192,8 @@ class Data_cfy_app
     #raise I18n.t('apps.model.name_blank') if name.blank?
     #raise I18n.t('apps.model.memsize_blank') if memsize.blank?
     #raise I18n.t('apps.model.memsize_numeric') if (memsize =~ /^\d+$/).nil?
-    conn = @ec2_main.environment.connection 
-    return {} if conn == nil  
+    conn = @ec2_main.environment.connection
+    return {} if conn == nil
     app = conn.app_info(name)
     current_memory = app[:resources][:memory]
     wanted_mem = memsize.to_i * app[:instances]
@@ -211,8 +211,8 @@ class Data_cfy_app
     #raise I18n.t('apps.model.name_blank') if name.blank?
     #raise I18n.t('apps.model.envvar_blank') if var_name.blank?
     #raise I18n.t('apps.model.envvar_invalid', :var_name => var_name) if (var_name =~ /^[\w-]+$/).nil?
-    conn = @ec2_main.environment.connection 
-    return nil if conn == nil  
+    conn = @ec2_main.environment.connection
+    return nil if conn == nil
     app = conn.app_info(name)
     envvars = app[:env] || []
     var_exists = nil
@@ -234,8 +234,8 @@ class Data_cfy_app
   def unset_var(name, var_name, restart = "true")
     #raise I18n.t('apps.model.name_blank') if name.blank?
     #raise I18n.t('apps.model.envvar_blank') if var_name.blank?
-    conn = @ec2_main.environment.connection 
-    return nil if conn == nil  
+    conn = @ec2_main.environment.connection
+    return nil if conn == nil
     app = conn.app_info(name)
     envvars = app[:env] || []
     var_deleted = nil
@@ -260,8 +260,8 @@ class Data_cfy_app
   def bind_service(name, service)
     #raise I18n.t('apps.model.name_blank') if name.blank?
     #raise I18n.t('apps.model.service_blank') if service.blank?
-    conn = @ec2_main.environment.connection 
-    return nil if conn == nil  
+    conn = @ec2_main.environment.connection
+    return nil if conn == nil
     app = conn.app_info(name)
     services = app[:services] || []
     service_exists = services.index(service)
@@ -278,8 +278,8 @@ class Data_cfy_app
   def unbind_service(name, service)
     #raise I18n.t('apps.model.name_blank') if name.blank?
     #raise I18n.t('apps.model.service_blank') if service.blank?
-    conn = @ec2_main.environment.connection 
-    return nil if conn == nil      
+    conn = @ec2_main.environment.connection
+    return nil if conn == nil
     app = conn.app_info(name)
     services = app[:services] || []
     service_deleted = services.delete(service)
@@ -297,8 +297,8 @@ class Data_cfy_app
     #raise I18n.t('apps.model.name_blank') if name.blank?
     #raise I18n.t('apps.model.url_blank') if url.blank?
     url = url.strip.gsub(/^http(s*):\/\//i, '').downcase
-    conn = @ec2_main.environment.connection 
-    return nil if conn == nil      
+    conn = @ec2_main.environment.connection
+    return nil if conn == nil
     app = conn.app_info(name)
     uris = app[:uris] || []
     url_exists = uris.index(url)
@@ -315,8 +315,8 @@ class Data_cfy_app
     #raise I18n.t('apps.model.name_blank') if name.blank?
     #raise I18n.t('apps.model.url_blank') if url.blank?
     url = url.strip.gsub(/^http(s*):\/\//i, '').downcase
-    conn = @ec2_main.environment.connection 
-    return nil if conn == nil      
+    conn = @ec2_main.environment.connection
+    return nil if conn == nil
     app = conn.app_info(name)
     uris = app[:uris] || []
     url_deleted = uris.delete(url)
@@ -332,8 +332,8 @@ class Data_cfy_app
   def upload_app(name, zipfile, resource_manifest = [])
     #raise I18n.t('apps.model.name_blank') if name.blank?
     #raise I18n.t('apps.model.zipfile_blank') if zipfile.blank?
-    conn = @ec2_main.environment.connection 
-    return nil if conn == nil      
+    conn = @ec2_main.environment.connection
+    return nil if conn == nil
     conn.upload_app(name, zipfile, resource_manifest)
   end
 
@@ -351,7 +351,7 @@ class Data_cfy_app
     Utils::ZipUtil.pack_files(zipfile, files)
     files.each { |f| f[:fn] = f[:zn]}
     upload_app(name, zipfile, files)
-  ensure
+    ensure
     FileUtils.rm_f(zipfile) if zipfile
     FileUtils.rm_rf(repodir, :secure => true) if repodir
   end
@@ -360,8 +360,8 @@ class Data_cfy_app
     #raise I18n.t('apps.model.name_blank') if name.blank?
     app_bits_tmpdir = get_app_bits_tmpdir()
     zipfile = app_bits_tmpdir.join(name + ".zip").to_s
-    conn = @ec2_main.environment.connection 
-    return nil if conn == nil      
+    conn = @ec2_main.environment.connection
+    return nil if conn == nil
     app_bits = conn.download_app(name)
     File.open(zipfile, "w") {|f| f.write(app_bits.force_encoding("utf-8").encode) }
     zipfile
@@ -370,39 +370,39 @@ class Data_cfy_app
   def view_file(name, path, instance = 0)
     #raise I18n.t('apps.model.name_blank') if name.blank?
     #raise I18n.t('apps.model.path_blank') if path.blank?
-    conn = @ec2_main.environment.connection 
-    return nil if conn == nil      
+    conn = @ec2_main.environment.connection
+    return nil if conn == nil
     contents = conn.app_files(name, path, instance) || []
   end
 
   private
 
   def app_crashes(name, since = 0)
-    conn = @ec2_main.environment.connection 
-    return nil if conn == nil    
+    conn = @ec2_main.environment.connection
+    return nil if conn == nil
     crashes = conn.app_crashes(name)[:crashes] || {}
     crashes.delete_if {|crash| crash[:since] < since}
     crashes
   end
 
   def app_started_properly(name, error_on_health)
-    conn = @ec2_main.environment.connection 
-    return nil if conn == nil    
+    conn = @ec2_main.environment.connection
+    return nil if conn == nil
     app = conn.app_info(name)
     case health(app)
-      when 'N/A'
-        raise 'Undetermined State' if error_on_health
-        return false
-      when 'RUNNING'
-        return true
-      else
-        return false
+    when 'N/A'
+      raise 'Undetermined State' if error_on_health
+      return false
+    when 'RUNNING'
+      return true
+    else
+      return false
     end
   end
 
   def check_app_for_restart(name)
-    conn = @ec2_main.environment.connection 
-    return nil if conn == nil    
+    conn = @ec2_main.environment.connection
+    return nil if conn == nil
     app = conn.app_info(name) || {}
     restart(name) if app[:state] == 'STARTED'
   end
@@ -413,8 +413,8 @@ class Data_cfy_app
   end
 
   def check_resources(resources = [])
-    conn = @ec2_main.environment.connection 
-    return nil if conn == nil    
+    conn = @ec2_main.environment.connection
+    return nil if conn == nil
     conn.check_resources(resources)
   end
 
@@ -462,27 +462,27 @@ class Data_cfy_app
 
   def state_color(state)
     color = case state
-      when "RUNNING" then "#7FDB49"
-      when "STARTED" then "#7FDB49"
-      when "STARTING" then "#5BDED3"
-      when "STOPPED" then "#C70E17"
-      when "FLAPPING" then "#FF8C00"
-      when "DOWN" then "#941218"
+    when "RUNNING" then "#7FDB49"
+    when "STARTED" then "#7FDB49"
+    when "STARTING" then "#5BDED3"
+    when "STOPPED" then "#C70E17"
+    when "FLAPPING" then "#FF8C00"
+    when "DOWN" then "#941218"
       #when "CRASHED" then "#F71823"
       #when "DEA_SHUTDOWN" then "#F71823"
       #when "DEA_EVACUATION" then "#F71823"
-      else "#F71823"
-     end
+    else "#F71823"
+    end
   end
 
   def valid_framework_and_runtime?(framework, runtime)
-    conn = @ec2_main.environment.connection 
-    return nil if conn == nil    
+    conn = @ec2_main.environment.connection
+    return nil if conn == nil
     system = System.new(conn)
     frameworks = system.find_all_frameworks()
     frameworks.each do |fwk_name, fwk|
       fwk[:runtimes].each do |run|
-         return true if (fwk[:name] == framework && run[:name] == runtime)
+        return true if (fwk[:name] == framework && run[:name] == runtime)
       end
     end
     false

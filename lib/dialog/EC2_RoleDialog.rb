@@ -1,3 +1,4 @@
+
 require 'rubygems'
 require 'fox16'
 require 'net/http'
@@ -5,36 +6,36 @@ require 'resolv'
 
 include Fox
 
-class GOG_AddressDialog < FXDialogBox
+class EC2_RoleDialog < FXDialogBox
 
   def initialize(owner)
-    puts "GOG_AddressDialog.initialize"
+    puts "RoleDialog.initialize"
     @ec2_main = owner
     @curr_item = ""
-    @item_name = []
-    begin
-      @item_name = @ec2_main.environment.addresses.all
-    rescue
+    @item_name = Array.new
+    i=0
+    @ec2_main.environment.roles.all.each do |r|
+      @item_name[i] = r['RoleName']
+      i = i+1
     end
-    super(owner, "Select Address", :opts => DECOR_ALL, :width => 600, :height => 300)
+    @item_name = @item_name.sort
+    super(owner, "Select Role", :opts => DECOR_ALL, :width => 400, :height => 200)
     itemlist = FXList.new(self, :opts => LIST_SINGLESELECT|LAYOUT_FILL)
     @item_name.each do |e|
-      itemlist.appendItem("#{e['address']} (#{e['name']})")
+      itemlist.appendItem(e)
     end
     itemlist.connect(SEL_COMMAND) do |sender, sel, data|
       selected_item = ""
       itemlist.each do |item|
-        if item.selected?
-          sa=(item.text).split('(')
-          selected_item = sa[0].strip
-        end
+        selected_item = item.text if item.selected?
       end
       puts "item "+selected_item
       @curr_item = selected_item
-      puts "instance "+@curr_item
+      puts "Role "+@curr_item
       self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
     end
   end
+
   def selected
     return @curr_item
   end

@@ -14,15 +14,14 @@ class GOG_ZoneOperationDeleteDialog < FXDialogBox
     @deleted = false
     answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm delete","Confirm delete of Zone Operation "+@delete_item)
     if answer == MBOX_CLICKED_YES
-   	   begin
-  	      @ec2_main.environment.servers.delete_zoneoperation($google_zone,@delete_item)
-          @deleted = true
-       rescue
-          error_message("Zone Operation Deletion failed",$!)
-       end
+      begin
+        @ec2_main.environment.servers.delete_zoneoperation($google_zone,@delete_item)
+        @deleted = true
+      rescue
+        error_message("Zone Operation Deletion failed",$!)
+      end
     end    
   end 
- 
   def deleted 
     @deleted
   end   
@@ -30,6 +29,5 @@ class GOG_ZoneOperationDeleteDialog < FXDialogBox
   def success 
     @deleted
   end
-  
 end
 

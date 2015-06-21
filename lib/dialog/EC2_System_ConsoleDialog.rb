@@ -16,17 +16,17 @@ class EC2_System_ConsoleDialog < FXDialogBox
     text_area = FXText.new(page1, :opts => TEXT_WORDWRAP|LAYOUT_FILL)
     text = ""
     begin
-       r = @ec2_main.environment.servers.get_console_output(instance)
-       text = r[:aws_output]
+      r = @ec2_main.environment.servers.get_console_output(instance)
+      text = r[:aws_output]
     rescue
-       text = ""
+      text = ""
     end    
     text_area.setText(text)
     FXLabel.new(page1, "" )
     close = FXButton.new(page1, "   &Close   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     FXLabel.new(page1, "" )
     close.connect(SEL_COMMAND) do |sender, sel, data|
-       self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+      self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
     end
   end 
 

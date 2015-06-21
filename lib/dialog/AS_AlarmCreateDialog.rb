@@ -16,11 +16,11 @@ class AS_AlarmCreateDialog < FXDialogBox
     @ec2_main = owner
     @title = ""
     if item == nil 
-       @result = ""
-       @title = "Add CloudWatch Alarm"
+      @result = ""
+      @title = "Add CloudWatch Alarm"
     else
-       @result = item
-       @title = "Edit CloudWatch Alarm"
+      @result = item
+      @title = "Edit CloudWatch Alarm"
     end
     @saved = false
     #@create = @ec2_main.makeIcon("new.png")
@@ -50,11 +50,11 @@ class AS_AlarmCreateDialog < FXDialogBox
     namespace_button.icon = @magnifier
     namespace_button.tipText = "Select Namespace"
     namespace_button.connect(SEL_COMMAND) do
-       dialog = AS_NamespaceDialog.new(@ec2_main)
-       dialog.execute
-       if dialog.selected != nil and dialog.selected != ""
-    	  namespace.text = dialog.selected
-       end   
+      dialog = AS_NamespaceDialog.new(@ec2_main)
+      dialog.execute
+      if dialog.selected != nil and dialog.selected != ""
+        namespace.text = dialog.selected
+      end   
     end
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "Metric Name")
@@ -64,11 +64,11 @@ class AS_AlarmCreateDialog < FXDialogBox
     metric_name_button.icon = @magnifier
     metric_name_button.tipText = "Select Metric"
     metric_name_button.connect(SEL_COMMAND) do
-       dialog = AS_MetricDialog.new(@ec2_main, namespace.text)
-       dialog.execute
-       if dialog.selected != nil and dialog.selected != ""
-	  metric_name.text = dialog.selected
-       end   
+      dialog = AS_MetricDialog.new(@ec2_main, namespace.text)
+      dialog.execute
+      if dialog.selected != nil and dialog.selected != ""
+        metric_name.text = dialog.selected
+      end   
     end
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "Statistic")
@@ -80,7 +80,7 @@ class AS_AlarmCreateDialog < FXDialogBox
     statistic.appendItem("SampleCount");
     statistic.appendItem("Sum");
     statistic.connect(SEL_COMMAND) do |sender, sel, data|
-       statistic_value = data
+      statistic_value = data
     end    
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "Period (Secs)")
@@ -97,7 +97,7 @@ class AS_AlarmCreateDialog < FXDialogBox
     comparison_operator.appendItem("LessThanThreshold");
     comparison_operator.appendItem("LessThanOrEqualToThreshold");
     comparison_operator.connect(SEL_COMMAND) do |sender, sel, data|
-       comparison_operator_value = data
+      comparison_operator_value = data
     end	    
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "Dimensions")
@@ -113,11 +113,11 @@ class AS_AlarmCreateDialog < FXDialogBox
     unit_button.icon = @magnifier
     unit_button.tipText = "Select Unit"
     unit_button.connect(SEL_COMMAND) do
-       dialog = AS_UnitDialog.new(@ec2_main)
-       dialog.execute
-       if dialog.selected != nil and dialog.selected != ""
-	  unit.text = dialog.selected
-       end   
+      dialog = AS_UnitDialog.new(@ec2_main)
+      dialog.execute
+      if dialog.selected != nil and dialog.selected != ""
+        unit.text = dialog.selected
+      end   
     end
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "Actions Enabled")
@@ -126,7 +126,7 @@ class AS_AlarmCreateDialog < FXDialogBox
     actions_enabled.appendItem("True");
     actions_enabled.appendItem("False");
     actions_enabled.connect(SEL_COMMAND) do |sender, sel, data|
-       actions_enabled_value = data
+      actions_enabled_value = data
     end	        
     FXLabel.new(frame1, "" )    
     FXLabel.new(frame1, "Alarm Actions")
@@ -135,11 +135,11 @@ class AS_AlarmCreateDialog < FXDialogBox
     alarm_actions_button.icon = @magnifier
     alarm_actions_button.tipText = "Select Action"
     alarm_actions_button.connect(SEL_COMMAND) do
-       dialog = AS_PolicyDialog.new(@ec2_main)
-       dialog.execute
-       if dialog.selected != nil and dialog.selected != ""
-	  alarm_actions.text = dialog.selected
-       end   
+      dialog = AS_PolicyDialog.new(@ec2_main)
+      dialog.execute
+      if dialog.selected != nil and dialog.selected != ""
+        alarm_actions.text = dialog.selected
+      end   
     end
     FXLabel.new(frame1, "Insufficient Data Actions")
     insufficient_data_actions = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN)
@@ -174,144 +174,141 @@ class AS_AlarmCreateDialog < FXDialogBox
     save = FXButton.new(frame2, "   &Save   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X|BUTTON_INITIAL)
     FXLabel.new(frame1, "" )
     save.connect(SEL_COMMAND) do |sender, sel, data|
-       if alarm_name.text == nil or alarm_name.text == ""
-         error_message("Error","Alarm Name not specified")
-       else
-         r = {}
-         r['AlarmName'] = alarm_name.text      
-         r['AlarmDescription'] = alarm_description.text                      
-         r['ComparisonOperator'] = comparison_operator_value
-         dim = (dimensions.text).split(",")
-         dim_ah = []
-         dim.each do |a|
-           b = a.split('=')
-           if b.size>0 
-              dim_ah.push({ 'Name' => b[0], 'Value' => b[1]})
-           end
-         end           
-         r['Dimensions'] = dim_ah                    
-         r['EvaluationPeriods'] = (evaluation_periods.text).to_i
-         r['InsufficientDataActions'] = (insufficient_data_actions.text).split(",")
-         r['MetricName'] = metric_name.text
-         r['Statistic'] = statistic_value
-         r['Namespace'] = namespace.text
-         r['OKActions'] = (ok_actions.text).split(",")      
-         r['Period'] = (period.text).to_i
-         if actions_enabled_value == "True"
-            r['ActionsEnabled']   = true 
-         else
-            r['ActionsEnabled']   = false 
-         end
-         r['AlarmActions'] =  (alarm_actions.text).split(',')
-         r['Statistic'] = statistic_value
-         r['Threshold'] = (threshold.text).to_i
-         r['Unit'] = unit.text         
-         #r['AlarmConfigurationUpdatedTimestamp'] = alarm_configuration_updated_timestamp.text
-         #r['StateReason'] = state_reason.text
-         #r['StateReasonData'] = state_reason_data.text                    
-         #r['StateUpdatedTimestamp'] = state_updated_timestamp.text
-         #r['StateValue'] = state_value.text
-         #r['AlarmArn'] = alarm_arn.text               
-         put_metric_alarm(r)
-         if @saved == true
-            self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
-         end         
-       end  
+      if alarm_name.text == nil or alarm_name.text == ""
+        error_message("Error","Alarm Name not specified")
+      else
+        r = {}
+        r['AlarmName'] = alarm_name.text      
+        r['AlarmDescription'] = alarm_description.text                      
+        r['ComparisonOperator'] = comparison_operator_value
+        dim = (dimensions.text).split(",")
+        dim_ah = []
+        dim.each do |a|
+          b = a.split('=')
+          if b.size>0 
+            dim_ah.push({ 'Name' => b[0], 'Value' => b[1]})
+          end
+        end           
+        r['Dimensions'] = dim_ah                    
+        r['EvaluationPeriods'] = (evaluation_periods.text).to_i
+        r['InsufficientDataActions'] = (insufficient_data_actions.text).split(",")
+        r['MetricName'] = metric_name.text
+        r['Statistic'] = statistic_value
+        r['Namespace'] = namespace.text
+        r['OKActions'] = (ok_actions.text).split(",")      
+        r['Period'] = (period.text).to_i
+        if actions_enabled_value == "True"
+          r['ActionsEnabled']   = true 
+        else
+          r['ActionsEnabled']   = false 
+        end
+        r['AlarmActions'] =  (alarm_actions.text).split(',')
+        r['Statistic'] = statistic_value
+        r['Threshold'] = (threshold.text).to_i
+        r['Unit'] = unit.text         
+        #r['AlarmConfigurationUpdatedTimestamp'] = alarm_configuration_updated_timestamp.text
+        #r['StateReason'] = state_reason.text
+        #r['StateReasonData'] = state_reason_data.text                    
+        #r['StateUpdatedTimestamp'] = state_updated_timestamp.text
+        #r['StateValue'] = state_value.text
+        #r['AlarmArn'] = alarm_arn.text               
+        put_metric_alarm(r)
+        if @saved == true
+          self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+        end         
+      end  
     end
     if @result != ""
-          #as.describe_triggers(@as_name).each do |r|
-          options = {}
-          options['PolicyNames.member.1']= @result
-          @ec2_main.environment.cloud_watch.describe_alarms().each do |r|
-             if r['AlarmName'] == @result
-                     alarm_name.text = r['AlarmName']  
-                     alarm_description.text = r['AlarmDescription']                     
-                     comparison_operator_value = r['ComparisonOperator']
-        		comparison_operator.setCurrentItem(0)
-        		if comparison_operator_value == "GreaterThanThreshold"
-        		   comparison_operator.setCurrentItem(1)
-        		end
-        		if comparison_operator_value == "LessThanThreshold"
-        		   comparison_operator.setCurrentItem(2)
-        		end
-        		if comparison_operator_value == "LessThanOrEqualToThreshold"
-        		   comparison_operator.setCurrentItem(3)
-        		end
-        	     dim = ""	
-        	     if r['Dimensions'] != nil 
-        	        r['Dimensions'].each do |d|
-        	           if dim == ""
-        	              dim = "#{d['Name']}=#{d['Value']}"
-        	           else
-        	              dim = dim+",#{d['Name']}=#{d['Value']}"
-        	           end   
-        	        end
-        	     end   
-                     dimensions.text = dim                   
-                     evaluation_periods.text = r['EvaluationPeriods'].to_s
-                     insufficient_data_actions.text = r['InsufficientDataActions']
-                     metric_name.text = r['MetricName']
-                     namespace.text = r['Namespace']
-                     ok_actions.text = r['OKActions']      
-                     period.text = r['Period'].to_s
-                     if r['ActionsEnabled'] == true
-                        actions_enabled.setCurrentItem(0)
-                        actions_enabled_value = "True"
-                     else
-                        actions_enabled.setCurrentItem(1)
-                        actions_enabled_value = "False"                     
-                     end
-                     alarm_actions.text = r['AlarmActions']
-                     statistic_value = r['Statistic']
-	             case statistic_value
-                     when "Average"
-                        statistic.setCurrentItem(0)
-                     when "Maximum"
-                        statistic.setCurrentItem(1)
-                     when "Minimum"
-                        statistic.setCurrentItem(2)
-                     when "SampleCount"
-                        statistic.setCurrentItem(3)
-                     when "Sum"
-                        statistic.setCurrentItem(4)
-                     end
-                     threshold.text = r['Threshold'].to_s
-                     unit.text = r['Unit']
-                     alarm_configuration_updated_timestamp.text = r['AlarmConfigurationUpdatedTimestamp'].to_s                     
-                     alarm_arn.text = r['AlarmArn']
-                     state_reason.text = r['StateReason']
-                     state_reason_data.text = r['StateReasonData']                    
-                     state_updated_timestamp.text = r['StateUpdatedTimestamp'].to_s
-                     state_value.text = r['StateValue']
-                  end
+      #as.describe_triggers(@as_name).each do |r|
+      options = {}
+      options['PolicyNames.member.1']= @result
+      @ec2_main.environment.cloud_watch.describe_alarms().each do |r|
+        if r['AlarmName'] == @result
+          alarm_name.text = r['AlarmName']  
+          alarm_description.text = r['AlarmDescription']                     
+          comparison_operator_value = r['ComparisonOperator']
+          comparison_operator.setCurrentItem(0)
+          if comparison_operator_value == "GreaterThanThreshold"
+            comparison_operator.setCurrentItem(1)
           end
-     else
-        namespace.text = "AWS/EC2"
-        unit.text = "Percent"
-        metric_name.text = "CPUUtilization"
-        evaluation_periods.text = "1"
-        statistic_value = "Average"
-        actions_enabled_value = "True"
-        comparison_operator_value = "GreaterThanOrEqualToThreshold"
-     end
+          if comparison_operator_value == "LessThanThreshold"
+            comparison_operator.setCurrentItem(2)
+          end
+          if comparison_operator_value == "LessThanOrEqualToThreshold"
+            comparison_operator.setCurrentItem(3)
+          end
+          dim = ""	
+          if r['Dimensions'] != nil 
+            r['Dimensions'].each do |d|
+              if dim == ""
+                dim = "#{d['Name']}=#{d['Value']}"
+              else
+                dim = dim+",#{d['Name']}=#{d['Value']}"
+              end   
+            end
+          end   
+          dimensions.text = dim                   
+          evaluation_periods.text = r['EvaluationPeriods'].to_s
+          insufficient_data_actions.text = r['InsufficientDataActions']
+          metric_name.text = r['MetricName']
+          namespace.text = r['Namespace']
+          ok_actions.text = r['OKActions']      
+          period.text = r['Period'].to_s
+          if r['ActionsEnabled'] == true
+            actions_enabled.setCurrentItem(0)
+            actions_enabled_value = "True"
+          else
+            actions_enabled.setCurrentItem(1)
+            actions_enabled_value = "False"                     
+          end
+          alarm_actions.text = r['AlarmActions']
+          statistic_value = r['Statistic']
+          case statistic_value
+          when "Average"
+            statistic.setCurrentItem(0)
+          when "Maximum"
+            statistic.setCurrentItem(1)
+          when "Minimum"
+            statistic.setCurrentItem(2)
+          when "SampleCount"
+            statistic.setCurrentItem(3)
+          when "Sum"
+            statistic.setCurrentItem(4)
+          end
+          threshold.text = r['Threshold'].to_s
+          unit.text = r['Unit']
+          alarm_configuration_updated_timestamp.text = r['AlarmConfigurationUpdatedTimestamp'].to_s                     
+          alarm_arn.text = r['AlarmArn']
+          state_reason.text = r['StateReason']
+          state_reason_data.text = r['StateReasonData']                    
+          state_updated_timestamp.text = r['StateUpdatedTimestamp'].to_s
+          state_value.text = r['StateValue']
+        end
+      end
+    else
+      namespace.text = "AWS/EC2"
+      unit.text = "Percent"
+      metric_name.text = "CPUUtilization"
+      evaluation_periods.text = "1"
+      statistic_value = "Average"
+      actions_enabled_value = "True"
+      comparison_operator_value = "GreaterThanOrEqualToThreshold"
+    end
   end 
-  
   def put_metric_alarm(options)
-      begin
-       puts "options #{options}" 
-       r = @ec2_main.environment.cloud_watch.put_metric_alarm(options)
-       @saved = true
-      rescue
-        error_message("Create or Update Alarm Failed",$!)
-      end 
+    begin
+      puts "options #{options}" 
+      r = @ec2_main.environment.cloud_watch.put_metric_alarm(options)
+      @saved = true
+    rescue
+      error_message("Create or Update Alarm Failed",$!)
+    end 
   end 
 
   def saved
-     @saved
+    @saved
   end
-    
   def success
-     @saved
+    @saved
   end
-  
 end

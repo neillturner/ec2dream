@@ -27,21 +27,19 @@ class EC2_EBSAttachDeviceDialog < FXDialogBox
     devicelist.appendItem("windows xvdi");
     devicelist.appendItem("windows xvdj");
     devicelist.appendItem("windows xvdk");
-    devicelist.appendItem("windows xvdl");       
+    devicelist.appendItem("windows xvdl");
     devicelist.connect(SEL_COMMAND) do |sender, sel, data|
-         selected_item = ""
-         devicelist.each do |item|
-           selected_item = item.text if item.selected?
-         end
-         puts "item "+selected_item
-         @curr_device = selected_item
-         puts "device "+@curr_device
-         self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+      selected_item = ""
+      devicelist.each do |item|
+        selected_item = item.text if item.selected?
+      end
+      puts "item "+selected_item
+      @curr_device = selected_item
+      puts "device "+@curr_device
+      self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
     end
   end
-  
   def selected
     return @curr_device
-  end  
-  
+  end
 end

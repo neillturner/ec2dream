@@ -38,14 +38,14 @@ class LOC_CreateDialog < FXDialogBox
     ssh_key_button.icon = @magnifier
     ssh_key_button.tipText = "Browse..."
     ssh_key_button.connect(SEL_COMMAND) do
-       dialog = FXFileDialog.new(frame1, "Select pem file")
-       dialog.patternList = [
-          "Pem Files (*.pem)"
-       ]
-       dialog.selectMode = SELECTFILE_EXISTING
-       if dialog.execute != 0
-          ssh_key.text = dialog.filename
-       end
+      dialog = FXFileDialog.new(frame1, "Select pem file")
+      dialog.patternList = [
+        "Pem Files (*.pem)"
+      ]
+      dialog.selectMode = SELECTFILE_EXISTING
+      if dialog.execute != 0
+        ssh_key.text = dialog.filename
+      end
     end
     FXLabel.new(frame1, "Putty Key" )
     putty_key = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
@@ -54,14 +54,14 @@ class LOC_CreateDialog < FXDialogBox
     putty_key_button.icon = @magnifier
     putty_key_button.tipText = "Browse..."
     putty_key_button.connect(SEL_COMMAND) do
-       dialog = FXFileDialog.new(frame1, "Select pem file")
-       dialog.patternList = [
-          "Pem Files (*.ppk)"
-       ]
-       dialog.selectMode = SELECTFILE_EXISTING
-       if dialog.execute != 0
-          putty_key.text = dialog.filename
-       end
+      dialog = FXFileDialog.new(frame1, "Select pem file")
+      dialog.patternList = [
+        "Pem Files (*.ppk)"
+      ]
+      dialog.selectMode = SELECTFILE_EXISTING
+      if dialog.execute != 0
+        putty_key.text = dialog.filename
+      end
     end
     FXLabel.new(frame1, "Kitchen Instance" )
     chef_node = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
@@ -100,14 +100,14 @@ class LOC_CreateDialog < FXDialogBox
     bastion_ssh_key_button.icon = @magnifier
     bastion_ssh_key_button.tipText = "Browse..."
     bastion_ssh_key_button.connect(SEL_COMMAND) do
-       dialog = FXFileDialog.new(frame1, "Select pem file")
-       dialog.patternList = [
-          "Pem Files (*.pem)"
-       ]
-       dialog.selectMode = SELECTFILE_EXISTING
-       if dialog.execute != 0
-          bastion_ssh_key.text = dialog.filename
-       end
+      dialog = FXFileDialog.new(frame1, "Select pem file")
+      dialog.patternList = [
+        "Pem Files (*.pem)"
+      ]
+      dialog.selectMode = SELECTFILE_EXISTING
+      if dialog.execute != 0
+        bastion_ssh_key.text = dialog.filename
+      end
     end
     FXLabel.new(frame1, "Bastion Putty Key" )
     bastion_putty_key = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
@@ -115,14 +115,14 @@ class LOC_CreateDialog < FXDialogBox
     bastion_putty_key_button.icon = @magnifier
     bastion_putty_key_button.tipText = "Browse..."
     bastion_putty_key_button.connect(SEL_COMMAND) do
-       dialog = FXFileDialog.new(frame1, "Select pem file")
-       dialog.patternList = [
-          "Pem Files (*.ppk)"
-       ]
-       dialog.selectMode = SELECTFILE_EXISTING
-       if dialog.execute != 0
-          bastion_putty_key.text = dialog.filename
-       end
+      dialog = FXFileDialog.new(frame1, "Select pem file")
+      dialog.patternList = [
+        "Pem Files (*.ppk)"
+      ]
+      dialog.selectMode = SELECTFILE_EXISTING
+      if dialog.execute != 0
+        bastion_putty_key.text = dialog.filename
+      end
     end
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "" )
@@ -131,29 +131,29 @@ class LOC_CreateDialog < FXDialogBox
     create = FXButton.new(frame1, "   &Create   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     FXLabel.new(frame1, "" )
     create.connect(SEL_COMMAND) do |sender, sel, data|
-       if server.text == nil or server.text == ""
-         error_message("Error","Server not specified")
-       else
-         windows_server_value = "false"
-         if windows_server.itemCurrent?(0)
-	    windows_server_value = true
-         end
-         create_local_server(server.text,address.text,address_port.text,chef_node.text,ssh_user.text,ssh_password.text,ssh_key.text,putty_key.text,local_port.text,bastion_host.text,bastion_port.text,bastion_user.text,bastion_ssh_key.text,bastion_putty_key.text,windows_server_value)
-         if @saved == true
-           self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
-         end
-       end
+      if server.text == nil or server.text == ""
+        error_message("Error","Server not specified")
+      else
+        windows_server_value = "false"
+        if windows_server.itemCurrent?(0)
+          windows_server_value = true
+        end
+        create_local_server(server.text,address.text,address_port.text,chef_node.text,ssh_user.text,ssh_password.text,ssh_key.text,putty_key.text,local_port.text,bastion_host.text,bastion_port.text,bastion_user.text,bastion_ssh_key.text,bastion_putty_key.text,windows_server_value)
+        if @saved == true
+          self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+        end
+      end
     end
   end
 
   def create_local_server(server,address,address_port,chef_node,ssh_user,ssh_password,ssh_key,putty_key,local_port,bastion_host, bastion_port,bastion_user,bastion_ssh_key,bastion_putty_key,windows_server)
-     folder = "loc_server"
-     loc = EC2_Properties.new
-     if loc != nil
+    folder = "loc_server"
+    loc = EC2_Properties.new
+    if loc != nil
       begin
         if loc.exists(folder, server)
-           error_message("Error","Local Server Already Exists")
-           return
+          error_message("Error","Local Server Already Exists")
+          return
         end
         properties = {}
         properties['server']=server
@@ -174,17 +174,17 @@ class LOC_CreateDialog < FXDialogBox
 
         @saved = loc.save(folder, server, properties)
         if @saved == false
-           error_message("Error","Create Local Server Failed")
+          error_message("Error","Create Local Server Failed")
         end
       rescue
         error_message("Create Local Server",$!)
         return
       end
-     end
+    end
   end
 
   def saved
-     @saved
+    @saved
   end
 
   def created
@@ -192,7 +192,7 @@ class LOC_CreateDialog < FXDialogBox
   end
 
   def success
-     @saved
+    @saved
   end
 
 end

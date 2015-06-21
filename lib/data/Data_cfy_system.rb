@@ -1,17 +1,17 @@
 class Data_cfy_system
   def initialize(owner)
-    @ec2_main = owner 
+    @ec2_main = owner
   end
 
   def find_account_info()
-     conn = @ec2_main.environment.connection 
+    conn = @ec2_main.environment.connection
     return {} if conn == nil
-     conn.cloud_info || {}
+    conn.cloud_info || {}
   end
 
   def find_all_frameworks()
     info = find_account_info()
-      info[:frameworks] || {}
+    info[:frameworks] || {}
   end
 
   def find_all_runtimes()
@@ -31,7 +31,7 @@ class Data_cfy_system
   end
 
   def find_all_system_services()
-    conn = @ec2_main.environment.connection 
+    conn = @ec2_main.environment.connection
     return {} if conn == nil
     conn.cloud_services_info || {}
   end
@@ -41,7 +41,6 @@ class Data_cfy_system
     usage = info[:usage]
     limits = info[:limits]
     return 0 unless usage and limits
-
     available_memory = limits[:memory].to_i - usage[:memory].to_i
   end
 end

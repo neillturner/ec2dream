@@ -22,19 +22,16 @@ class CF_StackDialog < FXDialogBox
     select = FXButton.new(frame1, "   &Select   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     FXLabel.new(frame1, "" )
     select.connect(SEL_COMMAND) do |sender, sel, data|
-       if stack_name.text != nil or stack_name.text != ""
-         @stack_name = stack_name.text
-       end         
-       self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+      if stack_name.text != nil or stack_name.text != ""
+        @stack_name = stack_name.text
+      end         
+      self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
     end
   end 
-  
-   def selected
-      @stack_name
+  def selected
+    @stack_name
   end
-  
   def stack_name
     @stack_name
   end
-  
 end

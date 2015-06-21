@@ -14,9 +14,9 @@ class EC2_SnapRegisterDialog < FXDialogBox
     snap_nickname = ""
     sa = (snap_id).split"/"
     if sa.size>1
-       snap_id = sa[1]
-       snap_nickname = sa[0]
-    end    
+      snap_id = sa[1]
+      snap_nickname = sa[0]
+    end
     @created = false
     @image_platform = "i386"
     options = {}
@@ -36,7 +36,7 @@ class EC2_SnapRegisterDialog < FXDialogBox
     platform.appendItem("i386");
     platform.appendItem("x86_64");
     platform.connect(SEL_COMMAND) do |sender, sel, data|
-       @image_platform = data
+      @image_platform = data
     end
     FXLabel.new(frame1, "Image Name" )
     image_name = FXTextField.new(frame1, 30, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
@@ -47,14 +47,14 @@ class EC2_SnapRegisterDialog < FXDialogBox
     device_name.text = "/dev/sda1"
     FXLabel.new(frame1, "Kernel Id" )
     kernel_id = FXTextField.new(frame1, 30, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
-    FXLabel.new(frame1, "Ramdisk Id" )        
+    FXLabel.new(frame1, "Ramdisk Id" )
     ramdisk_id = FXTextField.new(frame1, 30, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
     FXLabel.new(frame1, "Delete Volume on Termination" )
     delete_on_termination = FXComboBox.new(frame1, 15, :opts => COMBOBOX_STATIC|COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
-    delete_on_termination.numVisible = 2      
-    delete_on_termination.appendItem("true")	
+    delete_on_termination.numVisible = 2
+    delete_on_termination.appendItem("true")
     delete_on_termination.appendItem("false")
-    delete_on_termination.setCurrentItem(0)    
+    delete_on_termination.setCurrentItem(0)
     #frame2 = FXHorizontalFrame.new(page1,LAYOUT_FILL, :padding => 0)
     FXLabel.new(frame1,"")
     FXLabel.new(frame1,"")
@@ -62,56 +62,51 @@ class EC2_SnapRegisterDialog < FXDialogBox
     FXLabel.new(frame1,"")
     create = FXButton.new(frame1, "   &Register   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     create.connect(SEL_COMMAND) do |sender, sel, data|
-         r = {}
-         if kernel_id.text == nil or kernel_id.text == ""
-            error_message("Error","Kernel Id not specified") 
-         else
-	  
-	     options[:name] = image_name.text
-	     options[:root_device_name] = device_name.text
-	     if description.text != nil
-	        options[:description] = description.text
-             end
-             options[:architecture] = @image_platform
-             if kernel_id.text != nil
-                options[:kernel_id] = kernel_id.text
-             end 
-             if ramdisk_id.text != nil
-                options[:ramdisk_id] = ramdisk_id.text
-             end             
-             bm = {}
-             bm[:ebs_snapshot_id] = snapshot_id.text
-             bm[:device_name] = device_name.text
-             if delete_on_termination.itemCurrent?(1)
-                bm[:ebs_delete_on_termination] = false
-             else
-                bm[:ebs_delete_on_termination] = true
-             end             
-             options[:block_device_mappings] =bm  
-             begin
-                @ec2_main.environment.images.register_image(options)
-             rescue
-                error_message("Register Image failed",$!)
-             end             
-             @created = true
-         end 
+      r = {}
+      if kernel_id.text == nil or kernel_id.text == ""
+        error_message("Error","Kernel Id not specified")
+      else
+                options[:name] = image_name.text
+        options[:root_device_name] = device_name.text
+        if description.text != nil
+          options[:description] = description.text
+        end
+        options[:architecture] = @image_platform
+        if kernel_id.text != nil
+          options[:kernel_id] = kernel_id.text
+        end
+        if ramdisk_id.text != nil
+          options[:ramdisk_id] = ramdisk_id.text
+        end
+        bm = {}
+        bm[:ebs_snapshot_id] = snapshot_id.text
+        bm[:device_name] = device_name.text
+        if delete_on_termination.itemCurrent?(1)
+          bm[:ebs_delete_on_termination] = false
+        else
+          bm[:ebs_delete_on_termination] = true
+        end
+        options[:block_device_mappings] =bm
+        begin
+          @ec2_main.environment.images.register_image(options)
+        rescue
+          error_message("Register Image failed",$!)
+        end
+        @created = true
+      end
     end
     exit_button = FXButton.new(frame1, "   &Exit   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     exit_button.connect(SEL_COMMAND) do |sender, sel, data|
-       self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+      self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
     end
-  end    
- 
+  end
   def saved
-     @created
-  end 
- 
+    @created
+  end
   def created
-     @created
+    @created
   end
-  
   def success
-     @created
+    @created
   end
-
 end

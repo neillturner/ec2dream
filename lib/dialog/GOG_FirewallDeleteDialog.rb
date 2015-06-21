@@ -14,15 +14,14 @@ class GOG_FirewallDeleteDialog < FXDialogBox
     @deleted = false
     answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm delete","Confirm delete of Firewall "+@delete_item)
     if answer == MBOX_CLICKED_YES
-   	   begin
-  	      @ec2_main.environment.security_group.delete_firewall(@delete_item)
-          @deleted = true
-       rescue
-          error_message("Firewall Deletion failed",$!)
-       end
+      begin
+        @ec2_main.environment.security_group.delete_firewall(@delete_item)
+        @deleted = true
+      rescue
+        error_message("Firewall Deletion failed",$!)
+      end
     end    
   end 
- 
   def deleted 
     @deleted
   end   
@@ -30,6 +29,5 @@ class GOG_FirewallDeleteDialog < FXDialogBox
   def success 
     @deleted
   end
-  
 end
 

@@ -18,11 +18,11 @@ class CFY_ServiceEditDialog < FXDialogBox
     @magnifier.create    
     var_name=parm
     if function=="unbind"
-       @title = "Unbind Service"
-       @button = "Unbind"
+      @title = "Unbind Service"
+      @button = "Unbind"
     else
-       @title = "Bind Service"
-       @button = "Bind"
+      @title = "Bind Service"
+      @button = "Bind"
     end
     @saved = false
     super(owner, @title, :opts => DECOR_ALL, :width => 350, :height => 100)
@@ -36,48 +36,45 @@ class CFY_ServiceEditDialog < FXDialogBox
     @var_name_button.icon = @magnifier
     @var_name_button.tipText = "Select Service"
     @var_name_button.connect(SEL_COMMAND) do
-       dialog = CFY_ServiceDialog.new(@ec2_main)
-       dialog.execute
-       selected = dialog.selected
-       if selected != nil and selected != ""
-          @var_name.text = selected
-       end   
+      dialog = CFY_ServiceDialog.new(@ec2_main)
+      dialog.execute
+      selected = dialog.selected
+      if selected != nil and selected != ""
+        @var_name.text = selected
+      end   
     end
     FXLabel.new(frame1, "" )
     save = FXButton.new(frame1, "   &#{@button}   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_LEFT)
     FXLabel.new(frame1, "" )
     save.connect(SEL_COMMAND) do |sender, sel, data|
-       var_name = @var_name.text
-       if function=="unbind"
-           begin
-             r = @ec2_main.environment.cfy_app.unbind_service(name, var_name)
-             @saved = true
-          rescue
-             error_message("Unbind Service Failed",$!)
-          end      
-       else
-          begin
-             r = @ec2_main.environment.cfy_app.bind_service(name, var_name)
-             @saved = true
-          rescue
-             error_message("Bind Service Failed",$!)
-          end      
-       end   
-       self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+      var_name = @var_name.text
+      if function=="unbind"
+        begin
+          r = @ec2_main.environment.cfy_app.unbind_service(name, var_name)
+          @saved = true
+        rescue
+          error_message("Unbind Service Failed",$!)
+        end      
+      else
+        begin
+          r = @ec2_main.environment.cfy_app.bind_service(name, var_name)
+          @saved = true
+        rescue
+          error_message("Bind Service Failed",$!)
+        end      
+      end   
+      self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
     end
     @name.text = name
     @var_name.text = var_name
     if @title == "Unbind Service"
-       @var_name.enabled = false
+      @var_name.enabled = false
     end    
   end
-  
   def saved
     @saved
   end
-  
   def success
-     @saved
+    @saved
   end
-  
 end

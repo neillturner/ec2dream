@@ -30,14 +30,14 @@ class EC2_BastionEditDialog < FXDialogBox
     bastion_ssh_key_button.icon = @magnifier
     bastion_ssh_key_button.tipText = "Browse..."
     bastion_ssh_key_button.connect(SEL_COMMAND) do
-       dialog = FXFileDialog.new(frame1, "Select pem file")
-       dialog.patternList = [
-          "Pem Files (*.pem)"
-       ]
-       dialog.selectMode = SELECTFILE_EXISTING
-       if dialog.execute != 0
-          bastion_ssh_key.text = dialog.filename
-       end
+      dialog = FXFileDialog.new(frame1, "Select pem file")
+      dialog.patternList = [
+        "Pem Files (*.pem)"
+      ]
+      dialog.selectMode = SELECTFILE_EXISTING
+      if dialog.execute != 0
+        bastion_ssh_key.text = dialog.filename
+      end
     end
     FXLabel.new(frame1, "Bastion Putty Key" )
     bastion_putty_key = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
@@ -45,14 +45,14 @@ class EC2_BastionEditDialog < FXDialogBox
     bastion_putty_key_button.icon = @magnifier
     bastion_putty_key_button.tipText = "Browse..."
     bastion_putty_key_button.connect(SEL_COMMAND) do
-       dialog = FXFileDialog.new(frame1, "Select pem file")
-       dialog.patternList = [
-          "Pem Files (*.ppk)"
-       ]
-       dialog.selectMode = SELECTFILE_EXISTING
-       if dialog.execute != 0
-          bastion_putty_key.text = dialog.filename
-       end
+      dialog = FXFileDialog.new(frame1, "Select pem file")
+      dialog.patternList = [
+        "Pem Files (*.ppk)"
+      ]
+      dialog.selectMode = SELECTFILE_EXISTING
+      if dialog.execute != 0
+        bastion_putty_key.text = dialog.filename
+      end
     end    
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "" )
@@ -67,13 +67,13 @@ class EC2_BastionEditDialog < FXDialogBox
     create = FXButton.new(frame1, "   &Save   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     FXLabel.new(frame1, "" )
     create.connect(SEL_COMMAND) do |sender, sel, data|
-        @parm['bastion_host']=bastion_host.text
-        @parm['bastion_port']=bastion_port.text
-        @parm['bastion_user']=bastion_user.text
-        @parm['bastion_ssh_key']=bastion_ssh_key.text
-        @parm['bastion_putty_key']=bastion_putty_key.text    
-        @saved = true
-        self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+      @parm['bastion_host']=bastion_host.text
+      @parm['bastion_port']=bastion_port.text
+      @parm['bastion_user']=bastion_user.text
+      @parm['bastion_ssh_key']=bastion_ssh_key.text
+      @parm['bastion_putty_key']=bastion_putty_key.text    
+      @saved = true
+      self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
     end
     bastion_host.text = parm['bastion_host'] if parm['bastion_host'] != nil 
     bastion_port.text = parm['bastion_port'] if parm['bastion_port'] != nil
@@ -81,17 +81,14 @@ class EC2_BastionEditDialog < FXDialogBox
     bastion_ssh_key.text = parm['bastion_ssh_key'] if parm['bastion_ssh_key'] != nil
     bastion_putty_key.text = parm['bastion_putty_key'] if parm['bastion_putty_key'] != nil
   end 
-  
   def saved
     @saved
   end
 
   def success
-     @saved
+    @saved
   end
-  
   def selected
     @parm
   end  
-  
 end

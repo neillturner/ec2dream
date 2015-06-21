@@ -31,40 +31,36 @@ class ELB_SSLSetDialog < FXDialogBox
     FXLabel.new(frame1, "Port Number" )
     ssl_certificate_id = FXTextField.new(frame1, 30, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
     FXLabel.new(frame1, "" )
-    if listener['SSLCertificateId'] != nil 
-       ssl_certificate_id.text = @ssl_cert
-    end   
+    if listener['SSLCertificateId'] != nil
+      ssl_certificate_id.text = @ssl_cert
+    end
     frame2 = FXHorizontalFrame.new(page1,LAYOUT_FILL, :padding => 0)
     update = FXButton.new(frame2, "   &Set   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     update.connect(SEL_COMMAND) do |sender, sel, data|
-       set_load_balancer_listener_ssl_certificate(@lb_name, listener['LoadBalancerPort'], ssl_certificate_id.text)
-       self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+      set_load_balancer_listener_ssl_certificate(@lb_name, listener['LoadBalancerPort'], ssl_certificate_id.text)
+      self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
     end
-  end  
+  end
 
   def set_load_balancer_listener_ssl_certificate(lb_name, load_balancer_port, ssl_certificate_id)
-      begin 
-         r = @ec2_main.environment.elb.set_load_balancer_policies_of_listener(load_balancer_name, load_balancer_port, ssl_certificate_id)
-         @ssl_cert = ssl_certificate_id
-         @updated = true
-      rescue
-         error_message("Setting SSL Certificate Id for Load Balancer Failed",$!)
-      end 
-  end 
-  
+    begin
+      r = @ec2_main.environment.elb.set_load_balancer_policies_of_listener(load_balancer_name, load_balancer_port, ssl_certificate_id)
+      @ssl_cert = ssl_certificate_id
+      @updated = true
+    rescue
+      error_message("Setting SSL Certificate Id for Load Balancer Failed",$!)
+    end
+  end
   def updated
-     @updated
+    @updated
   end
- 
   def saved
-      @updated
+    @updated
   end
- 
- def success
-     @updated
+  def success
+    @updated
   end
- 
   def selected
-      @ssl_cert
+    @ssl_cert
   end
 end

@@ -33,7 +33,7 @@ class AS_GroupResumeDialog < FXDialogBox
     scaling_processes.appendItem("ScheduledActions");
     scaling_processes.appendItem("AddToLoadBalancer");
     scaling_processes.connect(SEL_COMMAND) do |sender, sel, data|
-       scaling_processes = data
+      scaling_processes = data
     end    
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "" )
@@ -45,7 +45,7 @@ class AS_GroupResumeDialog < FXDialogBox
     resume.connect(SEL_COMMAND) do |sender, sel, data|
       options = {}
       if scaling_processes_value != "All"
-         options['ScalingProcesses'] = scaling_processes_value
+        options['ScalingProcesses'] = scaling_processes_value
       end     
       resume_processes(auto_scaling_group.text, options)
       if @created == true
@@ -53,26 +53,21 @@ class AS_GroupResumeDialog < FXDialogBox
       end
     end
   end 
-  
   def resume_processes(auto_scaling_group_name, options = {})
-         begin 
-            @ec2_main.environment.auto_scaling_groups.resume_processes(auto_scaling_group_name, options)
-            @created = true
-         rescue
-            error_message("Scaling Group Processes Resume failed",$!)
-         end
+    begin 
+      @ec2_main.environment.auto_scaling_groups.resume_processes(auto_scaling_group_name, options)
+      @created = true
+    rescue
+      error_message("Scaling Group Processes Resume failed",$!)
+    end
   end    
- 
   def saved
-      @created
+    @created
   end
-   
   def resumed
-     @created
+    @created
   end
-  
   def success
-     @created
+    @created
   end
-  
 end

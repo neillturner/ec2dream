@@ -34,41 +34,39 @@ class ELB_HealthDialog < FXDialogBox
     frame2 = FXHorizontalFrame.new(page1,LAYOUT_FILL, :padding => 0)
     update = FXButton.new(frame2, "   &Configure   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     update.connect(SEL_COMMAND) do |sender, sel, data|
-       h = {}
-       h['Target'] = target.text
-       h['Timeout'] = timeout.text.to_i
-       h['Interval'] = interval.text.to_i
-       h['HealthyThreshold'] = healthy_threshold.text.to_i
-       h['UnhealthyThreshold'] = unhealthy_threshold.text.to_i
-       begin 
-          @ec2_main.environment.elb.configure_health_check(load_balancer, h)
-          @updated = true
-       rescue
-          error_message("Configure Health Check failed",$!)
-       end             
-       if @updated
-          self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
-       end   
+      h = {}
+      h['Target'] = target.text
+      h['Timeout'] = timeout.text.to_i
+      h['Interval'] = interval.text.to_i
+      h['HealthyThreshold'] = healthy_threshold.text.to_i
+      h['UnhealthyThreshold'] = unhealthy_threshold.text.to_i
+      begin
+        @ec2_main.environment.elb.configure_health_check(load_balancer, h)
+        @updated = true
+      rescue
+        error_message("Configure Health Check failed",$!)
+      end
+      if @updated
+        self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+      end
     end
     @ec2_main.environment.elb.describe_load_balancers({'LoadBalancerNames' => [load_balancer]}).each do |r|
-          target.text = r['HealthCheck']['Target']
-	  timeout.text = r['HealthCheck']['Timeout'].to_s
-	  interval.text = r['HealthCheck']['Interval'].to_s
-	  healthy_threshold.text = r['HealthCheck']['HealthyThreshold'].to_s
-          unhealthy_threshold.text = r['HealthCheck']['UnhealthyThreshold'].to_s
+      target.text = r['HealthCheck']['Target']
+      timeout.text = r['HealthCheck']['Timeout'].to_s
+      interval.text = r['HealthCheck']['Interval'].to_s
+      healthy_threshold.text = r['HealthCheck']['HealthyThreshold'].to_s
+      unhealthy_threshold.text = r['HealthCheck']['UnhealthyThreshold'].to_s
     end
-  end  
+  end
 
   def saved
-     @updated
+    @updated
   end
-   
-  def updated
-     @updated
+    def updated
+    @updated
   end
 
   def success
-     @updated
+    @updated
   end
-  
 end

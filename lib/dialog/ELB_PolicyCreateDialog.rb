@@ -32,58 +32,53 @@ class ELB_PolicyCreateDialog < FXDialogBox
     create = FXButton.new(frame1, "   &Create   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_LEFT)
     FXLabel.new(frame1, "" )
     create.connect(SEL_COMMAND) do |sender, sel, data|
-       if cookie_name.text != nil and cookie_name.text != ""  and cookie_expiration_period.text != nil and cookie_expiration_period.text != "" 
-          error_message("Error","Specify either App Cookie Name or LB Cookie Expiration Period")
-       elsif cookie_name.text != nil and cookie_name.text != "" 
-          create_app_policy(@lb_name, policy_name.text, cookie_name.text)
+      if cookie_name.text != nil and cookie_name.text != ""  and cookie_expiration_period.text != nil and cookie_expiration_period.text != "" 
+        error_message("Error","Specify either App Cookie Name or LB Cookie Expiration Period")
+      elsif cookie_name.text != nil and cookie_name.text != "" 
+        create_app_policy(@lb_name, policy_name.text, cookie_name.text)
+        if @created == true
+          @result['PolicyName'] = policy_name.text
+          @result['CookieName'] = cookie_name.text
+          self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+        end
+      else 
+        if cookie_expiration_period.text != nil and cookie_expiration_period.text != "" 
+          create_lb_policy(@lb_name, policy_name.text, cookie_expiration_period.text)
           if @created == true
-             @result['PolicyName'] = policy_name.text
-             @result['CookieName'] = cookie_name.text
-             self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
-          end
-       else 
-          if cookie_expiration_period.text != nil and cookie_expiration_period.text != "" 
-             create_lb_policy(@lb_name, policy_name.text, cookie_expiration_period.text)
-             if @created == true
-                @result['PolicyName'] = policy_name.text
-                @result['CookieExpirationPeriod'] = cookie_expiration_period.text
-                self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
-             end   
-          end
-       end
+            @result['PolicyName'] = policy_name.text
+            @result['CookieExpirationPeriod'] = cookie_expiration_period.text
+            self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+          end   
+        end
+      end
     end
   end
-  
   def create_app_policy(load_balancer_name, policy_name, cookie_name)
-      begin 
-       r = @ec2_main.environment.elb.create_app_cookie_stickiness_policy(load_balancer_name, policy_name, cookie_name)
-       @created = true
-      rescue
-        error_message("Create App Cookie Stickiness Policy Failed",$!)
-      end 
+    begin 
+      r = @ec2_main.environment.elb.create_app_cookie_stickiness_policy(load_balancer_name, policy_name, cookie_name)
+      @created = true
+    rescue
+      error_message("Create App Cookie Stickiness Policy Failed",$!)
+    end 
   end
-  
   def create_lb_policy(load_balancer_name, policy_name, cookie_expiration_period)
-        begin 
-         r = @ec2_main.environment.elb.create_lb_cookie_stickiness_policy(load_balancer_name, policy_name, cookie_expiration_period.to_i)
-         @created = true
-        rescue
-          error_message("Create LB Cookie Stickiness Policy Failed",$!)
-        end 
+    begin 
+      r = @ec2_main.environment.elb.create_lb_cookie_stickiness_policy(load_balancer_name, policy_name, cookie_expiration_period.to_i)
+      @created = true
+    rescue
+      error_message("Create LB Cookie Stickiness Policy Failed",$!)
+    end 
   end
 
   def saved
-     @created
+    @created
   end
-  
   def created
     @created
   end
-  
   def success
-     @created
+    @created
   end
-  
   def result
     @result
   end   

@@ -24,42 +24,38 @@ class EC2_KeypairCreateDialog < FXDialogBox
     frame2 = FXHorizontalFrame.new(page1,LAYOUT_FILL, :padding => 0)
     create = FXButton.new(frame2, "   &Create   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     create.connect(SEL_COMMAND) do |sender, sel, data|
-       if name.text == nil or name.text == ""
-         error_message("Error","Key Pair Name not specified")
-       else
-         create_keypair(name.text)
-       end  
+      if name.text == nil or name.text == ""
+        error_message("Error","Key Pair Name not specified")
+      else
+        create_keypair(name.text)
+      end  
     end
     cancel = FXButton.new(frame2, "   &Cancel   ", nil, self, ID_CANCEL, FRAME_RAISED|LAYOUT_CENTER_X|LAYOUT_SIDE_BOTTOM)
     cancel.connect(SEL_COMMAND) do |sender, sel, data|
-            self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+      self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
     end  
   end 
-  
   def create_keypair(name)
-      begin 
-       r = @ec2_main.environment.keypairs.create(name)
-       if r[:aws_material] != nil
-          @text_area.setText(r[:aws_material])
-       else
-          @text_area.setText("#{r['private_key']}")
-       end
-       @created = true
-      rescue
-        error_message("Create Key Pair Failed",$!)
-      end 
+    begin 
+      r = @ec2_main.environment.keypairs.create(name)
+      if r[:aws_material] != nil
+        @text_area.setText(r[:aws_material])
+      else
+        @text_area.setText("#{r['private_key']}")
+      end
+      @created = true
+    rescue
+      error_message("Create Key Pair Failed",$!)
+    end 
   end 
-  
   def saved
-     @created
+    @created
   end
-  
   def created
-     @created
+    @created
   end
-  
   def success
-     @created
+    @created
   end
 
 end

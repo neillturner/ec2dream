@@ -18,8 +18,7 @@ class EC2_ShowPasswordDialog < FXDialogBox
     value = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
     FXLabel.new(frame1, "" )
     if item != nil
-        value.text = item
+      value.text = item
     end   
   end
- 
 end

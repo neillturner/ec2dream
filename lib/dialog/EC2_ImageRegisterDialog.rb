@@ -25,45 +25,41 @@ class EC2_ImageRegisterDialog < FXDialogBox
     frame2 = FXHorizontalFrame.new(page1,LAYOUT_FILL, :padding => 0)
     create = FXButton.new(frame2, "   &Register   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     create.connect(SEL_COMMAND) do |sender, sel, data|
-       if path.text == nil or path.text == ""
-         error_message("Error","AMI Manifest Path not specified")
-       else
-         register_image(path.text)
-         if @created == true
-           self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
-         end
-       end  
+      if path.text == nil or path.text == ""
+        error_message("Error","AMI Manifest Path not specified")
+      else
+        register_image(path.text)
+        if @created == true
+          self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+        end
+      end  
     end
     today = DateTime.now
     d = today.strftime("%Y%m%d")
     path.text = "<bucket>/<server>-#{d}/image.manifest.xml"
   end 
-  
   def register_image(p)
-     sa = (p).split("/")
-     sel_image = p 
-     if sa.size>1
-        sel_image = sa[1].rstrip
-     end  
-      begin 
-       @ec2_main.environment.images.register_image(sel_image)
-       @created = true
-       FXMessageBox.information(@ec2_main,MBOX_OK,"Image Registered","Image \""+r+"\" sucessfully registered")
-      rescue
-        error_message("Register Image Failed",$!)
-      end 
+    sa = (p).split("/")
+    sel_image = p 
+    if sa.size>1
+      sel_image = sa[1].rstrip
+    end  
+    begin 
+      @ec2_main.environment.images.register_image(sel_image)
+      @created = true
+      FXMessageBox.information(@ec2_main,MBOX_OK,"Image Registered","Image \""+r+"\" sucessfully registered")
+    rescue
+      error_message("Register Image Failed",$!)
+    end 
   end 
-  
   def saved
-     @created
+    @created
   end
-  
   def created
-      @created
+    @created
   end
-  
   def success
-     @created
+    @created
   end
 
 end

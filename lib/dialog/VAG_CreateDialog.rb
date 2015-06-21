@@ -23,41 +23,40 @@ class VAG_CreateDialog < FXDialogBox
     create = FXButton.new(frame1, "   &Create   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     FXLabel.new(frame1, "" )
     create.connect(SEL_COMMAND) do |sender, sel, data|
-       if server.text == nil or server.text == ""
-         error_message("Error","Server not specified")
-       else
-         create_vagrant_server(server.text)
-         if @saved == true
-           self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
-         end
-       end  
+      if server.text == nil or server.text == ""
+        error_message("Error","Server not specified")
+      else
+        create_vagrant_server(server.text)
+        if @saved == true
+          self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+        end
+      end  
     end
   end 
-  
   def create_vagrant_server(server)
-      folder = "#{$ec2_main.settings.get('VAGRANT_REPOSITORY')}/#{server}"
-      begin
-        if File.exist?(folder)
-           error_message("Error","Vagrant Server Already Defined")
-           return        
-        end
-        rc = Dir.mkdir(folder, 0700)
-        @saved = true if rc == 0
-        if @saved == false
-           error_message("Error","Vagrant Server Directory create Failed")
-        else
-           s = "#{ENV['EC2DREAM_HOME']}/chef/Vagrantfile"
-           d = "#{@ec2_main.settings.get('VAGRANT_REPOSITORY')}/#{server}"
-           FileUtils.cp_r(s, d)        
-        end   
-      rescue
-        error_message("Vagrant Server Directory create Failed",$!)
-        return
+    folder = "#{$ec2_main.settings.get('VAGRANT_REPOSITORY')}/#{server}"
+    begin
+      if File.exist?(folder)
+        error_message("Error","Vagrant Server Already Defined")
+        return        
       end
+      rc = Dir.mkdir(folder, 0700)
+      @saved = true if rc == 0
+      if @saved == false
+        error_message("Error","Vagrant Server Directory create Failed")
+      else
+        s = "#{ENV['EC2DREAM_HOME']}/chef/Vagrantfile"
+        d = "#{@ec2_main.settings.get('VAGRANT_REPOSITORY')}/#{server}"
+        FileUtils.cp_r(s, d)        
+      end   
+    rescue
+      error_message("Vagrant Server Directory create Failed",$!)
+      return
+    end
   end 
 
   def saved
-     @saved
+    @saved
   end
 
   def created
@@ -65,7 +64,6 @@ class VAG_CreateDialog < FXDialogBox
   end
 
   def success
-     @saved
+    @saved
   end
-  
 end

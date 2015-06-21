@@ -28,37 +28,33 @@ class EC2_InstanceAdminPasswordDialog < FXDialogBox
     create = FXButton.new(frame1, "   &Change   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     FXLabel.new(frame1, "" )
     create.connect(SEL_COMMAND) do |sender, sel, data|
-       if admin_password.text != nil and admin_password.text != ""
-          begin
-             @password = admin_password.text
-             r = @ec2_main.environment.servers.change_password_server(instance_id, @password)
-             @created = true
-          rescue
-             error_message("Admin Password Change Failed",$!)
-          end 
-          if @created == true
-             self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
-          end
-       else
-          error_message("Error","New Admin Password Not Specified")
-       end
+      if admin_password.text != nil and admin_password.text != ""
+        begin
+          @password = admin_password.text
+          r = @ec2_main.environment.servers.change_password_server(instance_id, @password)
+          @created = true
+        rescue
+          error_message("Admin Password Change Failed",$!)
+        end 
+        if @created == true
+          self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+        end
+      else
+        error_message("Error","New Admin Password Not Specified")
+      end
     end 
   end
- 
   def saved
-     @created
+    @created
   end
-  
   def updated
-     @created
+    @created
   end
-  
   def success
-     @created
+    @created
   end
-  
   def selected
-     @password
+    @password
   end 
 
 end

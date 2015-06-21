@@ -13,11 +13,11 @@ class ELB_ListenerEditDialog < FXDialogBox
     @lb_name = load_balancer 
     @title = ""
     if item == nil 
-       @result = {}
-       @title = "Add Listener"
+      @result = {}
+      @title = "Add Listener"
     else
-       @result = item
-       @title = "Edit Listener"
+      @result = item
+      @title = "Edit Listener"
     end
     @saved = false
     super(owner, @title, :opts => DECOR_ALL, :width => 400, :height => 175)
@@ -52,62 +52,59 @@ class ELB_ListenerEditDialog < FXDialogBox
     save = FXButton.new(frame1, "   &Return   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     FXLabel.new(frame1, "" )
     save.connect(SEL_COMMAND) do |sender, sel, data|
-       if protocol.itemCurrent?(0)
-          @result['Protocol'] = "HTTP"
-       elsif protocol.itemCurrent?(1)
-          @result['Protocol'] = "HTTPS"
-       elsif protocol.itemCurrent?(2)
-          @result['Protocol'] = "TCP"          
-       elsif protocol.itemCurrent?(3)
-          @result['Protocol'] = "SSL"         
-       end
-       @result['LoadBalancerPort'] = load_balancer_port.text
-       @result['InstancePort'] = instance_port.text
-       if instance_protocol.itemCurrent?(0)
-          @result['InstanceProtocol'] = "HTTP"
-       elsif instance_protocol.itemCurrent?(1)
-          @result['InstanceProtocol'] = "HTTPS"
-       elsif instance_protocol.itemCurrent?(2)
-          @result['InstanceProtocol'] = "TCP"          
-       elsif instance_protocol.itemCurrent?(3)
-          @result['InstanceProtocol'] = "SSL"         
-       end       
-       @result['SSLCertificateId'] = ssl_certificate_id.text
-       @saved = true
-       self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+      if protocol.itemCurrent?(0)
+        @result['Protocol'] = "HTTP"
+      elsif protocol.itemCurrent?(1)
+        @result['Protocol'] = "HTTPS"
+      elsif protocol.itemCurrent?(2)
+        @result['Protocol'] = "TCP"          
+      elsif protocol.itemCurrent?(3)
+        @result['Protocol'] = "SSL"         
+      end
+      @result['LoadBalancerPort'] = load_balancer_port.text
+      @result['InstancePort'] = instance_port.text
+      if instance_protocol.itemCurrent?(0)
+        @result['InstanceProtocol'] = "HTTP"
+      elsif instance_protocol.itemCurrent?(1)
+        @result['InstanceProtocol'] = "HTTPS"
+      elsif instance_protocol.itemCurrent?(2)
+        @result['InstanceProtocol'] = "TCP"          
+      elsif instance_protocol.itemCurrent?(3)
+        @result['InstanceProtocol'] = "SSL"         
+      end       
+      @result['SSLCertificateId'] = ssl_certificate_id.text
+      @saved = true
+      self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
     end
     if @result['Protocol'] != nil and @result['Protocol'] != ""
-       if @result['Protocol'] = "HTTP"
-          instance_protocol.setCurrentItem(0)
-       elsif @result['Protocol'] = "HTTPS"
-          instance_protocol.setCurrentItem(1)
-       elsif @result['Protocol'] = "TCP"
-          instance_protocol.setCurrentItem(2)
-       elsif @result['Protocol'] = "SSL"
-          instance_protocol.setCurrentItem(3)          
-       end
-    else 
+      if @result['Protocol'] = "HTTP"
         instance_protocol.setCurrentItem(0)
+      elsif @result['Protocol'] = "HTTPS"
+        instance_protocol.setCurrentItem(1)
+      elsif @result['Protocol'] = "TCP"
+        instance_protocol.setCurrentItem(2)
+      elsif @result['Protocol'] = "SSL"
+        instance_protocol.setCurrentItem(3)          
+      end
+    else 
+      instance_protocol.setCurrentItem(0)
     end    
     if @result['LoadBalancerPort'] != nil 
-        load_balancer_port.text = @result['LoadBalancerPort']
+      load_balancer_port.text = @result['LoadBalancerPort']
     end    
     if @result['InstancePort'] != nil 
-        instance_port.text = @result['InstancePort']
+      instance_port.text = @result['InstancePort']
     end    
     if @result['SSLCertificateId'] != nil 
-        ssl_certificate_id.text = @result['SSLCertificateId']
+      ssl_certificate_id.text = @result['SSLCertificateId']
     end
   end   
-  
   def saved
     @saved
   end
- 
   def success
-     @saved
+    @saved
   end
- 
   def result
     @result
   end   

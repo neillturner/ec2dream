@@ -14,13 +14,13 @@ class AS_ScheduledActionCreateDialog < FXDialogBox
     @ec2_main = owner
     @title = ""
     if item == nil 
-       @result = ""
-       @as_group = group
-       @title = "Add Scheduled Action"
+      @result = ""
+      @as_group = group
+      @title = "Add Scheduled Action"
     else
-       @as_group = group
-       @result = item
-       @title = "Edit Scheduled Action"
+      @as_group = group
+      @result = item
+      @title = "Edit Scheduled Action"
     end
     @saved = false
     @magnifier = @ec2_main.makeIcon("magnifier.png")
@@ -36,12 +36,12 @@ class AS_ScheduledActionCreateDialog < FXDialogBox
     group_name_button.icon = @magnifier
     group_name_button.tipText = "  Select Autoscaling group "
     group_name_button.connect(SEL_COMMAND) do |sender, sel, data|
-         dialog = AS_GroupDialog.new(@ec2_main)
-         dialog.execute
-         selected = dialog.selected 
-         if selected != nil and selected !="" 
-              group_name.text = selected
-         end        
+      dialog = AS_GroupDialog.new(@ec2_main)
+      dialog.execute
+      selected = dialog.selected 
+      if selected != nil and selected !="" 
+        group_name.text = selected
+      end        
     end    
     group_name.text = @as_name
     FXLabel.new(frame1, "" )
@@ -61,7 +61,7 @@ class AS_ScheduledActionCreateDialog < FXDialogBox
     recurrence_button.icon = @magnifier
     recurrence_button.tipText = "Select Namespace"
     recurrence_button.connect(SEL_COMMAND) do
-       browser("http://en.wikipedia.org/wiki/Cron")
+      browser("http://en.wikipedia.org/wiki/Cron")
     end    
     FXLabel.new(frame1, "" )     
     FXLabel.new(frame1, "DesiredCapacity")
@@ -84,75 +84,73 @@ class AS_ScheduledActionCreateDialog < FXDialogBox
     save = FXButton.new(frame2, "   &Save   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     FXLabel.new(frame1, "" )
     save.connect(SEL_COMMAND) do |sender, sel, data|
-       if scheduled_action_name.text == nil or scheduled_action_name.text == ""
-         error_message("Error","Scheduled Action Name not specified")
-       else
-         r = {}
-         if start_time.text != nil and start_time.text != ""
-            r['StartTime'] = start_time.text
-         end
-         if end_time.text != nil and end_time.text != ""
-            r['EndTime'] = end_time.text
-         end 
-         if desired_capacity.text != nil and desired_capacity.text != ""
-            r['DesiredCapacity'] = (desired_capacity.text).to_i
-         end
-         if min_size.text != nil and min_size.text != ""
-            r['MinSize'] = (min_size.text).to_i
-         end   
-         if max_size.text != nil and max_size.text != ""
-            r['MaxSize'] = (max_size.text).to_i
-         end   
-         if recurrence.text != nil and recurrence.text != ""
-            r['Recurrence'] = recurrence.text
-         end
-         put_scheduled_update_group_action(group_name.text, scheduled_action_name.text, nil, r)
-         if @saved == true
-            self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
-         end         
-       end  
+      if scheduled_action_name.text == nil or scheduled_action_name.text == ""
+        error_message("Error","Scheduled Action Name not specified")
+      else
+        r = {}
+        if start_time.text != nil and start_time.text != ""
+          r['StartTime'] = start_time.text
+        end
+        if end_time.text != nil and end_time.text != ""
+          r['EndTime'] = end_time.text
+        end 
+        if desired_capacity.text != nil and desired_capacity.text != ""
+          r['DesiredCapacity'] = (desired_capacity.text).to_i
+        end
+        if min_size.text != nil and min_size.text != ""
+          r['MinSize'] = (min_size.text).to_i
+        end   
+        if max_size.text != nil and max_size.text != ""
+          r['MaxSize'] = (max_size.text).to_i
+        end   
+        if recurrence.text != nil and recurrence.text != ""
+          r['Recurrence'] = recurrence.text
+        end
+        put_scheduled_update_group_action(group_name.text, scheduled_action_name.text, nil, r)
+        if @saved == true
+          self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+        end         
+      end  
     end
     if @result != ""
-          options = {}
-          options['AutoScalingGroupName']= group_name.text
-          options['PolicyNames.member.1']= @result
-          @ec2_main.environment.scheduled_actions.all(options).each do |r|
-             if r['ScheduledActionName'] = @result
-                     scheduled_action_name.text = r['ScheduledActionName']
-                     if r['StartTime'] != nil
-                        start_time.text = r['StartTime'].iso8601
-                     end
-                     if r['EndTime'] != nil
-                        end_time.text = r['EndTime'].iso8601
-                     end   
-                     desired_capacity.text = r['DesiredCapacity'].to_s                   
-                     min_size.text = r['MinSize'].to_s
-                     max_size.text = r['MaxSize'].to_s
-                     recurrence.text = r['Recurrence'].to_s
-                     scheduled_action_arn.text = r['ScheduledActionARN']
-                  end
+      options = {}
+      options['AutoScalingGroupName']= group_name.text
+      options['PolicyNames.member.1']= @result
+      @ec2_main.environment.scheduled_actions.all(options).each do |r|
+        if r['ScheduledActionName'] = @result
+          scheduled_action_name.text = r['ScheduledActionName']
+          if r['StartTime'] != nil
+            start_time.text = r['StartTime'].iso8601
           end
-     else
+          if r['EndTime'] != nil
+            end_time.text = r['EndTime'].iso8601
+          end   
+          desired_capacity.text = r['DesiredCapacity'].to_s                   
+          min_size.text = r['MinSize'].to_s
+          max_size.text = r['MaxSize'].to_s
+          recurrence.text = r['Recurrence'].to_s
+          scheduled_action_arn.text = r['ScheduledActionARN']
+        end
+      end
+    else
       start_time.text = "YYYY-MM-DDT00:00:00Z"
-     end
+    end
   end 
-  
   def put_scheduled_update_group_action(auto_scaling_group_name, scheduled_action_name, time=nil, options = {}) 
-      begin
-       puts "options #{options}" 
-       r = @ec2_main.environment.scheduled_actions.put_scheduled_update_group_action(auto_scaling_group_name, scheduled_action_name, time, options ) 
-       @saved = true
-      rescue
-        error_message("Create or Update Scheduled Action Failed",$!)
-      end 
+    begin
+      puts "options #{options}" 
+      r = @ec2_main.environment.scheduled_actions.put_scheduled_update_group_action(auto_scaling_group_name, scheduled_action_name, time, options ) 
+      @saved = true
+    rescue
+      error_message("Create or Update Scheduled Action Failed",$!)
+    end 
   end 
 
-    def saved
-     @saved
+  def saved
+    @saved
   end
-  
   def success
-     @saved
+    @saved
   end
 
 end

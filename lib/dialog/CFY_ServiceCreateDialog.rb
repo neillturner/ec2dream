@@ -27,51 +27,46 @@ class CFY_ServiceCreateDialog < FXDialogBox
     system_service_button.icon = @magnifier
     system_service_button.tipText = "Select System Service"
     system_service_button.connect(SEL_COMMAND) do
-	dialog = CFY_SystemServiceDialog.new(@ec2_main)
-	dialog.execute
-	selected = dialog.selected
-	if selected != nil and selected != ""
-	  system_service.text = selected
-	end   
+      dialog = CFY_SystemServiceDialog.new(@ec2_main)
+      dialog.execute
+      selected = dialog.selected
+      if selected != nil and selected != ""
+        system_service.text = selected
+      end   
     end 	
     frame2 = FXHorizontalFrame.new(page1,LAYOUT_FILL, :padding => 0)
     create = FXButton.new(frame2, "   &Create   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     create.connect(SEL_COMMAND) do |sender, sel, data|
-       if name.text == nil or name.text == ""
-         error_message("Error","Name not specified")    
-       elsif system_service.text == nil or system_service.text == ""
-         error_message("Error","System Service not specified")
-       else
-         create_service(name.text, system_service.text)
-         self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
-       end  
+      if name.text == nil or name.text == ""
+        error_message("Error","Name not specified")    
+      elsif system_service.text == nil or system_service.text == ""
+        error_message("Error","System Service not specified")
+      else
+        create_service(name.text, system_service.text)
+        self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+      end  
     end
     cancel = FXButton.new(frame2, "   &Cancel   ", nil, self, ID_CANCEL, FRAME_RAISED|LAYOUT_CENTER_X|LAYOUT_SIDE_BOTTOM)
     cancel.connect(SEL_COMMAND) do |sender, sel, data|
-            self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+      self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
     end  
   end 
- 
- 
   def create_service(name, system_service)
-     begin
-        r = @ec2_main.environment.cfy_service.create(name, system_service)
-        @created = true
-     rescue
-        error_message("Create Service Failed",$!)
-     end      
- end 
-   
+    begin
+      r = @ec2_main.environment.cfy_service.create(name, system_service)
+      @created = true
+    rescue
+      error_message("Create Service Failed",$!)
+    end      
+  end 
   def saved
-     @created
+    @created
   end
-  
   def created
-     @created
+    @created
   end
-  
   def success
-     @created
+    @created
   end
 
 end

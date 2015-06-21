@@ -26,27 +26,23 @@ class AS_CapacityDialog < FXDialogBox
     frame2 = FXHorizontalFrame.new(page1,LAYOUT_FILL, :padding => 0)
     update = FXButton.new(frame2, "   &Update   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X|BUTTON_INITIAL)
     update.connect(SEL_COMMAND) do |sender, sel, data|
-	  begin 
-             #as.set_desired_capacity(@as_name, desired_capacity.text )
-             @ec2_main.environment.auto_scaling_groups.set_desired_capacity(@as_name, desired_capacity.text )
-          rescue
-             error_message("Set Desired Capacity Failed",$!)
-          end             
-          @updated = true
-       self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+      begin
+        #as.set_desired_capacity(@as_name, desired_capacity.text )
+        @ec2_main.environment.auto_scaling_groups.set_desired_capacity(@as_name, desired_capacity.text )
+      rescue
+        error_message("Set Desired Capacity Failed",$!)
+      end
+      @updated = true
+      self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
     end
-  end  
-   
+  end
   def updated
-     @updated
+    @updated
   end
- 
   def saved
-      @updated
+    @updated
   end
-  
   def success
-     @updated
+    @updated
   end
- 
 end

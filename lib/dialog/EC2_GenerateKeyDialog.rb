@@ -25,15 +25,15 @@ class EC2_GenerateKeyDialog < FXDialogBox
     value_button.icon = @magnifier
     value_button.tipText = "Browse..."
     value_button.connect(SEL_COMMAND) do
-	   dialog = FXFileDialog.new(frame1, "Select pem file")
-	   dialog.patternList = [
-	          "Pem Files (*.pem)"
-	   ]
-	   dialog.selectMode = SELECTFILE_EXISTING
-	   if dialog.execute != 0
-	      value.text = dialog.filename
-	   end
-	end
+      dialog = FXFileDialog.new(frame1, "Select pem file")
+      dialog.patternList = [
+        "Pem Files (*.pem)"
+      ]
+      dialog.selectMode = SELECTFILE_EXISTING
+      if dialog.execute != 0
+        value.text = dialog.filename
+      end
+    end
     FXLabel.new(frame1, "" )
     frame2 = FXHorizontalFrame.new(page1, 3, :opts => MATRIX_BY_COLUMNS||LAYOUT_FILL)  
     putty_generate_button = FXButton.new(frame2, " PuTTYgen Key Generator ", :opts => BUTTON_NORMAL|LAYOUT_LEFT|LAYOUT_CENTER_X)
@@ -42,15 +42,14 @@ class EC2_GenerateKeyDialog < FXDialogBox
     putty_generate_button.connect(SEL_COMMAND) do    
       puts "settings.PuttyGenerateButton.connect"
       if value.text != nil and value.text != ''
-         system("cmd.exe /C "+ENV['EC2DREAM_HOME']+"/putty//puttygen "+"\""+value.text+"\""+"  -t rsa")
+        system("cmd.exe /C "+ENV['EC2DREAM_HOME']+"/putty//puttygen "+"\""+value.text+"\""+"  -t rsa")
       else
-         error_message("Error","No SSH_PRIVATE_KEY  specified")
+        error_message("Error","No SSH_PRIVATE_KEY  specified")
       end
     end
     FXLabel.new(frame2, "In PuTTYgen press OK and then press SAVE PRIVATE KEY" )
     if item != nil
-        value.text = item
+      value.text = item
     end
   end
- 
 end

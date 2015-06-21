@@ -16,19 +16,17 @@ class EC2_TimezoneDialog < FXDialogBox
     itemlist.appendItem("UTC")
     itemlist.appendItem("Local")
     itemlist.connect(SEL_COMMAND) do |sender, sel, data|
-       selected_item = ""
-       itemlist.each do |item|
-          selected_item = item.text if item.selected?
-       end
-       puts "item "+selected_item
-       @curr_item = selected_item
-       puts "Timezone "+@curr_item
-       self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+      selected_item = ""
+      itemlist.each do |item|
+        selected_item = item.text if item.selected?
+      end
+      puts "item "+selected_item
+      @curr_item = selected_item
+      puts "Timezone "+@curr_item
+      self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
     end
   end
-  
   def selected
     return @curr_item
-  end  
-  
+  end
 end

@@ -15,30 +15,28 @@ class CF_GetTemplateDialog < FXDialogBox
     page1 = FXVerticalFrame.new(self, LAYOUT_FILL, :padding => 0)
     text_area = FXText.new(page1, :opts => TEXT_WORDWRAP|LAYOUT_FILL)
     text = ""
-     cf = @ec2_main.environment.cf_connection
-     if cf != nil
-	begin
-           response = cf.get_template(stack_name) 
-            if response.status == 200
-	       text = response.body["TemplateBody"]
-	    else   
-	       text = ""
-	    end                  
-         rescue
-            puts "ERROR: getting template  #{$!}"
-         end           
-     end
+    cf = @ec2_main.environment.cf_connection
+    if cf != nil
+      begin
+        response = cf.get_template(stack_name) 
+        if response.status == 200
+          text = response.body["TemplateBody"]
+        else   
+          text = ""
+        end                  
+      rescue
+        puts "ERROR: getting template  #{$!}"
+      end           
+    end
     text_area.setText(text)
     FXLabel.new(page1, "" )
     close = FXButton.new(page1, "   &Close   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     FXLabel.new(page1, "" )
     close.connect(SEL_COMMAND) do |sender, sel, data|
-       self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+      self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
     end
   end 
-  
   def success
     @false
   end  
-  
 end

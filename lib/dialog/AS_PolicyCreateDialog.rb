@@ -13,11 +13,11 @@ class AS_PolicyCreateDialog < FXDialogBox
     @ec2_main = owner
     @title = ""
     if item == nil 
-       @result = ""
-       @title = "Add Policy"
+      @result = ""
+      @title = "Add Policy"
     else
-       @result = item
-       @title = "Edit Policy"
+      @result = item
+      @title = "Edit Policy"
     end
     @saved = false
     @as_name = as_group
@@ -44,12 +44,12 @@ class AS_PolicyCreateDialog < FXDialogBox
     group_name_button.icon = @magnifier
     group_name_button.tipText = "  Select Autoscaling group "
     group_name_button.connect(SEL_COMMAND) do |sender, sel, data|
-         dialog = AS_GroupDialog.new(@ec2_main)
-         dialog.execute
-         selected = dialog.selected 
-         if selected != nil and selected !="" 
-              group_name.text = selected
-         end        
+      dialog = AS_GroupDialog.new(@ec2_main)
+      dialog.execute
+      selected = dialog.selected 
+      if selected != nil and selected !="" 
+        group_name.text = selected
+      end        
     end
     group_name.text = @as_name
     FXLabel.new(frame1, "" )
@@ -66,7 +66,7 @@ class AS_PolicyCreateDialog < FXDialogBox
     adjustment_type.appendItem("ExactCapacity");
     adjustment_type.appendItem("PercentChangeInCapacity");
     adjustment_type.connect(SEL_COMMAND) do |sender, sel, data|
-       adjustment_type_value = data
+      adjustment_type_value = data
     end	
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "Scaling Adjustment" )
@@ -75,8 +75,8 @@ class AS_PolicyCreateDialog < FXDialogBox
     FXLabel.new(frame1, "Alarms")
     alarms = FXTable.new(frame1,:height => 80, :opts => LAYOUT_FIX_HEIGHT|LAYOUT_FILL|TABLE_COL_SIZABLE|TABLE_ROW_SIZABLE|TABLE_READONLY  )
     alarms.connect(SEL_COMMAND) do |sender, sel, which|
-	@as_alarms_curr_row = which.row
-	alarms.selectRow(@as_alarms_curr_row)
+      @as_alarms_curr_row = which.row
+      alarms.selectRow(@as_alarms_curr_row)
     end 
     FXLabel.new(frame1, "" )  
     FXLabel.new(frame1, "" )  
@@ -94,81 +94,79 @@ class AS_PolicyCreateDialog < FXDialogBox
     save = FXButton.new(frame2, "   &Save   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     FXLabel.new(frame1, "" )
     save.connect(SEL_COMMAND) do |sender, sel, data|
-       if policy_name.text == nil or policy_name.text == ""
-         error_message("Error","Policy Name not specified")
-       else
-         @options = {}
-         @options['Cooldown']=(cooldown.text).to_i
-         @options['Alarm']=@as_alarms
-         put_scaling_policy(adjustment_type_value, group_name.text, policy_name.text, scaling_adjustment.text, @options)
-         if @saved == true
-            self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
-         end         
-       end  
+      if policy_name.text == nil or policy_name.text == ""
+        error_message("Error","Policy Name not specified")
+      else
+        @options = {}
+        @options['Cooldown']=(cooldown.text).to_i
+        @options['Alarm']=@as_alarms
+        put_scaling_policy(adjustment_type_value, group_name.text, policy_name.text, scaling_adjustment.text, @options)
+        if @saved == true
+          self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+        end         
+      end  
     end
     if @result != ""
-          options = {} 
-          options['AutoScalingGroupName'] = group_name.text
-          options['PolicyName'] = @result
-          @ec2_main.environment.auto_scaling_policies.all(options).each do |r|
-             if r['PolicyName'] == @result
-         		policy_name.text = r['PolicyName']
-        		policy_arn.text = r['PolicyARN']
-        		cooldown.text = r['Cooldown'].to_s
-        		adjustment_type_value = r['AdjustmentType']
-        		adjustment_type.setCurrentItem(0)
-        		if adjustment_type_value == "ExactCapacity"
-        		   adjustment_type.setCurrentItem(1)
-        		end
-        		if adjustment_type_value == "PercentChangeInCapacity"
-        		   adjustment_type.setCurrentItem(2)
-        		end       		
-         	        scaling_adjustment.text = r['ScalingAdjustment'].to_s
-         	        @as_alarms = r['Alarms']
-        		load_alarm_table(alarms)
-             else
-              @as_alarms = r['Alarms']
-              load_alarm_table(alarms)
-             end
+      options = {} 
+      options['AutoScalingGroupName'] = group_name.text
+      options['PolicyName'] = @result
+      @ec2_main.environment.auto_scaling_policies.all(options).each do |r|
+        if r['PolicyName'] == @result
+          policy_name.text = r['PolicyName']
+          policy_arn.text = r['PolicyARN']
+          cooldown.text = r['Cooldown'].to_s
+          adjustment_type_value = r['AdjustmentType']
+          adjustment_type.setCurrentItem(0)
+          if adjustment_type_value == "ExactCapacity"
+            adjustment_type.setCurrentItem(1)
           end
-     else
-        adjustment_type_value = "ChangeInCapacity"
-        load_alarm_table(alarms)
-     end
+          if adjustment_type_value == "PercentChangeInCapacity"
+            adjustment_type.setCurrentItem(2)
+          end       		
+          scaling_adjustment.text = r['ScalingAdjustment'].to_s
+          @as_alarms = r['Alarms']
+          load_alarm_table(alarms)
+        else
+          @as_alarms = r['Alarms']
+          load_alarm_table(alarms)
+        end
+      end
+    else
+      adjustment_type_value = "ChangeInCapacity"
+      load_alarm_table(alarms)
+    end
   end 
-  
   def put_scaling_policy(adjustment_type, auto_scaling_group_name, policy_name, scaling_adjustment, options = {})
-      begin
-       puts "options #{options}" 
-       r = @ec2_main.environment.auto_scaling_policies.put_scaling_policy(adjustment_type, auto_scaling_group_name, policy_name, scaling_adjustment, options)
-       @saved = true
-      rescue
-        error_message("Create or Update Policy Failed",$!)
-      end 
+    begin
+      puts "options #{options}" 
+      r = @ec2_main.environment.auto_scaling_policies.put_scaling_policy(adjustment_type, auto_scaling_group_name, policy_name, scaling_adjustment, options)
+      @saved = true
+    rescue
+      error_message("Create or Update Policy Failed",$!)
+    end 
   end 
 
   def load_alarm_table(field)
-         field.clearItems
-         field.rowHeaderWidth = 0	
-         field.setTableSize(@as_alarms.size, 1)
-         field.setColumnText(0, "Alarm Name;Alarm ARN") 
-         field.setColumnWidth(0,350)
-         i = 0
-         @as_alarms.each do |m|
-           if m!= nil 
-              field.setItemText(i, 0, "#{m['AlarmName']};#{m['AlarmARN']}")
-              field.setItemJustify(i, 0, FXTableItem::LEFT)
-              i = i+1
-   	   end 
-         end   
+    field.clearItems
+    field.rowHeaderWidth = 0	
+    field.setTableSize(@as_alarms.size, 1)
+    field.setColumnText(0, "Alarm Name;Alarm ARN") 
+    field.setColumnWidth(0,350)
+    i = 0
+    @as_alarms.each do |m|
+      if m!= nil 
+        field.setItemText(i, 0, "#{m['AlarmName']};#{m['AlarmARN']}")
+        field.setItemJustify(i, 0, FXTableItem::LEFT)
+        i = i+1
+      end 
+    end   
   end
 
   def saved
-     @saved
+    @saved
   end
-  
   def success
-     @saved
+    @saved
   end
 
 end

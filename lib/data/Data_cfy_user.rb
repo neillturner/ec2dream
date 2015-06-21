@@ -4,18 +4,18 @@ class Data_cfy_user
   end
 
   def find_all_users()
-    conn = @ec2_main.environment.connection 
+    conn = @ec2_main.environment.connection
     return {} if conn == nil
-    begin 
-       conn.list_users || []
+    begin
+      conn.list_users || []
     rescue
-       []
+      []
     end
   end
 
   def find(username)
-    conn = @ec2_main.environment.connection 
-    return {} if conn == nil  
+    conn = @ec2_main.environment.connection
+    return {} if conn == nil
     user_info = conn.user_info(username) || nil
     # cc's prior to 31143c1 commit doesn't return the admin flag
     if !user_info.nil? && !user_info.has_key?(:admin)
@@ -38,14 +38,14 @@ class Data_cfy_user
   end
 
   def create(username, password)
-    conn = @ec2_main.environment.connection 
-    return {} if conn == nil  
+    conn = @ec2_main.environment.connection
+    return {} if conn == nil
     conn.create_user(username, password)
   end
 
   def delete(username)
-    conn = @ec2_main.environment.connection 
-    return {} if conn == nil  
+    conn = @ec2_main.environment.connection
+    return {} if conn == nil
     conn.delete_user(username)
   end
 end
