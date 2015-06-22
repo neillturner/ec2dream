@@ -38,7 +38,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency('fog', '>= 1.20.0')
   spec.summary = 'Build and Manage Cloud Servers'
   spec.description = 'Visual devops tool. Supports chef, puppet, ansible, test-kitchen with Hosted Servers and Clouds including Amazon AWS, Eucalyptus, CloudStack, Openstack, Rackspace, HP Cloud, Google Compute Engines, CloudFoundry, and Vagrant.'
-    candidates = Dir.glob("{lib}/**/*") +  ['History.md', 'README.md', 'ec2dream.ico', 'ec2dream.bmp' , 'ec2dream.gemspec']
+    candidates = Dir.glob("{lib}/**/*") +  ['History.md', 'README.md', 'ec2dream.ico', 'ec2dream.bmp' , 'ca-bundle.crt', 'ec2dream.gemspec']
     candidates = candidates +  Dir.glob("{chef}/**/*")
     candidates = candidates +  Dir.glob("{puppet}/**/*")
     candidates = candidates +  Dir.glob("{launchrdp}/*")

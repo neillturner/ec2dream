@@ -1,3 +1,10 @@
+### Version 3.7.12 June 2015
+Allow edit of Elastic IP so can be bypassed by ssh
+Add popup for roles in launch screen
+Fix  MonitorDialog to only look for MountPath
+Add ssl_cert_file setting and fix code not to bypass ssl
+Pretty Print code
+
 ### Version 3.7.11 May 2015
 Added cfndsl options and pretty printing generated json
 Ability to select when do a CSV display of the list.
