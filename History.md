@@ -1,9 +1,11 @@
-### Version 3.7.12 June 2015
+### Version 4.0.0 June 2015
 Allow edit of Elastic IP so can be bypassed by ssh
 Add popup for roles in launch screen
 Fix  MonitorDialog to only look for MountPath
 Add ssl_cert_file setting and fix code not to bypass ssl
 Pretty Print code
+**BREAKING CHANGE** Need to add to environment configuration SSL_CERT_FILE set to
+<EC2DREAM HOME>\ca-bundle.crt
 
 ### Version 3.7.11 May 2015
 Added cfndsl options and pretty printing generated json
