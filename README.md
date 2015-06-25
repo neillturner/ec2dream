@@ -1,8 +1,13 @@
-### EC2Dream - Build and Manage Cloud Servers Version 3.7.12 -  June 2015
+### EC2Dream - Build and Manage Cloud Servers Version 4.0.0 -  June 2015
 
 [![Gem Version](https://badge.fury.io/rb/ec2dream.svg)](http://badge.fury.io/rb/ec2dream)
 
 For installation see http://ec2dream.blogspot.co.uk/search/label/EC2Dream%20Installation
+
+```
+**BREAKING CHANGE** Need to add to environment configuration SSL_CERT_FILE set to
+<EC2DREAM HOME>\ca-bundle.crt
+```
 
 EC2Dream is visual cloud computing admin for the Fog ruby cloud services library and combines Fog, Ruby into an open source devops platform supporting:
 *     Local and Hosted Servers.
