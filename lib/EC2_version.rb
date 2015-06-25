@@ -1,5 +1,5 @@
 # encoding: UTF-8
 
 module EC2Dream
-  VERSION = '3.7.12'
+  VERSION = '4.0.0'
 end
