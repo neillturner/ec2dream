@@ -390,7 +390,9 @@ class EC2_Settings
         load_panel('PUTTY_PRIVATE_KEY')
       end
       load_panel('SSL_CERT_FILE')
-      ENV['SSL_CERT_FILE'] =get('SSL_CERT_FILE')
+      ssl_cert = get('SSL_CERT_FILE')
+      ssl_cert = "#{ENV['EC2DREAM_HOME']}/ca-bundle.crt" if ssl_cert == "ca-bundle.crt"
+      ENV['SSL_CERT_FILE'] = ssl_cert
       if @settings['EC2_PLATFORM'].text=="google"
         @settings['AMAZON_ACCESS_KEY_ID_LABEL'].text="CLIENT_EMAIL"
         @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].text="KEY_LOCATION"

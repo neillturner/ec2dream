@@ -554,7 +554,7 @@ class EC2_EnvCreateDialog < FXDialogBox
       if @openstack_url.text != nil
         settings.put("EC2_URL",@openstack_url.text)
       end
-      settings.put('SSL_CERT_FILE',"#{ENV['EC2DREAM_HOME']}/lib/cacert.pem")
+      settings.put('SSL_CERT_FILE',"ca-bundle.crt")
     elsif @ec2_platform == "openstack_hp"
       if @hp_access_key.text != nil
         settings.put("AMAZON_ACCESS_KEY_ID",@hp_access_key.text)
@@ -571,7 +571,7 @@ class EC2_EnvCreateDialog < FXDialogBox
       if @hp_avl_zone.text != nil
         settings.put("AVAILABILITY_ZONE",@hp_avl_zone.text)
       end
-      settings.put('SSL_CERT_FILE',"#{ENV['EC2DREAM_HOME']}/lib/cacert.pem")
+      settings.put('SSL_CERT_FILE',"ca-bundle.crt")
     elsif @ec2_platform == "openstack_rackspace"
       if @rack_access_key.text != nil
         settings.put("AMAZON_ACCESS_KEY_ID",@rack_access_key.text)
@@ -582,7 +582,7 @@ class EC2_EnvCreateDialog < FXDialogBox
       if @rack_url.text != nil
         settings.put("EC2_URL",@rack_url.text)
       end
-      settings.put('SSL_CERT_FILE',"#{ENV['EC2DREAM_HOME']}/lib/cacert.pem")
+      settings.put('SSL_CERT_FILE',"ca-bundle.crt")
     elsif @ec2_platform == "cloudstack"
       if @cloudstack_access_key.text != nil
         settings.put("AMAZON_ACCESS_KEY_ID",@cloudstack_access_key.text)
@@ -593,7 +593,7 @@ class EC2_EnvCreateDialog < FXDialogBox
       if @cloudstack_url.text != nil
         settings.put("EC2_URL",@cloudstack_url.text)
       end
-      settings.put('SSL_CERT_FILE',"#{ENV['EC2DREAM_HOME']}/lib/cacert.pem")
+      settings.put('SSL_CERT_FILE',"ca-bundle.crt")
     elsif @ec2_platform == "cloudfoundry"
       if @cloudfoundry_access_key.text != nil
         settings.put("AMAZON_ACCESS_KEY_ID",@cloudfoundry_access_key.text)
@@ -604,7 +604,7 @@ class EC2_EnvCreateDialog < FXDialogBox
       if @cloudfoundry_url.text != nil
         settings.put("EC2_URL",@cloudfoundry_url.text)
       end
-      settings.put('SSL_CERT_FILE',"#{ENV['EC2DREAM_HOME']}/lib/cacert.pem")
+      settings.put('SSL_CERT_FILE',"ca-bundle.crt")
     elsif @ec2_platform == "google"
       if @google_client_email.text != nil
         settings.put("AMAZON_ACCESS_KEY_ID",@google_client_email.text)
@@ -618,7 +618,7 @@ class EC2_EnvCreateDialog < FXDialogBox
       if @google_zone.text != nil
         settings.put("AVAILABILITY_ZONE",@google_zone.text)
       end
-      settings.put('SSL_CERT_FILE',"#{ENV['EC2DREAM_HOME']}/lib/cacert.pem")
+      settings.put('SSL_CERT_FILE',"ca-bundle.crt")
     else
       if @amazon_access_key.text != nil
         settings.put("AMAZON_ACCESS_KEY_ID",@amazon_access_key.text)
@@ -630,7 +630,7 @@ class EC2_EnvCreateDialog < FXDialogBox
         settings.put("EC2_URL",@ec2_url.text)
       end
       settings.put('AMAZON_NICKNAME_TAG',"Name")
-      settings.put('SSL_CERT_FILE',"#{ENV['EC2DREAM_HOME']}/lib/cacert.pem")
+      settings.put('SSL_CERT_FILE',"ca-bundle.crt")
     end
     settings.put('VAGRANT_REPOSITORY',"#{ENV['EC2DREAM_HOME']}/vagrant")
     settings.save

@@ -5,8 +5,7 @@ Fix  MonitorDialog to only look for MountPath
 Add ssl_cert_file setting and fix code not to bypass ssl
 Pretty Print code
 ```
-**BREAKING CHANGE** Need to add to environment configuration SSL_CERT_FILE set to
-<EC2DREAM HOME>\ca-bundle.crt
+**BREAKING CHANGE** Need to add to environment configuration SSL_CERT_FILE set to ca-bundle.crt
 ```
 
 ### Version 3.7.11 May 2015
