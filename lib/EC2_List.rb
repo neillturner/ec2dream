@@ -697,6 +697,7 @@ class EC2_List
 
 
   def load_sort_reload(type,sort_col,reload,connection="Compute")
+    command = Thread.new do
     @connection = connection
     @type = type
     @curr_item = ""
@@ -963,6 +964,7 @@ class EC2_List
       @table.setTableSize(0,0)
     end
     @loaded = true
+    end
   end
 
   def create_lists(list_size)
