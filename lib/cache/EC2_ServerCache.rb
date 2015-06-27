@@ -456,22 +456,6 @@ class EC2_ServerCache
     end
   end
 
-  # TO DO for VPC - i don't think these are used anymore
-  #def running(group)
-  #      return @sg_instances[group]
-  #end
-
-  # TO DO for VPC  - i don't think these are used anymore
-  #def active(group)
-  #        return @sg_active_instances[group]
-  #end
-
-  # TO DO for VPC - used by treecache  ??? cannot find
-  #def securityGrps
-  #     return @securityGrps
-  # end
-
-  # DONE - add part for vpc.
   def secGrps(group_name,vpc=nil)
     puts "ServerCache.secGrps(#{group_name},#{vpc})"
     if vpc == nil or vpc == ""
@@ -512,7 +496,6 @@ class EC2_ServerCache
     end
   end
 
-  # DONE - need to add vpc parameter used by ec2_secgrp
   def refresh_secGrps(group_name, vpc=nil)
     puts "ServerCache.refresh_secGrps(#{group_name},#{vpc})"
     filter = nil
@@ -560,7 +543,6 @@ class EC2_ServerCache
     end
   end
 
-  # DONE - can figure out vpc from r['vpcId']
   def addInstance(r)
     puts "adding instance name #{r['name']}"
     si = r[:aws_instance_id]
@@ -595,11 +577,6 @@ class EC2_ServerCache
     end
     @instances[si]=r
   end
-
-  # TO DO for VPC - merge vpc instances - i don't think it is used anymore
-  #def instances
-  #     return @instances
-  #end
 
   def instance(instance_id)
     return @instances[instance_id] if @instances[instance_id] != nil
@@ -641,7 +618,6 @@ class EC2_ServerCache
     return sa
   end
 
-  # DONE
   def instance_running_names(type=nil)
     sa = []
     if type==nil or type != "vpc"
