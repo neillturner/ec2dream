@@ -1,3 +1,7 @@
+### Version 4.0.1 June 2015
+Refresh tree and list in a thread so doesn't lock screen
+Improve performance of loading public images
+
 ### Version 4.0.0 June 2015
 Allow edit of Elastic IP so can be bypassed by ssh
 Add popup for roles in launch screen
