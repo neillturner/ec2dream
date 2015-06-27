@@ -168,7 +168,7 @@ class EC2_TreeCache
   def refresh_env
     puts "Tree.refresh_env"	
     if @topmost == nil or (@topmost.class  == Fox::FXTreeItem and  @topmost.text != "Loading......")
-      #command = Thread.new do
+      command = Thread.new do
       @environments.each do |a|
         @tree.removeItem(a)
       end 	   
@@ -193,7 +193,7 @@ class EC2_TreeCache
           end 
         end
       end 
-      #end      
+      end      
     end 
   end 
 
@@ -231,11 +231,7 @@ class EC2_TreeCache
       @tree.selectItem(r)    
     end
   end
-  # TO DO add support for vpc - not used i think 
-  #def addSecGrp(groupName)
-  #   @tree.prependItem(@serverBranch, groupName, @parallel, @parallel, groupName)
-  #end  
-  # DONE. 
+  
   # need to figure out how to find tree items that are the same...
   def delete_secGrp(groupName,vpc=nil)
     start = @serverBranch if vpc == nil or vpc == ""
