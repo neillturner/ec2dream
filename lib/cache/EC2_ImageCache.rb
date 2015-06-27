@@ -52,19 +52,21 @@ class EC2_ImageCache
       puts "*** ImageCache Loading. This could take a few minutes             ***"
       puts "*** but once loaded it will be much quicker searching for images  ***"
       puts "*********************************************************************"
-      puts "Creating Image Cache File #{cache_filename}...."
+      puts "----------> Getting list of Public Images from Amazon or Openstack...."
       doc = ""
       doc_self = ""
       acct_no = @ec2_main.settings.get('AMAZON_ACCOUNT_ID')
       #ec2.describe_images_by_executable_by("all").each do |r|
       x=@ec2_main.environment.images.find_by_executable("all")
+      puts "----------> Building Image Cache Data...."
       x.each do |r|
         if @ec2_main.settings.openstack and acct_no ==  r["owner_id"]
-          doc_self = doc_self + "#{r['imageId']},#{r['architecture']},#{r['rootDeviceType']},#{r['imageLocation']}\n"
+          doc_self << "#{r['imageId']},#{r['architecture']},#{r['rootDeviceType']},#{r['imageLocation']}\n"
         else
-          doc = doc + "#{r['imageId']},#{r['architecture']},#{r['rootDeviceType']},#{r['imageLocation']}\n"
+          doc << "#{r['imageId']},#{r['architecture']},#{r['rootDeviceType']},#{r['imageLocation']}\n"
         end
       end
+      puts "----------> Writing Image Cache File #{cache_filename}...."
       File.open( cache_filename, "w") do |f|
         f.write(doc)
         f.close
@@ -85,7 +87,7 @@ class EC2_ImageCache
     @image_instance_small = Array.new
     @image_instance_large = Array.new
     cache_file = File.new(cache_filename, "r")
-    puts "Reading Image Cache File #{cache_filename}...."
+    puts "----------> Reading Image Cache File #{cache_filename}...."
     while (line = cache_file.gets)
       sa = (line).split","
       r = {}
@@ -142,7 +144,7 @@ class EC2_ImageCache
     @image_instance_large = @image_instance_large.sort
     @status = "loaded"
 
-    puts "ImageCache Loaded"
+    puts "----------> ImageCache Loaded"
     puts "#{@image_all.size} All Images"
     puts "#{@image_self.size} Self Images"
     puts "#{@image_ebs.size} Ebs Images"
