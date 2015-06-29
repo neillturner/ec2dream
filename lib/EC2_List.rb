@@ -963,8 +963,8 @@ class EC2_List
     else
       @table.setTableSize(0,0)
     end
+    end    
     @loaded = true
-    end
   end
 
   def create_lists(list_size)
