@@ -697,7 +697,7 @@ class EC2_List
 
 
   def load_sort_reload(type,sort_col,reload,connection="Compute")
-    command = Thread.new do
+
     @connection = connection
     @type = type
     @curr_item = ""
@@ -725,7 +725,7 @@ class EC2_List
       if @data.empty?
         image_error_message = @ec2_main.environment.images.error_message
         if image_error_message != nil and image_error_message != ""
-          error_message("Error",image_error_message)
+          puts "ERROR: #{image_error_message}"
         end
       end
       #end
@@ -738,7 +738,12 @@ class EC2_List
           end
         end
       end
-    elsif type == "Local Servers"
+      load_table_with_data()
+      @loaded = true      
+      return
+    end  
+    command = Thread.new do  
+    if type == "Local Servers"
       loc = EC2_Properties.new
       if loc != nil
         if reload == true
@@ -758,7 +763,7 @@ class EC2_List
       begin
         envs = Dir.entries($ec2_main.settings.get("VAGRANT_REPOSITORY"))
       rescue
-        error_message("Vagrant Repository does not exist",$!)
+        puts "ERROR: Vagrant Repository does not exist #{$!}"
         return
       end
       if reload == true
@@ -823,6 +828,12 @@ class EC2_List
         end
       end
     end
+    load_table_with_data()
+    end    
+    @loaded = true
+  end
+  
+  def load_table_with_data
     @data = [] if @data == nil
     if  !@data.empty?  or @data.size>0
       @data_title = []
@@ -950,7 +961,7 @@ class EC2_List
               end
               j=j+1
             rescue
-              puts "error processing  data for #{k} lists[#{j},#{i}] = #{v}"
+              puts "ERROR: processing data for #{k} lists[#{j},#{i}] = #{v}"
             end
           end
         end
@@ -962,9 +973,7 @@ class EC2_List
       set_table_data(lists,table_size)
     else
       @table.setTableSize(0,0)
-    end
-    end    
-    @loaded = true
+    end  
   end
 
   def create_lists(list_size)
