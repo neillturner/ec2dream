@@ -29,7 +29,7 @@ Gem::Specification.new do |spec|
   spec.email = 'neillwturner@gmail.com'
   spec.executables = ["ec2dream"]
   spec.homepage = 'http://ec2dream.blogspot.com'
-
+  spec.required_ruby_version = '>= 2.1'
   spec.require_path = 'lib'
   spec.add_dependency('fxruby')
   spec.add_dependency('rubyzip', '>= 1.0.0')
