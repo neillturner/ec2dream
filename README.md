@@ -1,4 +1,4 @@
-### EC2Dream - Build and Manage Cloud Servers Version 4.0.1 -  June 2015
+### EC2Dream - Build and Manage Cloud Servers Version 4.0.3 -  July 2015
 
 [![Gem Version](https://badge.fury.io/rb/ec2dream.svg)](http://badge.fury.io/rb/ec2dream)
 

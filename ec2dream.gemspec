@@ -31,7 +31,7 @@ Gem::Specification.new do |spec|
   spec.homepage = 'http://ec2dream.blogspot.com'
   spec.required_ruby_version = '>= 2.1'
   spec.require_path = 'lib'
-  spec.add_dependency('fxruby')
+  spec.add_dependency('fxruby', '<= 1.6.29')
   spec.add_dependency('rubyzip', '>= 1.0.0')
   spec.add_dependency('zip-zip')
   spec.add_dependency('gchartrb')
