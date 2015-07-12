@@ -523,7 +523,7 @@ class EC2_Launch
         @launch['EC2_SSH_Private_Key'].text = dialog.filename
       end
     end
-    if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
+    if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("mingw") != nil
       FXLabel.new(@frame1pk, "Putty Private Key" )
       @launch['Putty_Private_Key'] = FXTextField.new(@frame1pk, 20, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
       @launch['Putty_Private_Key_Button'] = FXButton.new(@frame1pk, "", :opts => BUTTON_TOOLBAR)
@@ -974,7 +974,7 @@ class EC2_Launch
         @ops_launch['SSH_Private_Key'].text = dialog.filename
       end
     end
-    if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
+    if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("mingw") != nil
       FXLabel.new(@frame4, "Override Putty Private Key" )
       @ops_launch['Putty_Private_Key'] = FXTextField.new(@frame4, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
       @ops_launch['Putty_Private_Key_Button'] = FXButton.new(@frame4, "", :opts => BUTTON_TOOLBAR)
@@ -1209,7 +1209,7 @@ class EC2_Launch
         @google_launch['SSH_Private_Key'].text = dialog.filename
       end
     end
-    if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
+    if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("mingw") != nil
       FXLabel.new(@frame6, "Override Putty Private Key" )
       @google_launch['Putty_Private_Key'] = FXTextField.new(@frame6, 60, nil, 0, :opts => FRAME_SUNKEN)
       @google_launch['Putty_Private_Key_Button'] = FXButton.new(@frame6, "", :opts => BUTTON_TOOLBAR)

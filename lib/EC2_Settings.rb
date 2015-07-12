@@ -49,7 +49,7 @@ class EC2_Settings
     @settings['SAVE_SETTINGS_BUTTON'].connect(SEL_UPDATE) do |sender, sel, data|
       enable_if_env_set(sender)
     end
-    if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
+    if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("mingw") != nil
       @settings['PUTTY_GENERATE_BUTTON'] = FXButton.new(page1a, "PuTTygen Key Generator", :opts => BUTTON_NORMAL|LAYOUT_LEFT)
       @settings['PUTTY_GENERATE_BUTTON'].icon = @link
       @settings['PUTTY_GENERATE_BUTTON'].tipText = " PuTTYgen Key Generator "
@@ -182,7 +182,7 @@ class EC2_Settings
         @settings['EC2_SSH_PRIVATE_KEY'].text = dialog.filename
       end
     end
-    if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
+    if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("mingw") != nil
       FXLabel.new(frame1, "PUTTY_PRIVATE_KEY" )
       @settings['PUTTY_PRIVATE_KEY'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
       @settings['PUTTY_PRIVATE_KEY_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
@@ -280,7 +280,7 @@ class EC2_Settings
         @settings['SSL_CERT_FILE'].text = dialog.filename
       end
     end
-    if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
+    if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("mingw") == nil
       FXLabel.new(frame1, "TERMINAL_EMULATOR" )
       @settings['TERMINAL_EMULATOR'] = FXTextField.new(frame1, 20, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
       @settings['TERMINAL_EMULATOR'].text = "xterm"
@@ -380,18 +380,21 @@ class EC2_Settings
       end
       load_panel('AVAILABILITY_ZONE')
       load_panel('AMAZON_NICKNAME_TAG')
-      if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
+      if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("mingw") == nil
         load_panel('TERMINAL_EMULATOR')
       end
       @settings['EXTERNAL_EDITOR'].text = get_system('EXTERNAL_EDITOR')
       @settings['EXTERNAL_BROWSER'].text = get_system('EXTERNAL_BROWSER')
       @settings['TIMEZONE'].text = get_system('TIMEZONE')
-      if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
+      if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("mingw") != nil
         load_panel('PUTTY_PRIVATE_KEY')
       end
       load_panel('SSL_CERT_FILE')
       ssl_cert = get('SSL_CERT_FILE')
       ssl_cert = "#{ENV['EC2DREAM_HOME']}/ca-bundle.crt" if ssl_cert == "ca-bundle.crt"
+      if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("mingw") != nil
+        ssl_cert = "#{ENV['EC2DREAM_HOME']}/ca-bundle.crt" if ssl_cert == ""
+      end
       ENV['SSL_CERT_FILE'] = ssl_cert
       if @settings['EC2_PLATFORM'].text=="google"
         @settings['AMAZON_ACCESS_KEY_ID_LABEL'].text="CLIENT_EMAIL"
@@ -436,10 +439,10 @@ class EC2_Settings
     clear('EXTERNAL_EDITOR')
     clear('EXTERNAL_BROWSER')
     clear('TIMEZONE')
-    if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
+    if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("mingw") != nil
       clear('PUTTY_PRIVATE_KEY')
     end
-    if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
+    if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("mingw") == nil
       @settings['TERMINAL_EMULATOR'].text = "xterm"
     end
     clear('SSL_CERT_FILE')
@@ -567,7 +570,7 @@ class EC2_Settings
     save_setting("VAGRANT_REPOSITORY")
     save_setting("AVAILABILITY_ZONE")
     save_setting("AMAZON_NICKNAME_TAG")
-    if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
+    if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("mingw") != nil
       save_setting("PUTTY_PRIVATE_KEY")
     end
     save_setting("SSL_CERT_FILE")
@@ -577,7 +580,7 @@ class EC2_Settings
   end
 
   def save_system_screen_values
-    if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
+    if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("mingw") == nil
       put_system("TERMINAL_EMULATOR",@settings["TERMINAL_EMULATOR"].text)
     end
     put_system("EXTERNAL_EDITOR",@settings["EXTERNAL_EDITOR"].text)

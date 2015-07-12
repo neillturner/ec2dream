@@ -22,7 +22,7 @@ class EC2_Server
     ops_clear('Availability_Zone')
     ops_clear('Launch_Time')
     ops_clear('Key_Name')
-    if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
+    if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("mingw") == nil
       ops_clear('SSH_Private_Key')
     else
       ops_clear('Putty_Private_Key')
@@ -143,7 +143,7 @@ class EC2_Server
       else
         @ops_server['Availability_Zone'].text =  ""
       end
-      if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
+      if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("mingw") == nil
         @ops_server['SSH_Private_Key'].text = get_pk
       else
         @ops_server['Putty_Private_Key'].text = get_ppk

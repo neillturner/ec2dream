@@ -13,7 +13,7 @@ class VAG_DestroyDialog < FXDialogBox
     answer = FXMessageBox.question($ec2_main.tabBook,MBOX_YES_NO,"Confirm vagant #{command}","Confirm vagrant #{command} for server #{server}")
     if answer == MBOX_CLICKED_YES
       folder = "#{$ec2_main.settings.get('VAGRANT_REPOSITORY')}/#{server}"
-      if RUBY_PLATFORM.index("mswin") != nil  or RUBY_PLATFORM.index("i386-mingw32") != nil
+      if RUBY_PLATFORM.index("mswin") != nil  or RUBY_PLATFORM.index("mingw") != nil
         folder = folder.gsub('/','\\')
         c = "cmd.exe /c \@start \"#{server} - vagrant #{command} \" \"#{ENV['EC2DREAM_HOME']}/vagrant/vagrant_cmd.bat\" #{folder} #{command}"
         puts c

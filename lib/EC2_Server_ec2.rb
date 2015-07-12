@@ -25,7 +25,7 @@ class EC2_Server
       clear('Instance_Type')
       clear('Availability_Zone')
       clear('Launch_Time')
-      if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
+      if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("mingw") == nil
         clear('EC2_SSH_Private_Key')
       else
         clear('Putty_Private_Key')
@@ -102,7 +102,7 @@ class EC2_Server
         @server['Instance_Type'].text = r['instanceType']
         @server['Availability_Zone'].text = r['placement']['availabilityZone']
         @server['Launch_Time'].text = convert_time(r['launchTime'])
-        if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
+        if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("mingw") == nil
           @server['EC2_SSH_Private_Key'].text = get_pk
         else
           @server['Putty_Private_Key'].text = get_ppk

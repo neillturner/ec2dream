@@ -24,7 +24,7 @@ class EC2_Server
     @google_server['Disks'].setVisibleRows(5)
     @google_server['Disks'].setText("")
     google_clear('Launch_Time')
-    if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
+    if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("mingw") == nil
       google_clear('SSH_Private_Key')
     else
       google_clear('Putty_Private_Key')
@@ -156,7 +156,7 @@ class EC2_Server
         end
       end
       @google_server['Disks'].setText(disk_list)
-      if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
+      if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("mingw") == nil
         @google_server['SSH_Private_Key'].text = get_pk
       else
         @google_server['Putty_Private_Key'].text = get_ppk

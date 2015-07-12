@@ -172,7 +172,7 @@ class EC2_Server
         sender.enabled = false
       end
     end
-    if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
+    if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("mingw") != nil
       @remote_desktop_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
       @remote_desktop_button.icon = @desktop
       @remote_desktop_button.tipText = " Windows Remote Desktop "
@@ -546,7 +546,7 @@ class EC2_Server
     #FXLabel.new(@frame1, "Launch Time" )
     #@server['Launch_Time'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
     #FXLabel.new(@frame1, "" )
-    if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
+    if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("mingw") == nil
       FXLabel.new(@frame1, "EC2 SSH Private Key" )
       @server['EC2_SSH_Private_Key'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
       @server['EC2_SSH_Private_Key'].connect(SEL_COMMAND) do
@@ -846,7 +846,7 @@ class EC2_Server
     FXLabel.new(@frame3, "Key Name" )
     @ops_server['Key_Name'] = FXTextField.new(@frame3, 25, nil, 0, :opts => TEXTFIELD_READONLY)
     FXLabel.new(@frame3, "" )
-    if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
+    if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("mingw") == nil
       FXLabel.new(@frame3,"SSH Private Key" )
       @ops_server['SSH_Private_Key'] = FXTextField.new(@frame3, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
       @ops_server['SSH_Private_Key'].connect(SEL_COMMAND) do
@@ -1385,7 +1385,7 @@ class EC2_Server
     FXLabel.new(@frame6, "Scheduling")
     @google_server['Scheduling'] = FXTextField.new(@frame6, 60, nil, 0, :opts => TEXTFIELD_READONLY)
     FXLabel.new(@frame6, "" )
-    if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("i386-mingw32") == nil
+    if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("mingw") == nil
       FXLabel.new(@frame6,"SSH Private Key" )
       @google_server['SSH_Private_Key'] = FXTextField.new(@frame6, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
       @google_server['SSH_Private_Key'].connect(SEL_COMMAND) do

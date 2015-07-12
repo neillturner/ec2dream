@@ -91,7 +91,7 @@ class EC2_Kitchen
     @winscp_button.connect(SEL_UPDATE) do |sender, sel, data|
       sender.enabled = true
     end
-    if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
+    if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("mingw") != nil
       @remote_desktop_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
       @remote_desktop_button.icon = @desktop
       @remote_desktop_button.tipText = " Windows Remote Desktop "

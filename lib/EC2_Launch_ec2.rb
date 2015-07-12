@@ -10,17 +10,17 @@ class EC2_Launch
       error_message("Error","Image ID not specified")
       return
     end
-    vpc = nil 
+    vpc = nil
     if @launch['Subnet_Id'].text != nil and @launch['Subnet_Id'].text != ""
       @ec2_main.environment.vpc.describe_subnets.each do |r|
         if r['subnetId'] == @launch['Subnet_Id'].text
           vpc = r['vpcId']
-        end  
+        end
       end
-      if vpc == nil  
+      if vpc == nil
         puts "ERROR: Subnet ID not found"
         error_message("Launch Error","Subnet ID not found")
-        return          
+        return
       end
     end
     if  vpc == nil
@@ -34,7 +34,7 @@ class EC2_Launch
         if @launch['Addressing'].text != nil and  @launch['Addressing'].text != ""
           launch_parm[:addressing] =  @launch['Addressing'].text
         end
-      end   
+      end
       if @launch['Minimum_Server_Count'].text != nil and @launch['Minimum_Server_Count'].text != ""
         launch_parm['MinCount']= @launch['Minimum_Server_Count'].text
       else
@@ -50,7 +50,7 @@ class EC2_Launch
       end
       if @launch['Keypair'].text != nil and @launch['Keypair'].text != ""
         launch_parm['KeyName']= @launch['Keypair'].text
-      else 
+      else
         error_message("Launch Error","Keypair not specified")
         return
       end
@@ -59,7 +59,7 @@ class EC2_Launch
       sa = (a).split(",")
       sa.each do |s|
         g.push(s[0..s.length-1])
-      end       
+      end
       if @launch['Subnet_Id'].text != nil and @launch['Subnet_Id'].text != ""
         gi = []
         g.each do |gn|
@@ -67,12 +67,12 @@ class EC2_Launch
           gi.push(sg[:group_id]) if sg != nil
         end
         launch_parm['SecurityGroupId'] = gi
-      else             
-        launch_parm['SecurityGroup'] = g 
-      end 
+      else
+        launch_parm['SecurityGroup'] = g
+      end
       if @launch['IAM_Role'].text != nil and @launch['IAM_Role'].text != ""
-        launch_parm['IamInstanceProfile.Name'] = @launch['IAM_Role'].text 
-      end   
+        launch_parm['IamInstanceProfile.Name'] = @launch['IAM_Role'].text
+      end
       it = (@launch['Instance_Type'].text).downcase
       if @launch['Availability_Zone'].text != nil and @launch['Availability_Zone'].text != ""
         launch_parm['Placement.AvailabilityZone']= @launch['Availability_Zone'].text
@@ -82,7 +82,7 @@ class EC2_Launch
       end
       if @launch['Private_IP'].text != nil and @launch['Private_IP'].text != ""
         launch_parm['PrivateIpAddress']= @launch['Private_IP'].text
-      end       
+      end
       launch_parm['UserData'] = ""
       if @launch['User_Data'].text != nil and @launch['User_Data'].text != ""
         launch_parm['UserData']= @launch['User_Data'].text
@@ -90,11 +90,11 @@ class EC2_Launch
       if @launch['User_Data_File'].text != nil and @launch['User_Data_File'].text != ""
         fn = @launch['User_Data_File'].text
         d = ""
-        begin 
+        begin
           f = File.open(fn, "r")
           d = f.read
           f.close
-        rescue 
+        rescue
           puts "ERROR: could not read user data file"
           error_message("Launch Error","Could not read User Data File")
           return
@@ -103,7 +103,7 @@ class EC2_Launch
           launch_parm['UserData']=launch_parm['UserData']+","+d
         else
           launch_parm['UserData']=d
-        end   
+        end
       end
       if @launch['Monitoring_State'].itemCurrent?(1)
         launch_parm['Monitoring.Enabled'] = true
@@ -116,10 +116,10 @@ class EC2_Launch
         end
         if @launch['Ebs_Optimized'].itemCurrent?(0)
           launch_parm['EbsOptimized'] = true
-        end          
+        end
         if @launch['Image_Root_Device_Type'].text != nil and  @launch['Image_Root_Device_Type'].text == "ebs"
           if @launch['Instance_Initiated_Shutdown_Behavior'].itemCurrent?(1)
-            launch_parm['InstanceInitiatedShutdownBehavior'] = "terminate" 
+            launch_parm['InstanceInitiatedShutdownBehavior'] = "terminate"
           else
             launch_parm['InstanceInitiatedShutdownBehavior'] = "stop"
           end
@@ -131,23 +131,23 @@ class EC2_Launch
       end
       if @block_mapping.size>0
         bm = bm + @block_mapping.array_fog
-      end	
-      if bm.size>0 
+      end
+      if bm.size>0
         i=0
         bm.each do |m|
-          if m != nil 
+          if m != nil
             if m['Ebs.SnapshotId'] != nil
               sa = (m['Ebs.SnapshotId']).split"/"
               if sa.size>1
                 m['Ebs.SnapshotId']=sa[1]
               end
-            end  
+            end
             bm[i]=m
-          end  
+          end
           i = i+1
         end
         launch_parm['BlockDeviceMapping'] = bm
-      end 
+      end
       save
       puts "launch server #{server} parms #{launch_parm}"
       item_server = ""
@@ -155,7 +155,7 @@ class EC2_Launch
       begin
         #item = ec2.launch_instances(server, launch_parm)
         item =  @ec2_main.environment.servers.create_server(server, nil, nil, launch_parm)
-      rescue 
+      rescue
         error_message("Launch of Server Failed",$!)
         return
       end
@@ -167,55 +167,55 @@ class EC2_Launch
           #  gi = r[:groups][0][:group_id]
           #else
           #   gi = r[:groups][0][:group_name]
-          #end  
+          #end
           name = @launch['Name'].text
           if name != nil and name != ""
             item_server = name+"/"+r[:aws_instance_id]
-          else   
+          else
             item_server = gi+"/"+r[:aws_instance_id]
           end
         end
         puts "item server #{item_server}"
-        instances.push(r[:aws_instance_id]) 
+        instances.push(r[:aws_instance_id])
         #@ec2_main.serverCache.addInstance(r)
       end
-      begin 
+      begin
         nickname_tag = @ec2_main.settings.get('AMAZON_NICKNAME_TAG')
         if nickname_tag != nil and nickname_tag != ""
           name = @launch['Name'].text
-          sleep 5 
+          sleep 5
           instances.each do |s|
             if s != nil and s != ""
               ec2 = @ec2_main.environment.connection
               if ec2 != nil
                 r = ec2.create_tags(s, {nickname_tag => name})
-              end   
-            end 
-          end    	  
+              end
+            end
+          end
         end
         if @resource_tags  != nil and @resource_tags.empty == false
-          instances.each do |s| 
+          instances.each do |s|
             @resource_tags.assign(s)
           end
-        end     	  
+        end
       rescue
         error_message("Create Tags Failed",$!)
         return
-      end 
+      end
       if item_server != ""
         @ec2_main.environment.servers.all(instances).each do |r|
           @ec2_main.serverCache.addInstance(r)
-        end 
+        end
         #@ec2_main.treeCache.refresh
         @ec2_main.server.load_server(item_server)
         @ec2_main.tabBook.setCurrent(1)
-      end   
+      end
     end
-  end 
+  end
   def launch_group_name(x)
     gn = ""
     begin
-      if x['groupSet'] != nil 
+      if x['groupSet'] != nil
         gn = x['groupSet'][1]
       elsif x[:sec_groups].instance_of? Array and x[:sec_groups][0] != nil
         gn = x[:sec_groups][0]
@@ -236,13 +236,13 @@ class EC2_Launch
   def request_spot_instance
     puts "launch.request_spot_instance"
     platform = @ec2_main.settings.get("EC2_PLATFORM")
-    if platform != "amazon"  
+    if platform != "amazon"
       error_message("Not Supported","Spot Requests not supported on #{platform}")
       return
     end
     if @launch['Image_Id'].text != nil and @launch['Image_Id'].text != ""
       server = @launch['Image_Id'].text
-    else 
+    else
       error_message("Error","Image ID not specified")
       return
     end
@@ -261,18 +261,18 @@ class EC2_Launch
       end
       if @launch['Keypair'].text != nil and @launch['Keypair'].text != ""
         launch_parm['LaunchSpecification.KeyName']= @launch['Keypair'].text
-      else 
+      else
         error_message("Launch Error","Keypair not specified")
         return
       end
       g = []
       a = @launch['Security_Group'].text
       sa = (a).split(",")
-      sa.each do |s|        
+      sa.each do |s|
         g.push(s[0..s.length-1])
       end
       it = (@launch['Instance_Type'].text).downcase
-      launch_parm['LaunchSpecification.SecurityGroup'] = g 
+      launch_parm['LaunchSpecification.SecurityGroup'] = g
       if @launch['Availability_Zone'].text != nil and @launch['Availability_Zone'].text != ""
         launch_parm['LaunchSpecification.Placement.AvailabilityZone']= @launch['Availability_Zone'].text
       end
@@ -283,11 +283,11 @@ class EC2_Launch
       if @launch['User_Data_File'].text != nil and @launch['User_Data_File'].text != ""
         fn = @launch['User_Data_File'].text
         d = ""
-        begin 
+        begin
           f = File.open(fn, "r")
           d = f.read
           f.close
-        rescue 
+        rescue
           puts "ERROR: could not read user data file"
           error_message("Launch Error","Could not read User Data File")
           return
@@ -296,21 +296,21 @@ class EC2_Launch
           launch_parm['LaunchSpecification.UserData']=launch_parm['LaunchSpecification.UserData']+","+d
         else
           launch_parm['LaunchSpecification.UserData']=d
-        end   
+        end
       end
       if @launch['Monitoring_State'].itemCurrent?(1)
         launch_parm['LaunchSpecification.Monitoring.Enabled'] = true
       end
       if @launch['Ebs_Optimized'].itemCurrent?(0)
         launch_parm['LaunchSpecification.EbsOptimized'] = true
-      end        
+      end
       if @launch['Subnet_Id'].text != nil and @launch['Subnet_Id'].text != ""
         launch_parm['LaunchSpecification.SubnetId']= @launch['Subnet_Id'].text
-      end        
+      end
       # currently block mappings not supported on spot instance requests.
       # if @block_mapping != nil and @block_mapping.size>0
       #      launch_parm[:block_device_mappings] = @block_mapping
-      # end        
+      # end
       save
       puts "request spot instance #{server} parameters #{launch_parm}"
       item = []
@@ -319,15 +319,15 @@ class EC2_Launch
         item = @ec2_main.environment.servers.request_spot_instances(launch_parm)
       rescue
         error_message("Spot Instance Request Failed",$!)
-        return 
+        return
       end
       req_id = item[0]['spotInstanceRequestId']
-      begin 
+      begin
         if @resource_tags  != nil and @resource_tags.empty == false
           item.each do |r|
             @resource_tags.assign(req_id)
-          end   
-        end 
+          end
+        end
         nickname_tag = @ec2_main.settings.get('AMAZON_NICKNAME_TAG')
         if nickname_tag != nil and nickname_tag != ""
           name = @launch['Name'].text
@@ -335,14 +335,14 @@ class EC2_Launch
             ec2 = @ec2_main.environment.connection
             if ec2 != nil
               r = ec2.create_tags(req_id, {nickname_tag => name})
-            end 
-          end    	  
-        end           
+            end
+          end
+        end
       rescue
         error_message("Create Tags Failed",$!)
         return
-      end       
-    end 
+      end
+    end
   end
   def load(profile)
     puts "Launch.load"
@@ -351,11 +351,11 @@ class EC2_Launch
     elsif  @ec2_main.settings.openstack
       load_ops(profile)
     elsif  @ec2_main.settings.google
-      load_google(profile)  
+      load_google(profile)
     elsif @ec2_main.settings.cloudfoundry
       load_cfy(profile)
-    else   
-      clear_panel      
+    else
+      clear_panel
       @type = "ec2"
       @profile_type = "secgrp"
       @profile_folder = "launch"
@@ -389,12 +389,12 @@ class EC2_Launch
         end
         ft = @ec2_main.settings.get_system('ENV_PATH')+"/"+@profile_folder+"/"+@profile+"_tags.rb"
         if File.exists?(fn)
-          @resource_tags = EC2_ResourceTags.new(@ec2_main) 
+          @resource_tags = EC2_ResourceTags.new(@ec2_main)
           @resource_tags.load(ft)
           @launch['Tags'].text=@resource_tags.show
         else
           @resource_tags = nil
-        end        
+        end
         load_panel('Security_Group')
         load_panel('IAM_Role')
         load_panel('Puppet_Manifest')
@@ -421,30 +421,30 @@ class EC2_Launch
         load_panel('Additional_Info')
         load_panel('EC2_SSH_User')
         load_panel('EC2_SSH_Private_Key')
-        if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
+        if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("mingw") != nil
           load_panel('Putty_Private_Key')
         end
         load_panel('Win_Admin_Password')
         load_panel('Local_Port')
         load_bastion
         @block_mapping.load_from_properties(@properties,"BlockMapping",@launch['Block_Devices'])
-        @image_bm.load_from_properties(@properties,"Image_Bm",@launch['Image_Block_Devices']) 
+        @image_bm.load_from_properties(@properties,"Image_Bm",@launch['Image_Block_Devices'])
         @launch_loaded = true
       else
         @launch_loaded = true
       end
       load_notes
       @ec2_main.app.forceRefresh
-    end   
-  end 
+    end
+  end
   def load_image
     puts "Launch.load_image"
     image_id = @properties['Image_Id']
     if image_id != nil and image_id != ""
-      begin 
+      begin
         #ec2.describe_images([image_id]).each do |r|
-        r = @ec2_main.environment.images.get(image_id) 
-        #puts r 
+        r = @ec2_main.environment.images.get(image_id)
+        #puts r
         put('Image_Manifest',r['imageLocation'])
         put('Image_Architecture',r['architecture'])
         if r['isPublic'] == true
@@ -458,13 +458,13 @@ class EC2_Launch
         end
         put('Image_Root_Device_Type',r['rootDeviceType'])
         @image_bm.load_fog(r,@launch['Image_Block_Devices'])
-        #end            
+        #end
       rescue
         puts "ERROR: Image not found"
         put('Image_Manifest',"*** Not Found ***")
         error_message("Error","Launch Profile: Image Id not found")
       end
-    end   
+    end
   end
   def load_bastion
     @bastion = {}
@@ -473,15 +473,15 @@ class EC2_Launch
     @bastion['bastion_user'] = @properties['Bastion_User']
     @bastion['bastion_ssh_key'] = @properties['Bastion_Ssh_Key']
     @bastion['bastion_putty_key'] = @properties['Bastion_Putty_Key']
-  end 
+  end
   def load_profile(image)
     puts "Launch.load_profile"
     @type = "ec2"
     sa = (image).split("/")
-    image_id = image 
+    image_id = image
     if sa.size>1
       image_id = sa[1].rstrip
-    end         
+    end
     @frame1.show()
     @frame3.hide()
     @frame4.hide()
@@ -489,7 +489,7 @@ class EC2_Launch
     @profile_folder = "image"
     if !File.exists?(@ec2_main.settings.get_system('ENV_PATH')+"/"+@profile_folder)
       Dir.mkdir(@ec2_main.settings.get_system('ENV_PATH')+"/"+@profile_folder)
-    end    
+    end
     clear_panel
     @profile = image_id
     @properties = {}
@@ -511,7 +511,7 @@ class EC2_Launch
               @properties[line] = ''
             end
           end
-        end      
+        end
       end
       load_panel('Security_Group')
       load_panel('IAM_Role')
@@ -539,7 +539,7 @@ class EC2_Launch
       load_panel('Additional_Info')
       load_panel('EC2_SSH_User')
       load_panel('EC2_SSH_Private_Key')
-      if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
+      if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("mingw") != nil
         load_panel('Putty_Private_Key')
       end
       load_panel('Win_Admin_Password')
@@ -551,47 +551,47 @@ class EC2_Launch
       if pk != nil and pk != ""
         put('EC2_SSH_Private_Key',pk)
       end
-      if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
+      if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("mingw") != nil
         ppk = @ec2_main.settings.get('PUTTY_PRIVATE_KEY')
         if ppk != nil and ppk != ""
           put('Putty_Private_Key',ppk)
-        end        
+        end
       end
       @launch_loaded = true
     end
     @block_mapping.load_from_properties(@properties,"BlockMapping",@launch['Block_Devices'])
-    @image_bm.load_from_properties(@properties,"Image_Bm",@launch['Image_Block_Devices'])          
+    @image_bm.load_from_properties(@properties,"Image_Bm",@launch['Image_Block_Devices'])
     load_notes
     @ec2_main.app.forceRefresh
-  end 
+  end
   def load_monitoring_state
     if @properties['Monitoring_State'] == 'enabled'
       @launch['Monitoring_State'].setCurrentItem(1)
     else
       @launch['Monitoring_State'].setCurrentItem(0)
-    end   
+    end
   end
   def load_boolean_state(prop)
     if @properties[prop] == 'true'
       @launch[prop].setCurrentItem(0)
-    end   
+    end
     if @properties[prop] == 'false'
       @launch[prop].setCurrentItem(1)
-    end   
+    end
   end
   def load_shutdown_behaviour(prop)
     if @properties[prop] == 'stop'
       @launch[prop].setCurrentItem(0)
-    end   
+    end
     if @properties[prop] == 'terminate'
       @launch[prop].setCurrentItem(1)
-    end   
-  end   
+    end
+  end
   def load_panel(key)
     if @properties[key] != nil
       @launch[key].text = @properties[key]
     end
-  end 
+  end
   def clear_panel
     puts "Launch.clear_panel"
     if  @ec2_main.settings.cloudfoundry
@@ -599,14 +599,14 @@ class EC2_Launch
     elsif @ec2_main.settings.openstack
       clear_ops_panel
     elsif @ec2_main.settings.google
-      clear_google_panel	  
-    elsif @type == "as"  
+      clear_google_panel
+    elsif @type == "as"
       clear_as_panel
     else
       @type = "ec2"
       @profile = ""
       @properties = {}
-      @resource_tags = nil 
+      @resource_tags = nil
       @launch['Name'].text = ""
       @launch['Name'].enabled = true
       clear('Security_Group')
@@ -636,7 +636,7 @@ class EC2_Launch
       clear('Additional_Info')
       clear('EC2_SSH_User')
       clear('EC2_SSH_Private_Key')
-      if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
+      if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("mingw") != nil
         clear('Putty_Private_Key')
       end
       clear('Win_Admin_Password')
@@ -644,14 +644,14 @@ class EC2_Launch
       @bastion = {}
       @block_mapping.clear(@properties,"BlockMapping",@launch['Block_Devices'])
       @image_bm.clear(@properties,"Image_Bm",@launch['Image_Block_Devices'])
-      clear_notes     
+      clear_notes
       @launch_loaded = false
     end
-  end 
+  end
   def clear_monitoring_state
     @properties['Monitoring_State'] = "disabled"
     @launch['Monitoring_State'].setCurrentItem(0)
-  end 
+  end
   def clear_boolean_state(prop)
     @properties[prop] = "false"
     @launch[prop].setCurrentItem(1)
@@ -660,11 +660,11 @@ class EC2_Launch
   def clear_shutdown_behaviour(prop)
     @properties[prop] = "stop"
     @launch[prop].setCurrentItem(0)
-  end   
+  end
   def clear(key)
     @properties[key] = ""
     @launch[key].text = ""
-  end  
+  end
   def get(key)
     return @properties[key]
   end
@@ -672,19 +672,19 @@ class EC2_Launch
     #puts "Launch.put "+key
     @properties[key] = value
     @launch[key].text = value
-  end 
+  end
   def save
     puts "Launch.save"
     @profile = @launch['Name'].text
     if @profile == nil or @profile == ""
-      error_message("Error","No Server Name specified") 
+      error_message("Error","No Server Name specified")
     else
       save_launch('Image_Id')
       load_image
       load_panel('Image_Manifest')
       load_panel('Image_Architecture')
       load_panel('Image_Visibility')
-      load_panel('Image_Root_Device_Type')      
+      load_panel('Image_Root_Device_Type')
       save_launch('Security_Group')
       save_launch('IAM_Role')
       save_launch('Puppet_Manifest')
@@ -710,7 +710,7 @@ class EC2_Launch
       save_launch('Additional_Info')
       save_launch('EC2_SSH_User')
       save_launch('EC2_SSH_Private_Key')
-      if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
+      if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("mingw") != nil
         save_launch('Putty_Private_Key')
       end
       save_launch('Win_Admin_Password')
@@ -720,10 +720,10 @@ class EC2_Launch
       @image_bm.save(@properties,"Image_Bm")
       doc = ""
       @properties.each_pair do |key, value|
-        if value != nil 
+        if value != nil
           #puts "#{key}=#{value}\n"
           doc = doc + "#{key}=#{value}\n"
-        end 
+        end
       end
       fn = @ec2_main.settings.get_system('ENV_PATH')+"/"+@profile_folder+"/"+@profile+".properties"
       begin
@@ -733,25 +733,25 @@ class EC2_Launch
         if @resource_tags != nil
           ft = @ec2_main.settings.get_system('ENV_PATH')+"/"+@profile_folder+"/"+@profile+"_tags.rb"
           puts "saving #{ft}"
-          @resource_tags.save(ft)  
+          @resource_tags.save(ft)
         end
         save_notes
         @launch_loaded = true
       rescue
         puts "launch loaded false"
-        @launch_loaded = false      
+        @launch_loaded = false
       end
       @ec2_main.treeCache.refresh_launch
-    end 
+    end
   end
   def save_bastion(bastion=nil)
-    @bastion = bastion if bastion != nil 
+    @bastion = bastion if bastion != nil
     @properties['Bastion_Host'] = @bastion['bastion_host']
     @properties['Bastion_Port'] = @bastion['bastion_port']
     @properties['Bastion_User'] =  @bastion['bastion_user']
     @properties['Bastion_Ssh_Key'] = @bastion['bastion_ssh_key']
     @properties['Bastion_Putty_Key'] = @bastion['bastion_putty_key']
-  end 
+  end
   def delete
     fn = @ec2_main.settings.get_system('ENV_PATH')+"/"+@profile_folder+"/"+@profile+".properties"
     begin
@@ -767,18 +767,18 @@ class EC2_Launch
           @ec2_main.treeCache.refresh_launch
         end
       else
-        error_message("Error","No Launch Profile for "+@profile+" to delete") 
+        error_message("Error","No Launch Profile for "+@profile+" to delete")
       end
-    rescue 
+    rescue
     end
-  end 
+  end
   def image_info
-    puts "Launch.image_info" 
+    puts "Launch.image_info"
     img = @launch['Image_Id'].text
     r = @ec2_main.environment.images.get(img)
     put('Image_Manifest',r['imageLocation'])
     put('Image_Architecture',r['architecture'])
-    if r['isPublic'] == true 
+    if r['isPublic'] == true
       put('Image_Visibility','public')
     else
       put('Image_Visibility','private')
@@ -789,35 +789,35 @@ class EC2_Launch
         put('Instance_Type',"m1.large")
       else
         put('Instance_Type',"m1.small")
-      end 
+      end
     end
     put('Image_Root_Device_Type',r['rootDeviceType'])
     @image_bm.load_fog(r,@launch['Image_Block_Devices'])
-  end 
+  end
   def save_monitoring_state
-    if @launch['Monitoring_State'].itemCurrent?(1) 
-      @properties['Monitoring_State']="enabled"  
+    if @launch['Monitoring_State'].itemCurrent?(1)
+      @properties['Monitoring_State']="enabled"
     else
-      @properties['Monitoring_State']="disabled" 
+      @properties['Monitoring_State']="disabled"
     end
   end
   def save_boolean_state(prop)
-    if @launch[prop].itemCurrent?(1) 
-      @properties[prop]="false"  
+    if @launch[prop].itemCurrent?(1)
+      @properties[prop]="false"
     else
-      @properties[prop]="true" 
+      @properties[prop]="true"
     end
   end
   def save_shutdown_behaviour(prop)
-    if @launch[prop].itemCurrent?(1) 
-      @properties[prop]="terminate"  
+    if @launch[prop].itemCurrent?(1)
+      @properties[prop]="terminate"
     else
-      @properties[prop]="stop" 
+      @properties[prop]="stop"
     end
   end
 
   def save_launch(key)
-    puts "Launch.save_setting"  
+    puts "Launch.save_setting"
     if @launch[key].text != nil
       @properties[key] =  @launch[key].text
     else
@@ -843,7 +843,7 @@ class EC2_Launch
       if @type == "ops"
         @ops_text_area.text = f.read
       elsif @type == "google"
-        @google_text_area.text = f.read	 
+        @google_text_area.text = f.read
       else
         @text_area.text = f.read
       end
@@ -852,24 +852,24 @@ class EC2_Launch
     rescue
       @loaded = false
     end
-  end        
+  end
   def save_notes
     if @type == "ops"
-      textOutput = @ops_text_area.text 
+      textOutput = @ops_text_area.text
     elsif @type == "google"
-      textOutput = @google_text_area.text      	  
-    else   
+      textOutput = @google_text_area.text
+    else
       textOutput = @text_area.text
-    end   
+    end
     fn = @ec2_main.settings.get_system('ENV_PATH')+"/"+@profile_folder+"/"+@profile+".txt"
     begin
-      File.open(fn, 'w') do |f|  
+      File.open(fn, 'w') do |f|
         f.write(textOutput)
         f.close
       end
     rescue
     end
-  end 
+  end
 
 
 end

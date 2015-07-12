@@ -27,11 +27,11 @@ class EC2_SystemDialog < FXDialogBox
     location_button.icon = magnifier
     location_button.tipText = "Browse..."
     location_button.connect(SEL_COMMAND) do
-      if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
+      if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("mingw") != nil
         location.text = FXDirDialog.getOpenDirectory(frame1, "Select Repository Location", "C:/")
       else
         location.text = FXDirDialog.getOpenDirectory(frame1, "Select Repository Location", "/")
-      end 
+      end
     end
     FXLabel.new(frame1, "" )
     ok = FXButton.new(frame1, "   &OK   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
@@ -51,28 +51,28 @@ class EC2_SystemDialog < FXDialogBox
         @settings.put_system("REPOSITORY_REMOTE",location.text)
         defaults
         @settings.put_system('ENVIRONMENT','')
-        @settings.put_system('AUTO','false') 
+        @settings.put_system('AUTO','false')
         @settings.save_system()
         self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
-      end      
+      end
     end
   end
   def selected
     return @valid_loc
-  end 
+  end
 
   def defaults
-    if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
+    if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("mingw") != nil
       @settings.put_system('EXTERNAL_EDITOR',"notepad")  # default to notepad
-      @settings.put_system('EXTERNAL_BROWSER',"C:\\Program Files\\Internet Explorer\\iexplore.exe")  
+      @settings.put_system('EXTERNAL_BROWSER',"C:\\Program Files\\Internet Explorer\\iexplore.exe")
     else
       if RUBY_PLATFORM.index("linux") != nil
         @settings.put_system('EXTERNAL_EDITOR',"gedit")  # default to vi
         @settings.put_system('EXTERNAL_BROWSER',"/usr/bin/firefox")
       else
-        @settings.put_system('EXTERNAL_EDITOR',"xterm -e /Applications/TextEdit.app/Contents/MacOS/TextEdit")  
+        @settings.put_system('EXTERNAL_EDITOR',"xterm -e /Applications/TextEdit.app/Contents/MacOS/TextEdit")
         @settings.put_system('EXTERNAL_BROWSER',"open")
-      end   
+      end
     end
     @settings.put_system('TIMEZONE',"UTC")
   end

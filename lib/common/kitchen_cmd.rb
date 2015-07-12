@@ -74,7 +74,7 @@ def kitchen_cmd(cmd='list',instance=nil,debug=false)
         gem_install('chefspec') if `gem list chefspec -i`.include?('false')
         gem_install('fauxhai') if !`gem list`.lines.grep(/^fauxhai \(.*\)/)
       end
-      if RUBY_PLATFORM.index("mswin") != nil  or RUBY_PLATFORM.index("i386-mingw32") != nil
+      if RUBY_PLATFORM.index("mswin") != nil  or RUBY_PLATFORM.index("mingw") != nil
         c = "cmd.exe /c \@start \"kitchen\" /D \"#{repository}\" #{c}"
         puts c
         system(c)
@@ -95,7 +95,7 @@ def kitchen_cmd(cmd='list',instance=nil,debug=false)
       else
         gem_install('rspec-puppet') if `gem list rspec-puppet -i`.include?('false')
       end
-      if RUBY_PLATFORM.index("mswin") != nil  or RUBY_PLATFORM.index("i386-mingw32") != nil
+      if RUBY_PLATFORM.index("mswin") != nil  or RUBY_PLATFORM.index("mingw") != nil
         c = "cmd.exe /c \@start \"kitchen\" /D \"#{repository}\" #{c}"
         puts c
         system(c)
@@ -111,7 +111,7 @@ def kitchen_cmd(cmd='list',instance=nil,debug=false)
     if answer == MBOX_CLICKED_YES
       c="kitchen #{cmd} #{instance}"
       c=c+" -l debug" if debug
-      if RUBY_PLATFORM.index("mswin") != nil  or RUBY_PLATFORM.index("i386-mingw32") != nil
+      if RUBY_PLATFORM.index("mswin") != nil  or RUBY_PLATFORM.index("mingw") != nil
         c = "cmd.exe /c \@start \"kitchen\" /D \"#{repository}\" #{c}"
         puts c
         system(c)

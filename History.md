@@ -1,3 +1,8 @@
+### Version 4.0.4 July 2015
+add version dependencies for fxruby, test-kitchen and net-ssh.
+change ruby platform for windows to just mingw to get all windows ruby platforms.
+for windows default the SSL_CERT_FILE to ca-bundle.crt
+
 ### Version 4.0.1 June 2015
 Refresh tree and list in a thread so doesn't lock screen
 Improve performance of loading public images
@@ -8,9 +13,6 @@ Add popup for roles in launch screen
 Fix  MonitorDialog to only look for MountPath
 Add ssl_cert_file setting and fix code not to bypass ssl
 Pretty Print code
-```
-**BREAKING CHANGE** Need to add to environment configuration SSL_CERT_FILE set to ca-bundle.crt
-```
 
 ### Version 3.7.11 May 2015
 Added cfndsl options and pretty printing generated json

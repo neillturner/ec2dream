@@ -26,12 +26,15 @@ Gem::Specification.new do |spec|
   spec.name = 'ec2dream'
   spec.version = EC2Dream::VERSION
   spec.authors = ['Neill Turner']
+  spec.license       = "Apache-2.0"
   spec.email = 'neillwturner@gmail.com'
   spec.executables = ["ec2dream"]
   spec.homepage = 'http://ec2dream.blogspot.com'
   spec.required_ruby_version = '>= 2.1'
   spec.require_path = 'lib'
   spec.add_dependency('fxruby', '<= 1.6.29')
+  spec.add_dependency('net-ssh', '<= 2.9.2')
+  spec.add_dependency('test-kitchen', '~> 1.4')
   spec.add_dependency('rubyzip', '>= 1.0.0')
   spec.add_dependency('zip-zip')
   spec.add_dependency('gchartrb')

@@ -316,7 +316,7 @@ class CF_EditDialog < FXDialogBox
     gem_install('ppjson') unless list.include? "ppjson" if pretty_print_json.itemCurrent?(0)
     cmd="cfndsl -o #{template_file} #{cfndsl_parameters} #{cfndsl_file}"
     cmd2="ppjson -f -i #{template_file}"
-    if RUBY_PLATFORM.index("mswin") != nil  or RUBY_PLATFORM.index("i386-mingw32") != nil
+    if RUBY_PLATFORM.index("mswin") != nil  or RUBY_PLATFORM.index("mingw") != nil
       c = "cmd.exe /c \@start \"#{cmd}\" #{cmd}"
       puts c
       system(c)

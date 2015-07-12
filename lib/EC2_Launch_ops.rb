@@ -181,7 +181,7 @@ class EC2_Launch
     ops_clear('AccessIPv6')
     ops_clear('Image_Id')
     ops_clear('EC2_SSH_User')
-    if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("i386-mingw32") != nil
+    if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("mingw") != nil
       ops_clear('Putty_Private_Key')
     end
     clear_notes
