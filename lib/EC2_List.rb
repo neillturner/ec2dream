@@ -739,10 +739,10 @@ class EC2_List
         end
       end
       load_table_with_data()
-      @loaded = true      
+      @loaded = true
       return
-    end  
-    command = Thread.new do  
+    end
+    command = Thread.new do
     if type == "Local Servers"
       loc = EC2_Properties.new
       if loc != nil
@@ -757,8 +757,8 @@ class EC2_List
       end
     elsif type == "Test Kitchen"
       @data = kitchen_cmd("list")
-      path = Pathname.new($ec2_main.settings.get("TEST_KITCHEN_PATH")).basename
-      @title.text = "#{@type} - #{Pathname.new($ec2_main.settings.get("TEST_KITCHEN_PATH")).basename}"
+      #path = Pathname.new($ec2_main.settings.get("TEST_KITCHEN_PATH")).basename
+      @title.text = "#{@type} - #{Pathname.new($ec2_main.settings.get("KITCHEN_YAML")).basename}"
     elsif type == "Vagrant"
       begin
         envs = Dir.entries($ec2_main.settings.get("VAGRANT_REPOSITORY"))
@@ -829,10 +829,10 @@ class EC2_List
       end
     end
     load_table_with_data()
-    end    
+    end
     @loaded = true
   end
-  
+
   def load_table_with_data
     @data = [] if @data == nil
     if  !@data.empty?  or @data.size>0
@@ -973,7 +973,7 @@ class EC2_List
       set_table_data(lists,table_size)
     else
       @table.setTableSize(0,0)
-    end  
+    end
   end
 
   def create_lists(list_size)

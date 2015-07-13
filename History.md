@@ -1,3 +1,6 @@
+### Version 4.0.5 July 2015
+add KITCHEN_YAML environment setting.
+
 ### Version 4.0.4 July 2015
 add version dependencies for fxruby, test-kitchen and net-ssh.
 change ruby platform for windows to just mingw to get all windows ruby platforms.

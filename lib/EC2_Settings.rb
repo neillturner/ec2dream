@@ -45,6 +45,7 @@ class EC2_Settings
     @settings['SAVE_SETTINGS_BUTTON'].connect(SEL_COMMAND) do
       save
       save_system_screen_values
+      FXMessageBox.warning(@ec2_main,MBOX_OK,"Restart","Restart ec2dream to use new settings")
     end
     @settings['SAVE_SETTINGS_BUTTON'].connect(SEL_UPDATE) do |sender, sel, data|
       enable_if_env_set(sender)
@@ -53,19 +54,10 @@ class EC2_Settings
       @settings['PUTTY_GENERATE_BUTTON'] = FXButton.new(page1a, "PuTTygen Key Generator", :opts => BUTTON_NORMAL|LAYOUT_LEFT)
       @settings['PUTTY_GENERATE_BUTTON'].icon = @link
       @settings['PUTTY_GENERATE_BUTTON'].tipText = " PuTTYgen Key Generator "
-      # FXLabel.new(page1a, "In PuTTYgen press OK and then press SAVE PRIVATE KEY" )
       @settings['PUTTY_GENERATE_BUTTON'].connect(SEL_COMMAND) do
         dialog = EC2_GenerateKeyDialog.new(@ec2_main,"SSH_PRIVATE_KEY",@settings['EC2_SSH_PRIVATE_KEY'].text)
         dialog.execute
       end
-      # @settings['PUTTY_GENERATE_BUTTON'].connect(SEL_COMMAND) do
-      #    puts "settings.PuttyGenerateButton.connect"
-      #    if @settings['EC2_SSH_PRIVATE_KEY'].text != nil and @settings['EC2_SSH_PRIVATE_KEY'].text != ''
-      #       system("cmd.exe /C "+ENV['EC2DREAM_HOME']+"/putty//puttygen "+"\""+@settings['EC2_SSH_PRIVATE_KEY'].text+"\""+"  -t rsa")
-      #    else
-      #       error_message("Error","No EC2_SSH_PRIVATE_KEY setting specified")
-      #    end
-      # end
       @settings['PUTTY_GENERATE_BUTTON'].connect(SEL_UPDATE) do |sender, sel, data|
         enable_if_env_set(sender)
       end
@@ -91,7 +83,6 @@ class EC2_Settings
           else
             @settings['REPOSITORY_LOCATION'].text = " "
           end
-          FXMessageBox.warning(@ec2_main,MBOX_OK,"REPOSITORY_LOCATION","Restart to use new repository")
         end
       end
     end
@@ -251,6 +242,22 @@ class EC2_Settings
         @settings['TEST_KITCHEN_PATH'].text = dialog.directory
       end
     end
+    FXLabel.new(frame1, "KITCHEN_YAML" )
+    @settings['KITCHEN_YAML'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+    @settings['KITCHEN_YAML_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
+    @settings['KITCHEN_YAML_BUTTON'].icon = @magnifier
+    @settings['KITCHEN_YAML_BUTTON'].tipText = "Browse..."
+    @settings['KITCHEN_YAML_BUTTON'].connect(SEL_COMMAND) do
+      dialog = FXFileDialog.new(frame1, "Select kitchen yaml file")
+      dialog.directory = "#{ENV['EC2DREAM_HOME']}"
+      dialog.directory = @settings['TEST_KITCHEN_PATH'].text if @settings['TEST_KITCHEN_PATH'].text!=nil and @settings['TEST_KITCHEN_PATH'].text!=""
+      dialog.patternList = ["All Files (*)",
+                           "FILEMATCH_PERIOD"
+                          ]
+      if dialog.execute != 0
+        @settings['KITCHEN_YAML'].text = dialog.filename
+      end
+    end
     FXLabel.new(frame1, "VAGRANT_REPOSITORY" )
     @settings['VAGRANT_REPOSITORY'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @settings['VAGRANT_REPOSITORY_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
@@ -373,6 +380,9 @@ class EC2_Settings
         @properties['TEST_KITCHEN_PATH']  = "#{ENV['EC2DREAM_HOME']}/chef/chef-repo/site-cookbooks/mycompany_webserver"
         @settings['TEST_KITCHEN_PATH'].text = "#{ENV['EC2DREAM_HOME']}/chef/chef-repo/site-cookbooks/mycompany_webserver"
       end
+      load_panel('KITCHEN_YAML')
+      kitchen_yaml = get('KITCHEN_YAML')
+      ENV['KITCHEN_YAML'] = kitchen_yaml if kitchen_yaml != ""
       load_panel('VAGRANT_REPOSITORY')
       if @settings['VAGRANT_REPOSITORY'].text == nil or @settings['VAGRANT_REPOSITORY'].text == ""
         @properties['VAGRANT_REPOSITORY']  = "#{ENV['EC2DREAM_HOME']}/chef/vagrant"
@@ -433,6 +443,7 @@ class EC2_Settings
     clear('AMAZON_ACCESS_KEY_ID')
     clear('AMAZON_SECRET_ACCESS_KEY')
     clear('TEST_KITCHEN_PATH')
+    clear('KITCHEN_YAML')
     clear('VAGRANT_REPOSITORY')
     clear('AVAILABILITY_ZONE')
     clear('AMAZON_NICKNAME_TAG')
@@ -567,6 +578,7 @@ class EC2_Settings
     save_setting("AMAZON_ACCESS_KEY_ID")
     save_setting("AMAZON_SECRET_ACCESS_KEY")
     save_setting("TEST_KITCHEN_PATH")
+    save_setting("KITCHEN_YAML")
     save_setting("VAGRANT_REPOSITORY")
     save_setting("AVAILABILITY_ZONE")
     save_setting("AMAZON_NICKNAME_TAG")
