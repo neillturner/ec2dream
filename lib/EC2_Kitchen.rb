@@ -4,6 +4,7 @@ require 'fox16/colors'
 require 'fox16/scintilla'
 require 'net/http'
 require 'resolv'
+require 'pathname'
 require 'dialog/KIT_LogSelectDialog'
 require 'dialog/KIT_PathCreateDialog'
 require 'common/kitchen_cmd'
@@ -257,17 +258,21 @@ class EC2_Kitchen
     FXLabel.new(@frame1, "" )
     FXLabel.new(@frame1, "Test Kitchen Path" )
     @kit_server['test_kitchen_path'] = FXTextField.new(@frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
-    @kit_server['test_kitchen_path_button'] = FXButton.new(@frame1, " ",:opts => BUTTON_TOOLBAR)
-    @kit_server['test_kitchen_path_button'].icon = @modify
-    @kit_server['test_kitchen_path_button'].tipText = "  Configure Test Kitchen Path  "
-    @kit_server['test_kitchen_path_button'].connect(SEL_COMMAND) do |sender, sel, data|
-      dialog = KIT_PathCreateDialog.new(@ec2_main)
-      dialog.execute
-      if dialog.success
-        @ec2_main.tabBook.setCurrent(0)
-        @ec2_main.list.load("Test Kitchen")
-      end
-    end
+    FXLabel.new(@frame1, "" )
+    #@kit_server['test_kitchen_path_button'] = FXButton.new(@frame1, " ",:opts => BUTTON_TOOLBAR)
+    #@kit_server['test_kitchen_path_button'].icon = @modify
+    #@kit_server['test_kitchen_path_button'].tipText = "  Configure Test Kitchen Path  "
+    #@kit_server['test_kitchen_path_button'].connect(SEL_COMMAND) do |sender, sel, data|
+    #  dialog = KIT_PathCreateDialog.new(@ec2_main)
+    #  dialog.execute
+    #  if dialog.success
+    #    @ec2_main.tabBook.setCurrent(0)
+    #    @ec2_main.list.load("Test Kitchen")
+    #  end
+    #end
+    FXLabel.new(@frame1, "Kitchen_yaml" )
+    @kit_server['test_kitchen_yaml'] = FXTextField.new(@frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
+    FXLabel.new(@frame1, "" )
     FXLabel.new(@frame1, "SSH User" )
     @kit_server['ssh_user'] = FXTextField.new(@frame1, 30, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
     FXLabel.new(@frame1, "" )
@@ -311,6 +316,7 @@ class EC2_Kitchen
     @kit_server['transport'].text = transport if transport != nil
     @kit_server['last_action'].text = last_action
     @kit_server['test_kitchen_path'].text = @ec2_main.settings.get('TEST_KITCHEN_PATH')
+    @kit_server['test_kitchen_yaml'].text = "#{Pathname.new(@ec2_main.settings.get("KITCHEN_YAML")).basename}"    
     @kit_server['ssh_user'].text = @ec2_main.settings.get('EC2_SSH_USER')
     @kit_server['ssh_password'].text = ""
     @kit_server['chef_foodcritic'].text = @ec2_main.settings.get('CHEF_FOODCRITIC')
@@ -337,6 +343,7 @@ class EC2_Kitchen
       @kit_server['transport'].text = data[0]['Transport'] if data[0]['Transport'] != nil
       @kit_server['last_action'].text = data[0]['Last-Action']
       @kit_server['test_kitchen_path'].text = @ec2_main.settings.get('TEST_KITCHEN_PATH')
+      @kit_server['test_kitchen_yaml'].text = "#{Pathname.new(@ec2_main.settings.get("KITCHEN_YAML")).basename}"
       @kit_server['ssh_user'].text = @ec2_main.settings.get('EC2_SSH_USER')
       @kit_server['chef_foodcritic'].text = @ec2_main.settings.get('CHEF_FOODCRITIC')
       @kit_server['chef_rspec_test'].text = @ec2_main.settings.get('CHEF_RSPEC_TEST')
