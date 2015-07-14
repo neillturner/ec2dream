@@ -757,8 +757,9 @@ class EC2_List
       end
     elsif type == "Test Kitchen"
       @data = kitchen_cmd("list")
-      #path = Pathname.new($ec2_main.settings.get("TEST_KITCHEN_PATH")).basename
-      @title.text = "#{@type} - #{Pathname.new($ec2_main.settings.get("KITCHEN_YAML")).basename}"
+      path = ".kitchen.yml"
+      path = Pathname.new($ec2_main.settings.get("KITCHEN_YAML")).basename  if $ec2_main.settings.get("KITCHEN_YAML")!= ""
+      @title.text = "#{@type} - #{path}"
     elsif type == "Vagrant"
       begin
         envs = Dir.entries($ec2_main.settings.get("VAGRANT_REPOSITORY"))
