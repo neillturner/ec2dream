@@ -697,7 +697,6 @@ class EC2_List
 
 
   def load_sort_reload(type,sort_col,reload,connection="Compute")
-
     @connection = connection
     @type = type
     @curr_item = ""
@@ -714,6 +713,10 @@ class EC2_List
       else
         @title.text = @type + "    "
       end
+    elsif type == "Test Kitchen"
+      path = ".kitchen.yml"
+      path = Pathname.new($ec2_main.settings.get("KITCHEN_YAML")).basename  if $ec2_main.settings.get("KITCHEN_YAML")!= ""
+      @title.text = "#{@type} - #{path}"            
     else
       @title.text = @type + "    "
     end
@@ -728,7 +731,6 @@ class EC2_List
           puts "ERROR: #{image_error_message}"
         end
       end
-      #end
       if @tags_filter[:image] == nil or  @tags_filter[:image].empty?
         if @image_type == "Public Images"
           @title.text = "Images (Cached)"
@@ -757,9 +759,6 @@ class EC2_List
       end
     elsif type == "Test Kitchen"
       @data = kitchen_cmd("list")
-      path = ".kitchen.yml"
-      path = Pathname.new($ec2_main.settings.get("KITCHEN_YAML")).basename  if $ec2_main.settings.get("KITCHEN_YAML")!= ""
-      @title.text = "#{@type} - #{path}"
     elsif type == "Vagrant"
       begin
         envs = Dir.entries($ec2_main.settings.get("VAGRANT_REPOSITORY"))
@@ -774,7 +773,6 @@ class EC2_List
           @data.push({"server" => r, "Vagrantfile" => vf  }) if r != '.' and r != '..' and File.directory?("#{$ec2_main.settings.get('VAGRANT_REPOSITORY')}/#{r}")
         end
       end
-
     elsif type == "Templates"
       cf = EC2_Properties.new
       if cf != nil
