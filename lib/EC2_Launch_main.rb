@@ -815,7 +815,6 @@ class EC2_Launch
     @frame4s = FXHorizontalFrame.new(@frame4,LAYOUT_FILL_X, :padding => 0)
     @ops_launch['Name'] = FXTextField.new(@frame4s, 20, nil, 0, :opts => FRAME_SUNKEN)
     FXLabel.new(@frame4s, "" )
-    #FXLabel.new(@frame4s, "Chef Node/Puppet Roles" )
     @ops_launch['IAM_Role'] = FXTextField.new(@frame4s, 20, nil, 0, :opts => FRAME_SUNKEN)
     @ops_launch['IAM_Role'].visible=false
     FXLabel.new(@frame4, "" )
@@ -1056,7 +1055,6 @@ class EC2_Launch
     FXLabel.new(@frame6, "Server Name" )
     @google_launch['Name'] = FXTextField.new(@frame6, 20, nil, 0, :opts => FRAME_SUNKEN)
     FXLabel.new(@frame6, "" )
-    #FXLabel.new(@frame6, "Chef Node/Puppet Roles" )
     @google_launch['IAM_Role'] = FXTextField.new(@frame6, 20, nil, 0, :opts => FRAME_SUNKEN)
     @google_launch['IAM_Role'].visible=false
     FXLabel.new(@frame6, "" )

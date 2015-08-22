@@ -76,7 +76,6 @@ class EC2_Launch
     @profile = parm
     @google_launch['Name'].text = @profile
     @google_launch['Name'].enabled = false
-    @google_launch['Chef_Node'].text = @profile
     fn = @ec2_main.settings.get_system('ENV_PATH')+"/"+@profile_folder+"/"+@profile+".properties"
     if File.exists?(fn)
       File.open(fn, 'r') do |properties_file|
@@ -92,7 +91,6 @@ class EC2_Launch
           end
         end
       end
-      load_google_panel('Chef_Node')
       load_google_panel('Puppet_Manifest')
       load_google_panel('Boot_Disk')
       load_google_panel('Boot_Disk_Device')
@@ -134,7 +132,6 @@ class EC2_Launch
     @frame4.hide()
     @frame5.hide()
     @frame6.show()
-    google_clear('Chef_Node')
     google_clear('Puppet_Manifest')
     google_clear('Admin_Password')
     @google_launch['Name'].text = ""
@@ -203,7 +200,6 @@ class EC2_Launch
       error_message("Error","No Server Name specified")
     else
       @properties = {}
-      save_google_launch('Chef_Node')
       save_google_launch('Puppet_Manifest')
       save_google_launch('Boot_Disk')
       save_google_launch('Boot_Disk_Device')

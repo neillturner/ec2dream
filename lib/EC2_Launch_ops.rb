@@ -106,7 +106,6 @@ class EC2_Launch
     @profile = parm
     @ops_launch['Name'].text = @profile
     @ops_launch['Name'].enabled = false
-    @ops_launch['Chef_Node'].text = @profile
     @ops_launch['Image_Id'].enabled = true
     @ops_launch['Image_Id_Button'].enabled = true
     fn = @ec2_main.settings.get_system('ENV_PATH')+"/"+@profile_folder+"/"+@profile+".properties"
@@ -126,7 +125,6 @@ class EC2_Launch
       end
 
       load_ops_panel('Security_Group')
-      load_ops_panel('Chef_Node')
       load_ops_panel('Image_Id')
       load_ops_panel('Image_Name')
       load_ops_panel('Flavor')
@@ -163,7 +161,6 @@ class EC2_Launch
     @frame4.show()
     @frame5.hide()
     ops_clear('Security_Group')
-    ops_clear('Chef_Node')
     ops_clear('Admin_Password')
     @ops_launch['Name'].text = ""
     @ops_launch['Name'].enabled = true
@@ -222,7 +219,6 @@ class EC2_Launch
     else
       load_ops_image  if !@ec2_main.settings.openstack_hp
       save_ops_launch('Security_Group')
-      save_ops_launch('Chef_Node')
       save_ops_launch('Image_Id')
       save_ops_launch('Image_Name')
       save_ops_launch('Flavor')
