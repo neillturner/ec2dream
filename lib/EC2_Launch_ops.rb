@@ -106,7 +106,7 @@ class EC2_Launch
     @profile = parm
     @ops_launch['Name'].text = @profile
     @ops_launch['Name'].enabled = false
-    @ops_launch['Chef_Node'].text = @profile
+    @ops_launch['Chef_Node'].text = @profile if @ops_launch.include? 'Chef_Node'
     @ops_launch['Image_Id'].enabled = true
     @ops_launch['Image_Id_Button'].enabled = true
     fn = @ec2_main.settings.get_system('ENV_PATH')+"/"+@profile_folder+"/"+@profile+".properties"
@@ -163,7 +163,7 @@ class EC2_Launch
     @frame4.show()
     @frame5.hide()
     ops_clear('Security_Group')
-    ops_clear('Chef_Node')
+    # ops_clear('Chef_Node')
     ops_clear('Admin_Password')
     @ops_launch['Name'].text = ""
     @ops_launch['Name'].enabled = true
@@ -199,7 +199,12 @@ class EC2_Launch
     else
       @properties[key] = ""
     end
-    @ops_launch[key].text = ""
+
+    if @ops_launch.include? key
+      @ops_launch[key].text = ""
+    else
+      puts "ops_clear - invalid key = '" + key + "'."
+    end
   end
 
   def ops_put(key,value)
