@@ -1,4 +1,4 @@
-def ssh(server, address, user, private_key, putty_key, password, local_port=nil)
+def ssh(server, address, user, private_key, putty_key, password, local_port=nil, address_port=nil)
   puts " ssh #{server}, #{address}, #{user}, #{private_key}, #{putty_key}, #{password}, #{local_port}"
   s = server
   if address != nil and address != ""
@@ -21,6 +21,9 @@ def ssh(server, address, user, private_key, putty_key, password, local_port=nil)
     end
     if local_port != nil and local_port != ""
       c = c +" -P #{local_port}"
+    end
+    if address_port != nil and address_port != ""
+      c = c +" -P #{address_port}"
     end
     puts c
     system(c)
@@ -47,7 +50,9 @@ def ssh(server, address, user, private_key, putty_key, password, local_port=nil)
         c = te+ " -x"
       end
     end
-    if local_port != nil and local_port != ""
+    if address_port != nil and address_port != ""
+      c = c+" ssh -i #{private_key} localhost -l #{user} -p #{address_port} &"
+    elsif local_port != nil and local_port != ""
       puts "WARNING: accessing server via ssh tunnel"
       c = c+" ssh -i #{private_key} localhost -l #{user} -p #{local_port} &"
     else

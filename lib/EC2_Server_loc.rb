@@ -100,7 +100,7 @@ class EC2_Server
 
   def loc_ssh
     if @loc_server['windows_server'].itemCurrent?(1)
-      ssh(@loc_server['server'].text, @loc_server['address'].text, @loc_server['ssh_user'].text, @loc_server['ssh_key'].text, @loc_server['putty_key'].text, @loc_server['ssh_password'].text,@loc_server['local_port'].text)
+      ssh(@loc_server['server'].text, @loc_server['address'].text, @loc_server['ssh_user'].text, @loc_server['ssh_key'].text, @loc_server['putty_key'].text, @loc_server['ssh_password'].text,@loc_server['local_port'].text,@loc_server['address_port'].text)
     end
   end
 
