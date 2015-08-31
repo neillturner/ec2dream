@@ -64,10 +64,12 @@ class EC2_Settings
     end
 
     frame1 = FXMatrix.new(page1, 3, MATRIX_BY_COLUMNS|LAYOUT_FILL)
-    FXLabel.new(frame1, "ENVIRONMENT" )
+    @settings['ENV_NAME_LABEL'] = FXLabel.new(frame1, "ENVIRONMENT" )
+    @settings['ENV_NAME_LABEL'].tipText = "The EC2Dream Environment.\nYou can have different environment for different clouds,\ndifferent accounts in a cloud,\n or different test-itchen repositories for a cloud\n,Use servers for non-cloud environments"
     @settings['ENV_NAME'] = FXTextField.new(frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
     FXLabel.new(frame1, "" )
-    FXLabel.new(frame1, "ENV_REPOSITORY" )
+    @settings['REPOSITORY_LOCATION_LABEL'] = FXLabel.new(frame1, "ENV_REPOSITORY" )
+    @settings['REPOSITORY_LOCATION_LABEL'].tipText = "The Directory where EC2Dream stores all the internal information for each environment.\n This includes environment properties, launch profiles, and the image cache"
     @settings['REPOSITORY_LOCATION'] = FXTextField.new(frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
     @settings['REPOSITORY_LOCATION_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @settings['REPOSITORY_LOCATION_BUTTON'].icon = @repository
@@ -92,7 +94,8 @@ class EC2_Settings
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "  Cloud Access Settings", nil, LAYOUT_CENTER_X)
     FXLabel.new(frame1, "" )
-    FXLabel.new(frame1, "PLATFORM" )
+    @settings['EC2_PLATFORM_LABEL'] = FXLabel.new(frame1, "PLATFORM" )
+    @settings['EC2_PLATFORM_LABEL'].tipText = "The Cloud Platform type.\n User servers for non-cloud platforms."
     @settings['EC2_PLATFORM'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @settings['EC2_PLATFORM_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @settings['EC2_PLATFORM_BUTTON'].icon = @magnifier
@@ -109,6 +112,7 @@ class EC2_Settings
     @settings['AMAZON_ACCESS_KEY_ID'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame1, "" )
     @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'] = FXLabel.new(frame1, "SECRET_ACCESS_KEY" )
+
     @settings['AMAZON_SECRET_ACCESS_KEY'] = FXTextField.new(frame1, 60, nil, 0, :opts => TEXTFIELD_PASSWD|FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @settings['AMAZON_SECRET_ACCESS_KEY_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @settings['AMAZON_SECRET_ACCESS_KEY_BUTTON'].icon = @magnifier
@@ -121,6 +125,7 @@ class EC2_Settings
     @settings['AMAZON_ACCOUNT_ID'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame1, "" )
     @settings['EC2_URL_LABEL'] = FXLabel.new(frame1, "URL" )
+
     @settings['EC2_URL'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @settings['EC2_URL_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @settings['EC2_URL_BUTTON'].icon = @magnifier
@@ -134,6 +139,7 @@ class EC2_Settings
       end
     end
     @settings['AVAILABILITY_ZONE_LABEL'] = FXLabel.new(frame1, "AVAILABILITY_ZONE" )
+
     @settings['AVAILABILITY_ZONE'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @settings['AVAILABILITY_ZONE_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @settings['AVAILABILITY_ZONE_BUTTON'].icon = @magnifier
@@ -147,6 +153,7 @@ class EC2_Settings
       end
     end
     @settings['AMAZON_NICKNAME_TAG_LABEL'] = FXLabel.new(frame1, "NICKNAME TAG" )
+    @settings['AMAZON_NICKNAME_TAG_LABEL'] = ""
     @settings['AMAZON_NICKNAME_TAG'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame1, "" )
     #
@@ -155,10 +162,10 @@ class EC2_Settings
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "  PuTTY, ssh and SCP Settings", nil, LAYOUT_CENTER_X)
     FXLabel.new(frame1, "" )
-    FXLabel.new(frame1, "SSH_USER" )
+    @settings['EC2_SSH_USER_LABEL'] = FXLabel.new(frame1, "SSH_USER" )
     @settings['EC2_SSH_USER'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame1, "" )
-    FXLabel.new(frame1, "SSH_PRIVATE_KEY" )
+    @settings['EC2_SSH_PRIVATE_KEY_LABEL'] = FXLabel.new(frame1, "SSH_PRIVATE_KEY" )
     @settings['EC2_SSH_PRIVATE_KEY'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @settings['EC2_SSH_PRIVATE_KEY_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @settings['EC2_SSH_PRIVATE_KEY_BUTTON'].icon = @magnifier
@@ -174,7 +181,7 @@ class EC2_Settings
       end
     end
     if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("mingw") != nil
-      FXLabel.new(frame1, "PUTTY_PRIVATE_KEY" )
+      @settings['PUTTY_PRIVATE_KEY_LABEL'] = FXLabel.new(frame1, "PUTTY_PRIVATE_KEY" )
       @settings['PUTTY_PRIVATE_KEY'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
       @settings['PUTTY_PRIVATE_KEY_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
       @settings['PUTTY_PRIVATE_KEY_BUTTON'].icon = @magnifier
@@ -226,7 +233,8 @@ class EC2_Settings
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "  Global and General Settings", nil, LAYOUT_CENTER_X)
     FXLabel.new(frame1, "" )
-    FXLabel.new(frame1, "TEST_KITCHEN_PATH" )
+    @settings['TEST_KITCHEN_PATH_LABEL'] = FXLabel.new(frame1, "TEST_KITCHEN_PATH" )
+    @settings['TEST_KITCHEN_PATH_LABEL'].tipText = ""
     @settings['TEST_KITCHEN_PATH'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @settings['TEST_KITCHEN_PATH_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @settings['TEST_KITCHEN_PATH_BUTTON'].icon = @magnifier
@@ -242,7 +250,8 @@ class EC2_Settings
         @settings['TEST_KITCHEN_PATH'].text = dialog.directory
       end
     end
-    FXLabel.new(frame1, "KITCHEN_YAML" )
+    @settings['KITCHEN_YAML_LABEL'] = FXLabel.new(frame1, "KITCHEN_YAML" )
+    @settings['KITCHEN_YAML_LABEL'].tipText = ""
     @settings['KITCHEN_YAML'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @settings['KITCHEN_YAML_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @settings['KITCHEN_YAML_BUTTON'].icon = @magnifier
@@ -258,7 +267,8 @@ class EC2_Settings
         @settings['KITCHEN_YAML'].text = dialog.filename
       end
     end
-    FXLabel.new(frame1, "VAGRANT_REPOSITORY" )
+    @settings['VAGRANT_REPOSITORY_LABEL'] = FXLabel.new(frame1, "VAGRANT_REPOSITORY" )
+    @settings['VAGRANT_REPOSITORY_LABEL'].tipText = ""
     @settings['VAGRANT_REPOSITORY'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @settings['VAGRANT_REPOSITORY_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @settings['VAGRANT_REPOSITORY_BUTTON'].icon = @magnifier
@@ -274,7 +284,8 @@ class EC2_Settings
         @settings['VAGRANT_REPOSITORY'].text = dialog.directory
       end
     end
-    FXLabel.new(frame1, "SSL_CERT_FILE" )
+    @settings['SSL_CERT_FILE_LABEL'] = FXLabel.new(frame1, "SSL_CERT_FILE" )
+    @settings['SSL_CERT_FILE_LABEL'].tipText = ""
     @settings['SSL_CERT_FILE'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @settings['SSL_CERT_FILE_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @settings['SSL_CERT_FILE_BUTTON'].icon = @magnifier
@@ -288,7 +299,8 @@ class EC2_Settings
       end
     end
     if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("mingw") == nil
-      FXLabel.new(frame1, "TERMINAL_EMULATOR" )
+      @settings['TERMINAL_EMULATOR_LABEL'] = FXLabel.new(frame1, "TERMINAL_EMULATOR" )
+      @settings['TERMINAL_EMULATOR_LABEL'].tipText = ""
       @settings['TERMINAL_EMULATOR'] = FXTextField.new(frame1, 20, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
       @settings['TERMINAL_EMULATOR'].text = "xterm"
       @settings['TERMINAL_EMULATOR_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
@@ -303,7 +315,8 @@ class EC2_Settings
         end
       end
     end
-    FXLabel.new(frame1, "EXTERNAL_EDITOR" )
+    @settings['EXTERNAL_EDITOR_LABEL'] = FXLabel.new(frame1, "EXTERNAL_EDITOR" )
+    @settings['EXTERNAL_EDITOR_LABEL'].tipText = ""
     @settings['EXTERNAL_EDITOR'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @settings['EXTERNAL_EDITOR_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @settings['EXTERNAL_EDITOR_BUTTON'].icon = @magnifier
@@ -318,7 +331,8 @@ class EC2_Settings
         @settings['EXTERNAL_EDITOR'].text = dialog.filename
       end
     end
-    FXLabel.new(frame1, "EXTERNAL_BROWSER" )
+    @settings['EXTERNAL_BROWSER_LABEL'] = FXLabel.new(frame1, "EXTERNAL_BROWSER" )
+    @settings['EXTERNAL_BROWSER_LABEL'].tipText = ""
     @settings['EXTERNAL_BROWSER'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @settings['EXTERNAL_BROWSER_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @settings['EXTERNAL_BROWSER_BUTTON'].icon = @magnifier
@@ -333,7 +347,8 @@ class EC2_Settings
         @settings['EXTERNAL_BROWSER'].text = dialog.filename
       end
     end
-    FXLabel.new(frame1, "TIMEZONE" )
+    @settings['TIMEZONE_LABEL'] = FXLabel.new(frame1, "TIMEZONE" )
+    @settings['TIMEZONE_LABEL'].tipText = ""
     @settings['TIMEZONE'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @settings['TIMEZONE_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @settings['TIMEZONE_BUTTON'].icon = @magnifier
@@ -408,18 +423,30 @@ class EC2_Settings
       ENV['SSL_CERT_FILE'] = ssl_cert
       if @settings['EC2_PLATFORM'].text=="google"
         @settings['AMAZON_ACCESS_KEY_ID_LABEL'].text="CLIENT_EMAIL"
+        @settings['AMAZON_ACCESS_KEY_ID_LABEL'].tipText=""
         @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].text="KEY_LOCATION"
+        @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].tipText=""
         @settings['AMAZON_ACCOUNT_ID_LABEL'].text=""
+        @settings['AMAZON_ACCOUNT_ID_LABEL'].tipText=""
         @settings['EC2_URL_LABEL'].text="PROJECT"
+        @settings['EC2_URL_LABEL'].tipText=""
         @settings['AVAILABILITY_ZONE_LABEL'].text = "ZONE"
+        @settings['AVAILABILITY_ZONE_LABEL'].tipText = ""
         @settings['AMAZON_NICKNAME_TAG_LABEL'].text=""
+        @settings['AMAZON_NICKNAME_TAG_LABEL'].tipText=""
       else
         @settings['AMAZON_ACCESS_KEY_ID_LABEL'].text="ACCESS_KEY"
+        @settings['AMAZON_ACCESS_KEY_ID_LABEL'].tipText = "Your cloud account's access key id"
         @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].text="SECRET_ACCESS_KEY"
+        @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].tipText = ""
         @settings['AMAZON_ACCOUNT_ID_LABEL'].text="ACCOUNT_ID"
+        @settings['AMAZON_ACCOUNT_ID_LABEL'].tipText = ""
         @settings['EC2_URL_LABEL'].text="URL"
+        @settings['EC2_URL_LABEL'].tipText = ""
         @settings['AVAILABILITY_ZONE_LABEL'].text = "AVAILABILITY_ZONE"
+        @settings['AVAILABILITY_ZONE_LABEL'].tipText = ""
         @settings['AMAZON_NICKNAME_TAG_LABEL'].text="NICKNAME TAG"
+        @settings['AMAZON_NICKNAME_TAG_LABEL'].tipText = ""
       end
     end
     @ec2_main.app.forceRefresh

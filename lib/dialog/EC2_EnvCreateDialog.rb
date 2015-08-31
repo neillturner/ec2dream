@@ -16,12 +16,12 @@ class EC2_EnvCreateDialog < FXDialogBox
 
   def initialize(owner)
 
-    def textBox(label, frame)
-      FXLabel.new(frame, label )
-      pushback = FXTextField.new(frame, 60, nil, 0, :opts => FRAME_SUNKEN)
-      FXLabel.new(frame, "" )
-      return pushback
-    end
+   # def textBox(label, frame)
+   #   FXLabel.new(frame, label )
+   #   pushback = FXTextField.new(frame, 60, nil, 0, :opts => FRAME_SUNKEN)
+   #   FXLabel.new(frame, "" )
+   #   return pushback
+   # end
 
     puts "EnvCreateDialog.initialize"
     @ec2_main = owner
@@ -38,6 +38,7 @@ class EC2_EnvCreateDialog < FXDialogBox
     # servers
     #
     @serverstab = FXTabItem.new(@tabbook, "&Servers", nil)
+    @serverstab.tipText = "Local or remote Servers accessable by ip address"
     @serversframe = FXHorizontalFrame.new(@tabbook )
     frame0 = FXMatrix.new(@serversframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
     FXLabel.new(frame0,"")
@@ -49,20 +50,34 @@ class EC2_EnvCreateDialog < FXDialogBox
     FXLabel.new(frame0,"")
     FXLabel.new(frame0,"")
     FXLabel.new(frame0,"")
-    servers_env = textBox("Environment Name",frame0)
+    servers_env_label = FXLabel.new(frame0, "Environment Name" )
+    servers_env_label.tipText = ""
+    servers_env = FXTextField.new(frame0, 60, nil, 0, :opts => FRAME_SUNKEN)
+    FXLabel.new(frame0, "" )
 
     #
     # amazon aws
     #
     @amazontab = FXTabItem.new(@tabbook, "&Amazon EC2", nil)
+    @amazontab.tipText = ""
     @amazonframe = FXHorizontalFrame.new(@tabbook )
     frame1 = FXMatrix.new(@amazonframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
-    amazon_env = textBox("Environment Name",frame1)
-    @amazon_access_key = textBox("Amazon Access Key",frame1)
-    FXLabel.new(frame1, "Amazon Secret Access Key" )
+    amazon_env_label = FXLabel.new(frame1, "Environment Name" )
+    amazon_env_label.tipText = ""
+    amazon_env = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN)
+    FXLabel.new(frame1, "" )
+
+    #@amazon_access_key = textBox("Amazon Access Key",frame1)
+    @amazon_access_key_label = FXLabel.new(frame1, "Amazon Access Key" )
+    @amazon_access_key_label.tipText = ""
+    @amazon_access_key = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN)
+    FXLabel.new(frame1, "" )
+    @amazon_secret_access_key_label = FXLabel.new(frame1, "Amazon Secret Access Key" )
+    @amazon_secret_access_key_label.tipText=""
     @amazon_secret_access_key = FXTextField.new(frame1, 60, nil, 0, :opts => TEXTFIELD_PASSWD|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame1, "" )
-    FXLabel.new(frame1, "Region (Default US-Virginia)" )
+    @ec2_url_label = FXLabel.new(frame1, "Region (Default US-Virginia)" )
+    @ec2_url_label.tipText=""
     @ec2_url = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @ec2_url_button = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @magnifier = @ec2_main.makeIcon("magnifier.png")
@@ -88,10 +103,19 @@ class EC2_EnvCreateDialog < FXDialogBox
     # Google Compute Engine
     #
     @googletab = FXTabItem.new(@tabbook, "&Google Compute", nil)
+    @googletab.tipText = ""
     @googleframe = FXHorizontalFrame.new(@tabbook )
     frame8 = FXMatrix.new(@googleframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
-    google_env = textBox("Environment Name",frame8)
-    @google_client_email = textBox("Google Client Email",frame8)
+    #google_env = textBox("Environment Name",frame8)
+    google_env_label = FXLabel.new(frame8, "Environment Name" )
+    google_env_label.tipText = ""
+    google_env = FXTextField.new(frame8, 60, nil, 0, :opts => FRAME_SUNKEN)
+    FXLabel.new(frame8, "" )
+    #@google_client_email = textBox("Google Client Email",frame8)
+    @google_client_email_label = FXLabel.new(frame8, "Google Client Email" )
+    @google_client_email_label.tipText = ""
+    @google_client_email = FXTextField.new(frame8, 60, nil, 0, :opts => FRAME_SUNKEN)
+    FXLabel.new(frame8, "" )
     FXLabel.new(frame8, "Google Key Location" )
     @google_key_location = FXTextField.new(frame8, 60, nil, 0, :opts => TEXTFIELD_PASSWD|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     google_open = FXButton.new(frame8, "", nil, self, ID_ACCEPT, BUTTON_TOOLBAR|LAYOUT_LEFT)
@@ -135,36 +159,48 @@ class EC2_EnvCreateDialog < FXDialogBox
     #
     # eucalyptus
     #
-    @eucatab = FXTabItem.new(@tabbook, "&Eucalyptus", nil)
-    @eucaframe = FXHorizontalFrame.new(@tabbook)
-    frame2 = FXMatrix.new(@eucaframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
-    euca_env = textBox("Environment Name",frame2)
-    FXLabel.new(frame2, "Eucalyptus certificate zipfile" )
-    @eucazipfile = FXTextField.new(frame2, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
-    open = FXButton.new(frame2, "", nil, self, ID_ACCEPT, BUTTON_TOOLBAR|LAYOUT_LEFT)
-    open.icon = @magnifier
-    open.connect(SEL_COMMAND) {
-      eucazip = FXFileDialog.getOpenFilename(self, "Locate your eucalyptus certificate zipfile", "<eucalyptus certificate zipfile>", "*.zip")
-      if eucazip
-        @eucazipfile.text = eucazip
-      end
-    }
+    #@eucatab = FXTabItem.new(@tabbook, "&Eucalyptus", nil)
+    #@eucaframe = FXHorizontalFrame.new(@tabbook)
+    #frame2 = FXMatrix.new(@eucaframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
+    #euca_env = textBox("Environment Name",frame2)
+    #FXLabel.new(frame2, "Eucalyptus certificate zipfile" )
+    #@eucazipfile = FXTextField.new(frame2, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+    #open = FXButton.new(frame2, "", nil, self, ID_ACCEPT, BUTTON_TOOLBAR|LAYOUT_LEFT)
+    #open.icon = @magnifier
+    #open.connect(SEL_COMMAND) {
+    #  eucazip = FXFileDialog.getOpenFilename(self, "Locate your eucalyptus certificate zipfile", "<eucalyptus certificate zipfile>", "*.zip")
+    #  if eucazip
+    #    @eucazipfile.text = eucazip
+    #  end
+    #}
 
     #
     # openstack
     #
     @openstacktab = FXTabItem.new(@tabbook, "&OpenStack", nil)
+    @openstacktab.tipText = ""
     @openstackframe = FXHorizontalFrame.new(@tabbook )
     frame3 = FXMatrix.new(@openstackframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
-    openstack_env = textBox("Environment Name",frame3)
-    @openstack_access_key = textBox("User Name",frame3)
-    FXLabel.new(frame3, "Password" )
+    #openstack_env = textBox("Environment Name",frame3)
+    openstack_env_label = FXLabel.new(frame3, "Environment Name" )
+    openstack_env_label.tipText = ""
+    openstack_env = FXTextField.new(frame3, 60, nil, 0, :opts => FRAME_SUNKEN)
+    FXLabel.new(frame3, "" )
+    #@openstack_access_key = textBox("User Name",frame3)
+    @openstack_access_key_label = FXLabel.new(frame3, "User Name" )
+    @openstack_access_key_label.tipText = ""
+    @openstack_access_key = FXTextField.new(frame3, 60, nil, 0, :opts => FRAME_SUNKEN)
+    FXLabel.new(frame3, "" )
+    @openstack_secret_access_key_label = FXLabel.new(frame3, "Password" )
+    @openstack_secret_access_key_label.tipText = ""
     @openstack_secret_access_key = FXTextField.new(frame3, 60, nil, 0, :opts => TEXTFIELD_PASSWD|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame3, "" )
-    FXLabel.new(frame3, "URL (Default Trystack)" )
+    @openstack_url_label = FXLabel.new(frame3, "URL (Default Trystack)" )
+    @openstack_url_label.tipText = ""
     @openstack_url = FXTextField.new(frame3, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame3, "" )
-    FXLabel.new(frame3, "Tenant ID" )
+    @openstack_tenant_label = FXLabel.new(frame3, "Tenant ID" )
+    @openstack_tenant_label.tipText = ""
     @openstack_tenant = FXTextField.new(frame3, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     if ENV['AMAZON_ACCESS_KEY_ID'] != nil and ENV['AMAZON_ACCESS_KEY_ID'] != ""
       @openstack_access_key.text = ENV['AMAZON_ACCESS_KEY_ID']
@@ -184,20 +220,33 @@ class EC2_EnvCreateDialog < FXDialogBox
     # openstack_hp
     #
     @hptab = FXTabItem.new(@tabbook, "&HP OpenStack", nil)
+    @hptab.tipText = ""
     @hpframe = FXHorizontalFrame.new(@tabbook )
     frame4 = FXMatrix.new(@hpframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
-    hp_env = textBox("Environment Name",frame4)
-    @hp_access_key = textBox("HP User Name",frame4)
-    FXLabel.new(frame4, "HP Password" )
+    #hp_env = textBox("Environment Name",frame4)
+    hp_env_label = FXLabel.new(frame4, "Environment Name" )
+    hp_env_label.tipText = ""
+    hp_env = FXTextField.new(frame4, 60, nil, 0, :opts => FRAME_SUNKEN)
+    FXLabel.new(frame4, "" )
+    #@hp_access_key = textBox("HP User Name",frame4)
+    @hp_access_label = FXLabel.new(frame4, "HP User Name" )
+    @hp_access_label.tipText = ""
+    @hp_access = FXTextField.new(frame4, 60, nil, 0, :opts => FRAME_SUNKEN)
+    FXLabel.new(frame4, "" )
+    @hp_secret_access_key_label = FXLabel.new(frame4, "HP Password" )
+    @hp_secret_access_key_label.tipText = ""
     @hp_secret_access_key = FXTextField.new(frame4, 60, nil, 0, :opts => TEXTFIELD_PASSWD|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame4, "" )
-    FXLabel.new(frame4, "HP URL" )
+    @hp_url_label = FXLabel.new(frame4, "HP URL" )
+    @hp_url_label.tipText = ""
     @hp_url = FXTextField.new(frame4, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame4, "" )
-    FXLabel.new(frame4, "HP Tenant ID" )
+    @hp_tenant_label = FXLabel.new(frame4, "HP Tenant ID" )
+    @hp_tenant_label.tipText = ""
     @hp_tenant = FXTextField.new(frame4, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame4, "" )
-    FXLabel.new(frame4, "HP Avl Zone" )
+    @hp_avl_zone_label = FXLabel.new(frame4, "HP Avl Zone" )
+    @hp_avl_zone_label.tipText = ""
     @hp_avl_zone = FXTextField.new(frame4, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @hp_avl_zone_button = FXButton.new(frame4, "", :opts => BUTTON_TOOLBAR)
     @hp_avl_zone_button.icon = @magnifier
@@ -237,14 +286,25 @@ class EC2_EnvCreateDialog < FXDialogBox
     # openstack_rackspace
     #
     @racktab = FXTabItem.new(@tabbook, "&Rackspace", nil)
+    @racktab.tipText = ""
     @rackframe = FXHorizontalFrame.new(@tabbook )
     frame5 = FXMatrix.new(@rackframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
-    rack_env = textBox("Environment Name",frame5)
-    @rack_access_key = textBox("Rackspace User Name",frame5)
-    FXLabel.new(frame5, "Rackspace API Key" )
+    #rack_env = textBox("Environment Name",frame5)
+    rack_env_label = FXLabel.new(frame5, "Environment Name" )
+    rack_env_label.tipText = ""
+    rack_env = FXTextField.new(frame5, 60, nil, 0, :opts => FRAME_SUNKEN)
+    FXLabel.new(frame5, "" )
+    #@rack_access_key = textBox("Rackspace User Name",frame5)
+    @rack_access_key_label = FXLabel.new(frame5, "Rackspace User Name" )
+    @rack_access_key_label.tipText = ""
+    @rack_access_key = FXTextField.new(frame5, 60, nil, 0, :opts => FRAME_SUNKEN)
+    FXLabel.new(frame5, "" )
+    @rack_secret_access_key_label = FXLabel.new(frame5, "Rackspace API Key" )
+    @rack_secret_access_key_label.tipText = ""
     @rack_secret_access_key = FXTextField.new(frame5, 60, nil, 0, :opts => TEXTFIELD_PASSWD|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame5, "" )
-    FXLabel.new(frame5, "Rackspace Endpoint (Default Dallas)" )
+    @rack_url_label = FXLabel.new(frame5, "Rackspace Endpoint (Default Dallas)" )
+    @rack_url_label.tipText = ""
     @rack_url = FXTextField.new(frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @rack_url_button = FXButton.new(frame5, "", :opts => BUTTON_TOOLBAR)
     @rack_url_button.icon = @magnifier
@@ -268,87 +328,82 @@ class EC2_EnvCreateDialog < FXDialogBox
     #
     # cloudstack
     #
-    @cloudstacktab = FXTabItem.new(@tabbook, "&CloudStack", nil)
-    @cloudstackframe = FXHorizontalFrame.new(@tabbook )
-    frame6 = FXMatrix.new(@cloudstackframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
-    cloudstack_env = textBox("Environment Name",frame6)
-    @cloudstack_access_key = textBox("CloudStack API Key",frame6)
-    FXLabel.new(frame6, "CloudStack Secret Key" )
-    @cloudstack_secret_access_key = FXTextField.new(frame6, 60, nil, 0, :opts => TEXTFIELD_PASSWD|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
-    FXLabel.new(frame6, "" )
-    FXLabel.new(frame6, "CloudStack URL" )
-    @cloudstack_url = FXTextField.new(frame6, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
-    if ENV['AMAZON_ACCESS_KEY_ID'] != nil and ENV['AMAZON_ACCESS_KEY_ID'] != ""
-      @cloudstack_access_key.text = ENV['AMAZON_ACCESS_KEY_ID']
-    end
-    if ENV['AMAZON_SECRET_ACCESS_KEY'] != nil and ENV['AMAZON_SECRET_ACCESS_KEY'] != ""
-      @cloudstack_secret_access_key.text = ENV['AMAZON_SECRET_ACCESS_KEY']
-    end
+    #@cloudstacktab = FXTabItem.new(@tabbook, "&CloudStack", nil)
+    #@cloudstackframe = FXHorizontalFrame.new(@tabbook )
+    #frame6 = FXMatrix.new(@cloudstackframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
+    #cloudstack_env = textBox("Environment Name",frame6)
+    #@cloudstack_access_key = textBox("CloudStack API Key",frame6)
+    #FXLabel.new(frame6, "CloudStack Secret Key" )
+    #@cloudstack_secret_access_key = FXTextField.new(frame6, 60, nil, 0, :opts => TEXTFIELD_PASSWD|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+    #FXLabel.new(frame6, "" )
+    #FXLabel.new(frame6, "CloudStack URL" )
+    #@cloudstack_url = FXTextField.new(frame6, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+    #if ENV['AMAZON_ACCESS_KEY_ID'] != nil and ENV['AMAZON_ACCESS_KEY_ID'] != ""
+    #  @cloudstack_access_key.text = ENV['AMAZON_ACCESS_KEY_ID']
+    #end
     #if ENV['AMAZON_SECRET_ACCESS_KEY'] != nil and ENV['AMAZON_SECRET_ACCESS_KEY'] != ""
-    #     @openstack_secret_access_key.text = ENV['AMAZON_SECRET_ACCESS_KEY']
+    #  @cloudstack_secret_access_key.text = ENV['AMAZON_SECRET_ACCESS_KEY']
     #end
-    #if ENV['EC2_URL'] != nil and ENV['EC2_URL'] != ""
-    #    @cloudstack_url.text =  ENV['EC2_URL']
-    #else
-    # @cloudstack_url.text = "http://cloud-bridge-hostname:8090/bridge"  # cloudstack 4.0
-    @cloudstack_url.text = "http://localhost:7080/awsapi"                # cloudstack 4.1
-
-    #end
-    FXLabel.new(frame6, "")
-    FXLabel.new(frame6, "")
-    FXLabel.new(frame6, "")
-    FXLabel.new(frame6, "")
-    FXLabel.new(frame6, "")
-    FXLabel.new(frame6, "NOTE: Cloudstack 4.1 is supported by default. To change the version edit")
-    FXLabel.new(frame6, "")
-    FXLabel.new(frame6, "")
-    FXLabel.new(frame6, "the file cloudstack.rb in the lib folder to set the correct AWS API Version")
-    FXLabel.new(frame6, "")
-    FXLabel.new(frame6, "")
-    FXLabel.new(frame6, "")
+    ##if ENV['AMAZON_SECRET_ACCESS_KEY'] != nil and ENV['AMAZON_SECRET_ACCESS_KEY'] != ""
+    ##     @openstack_secret_access_key.text = ENV['AMAZON_SECRET_ACCESS_KEY']
+    ##end
+    ##if ENV['EC2_URL'] != nil and ENV['EC2_URL'] != ""
+    ##    @cloudstack_url.text =  ENV['EC2_URL']
+    ##else
+    ## @cloudstack_url.text = "http://cloud-bridge-hostname:8090/bridge"  # cloudstack 4.0
+    #@cloudstack_url.text = "http://localhost:7080/awsapi"                # cloudstack 4.1
+    ##end
+    #FXLabel.new(frame6, "")
+    #FXLabel.new(frame6, "")
+    #FXLabel.new(frame6, "")
+    #FXLabel.new(frame6, "")
+    #FXLabel.new(frame6, "")
+    #FXLabel.new(frame6, "NOTE: Cloudstack 4.1 is supported by default. To change the version edit")
+    #FXLabel.new(frame6, "")
+    #FXLabel.new(frame6, "")
+    #FXLabel.new(frame6, "the file cloudstack.rb in the lib folder to set the correct AWS API Version")
+    #FXLabel.new(frame6, "")
+    #FXLabel.new(frame6, "")
+    #FXLabel.new(frame6, "")
 
     #
     # cloudfoundry
     #
-    @cloudfoundrytab = FXTabItem.new(@tabbook, "&CloudFoundry", nil)
-    @cloudfoundryframe = FXHorizontalFrame.new(@tabbook )
-    frame7 = FXMatrix.new(@cloudfoundryframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
-    cloudfoundry_env = textBox("Environment Name",frame7)
-    @cloudfoundry_access_key = textBox("CloudFoundry User Name",frame7)
-    FXLabel.new(frame7, "CloudFoundry Password" )
-    @cloudfoundry_secret_access_key = FXTextField.new(frame7, 60, nil, 0, :opts => TEXTFIELD_PASSWD|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
-    FXLabel.new(frame7, "" )
-    FXLabel.new(frame7, "CloudFoundry URL" )
-    @cloudfoundry_url = FXTextField.new(frame7, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
-    @cloudfoundry_url_button = FXButton.new(frame7, "", :opts => BUTTON_TOOLBAR)
-    @cloudfoundry_url_button.icon = @magnifier
-    @cloudfoundry_url_button.tipText = "Select URL"
-    @cloudfoundry_url_button.connect(SEL_COMMAND) do
-      @dialog = EC2_RegionsDialog.new(@ec2_main,"","cloudfoundry")
-      @dialog.execute
-      it = @dialog.selected
-      if it != nil and it != ""
-        @cloudfoundry_url.text = it
-      end
-    end
-    if ENV['AMAZON_ACCESS_KEY_ID'] != nil and ENV['AMAZON_ACCESS_KEY_ID'] != ""
-      @cloudfoundry_access_key.text = ENV['AMAZON_ACCESS_KEY_ID']
-    end
-    if ENV['AMAZON_SECRET_ACCESS_KEY'] != nil and ENV['AMAZON_SECRET_ACCESS_KEY'] != ""
-      @cloudfoundry_secret_access_key.text = ENV['AMAZON_SECRET_ACCESS_KEY']
-    end
-    @cloudfoundry_url.text = "http://api.cloudfoundry.com/"
-
+    #@cloudfoundrytab = FXTabItem.new(@tabbook, "&CloudFoundry", nil)
+    #@cloudfoundryframe = FXHorizontalFrame.new(@tabbook )
+    #frame7 = FXMatrix.new(@cloudfoundryframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
+    #cloudfoundry_env = textBox("Environment Name",frame7)
+    #@cloudfoundry_access_key = textBox("CloudFoundry User Name",frame7)
+    #FXLabel.new(frame7, "CloudFoundry Password" )
+    #@cloudfoundry_secret_access_key = FXTextField.new(frame7, 60, nil, 0, :opts => TEXTFIELD_PASSWD|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+    #FXLabel.new(frame7, "" )
+    #FXLabel.new(frame7, "CloudFoundry URL" )
+    #@cloudfoundry_url = FXTextField.new(frame7, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+    #@cloudfoundry_url_button = FXButton.new(frame7, "", :opts => BUTTON_TOOLBAR)
+    #@cloudfoundry_url_button.icon = @magnifier
+    #@cloudfoundry_url_button.tipText = "Select URL"
+    #@cloudfoundry_url_button.connect(SEL_COMMAND) do
+    #  @dialog = EC2_RegionsDialog.new(@ec2_main,"","cloudfoundry")
+    #  @dialog.execute
+    #  it = @dialog.selected
+    #  if it != nil and it != ""
+    #    @cloudfoundry_url.text = it
+    #  end
+    #end
+    #if ENV['AMAZON_ACCESS_KEY_ID'] != nil and ENV['AMAZON_ACCESS_KEY_ID'] != ""
+    #  @cloudfoundry_access_key.text = ENV['AMAZON_ACCESS_KEY_ID']
+    #end
+    #if ENV['AMAZON_SECRET_ACCESS_KEY'] != nil and ENV['AMAZON_SECRET_ACCESS_KEY'] != ""
+    #  @cloudfoundry_secret_access_key.text = ENV['AMAZON_SECRET_ACCESS_KEY']
+    #end
+    #@cloudfoundry_url.text = "http://api.cloudfoundry.com/"
 
 
     amazon_env.connect(SEL_CHANGED) {
       google_env.text = amazon_env.text
-      euca_env.text = amazon_env.text
       openstack_env.text = amazon_env.text
       hp_env.text = amazon_env.text
       rack_env.text = amazon_env.text
-      cloudstack_env.text = amazon_env.text
-      cloudfoundry_env = amazon_env.text
       servers_env = amazon_env.text
       @new_env = amazon_env.text
       @ec2_platform = "amazon"
@@ -357,37 +412,31 @@ class EC2_EnvCreateDialog < FXDialogBox
     google_env.connect(SEL_CHANGED) {
       amazon_env.text = google_env.text
       google_env.text = google_env.text
-      euca_env.text = google_env.text
       openstack_env.text = google_env.text
       rack_env.text = google_env.text
-      cloudstack_env.text = google_env.text
-      cloudfoundry_env = google_env.text
       servers_env = google_env.text
       @new_env = google_env.text
       @ec2_platform = "google"
     }
 
-    euca_env.connect(SEL_CHANGED) {
-      amazon_env.text = euca_env.text
-      google_env.text = euca_env.text
-      openstack_env.text = euca_env.text
-      hp_env.text = euca_env.text
-      rack_env.text = euca_env.text
-      cloudstack_env.text = euca_env.text
-      cloudfoundry_env = euca_env.text
-      servers_env = euca_env.text
-      @new_env = euca_env.text
-      @ec2_platform = "eucalyptus"
-    }
+   # euca_env.connect(SEL_CHANGED) {
+   #   amazon_env.text = euca_env.text
+   #   google_env.text = euca_env.text
+   #   openstack_env.text = euca_env.text
+   #   hp_env.text = euca_env.text
+   #   rack_env.text = euca_env.text
+   #   cloudstack_env.text = euca_env.text
+   #   cloudfoundry_env = euca_env.text
+   #   servers_env = euca_env.text
+   #   @new_env = euca_env.text
+   #   @ec2_platform = "eucalyptus"
+   # }
 
     openstack_env.connect(SEL_CHANGED) {
       amazon_env.text = openstack_env.text
       google_env.text = openstack_env.text
-      euca_env.text = openstack_env.text
       hp_env.text = openstack_env.text
       rack_env.text = openstack_env.text
-      cloudstack_env.text = openstack_env.text
-      cloudfoundry_env = openstack_env.text
       servers_env = openstack_env.text
       @new_env = openstack_env.text
       @ec2_platform = "openstack"
@@ -396,11 +445,8 @@ class EC2_EnvCreateDialog < FXDialogBox
     hp_env.connect(SEL_CHANGED) {
       amazon_env.text = hp_env.text
       google_env.text = hp_env.text
-      euca_env.text = hp_env.text
       openstack_env.text = hp_env.text
       rack_env.text = hp_env.text
-      cloudstack_env.text = hp_env.text
-      cloudfoundry_env = hp_env.text
       servers_env = hp_env.text
       @new_env = hp_env.text
       @ec2_platform = "openstack_hp"
@@ -409,45 +455,41 @@ class EC2_EnvCreateDialog < FXDialogBox
     rack_env.connect(SEL_CHANGED) {
       amazon_env.text = rack_env.text
       google_env.text = rack_env.text
-      euca_env.text = rack_env.text
       hp_env.text = rack_env.text
-      cloudstack_env.text = rack_env.text
       openstack_env.text = rack_env.text
-      cloudfoundry_env = rack_env.text
       servers_env = rack_env.text
       @new_env = rack_env.text
       @ec2_platform = "openstack_rackspace"
     }
 
-    cloudstack_env.connect(SEL_CHANGED) {
-      amazon_env.text = cloudstack_env.text
-      google_env.text = cloudstack_env.text
-      euca_env.text = cloudstack_env.text
-      hp_env.text = cloudstack_env.text
-      rack_env.text = cloudstack_env.text
-      openstack_env.text = cloudstack_env.text
-      cloudfoundry_env = cloudstack_env.text
-      servers_env = cloudstack_env.text
-      @new_env = cloudstack_env.text
-      @ec2_platform = "cloudstack"
-    }
+    #cloudstack_env.connect(SEL_CHANGED) {
+    #  amazon_env.text = cloudstack_env.text
+    #  google_env.text = cloudstack_env.text
+    #  euca_env.text = cloudstack_env.text
+    #  hp_env.text = cloudstack_env.text
+    #  rack_env.text = cloudstack_env.text
+    #  openstack_env.text = cloudstack_env.text
+    #  cloudfoundry_env = cloudstack_env.text
+    #  servers_env = cloudstack_env.text
+    #  @new_env = cloudstack_env.text
+    #  @ec2_platform = "cloudstack"
+    #}
 
-    cloudfoundry_env.connect(SEL_CHANGED) {
-      amazon_env.text = cloudfoundry_env.text
-      google_env.text = cloudfoundry_env.text
-      euca_env.text = cloudfoundry_env.text
-      hp_env.text = cloudfoundry_env.text
-      rack_env.text = cloudfoundry_env.text
-      openstack_env.text = cloudfoundry_env.text
-      servers_env = cloudfoundry_env.text
-      @new_env = cloudfoundry_env.text
-      @ec2_platform = "cloudfoundry"
-    }
+    #cloudfoundry_env.connect(SEL_CHANGED) {
+    #  amazon_env.text = cloudfoundry_env.text
+    #  google_env.text = cloudfoundry_env.text
+    #  euca_env.text = cloudfoundry_env.text
+    #  hp_env.text = cloudfoundry_env.text
+    #  rack_env.text = cloudfoundry_env.text
+    #  openstack_env.text = cloudfoundry_env.text
+    #  servers_env = cloudfoundry_env.text
+    #  @new_env = cloudfoundry_env.text
+    #  @ec2_platform = "cloudfoundry"
+    #}
 
     servers_env.connect(SEL_CHANGED) {
       amazon_env.text = servers_env.text
       google_env.text = servers_env.text
-      euca_env.text = servers_env.text
       hp_env.text = servers_env.text
       rack_env.text = servers_env.text
       openstack_env.text = servers_env.text
@@ -486,28 +528,25 @@ class EC2_EnvCreateDialog < FXDialogBox
 
 
       Dir.mkdir(d)
-
-      if @eucazipfile.text != ""
-        unzip(@eucazipfile.text,d)
-        eucarcpath = d+"/euca/eucarc"
-
-        raise 'Not a valid Eucalyptus zipfile' unless File.exists?(eucarcpath)
-
-        eucarc = File.open(eucarcpath, 'r')
-        eucarc.read.each_line do |configline|
-          if configline =~ /EC2_ACCESS_KEY=\'(\w+)\'/
-            @amazon_access_key.text = $1
-          end
-          if configline =~ /EC2_SECRET_KEY=\'([^\']+)\'/
-            @amazon_secret_access_key.text = $1
-          end
-          if configline =~ /EC2_URL=(.+)$/
-            @ec2_url.text = $1
-          end
-        end
-        @ec2_platform = "eucalyptus"
-        eucarc.close
-      end
+      #if @eucazipfile.text != ""
+      #  unzip(@eucazipfile.text,d)
+      #  eucarcpath = d+"/euca/eucarc"
+      #  raise 'Not a valid Eucalyptus zipfile' unless File.exists?(eucarcpath)
+      #  eucarc = File.open(eucarcpath, 'r')
+      #  eucarc.read.each_line do |configline|
+      #    if configline =~ /EC2_ACCESS_KEY=\'(\w+)\'/
+      #      @amazon_access_key.text = $1
+      #    end
+      #    if configline =~ /EC2_SECRET_KEY=\'([^\']+)\'/
+      #      @amazon_secret_access_key.text = $1
+      #    end
+      #    if configline =~ /EC2_URL=(.+)$/
+      #      @ec2_url.text = $1
+      #    end
+      #  end
+      #  @ec2_platform = "eucalyptus"
+      #  eucarc.close
+      #end
       Dir.mkdir(d+"/launch")
       save_env
       if  @ec2_platform.start_with?("openstack")
@@ -583,28 +622,28 @@ class EC2_EnvCreateDialog < FXDialogBox
         settings.put("EC2_URL",@rack_url.text)
       end
       settings.put('SSL_CERT_FILE',"ca-bundle.crt")
-    elsif @ec2_platform == "cloudstack"
-      if @cloudstack_access_key.text != nil
-        settings.put("AMAZON_ACCESS_KEY_ID",@cloudstack_access_key.text)
-      end
-      if @cloudstack_secret_access_key.text != nil
-        settings.put("AMAZON_SECRET_ACCESS_KEY",@cloudstack_secret_access_key.text)
-      end
-      if @cloudstack_url.text != nil
-        settings.put("EC2_URL",@cloudstack_url.text)
-      end
-      settings.put('SSL_CERT_FILE',"ca-bundle.crt")
-    elsif @ec2_platform == "cloudfoundry"
-      if @cloudfoundry_access_key.text != nil
-        settings.put("AMAZON_ACCESS_KEY_ID",@cloudfoundry_access_key.text)
-      end
-      if @cloudfoundry_secret_access_key.text != nil
-        settings.put("AMAZON_SECRET_ACCESS_KEY",@cloudfoundry_secret_access_key.text)
-      end
-      if @cloudfoundry_url.text != nil
-        settings.put("EC2_URL",@cloudfoundry_url.text)
-      end
-      settings.put('SSL_CERT_FILE',"ca-bundle.crt")
+   # elsif @ec2_platform == "cloudstack"
+   #   if @cloudstack_access_key.text != nil
+   #     settings.put("AMAZON_ACCESS_KEY_ID",@cloudstack_access_key.text)
+   #   end
+   #   if @cloudstack_secret_access_key.text != nil
+   #     settings.put("AMAZON_SECRET_ACCESS_KEY",@cloudstack_secret_access_key.text)
+   #   end
+   #   if @cloudstack_url.text != nil
+   #     settings.put("EC2_URL",@cloudstack_url.text)
+   #   end
+   #   settings.put('SSL_CERT_FILE',"ca-bundle.crt")
+   # elsif @ec2_platform == "cloudfoundry"
+   #   if @cloudfoundry_access_key.text != nil
+   #     settings.put("AMAZON_ACCESS_KEY_ID",@cloudfoundry_access_key.text)
+   #   end
+   #   if @cloudfoundry_secret_access_key.text != nil
+   #     settings.put("AMAZON_SECRET_ACCESS_KEY",@cloudfoundry_secret_access_key.text)
+   #   end
+   #   if @cloudfoundry_url.text != nil
+   #     settings.put("EC2_URL",@cloudfoundry_url.text)
+   #   end
+   #   settings.put('SSL_CERT_FILE',"ca-bundle.crt")
     elsif @ec2_platform == "google"
       if @google_client_email.text != nil
         settings.put("AMAZON_ACCESS_KEY_ID",@google_client_email.text)
@@ -636,14 +675,14 @@ class EC2_EnvCreateDialog < FXDialogBox
     settings.save
   end
 
-  def unzip(eucazip,envpath)
-    Dir.mkdir(envpath+"/euca")
-    arch = Zip::ZipFile.open(eucazip)
-    arch.each do |entry|
-      xtrpath = File.join(envpath+"/euca/", entry.name)
-      raise 'Eucalyptus zipfile in an unsupported format' if xtrpath =~ /euca\/.+\/.+/
-      arch.extract(entry, xtrpath)
-    end
-  end
+  #def unzip(eucazip,envpath)
+  #  Dir.mkdir(envpath+"/euca")
+  #  arch = Zip::ZipFile.open(eucazip)
+  #  arch.each do |entry|
+  #    xtrpath = File.join(envpath+"/euca/", entry.name)
+  #    raise 'Eucalyptus zipfile in an unsupported format' if xtrpath =~ /euca\/.+\/.+/
+  #    arch.extract(entry, xtrpath)
+  #  end
+  #end
 
 end

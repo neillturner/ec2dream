@@ -519,7 +519,8 @@ class EC2_Server
     FXLabel.new(@frame1, "Private DSN" )
     @server['Private_DSN'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
     FXLabel.new(@frame1, "" )
-    FXLabel.new(@frame1, "Elastic IP" )
+    @server['Public_IP_label'] = FXLabel.new(@frame1, "Elastic IP" )
+    @server['Public_IP_label'] = "Elastic IP is used before private IP as address for ssh.\nClear the Elastic IP to ssh to server via Private IP."
     @frame1ip = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
     @server['Public_IP'] = FXTextField.new(@frame1ip, 25, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(@frame1ip, "Private IP" )
@@ -547,7 +548,8 @@ class EC2_Server
     #@server['Launch_Time'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
     #FXLabel.new(@frame1, "" )
     if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("mingw") == nil
-      FXLabel.new(@frame1, "EC2 SSH Private Key" )
+      @server['EC2_SSH_Private_Key_label'] = FXLabel.new(@frame1, "EC2 SSH Private Key" )
+      @server['EC2_SSH_Private_Key_label'].tipText = ""
       @server['EC2_SSH_Private_Key'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
       @server['EC2_SSH_Private_Key'].connect(SEL_COMMAND) do
         instance_id = @server['Instance_ID'].text
@@ -577,7 +579,8 @@ class EC2_Server
         end
       end
     else
-      FXLabel.new(@frame1, "Putty Private Key" )
+      @server['Putty_Private_Key_label'] = FXLabel.new(@frame1, "Putty Private Key" )
+      @server['Putty_Private_Key_label'].tipText = ""
       @server['Putty_Private_Key'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
       @server['Putty_Private_Key'].connect(SEL_COMMAND) do
         instance_id = @server['Instance_ID'].text
@@ -607,7 +610,8 @@ class EC2_Server
         end
       end
     end
-    FXLabel.new(@frame1, "EC2 SSH/Windows User" )
+    @server['EC2_SSH_User_label'] = FXLabel.new(@frame1, "EC2 SSH/Windows User" )
+    @server['EC2_SSH_User_label'].tipText = ""
     @frame1su = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
     @server['EC2_SSH_User'] = FXTextField.new(@frame1su, 20, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @server['EC2_SSH_User'].connect(SEL_COMMAND) do |sender, sel, data|
@@ -618,7 +622,8 @@ class EC2_Server
         @ec2_main.launch.save
       end
     end
-    FXLabel.new(@frame1su, "Win Admin Pswd" )
+    @server['Win_Admin_Password_label'] = FXLabel.new(@frame1su, "Win Admin Pswd" )
+    @server['Win_Admin_Password_label'].tipText = ""
     @server['Win_Admin_Password'] = FXTextField.new(@frame1su, 20, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_PASSWD)
     @server['Win_Admin_Password'].connect(SEL_COMMAND) do |sender, sel, data|
       instance_id = @server['Instance_ID'].text
@@ -676,7 +681,8 @@ class EC2_Server
       dialog = EC2_ShowPasswordDialog.new(@ec2_main,"Win Admin Password",@server['Win_Admin_Password'].text)
       dialog.execute
     end
-    FXLabel.new(@frame1, "Local Port (SSH Tunneling)" )
+    @server['Local_Port_label'] = FXLabel.new(@frame1, "Local Port (SSH Tunneling)" )
+    @server['Local_Port_label'].tipText = ""
     @frame1su = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
     @server['Local_Port'] = FXTextField.new(@frame1su, 20, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @server['Local_Port'].connect(SEL_COMMAND) do  |sender, sel, data|
@@ -767,17 +773,17 @@ class EC2_Server
     FXLabel.new(@frame3, "Name" )
     @frame3s = FXHorizontalFrame.new(@frame3,LAYOUT_FILL_X, :padding => 0)
     @ops_server['Name'] = FXTextField.new(@frame3s, 20, nil, 0, :opts => TEXTFIELD_READONLY)
-    FXLabel.new(@frame3s, "" )
-    FXLabel.new(@frame3s, "Kitchen Instance" )
-    @ops_server['Chef_Node'] = FXTextField.new(@frame3s, 21, nil, 0, :opts => FRAME_SUNKEN)
-    @ops_server['Chef_Node'].connect(SEL_COMMAND) do
-      instance_id = @ops_server['Instance_ID'].text
-      @ec2_chef_node[instance_id] = @ops_server['Chef_Node'].text
-      if @ec2_main.launch.loaded == true
-        @ec2_main.launch.ops_put('Chef_Node',@ops_server['Chef_Node'].text)
-        @ec2_main.launch.ops_save
-      end
-    end
+    #FXLabel.new(@frame3s, "" )
+    #FXLabel.new(@frame3s, "Kitchen Instance" )
+    #@ops_server['Chef_Node'] = FXTextField.new(@frame3s, 21, nil, 0, :opts => FRAME_SUNKEN)
+    #@ops_server['Chef_Node'].connect(SEL_COMMAND) do
+    #  instance_id = @ops_server['Instance_ID'].text
+    #  @ec2_chef_node[instance_id] = @ops_server['Chef_Node'].text
+    #  if @ec2_main.launch.loaded == true
+    #    @ec2_main.launch.ops_put('Chef_Node',@ops_server['Chef_Node'].text)
+    #    @ec2_main.launch.ops_save
+    #  end
+    #end
     FXLabel.new(@frame3, "" )
     FXLabel.new(@frame3, "Security Groups" )
     @frame3t = FXHorizontalFrame.new(@frame3,LAYOUT_FILL_X, :padding => 0)
@@ -1323,17 +1329,17 @@ class EC2_Server
     FXLabel.new(@frame6, "Name" )
     @frame6s = FXHorizontalFrame.new(@frame6,LAYOUT_FILL_X, :padding => 0)
     @google_server['Name'] = FXTextField.new(@frame6s, 20, nil, 0, :opts => TEXTFIELD_READONLY)
-    FXLabel.new(@frame6s, "" )
-    FXLabel.new(@frame6s, "Kitchen Instance" )
-    @google_server['Chef_Node'] = FXTextField.new(@frame6s, 21, nil, 0, :opts => FRAME_SUNKEN)
-    @google_server['Chef_Node'].connect(SEL_COMMAND) do
-      instance_id = @google_server['Instance_ID'].text
-      @ec2_chef_node[instance_id] = @google_server['Chef_Node'].text
-      if @ec2_main.launch.loaded == true
-        @ec2_main.launch.google_put('Chef_Node',@google_server['Chef_Node'].text)
-        @ec2_main.launch.save
-      end
-    end
+    #FXLabel.new(@frame6s, "" )
+    #FXLabel.new(@frame6s, "Kitchen Instance" )
+    #@google_server['Chef_Node'] = FXTextField.new(@frame6s, 21, nil, 0, :opts => FRAME_SUNKEN)
+    #@google_server['Chef_Node'].connect(SEL_COMMAND) do
+    #  instance_id = @google_server['Instance_ID'].text
+    #  @ec2_chef_node[instance_id] = @google_server['Chef_Node'].text
+    #  if @ec2_main.launch.loaded == true
+    #    @ec2_main.launch.google_put('Chef_Node',@google_server['Chef_Node'].text)
+    #    @ec2_main.launch.save
+    #  end
+    #end
     FXLabel.new(@frame6, "" )
     FXLabel.new(@frame6, "Instance ID" )
     @frame6t = FXHorizontalFrame.new(@frame6,LAYOUT_FILL_X, :padding => 0)
