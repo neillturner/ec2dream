@@ -1,4 +1,4 @@
-### EC2Dream - Build and Manage Cloud Servers Version 4.0.5 -  July 2015
+### EC2Dream - Build and Manage Cloud Servers
 
 [![Gem Version](https://badge.fury.io/rb/ec2dream.svg)](http://badge.fury.io/rb/ec2dream)
 
@@ -9,13 +9,11 @@ For installation see http://ec2dream.blogspot.co.uk/search/label/EC2Dream%20Inst
     field SSL_CERT_FILE to value ca-bundle.crt
 ```
 
-EC2Dream is visual cloud computing admin for the Fog ruby cloud services library and combines Fog, Ruby into an open source devops platform supporting:
+EC2Dream is a visual cloud computing devops product that uses Fog and Ruby supporting:
 *     Local and Hosted Servers.
 *     Amazon AWS.
-*     Amazon compatible clouds:  Eucalyptus, CloudStack.
 *     Openstack Clouds:  Rackspace Cloud Servers and HP Cloud.
 *     Google Compute Engine
-*     Cloud Foundry.
 *     Vagrant.
 *     Test Kitchen (Chef, Puppet, Ansible, Salt).
 
@@ -33,10 +31,9 @@ All using the one client graphical interface and running on Windows, Linux or Ma
 *   Save Launch profile
 *   Support for OpenStack HP Cloud and Rackspace including security groups, servers, keypairs, IP addresses, Block Storage volumes and
 *   Snapshots.
-*   Support for CloudFoundry and ruby dsl.
 *   Support for Local and Hosted Servers -  Servers running in local virtualized environments like Vagrant, VMWare or Virtual box.
 *   Support for ssh tunnelling allow support of servers in Amazon VPC.
-*   Support for Amazon AWS including Cloud Formation, Eucalyptus and openstack
+*   Support for Amazon AWS including Cloud Formation
 *   Support for Test Kitchen to develop and test chef cookbooks, puppet modules, ansible and salt.
 
 ### It contains:

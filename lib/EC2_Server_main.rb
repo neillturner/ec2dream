@@ -520,7 +520,7 @@ class EC2_Server
     @server['Private_DSN'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
     FXLabel.new(@frame1, "" )
     @server['Public_IP_label'] = FXLabel.new(@frame1, "Elastic IP" )
-    @server['Public_IP_label'] = "Elastic IP is used before private IP as address for ssh.\nClear the Elastic IP to ssh to server via Private IP."
+    @server['Public_IP_label'].tipText = "Elastic IP is used before private IP as address for ssh.\nClear the Elastic IP to ssh to server via Private IP."
     @frame1ip = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
     @server['Public_IP'] = FXTextField.new(@frame1ip, 25, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(@frame1ip, "Private IP" )
@@ -549,7 +549,7 @@ class EC2_Server
     #FXLabel.new(@frame1, "" )
     if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("mingw") == nil
       @server['EC2_SSH_Private_Key_label'] = FXLabel.new(@frame1, "EC2 SSH Private Key" )
-      @server['EC2_SSH_Private_Key_label'].tipText = ""
+      @server['EC2_SSH_Private_Key_label'].tipText = "OPTIONAL: SSH Key for SSH access to the server.\nDEFAULT: defaults to value specified in Environment tab."
       @server['EC2_SSH_Private_Key'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
       @server['EC2_SSH_Private_Key'].connect(SEL_COMMAND) do
         instance_id = @server['Instance_ID'].text
@@ -580,7 +580,7 @@ class EC2_Server
       end
     else
       @server['Putty_Private_Key_label'] = FXLabel.new(@frame1, "Putty Private Key" )
-      @server['Putty_Private_Key_label'].tipText = ""
+      @server['Putty_Private_Key_label'].tipText = "OPTIONAL: Putty Key for Putty access to the server.\nDEFAULT: defaults to value specified in Environment tab."
       @server['Putty_Private_Key'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
       @server['Putty_Private_Key'].connect(SEL_COMMAND) do
         instance_id = @server['Instance_ID'].text
@@ -611,7 +611,7 @@ class EC2_Server
       end
     end
     @server['EC2_SSH_User_label'] = FXLabel.new(@frame1, "EC2 SSH/Windows User" )
-    @server['EC2_SSH_User_label'].tipText = ""
+    @server['EC2_SSH_User_label'].tipText = "OPTIONAL: SSH User for SSH access to the server.\nFor Windows Server Remote Desktop user.\nDEFAULT: defaults to value specified in Environment tab."
     @frame1su = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
     @server['EC2_SSH_User'] = FXTextField.new(@frame1su, 20, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @server['EC2_SSH_User'].connect(SEL_COMMAND) do |sender, sel, data|
@@ -623,7 +623,7 @@ class EC2_Server
       end
     end
     @server['Win_Admin_Password_label'] = FXLabel.new(@frame1su, "Win Admin Pswd" )
-    @server['Win_Admin_Password_label'].tipText = ""
+    @server['Win_Admin_Password_label'].tipText = "OPTION: Windows Administrator user password for use with Remote Desktop.\nCan be populated by pressing 'Decrypt Windows Admin Password' button\n.It my take several minutes after the Windows Server is started before a decrypted is returned."
     @server['Win_Admin_Password'] = FXTextField.new(@frame1su, 20, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_PASSWD)
     @server['Win_Admin_Password'].connect(SEL_COMMAND) do |sender, sel, data|
       instance_id = @server['Instance_ID'].text
@@ -637,7 +637,7 @@ class EC2_Server
     @server['Win_Admin_Password_Button'] = FXButton.new(@frame1g, "", :opts => BUTTON_TOOLBAR)
 
     @server['Win_Admin_Password_Button'].icon = @key
-    @server['Win_Admin_Password_Button'].tipText = "Depcrypt Windows Admin Password"
+    @server['Win_Admin_Password_Button'].tipText = "Decrypt Windows Admin Password"
     @server['Win_Admin_Password_Button'].connect(SEL_COMMAND) do
       if loaded
         pk = get_pk
@@ -682,7 +682,7 @@ class EC2_Server
       dialog.execute
     end
     @server['Local_Port_label'] = FXLabel.new(@frame1, "Local Port (SSH Tunneling)" )
-    @server['Local_Port_label'].tipText = ""
+    @server['Local_Port_label'].tipText = "OPTIONAL: SSH port to use if different from default 22.\nTypically used when doing SSH Tunneling."
     @frame1su = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
     @server['Local_Port'] = FXTextField.new(@frame1su, 20, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @server['Local_Port'].connect(SEL_COMMAND) do  |sender, sel, data|
@@ -733,8 +733,8 @@ class EC2_Server
     FXLabel.new(@frame1d, "     Root Device Name" )
     @server['Root_Device_Name'] = FXTextField.new(@frame1d, 20, nil, 0, :opts => TEXTFIELD_READONLY)
     FXLabel.new(@frame1, "" )
-    FXLabel.new(@frame1, "Block Devices (EBS)")
-
+    @server['Block_Devices_label'] = FXLabel.new(@frame1, "Block Devices (EBS)")
+    @server['Block_Devices_label'].tipText = "Elastic Block Devices attached to the server"
     @server['Block_Devices'] = FXTable.new(@frame1,:height => 60, :opts => LAYOUT_FIX_HEIGHT|LAYOUT_FILL|TABLE_COL_SIZABLE|TABLE_ROW_SIZABLE|TABLE_READONLY  )
     @server['Block_Devices'].connect(SEL_COMMAND) do |sender, sel, which|
       @curr_row = which.row

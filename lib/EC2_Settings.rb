@@ -65,11 +65,11 @@ class EC2_Settings
 
     frame1 = FXMatrix.new(page1, 3, MATRIX_BY_COLUMNS|LAYOUT_FILL)
     @settings['ENV_NAME_LABEL'] = FXLabel.new(frame1, "ENVIRONMENT" )
-    @settings['ENV_NAME_LABEL'].tipText = "The EC2Dream Environment.\nYou can have different environment for different clouds,\ndifferent accounts in a cloud,\n or different test-itchen repositories for a cloud\n,Use servers for non-cloud environments"
+    @settings['ENV_NAME_LABEL'].tipText = "The EC2Dream Environment.\nYou can have different environment for different clouds.\ndifferent accounts in a cloud.\ndifferent test-kitchen repositories for a cloud.\nUse 'servers' for non-cloud environments."
     @settings['ENV_NAME'] = FXTextField.new(frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
     FXLabel.new(frame1, "" )
     @settings['REPOSITORY_LOCATION_LABEL'] = FXLabel.new(frame1, "ENV_REPOSITORY" )
-    @settings['REPOSITORY_LOCATION_LABEL'].tipText = "The Directory where EC2Dream stores all the internal information for each environment.\n This includes environment properties, launch profiles, and the image cache"
+    @settings['REPOSITORY_LOCATION_LABEL'].tipText = "The Directory where EC2Dream stores all the internal information for each environment.\nThis includes environment properties, launch profiles, and the image cache"
     @settings['REPOSITORY_LOCATION'] = FXTextField.new(frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
     @settings['REPOSITORY_LOCATION_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @settings['REPOSITORY_LOCATION_BUTTON'].icon = @repository
@@ -95,7 +95,7 @@ class EC2_Settings
     FXLabel.new(frame1, "  Cloud Access Settings", nil, LAYOUT_CENTER_X)
     FXLabel.new(frame1, "" )
     @settings['EC2_PLATFORM_LABEL'] = FXLabel.new(frame1, "PLATFORM" )
-    @settings['EC2_PLATFORM_LABEL'].tipText = "The Cloud Platform type.\n User servers for non-cloud platforms."
+    @settings['EC2_PLATFORM_LABEL'].tipText = "The Cloud Platform type.\nUser 'servers' for non-cloud platforms."
     @settings['EC2_PLATFORM'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @settings['EC2_PLATFORM_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @settings['EC2_PLATFORM_BUTTON'].icon = @magnifier
@@ -139,7 +139,6 @@ class EC2_Settings
       end
     end
     @settings['AVAILABILITY_ZONE_LABEL'] = FXLabel.new(frame1, "AVAILABILITY_ZONE" )
-
     @settings['AVAILABILITY_ZONE'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @settings['AVAILABILITY_ZONE_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @settings['AVAILABILITY_ZONE_BUTTON'].icon = @magnifier
@@ -153,7 +152,6 @@ class EC2_Settings
       end
     end
     @settings['AMAZON_NICKNAME_TAG_LABEL'] = FXLabel.new(frame1, "NICKNAME TAG" )
-    @settings['AMAZON_NICKNAME_TAG_LABEL'] = ""
     @settings['AMAZON_NICKNAME_TAG'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame1, "" )
     #
@@ -163,9 +161,11 @@ class EC2_Settings
     FXLabel.new(frame1, "  PuTTY, ssh and SCP Settings", nil, LAYOUT_CENTER_X)
     FXLabel.new(frame1, "" )
     @settings['EC2_SSH_USER_LABEL'] = FXLabel.new(frame1, "SSH_USER" )
+    @settings['EC2_SSH_USER_LABEL'].tipText = "OPTIONAL: The default user to use when accessing a server with SSH" 
     @settings['EC2_SSH_USER'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame1, "" )
     @settings['EC2_SSH_PRIVATE_KEY_LABEL'] = FXLabel.new(frame1, "SSH_PRIVATE_KEY" )
+    @settings['EC2_SSH_PRIVATE_KEY_LABEL'].tipText = "OPTIONAL: The default SSH Key to use when accessing a server with SSH"
     @settings['EC2_SSH_PRIVATE_KEY'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @settings['EC2_SSH_PRIVATE_KEY_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @settings['EC2_SSH_PRIVATE_KEY_BUTTON'].icon = @magnifier
@@ -182,6 +182,7 @@ class EC2_Settings
     end
     if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("mingw") != nil
       @settings['PUTTY_PRIVATE_KEY_LABEL'] = FXLabel.new(frame1, "PUTTY_PRIVATE_KEY" )
+      @settings['PUTTY_PRIVATE_KEY_LABEL'].tipText = "OPTIONAL: The default Putty Key to use when accessing a server with Putty"
       @settings['PUTTY_PRIVATE_KEY'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
       @settings['PUTTY_PRIVATE_KEY_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
       @settings['PUTTY_PRIVATE_KEY_BUTTON'].icon = @magnifier
@@ -234,7 +235,7 @@ class EC2_Settings
     FXLabel.new(frame1, "  Global and General Settings", nil, LAYOUT_CENTER_X)
     FXLabel.new(frame1, "" )
     @settings['TEST_KITCHEN_PATH_LABEL'] = FXLabel.new(frame1, "TEST_KITCHEN_PATH" )
-    @settings['TEST_KITCHEN_PATH_LABEL'].tipText = ""
+    @settings['TEST_KITCHEN_PATH_LABEL'].tipText = "REQUIRED FOR TEST-KITCHEN: The directory containing the kitchen yaml configuration file.\nAll directories and file in the kitchen yaml file are defined relative to this path."
     @settings['TEST_KITCHEN_PATH'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @settings['TEST_KITCHEN_PATH_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @settings['TEST_KITCHEN_PATH_BUTTON'].icon = @magnifier
@@ -251,7 +252,7 @@ class EC2_Settings
       end
     end
     @settings['KITCHEN_YAML_LABEL'] = FXLabel.new(frame1, "KITCHEN_YAML" )
-    @settings['KITCHEN_YAML_LABEL'].tipText = ""
+    @settings['KITCHEN_YAML_LABEL'].tipText = "OPTIONAL: Name of kitchen yaml file \nDEFAULT: .kitchen.yml file located in TEST_KITCHEN_PATH."
     @settings['KITCHEN_YAML'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @settings['KITCHEN_YAML_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @settings['KITCHEN_YAML_BUTTON'].icon = @magnifier
@@ -268,7 +269,7 @@ class EC2_Settings
       end
     end
     @settings['VAGRANT_REPOSITORY_LABEL'] = FXLabel.new(frame1, "VAGRANT_REPOSITORY" )
-    @settings['VAGRANT_REPOSITORY_LABEL'].tipText = ""
+    @settings['VAGRANT_REPOSITORY_LABEL'].tipText = "REQUIRED FOR VAGRANT: Location of Vagrant repository where vagrant box are stored.\nOnly used by vagrant option of EC2Dream."
     @settings['VAGRANT_REPOSITORY'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @settings['VAGRANT_REPOSITORY_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @settings['VAGRANT_REPOSITORY_BUTTON'].icon = @magnifier
@@ -285,7 +286,7 @@ class EC2_Settings
       end
     end
     @settings['SSL_CERT_FILE_LABEL'] = FXLabel.new(frame1, "SSL_CERT_FILE" )
-    @settings['SSL_CERT_FILE_LABEL'].tipText = ""
+    @settings['SSL_CERT_FILE_LABEL'].tipText = "OPTIONAL: SSL certificate file to use with running cloud provider API calls.\nDEFAULT: ca-bundle.crt file inside EC2DREAM."
     @settings['SSL_CERT_FILE'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @settings['SSL_CERT_FILE_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @settings['SSL_CERT_FILE_BUTTON'].icon = @magnifier
@@ -300,7 +301,7 @@ class EC2_Settings
     end
     if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("mingw") == nil
       @settings['TERMINAL_EMULATOR_LABEL'] = FXLabel.new(frame1, "TERMINAL_EMULATOR" )
-      @settings['TERMINAL_EMULATOR_LABEL'].tipText = ""
+      @settings['TERMINAL_EMULATOR_LABEL'].tipText = "MAC or LINUX ONLY: Terminal emulator to use for ssh access to servers."
       @settings['TERMINAL_EMULATOR'] = FXTextField.new(frame1, 20, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
       @settings['TERMINAL_EMULATOR'].text = "xterm"
       @settings['TERMINAL_EMULATOR_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
@@ -316,7 +317,7 @@ class EC2_Settings
       end
     end
     @settings['EXTERNAL_EDITOR_LABEL'] = FXLabel.new(frame1, "EXTERNAL_EDITOR" )
-    @settings['EXTERNAL_EDITOR_LABEL'].tipText = ""
+    @settings['EXTERNAL_EDITOR_LABEL'].tipText = "OPTIONAL: The location of a text editor to call to edit text files."
     @settings['EXTERNAL_EDITOR'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @settings['EXTERNAL_EDITOR_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @settings['EXTERNAL_EDITOR_BUTTON'].icon = @magnifier
@@ -332,7 +333,7 @@ class EC2_Settings
       end
     end
     @settings['EXTERNAL_BROWSER_LABEL'] = FXLabel.new(frame1, "EXTERNAL_BROWSER" )
-    @settings['EXTERNAL_BROWSER_LABEL'].tipText = ""
+    @settings['EXTERNAL_BROWSER_LABEL'].tipText = "OPTIONAL: The location of the browser to call to display any documentation and web links."
     @settings['EXTERNAL_BROWSER'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @settings['EXTERNAL_BROWSER_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @settings['EXTERNAL_BROWSER_BUTTON'].icon = @magnifier
@@ -348,7 +349,7 @@ class EC2_Settings
       end
     end
     @settings['TIMEZONE_LABEL'] = FXLabel.new(frame1, "TIMEZONE" )
-    @settings['TIMEZONE_LABEL'].tipText = ""
+    @settings['TIMEZONE_LABEL'].tipText = "The timezone to display date/time fields.\nVALID VALUES: UTC or Local."
     @settings['TIMEZONE'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @settings['TIMEZONE_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @settings['TIMEZONE_BUTTON'].icon = @magnifier
@@ -423,30 +424,30 @@ class EC2_Settings
       ENV['SSL_CERT_FILE'] = ssl_cert
       if @settings['EC2_PLATFORM'].text=="google"
         @settings['AMAZON_ACCESS_KEY_ID_LABEL'].text="CLIENT_EMAIL"
-        @settings['AMAZON_ACCESS_KEY_ID_LABEL'].tipText=""
+        @settings['AMAZON_ACCESS_KEY_ID_LABEL'].tipText="Your google email id"
         @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].text="KEY_LOCATION"
-        @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].tipText=""
+        @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].tipText="the location of your access key"
         @settings['AMAZON_ACCOUNT_ID_LABEL'].text=""
         @settings['AMAZON_ACCOUNT_ID_LABEL'].tipText=""
         @settings['EC2_URL_LABEL'].text="PROJECT"
-        @settings['EC2_URL_LABEL'].tipText=""
+        @settings['EC2_URL_LABEL'].tipText="Your Google Project"
         @settings['AVAILABILITY_ZONE_LABEL'].text = "ZONE"
-        @settings['AVAILABILITY_ZONE_LABEL'].tipText = ""
+        @settings['AVAILABILITY_ZONE_LABEL'].tipText = "Google zone to access. it is <region>-<zone> format."
         @settings['AMAZON_NICKNAME_TAG_LABEL'].text=""
         @settings['AMAZON_NICKNAME_TAG_LABEL'].tipText=""
       else
         @settings['AMAZON_ACCESS_KEY_ID_LABEL'].text="ACCESS_KEY"
-        @settings['AMAZON_ACCESS_KEY_ID_LABEL'].tipText = "Your cloud account's access key id"
+        @settings['AMAZON_ACCESS_KEY_ID_LABEL'].tipText = "Your cloud account's access key id.\nUsed to access the cloud providers API."
         @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].text="SECRET_ACCESS_KEY"
-        @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].tipText = ""
+        @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].tipText = "Your cloud account's secret access key id.\nUsed to access the cloud providers API."
         @settings['AMAZON_ACCOUNT_ID_LABEL'].text="ACCOUNT_ID"
-        @settings['AMAZON_ACCOUNT_ID_LABEL'].tipText = ""
+        @settings['AMAZON_ACCOUNT_ID_LABEL'].tipText = "Your Account ID of your cloud provider.\nOPTIONAL for AWS.\nFor AWS this is your account ID 12-digit number, such as 123456789012."
         @settings['EC2_URL_LABEL'].text="URL"
-        @settings['EC2_URL_LABEL'].tipText = ""
+        @settings['EC2_URL_LABEL'].tipText = "The Endpoint address for your cloud provider region."
         @settings['AVAILABILITY_ZONE_LABEL'].text = "AVAILABILITY_ZONE"
-        @settings['AVAILABILITY_ZONE_LABEL'].tipText = ""
+        @settings['AVAILABILITY_ZONE_LABEL'].tipText = "The availability zone of your cloud provider.\nOPTIONAL for AWS: Used by default when creating servers."
         @settings['AMAZON_NICKNAME_TAG_LABEL'].text="NICKNAME TAG"
-        @settings['AMAZON_NICKNAME_TAG_LABEL'].tipText = ""
+        @settings['AMAZON_NICKNAME_TAG_LABEL'].tipText = "OPTIONAL: The AWS Tag using to identifer the name of a resource.\nDEFAULTS to Name."
       end
     end
     @ec2_main.app.forceRefresh

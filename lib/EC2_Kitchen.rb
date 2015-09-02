@@ -233,27 +233,27 @@ class EC2_Kitchen
     #
     @frame1 = FXMatrix.new(@page1, 3, MATRIX_BY_COLUMNS|LAYOUT_FILL)
     @kit_server['instance_label'] = FXLabel.new(@frame1, "Instance" )
-    @kit_server['instance_label'].tipText = ""
+    @kit_server['instance_label'].tipText = "Name of the server instance(s) to run test-kitchen against.\nThis the typically in <suite name>-<platform name> format\nIt can be a partial name and then all servers that match are run."
     @kit_server['instance'] = FXTextField.new(@frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
     FXLabel.new(@frame1, "" )
     @kit_server['driver_label'] = FXLabel.new(@frame1, "Driver" )
-    @kit_server['driver_label'].tipText = ""
+    @kit_server['driver_label'].tipText = "Driver specifies the software that creates the machine."
     @kit_server['driver'] = FXTextField.new(@frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
     FXLabel.new(@frame1, "" )
     @kit_server['provisioner_label'] = FXLabel.new(@frame1, "Provisioner" )
-    @kit_server['provisioner_label'].tipText = ""
+    @kit_server['provisioner_label'].tipText = "Provisioner specifies what to run when doing a converge to provision the machine."
     @kit_server['provisioner'] = FXTextField.new(@frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
     FXLabel.new(@frame1, "" )
     @kit_server['verifier_label'] = FXLabel.new(@frame1, "Verifer" )
-    @kit_server['verifier_label'].tipText = ""
+    @kit_server['verifier_label'].tipText = "Verifier used to test server's configuration."
     @kit_server['verifier'] = FXTextField.new(@frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
     FXLabel.new(@frame1, "" )
     @kit_server['transport_label'] = FXLabel.new(@frame1, "Transport" )
-    @kit_server['transport_label'].tipText = ""
+    @kit_server['transport_label'].tipText = "Transport mechanism to communicate with the server."
     @kit_server['transport'] = FXTextField.new(@frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
     FXLabel.new(@frame1, "" )
     @kit_server['last_action_label'] = FXLabel.new(@frame1, "Last Action" )
-    @kit_server['last_action_label'].tipText = ""
+    @kit_server['last_action_label'].tipText = "Last Action that test-kitchen performed on this machine."
     @kit_server['last_action'] = FXTextField.new(@frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
     FXLabel.new(@frame1, "" )
     FXLabel.new(@frame1, "" )
@@ -263,30 +263,19 @@ class EC2_Kitchen
     FXLabel.new(@frame1, "" )
     FXLabel.new(@frame1, "" )
     @kit_server['test_kitchen_path_label'] = FXLabel.new(@frame1, "Test Kitchen Path" )
-    @kit_server['test_kitchen_path_label'].tipText = ""
+    @kit_server['test_kitchen_path_label'].tipText = "The directory containing the kitchen yaml configuration file.\nAll directories and files in the kitchen yaml file are defined relative to this path."
     @kit_server['test_kitchen_path'] = FXTextField.new(@frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
     FXLabel.new(@frame1, "" )
-    #@kit_server['test_kitchen_path_button'] = FXButton.new(@frame1, " ",:opts => BUTTON_TOOLBAR)
-    #@kit_server['test_kitchen_path_button'].icon = @modify
-    #@kit_server['test_kitchen_path_button'].tipText = "  Configure Test Kitchen Path  "
-    #@kit_server['test_kitchen_path_button'].connect(SEL_COMMAND) do |sender, sel, data|
-    #  dialog = KIT_PathCreateDialog.new(@ec2_main)
-    #  dialog.execute
-    #  if dialog.success
-    #    @ec2_main.tabBook.setCurrent(0)
-    #    @ec2_main.list.load("Test Kitchen")
-    #  end
-    #end
     @kit_server['test_kitchen_yaml_label'] = FXLabel.new(@frame1, "Kitchen_yaml" )
-    @kit_server['test_kitchen_yaml_label'].tipText = ""
+    @kit_server['test_kitchen_yaml_label'].tipText = "Name of kitchen yaml file\nDEFAULT: .kitchen.yml file located in TEST_KITCHEN_PATH."
     @kit_server['test_kitchen_yaml'] = FXTextField.new(@frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
     FXLabel.new(@frame1, "" )
     @kit_server['ssh_user_label'] = FXLabel.new(@frame1, "SSH User" )
-    @kit_server['ssh_user_label'].tipText = ""
+    @kit_server['ssh_user_label'].tipText = "SSH User used by test-kitchen when communicating with the server."
     @kit_server['ssh_user'] = FXTextField.new(@frame1, 30, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
     FXLabel.new(@frame1, "" )
     @kit_server['ssh_password_label'] = FXLabel.new(@frame1, "SSH Password" )
-    @kit_server['ssh_password_label'].tipText = ""
+    @kit_server['ssh_password_label'].tipText = "SSH Password used by test-kitchen when communicating with the server.\nIt's common to use an SSH key to access the server instead of a password."
     @kit_server['ssh_password'] = FXTextField.new(@frame1, 30, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
     FXLabel.new(@frame1, "" )
     @kit_server['chef_foodcritic_label'] = FXLabel.new(@frame1, "Foodcritic cookbook_path" )
@@ -296,16 +285,16 @@ class EC2_Kitchen
       @ec2_main.settings.put('CHEF_FOODCRITIC',@kit_server['chef_foodcritic'].text)
       @ec2_main.settings.save
     end
-    @kit_server['chef_foodcritic_comment'] = FXLabel.new(@frame1, "path of cookbook from TEST_KITCHEN_PATH" )
+    @kit_server['chef_foodcritic_comment'] = FXLabel.new(@frame1, "" )
     @kit_server['chef_foodcritic_comment'].tipText = ""
     @kit_server['chef_rspec_test_label'] = FXLabel.new(@frame1, "RSpec spec files" )
-    @kit_server['chef_rspec_test_label'].tipText = ""
+    @kit_server['chef_rspec_test_label'].tipText = "spec files to run from TEST_KITCHEN_PATH"
     @kit_server['chef_rspec_test'] = FXTextField.new(@frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     @kit_server['chef_rspec_test'].connect(SEL_COMMAND) do
       @ec2_main.settings.put('CHEF_RSPEC_TEST',@kit_server['chef_rspec_test'].text)
       @ec2_main.settings.save
     end
-    FXLabel.new(@frame1, "spec files to run  from TEST_KITCHEN_PATH" )
+    FXLabel.new(@frame1, "" )
   end
 
 
@@ -339,12 +328,12 @@ class EC2_Kitchen
     @kit_server['chef_rspec_test'].text ="./spec/unit/*_spec.rb" if @kit_server['chef_rspec_test'].text==nil or @kit_server['chef_rspec_test'].text==""
     if @kit_server['provisioner'].text == "PuppetApply"
       @kit_server['chef_foodcritic_label'].text = "puppet-lint/parser parms"
-      @kit_server['chef_foodcritic_label'].tipText = ""
+      @kit_server['chef_foodcritic_label'].tipText = "Puppet lint parameter or Puppet Parser parameter.\ne.g. C:\\repository\\puppet-cloudwatch_monitoring\\manifests\\*.pp"
       @kit_server['chef_foodcritic_comment'].text = ""
     else
       @kit_server['chef_foodcritic_label'].text = "Foodcritic cookbook_path"
-      @kit_server['chef_foodcritic_label'].tipText = ""
-      @kit_server['chef_foodcritic_comment'].text = "path of cookbook from TEST_KITCHEN_PATH"
+      @kit_server['chef_foodcritic_label'].tipText = "path of cookbook from TEST_KITCHEN_PATH"
+      @kit_server['chef_foodcritic_comment'].text = ""
     end
   end
 
@@ -367,12 +356,12 @@ class EC2_Kitchen
       @kit_server['chef_rspec_test'].text ="./spec/unit/*_spec.rb" if @kit_server['chef_rspec_test'].text==nil or @kit_server['chef_rspec_test'].text==""
       if @kit_server['provisioner'].text == "PuppetApply"
         @kit_server['chef_foodcritic_label'].text = "puppet-lint/parser parms"
-        @kit_server['chef_foodcritic_label'].tipText = ""
+        @kit_server['chef_foodcritic_label'].tipText = "Puppet lint parameter or Puppet Parser parameter.\ne.g. C:\\repository\\puppet-cloudwatch_monitoring\\manifests\\*.pp"
         @kit_server['chef_foodcritic_comment'].text = ""
       else
         @kit_server['chef_foodcritic_label'].text = "Foodcritic cookbook_path"
-        @kit_server['chef_foodcritic_label'].tipText = ""
-        @kit_server['chef_foodcritic_comment'].text = "path of cookbook from TEST_KITCHEN_PATH"
+        @kit_server['chef_foodcritic_label'].tipText = "path of cookbook from TEST_KITCHEN_PATH"
+        @kit_server['chef_foodcritic_comment'].text = ""
       end
     else
       error_message("Kitchen Instance undefined","Kitchen Instance #{@kit_server['instance'].text} not defined in .kitchem.yaml file")

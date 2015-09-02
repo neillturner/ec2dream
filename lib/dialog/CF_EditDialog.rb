@@ -91,7 +91,7 @@ class CF_EditDialog < FXDialogBox
     parameters = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
     FXLabel.new(frame1, "" )
     disable_rollback_label = FXLabel.new(frame1, "Disable Rollback" )
-    disable_rollback_label.tipText = "true or false. Controls rollback on stack creation failure, defaults to false."
+    disable_rollback_label.tipText = "OPTIONAL: true or false. Controls rollback on stack creation failure, defaults to false."
     disable_rollback = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
     FXLabel.new(frame1, "" )
     timeout_in_minutes_label = FXLabel.new(frame1, "Timeout in Minutes" )
