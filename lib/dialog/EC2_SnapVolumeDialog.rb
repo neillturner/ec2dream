@@ -30,12 +30,14 @@ class EC2_SnapVolumeDialog < FXDialogBox
     super(owner, "Create Snapshot", :opts => DECOR_ALL, :width => 500, :height => 210)
     page1 = FXVerticalFrame.new(self, LAYOUT_FILL, :padding => 0)
     frame1 = FXMatrix.new(page1, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
-    FXLabel.new(frame1, "Volume" )
+    ebs_volume_label = FXLabel.new(frame1, "Volume" )
+    ebs_volume_label.tipText = "Volume to create snaphot from" 
     ebs_volume = FXTextField.new(frame1, 30, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT|TEXTFIELD_READONLY)
     ebs_volume.text = snap_ebs
     FXLabel.new(frame1, "" )
     if  !@ec2_main.settings.openstack
-      FXLabel.new(frame1, "Tags" )
+      tags_label = FXLabel.new(frame1, "Tags" )
+      tags_label.tipText = "Tags to identify the disk volume. Keyword and Value pairs.\nTag keys and values are case sensitive.\nFOR AWS: Don't use the aws: prefix in your tag names or values"
       tags = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT|TEXTFIELD_READONLY)
       tags_button = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
       tags_button.icon = @edit
@@ -50,7 +52,8 @@ class EC2_SnapVolumeDialog < FXDialogBox
       end   
     end
     if  @ec2_main.settings.openstack
-      FXLabel.new(frame1, "Name" )
+      name_label = FXLabel.new(frame1, "Name" )
+      name_label.tipText = "The Name of the Disk Snapshot" 
       name = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
       name.text = snap_name 
       name.connect(SEL_COMMAND) do |sender, sel, data|
@@ -58,11 +61,13 @@ class EC2_SnapVolumeDialog < FXDialogBox
       end
       FXLabel.new(frame1, "" )
     end   
-    FXLabel.new(frame1, "Description" )
+    description_label = FXLabel.new(frame1, "Description" )
+    description_label.tipText = "Description of the Disk Snapshot" 
     description = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
     FXLabel.new(frame1, "" )
     if  @ec2_main.settings.openstack
-      FXLabel.new(frame1, "Force" )
+      force_label = FXLabel.new(frame1, "Force" )
+      force_label.tipText = "Force the snapshot creation" 
       force = FXComboBox.new(frame1, 10,
       :opts => COMBOBOX_STATIC|COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
       force.numVisible = 2

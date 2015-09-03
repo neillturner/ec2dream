@@ -33,7 +33,8 @@ class EC2_EBSCreateDialog < FXDialogBox
     super(owner, "Create Block Storage Volume", :opts => DECOR_ALL, :width => 500, :height => 225)
     frame1 = FXMatrix.new(self, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
     if  !@ec2_main.settings.openstack
-      FXLabel.new(frame1, "Tags" )
+      tags_label = FXLabel.new(frame1, "Tags" )
+      tags_label.tipText = "Tags to identify the disk volume. Keyword and Value pairs.\nTag keys and values are case sensitive.\nFOR AWS: Don't use the aws: prefix in your tag names or values"
       tags = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
       tags_button = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
       tags_button.icon = @edit
@@ -48,14 +49,16 @@ class EC2_EBSCreateDialog < FXDialogBox
       end   
     end
     if  @ec2_main.settings.openstack
-      FXLabel.new(frame1, "Name" )
+      name_label = FXLabel.new(frame1, "Name" )
+      name_label.tipText = "The Name of the Disk Volume" 
       name = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
       name.text = ebs_name 
       name.connect(SEL_COMMAND) do |sender, sel, data|
         ebs_name = data
       end
       FXLabel.new(frame1, "" )
-      FXLabel.new(frame1, "Description" )
+      description_label = FXLabel.new(frame1, "Description" )
+      description_label.tipText = "Description of the Disk Volume" 
       description = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
       description.text = ebs_description 
       description.connect(SEL_COMMAND) do |sender, sel, data|
@@ -63,15 +66,17 @@ class EC2_EBSCreateDialog < FXDialogBox
       end
       FXLabel.new(frame1, "" )
     end
-    FXLabel.new(frame1, "Volume Type" )
+    volume_type_label = FXLabel.new(frame1, "Volume Type" )
     volume_type = FXComboBox.new(frame1, 20,
     :opts => COMBOBOX_STATIC|COMBOBOX_NO_REPLACE|LAYOUT_RIGHT)
-    if  @ec2_main.settings.openstack_rackspace	      
+    if  @ec2_main.settings.openstack_rackspace
+      volume_type_label.tipText = "Type of Volume"
       volume_type.numVisible = 2
       volume_type.appendItem("SATA")
       volume_type.appendItem("SSD")
       ebs_type = "SATA"
     else
+      volume_type_label.tipText = "Volume Type: gp2 for General Purpose (SSD) volumes, io1 for Provisioned IOPS (SSD) volumes, and standard for Magnetic volumes."
       volume_type.numVisible = 3
       volume_type.appendItem("standard")
       volume_type.appendItem("gp2")
@@ -98,7 +103,8 @@ class EC2_EBSCreateDialog < FXDialogBox
     capacity.connect(SEL_COMMAND) do |sender, sel, data|
       ebs_capacity = data
     end	
-    FXLabel.new(frame1, "Availability Zone" )
+    zone_label = FXLabel.new(frame1, "Availability Zone" )
+    zone_label.tipText = "Availability Zone for the disk volume.\nOften it needs to be in the some zone as the server ataching the disk"  
     zone = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     zone_button = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     zone_button.icon = @magnifier
@@ -112,7 +118,8 @@ class EC2_EBSCreateDialog < FXDialogBox
         ebs_zone = it
       end	    
     end            
-    FXLabel.new(frame1, "Snapshot" )
+    snap_label = FXLabel.new(frame1, "Snapshot" )
+    snap_label.tipText = "Create the disk wih data from the snapshot"  
     snap = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     snap.text = ebs_snap 
     snap.connect(SEL_COMMAND) do |sender, sel, data|
@@ -130,7 +137,8 @@ class EC2_EBSCreateDialog < FXDialogBox
         ebs_snap = it
       end	    
     end
-    FXLabel.new(frame1, "I/O Per Second" )
+    iops_label = FXLabel.new(frame1, "I/O Per Second" )
+    iops_label.tipText = "The number of I/Os per second this disk volume will support"
     iops = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_INTEGER|LAYOUT_RIGHT)
     iops.connect(SEL_COMMAND) do |sender, sel, data|
       ebs_iops = data.to_i

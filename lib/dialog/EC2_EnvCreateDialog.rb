@@ -38,7 +38,7 @@ class EC2_EnvCreateDialog < FXDialogBox
     # servers
     #
     @serverstab = FXTabItem.new(@tabbook, "&Servers", nil)
-    @serverstab.tipText = "Local or remote Servers accessable by ip address"
+    @serverstab.tipText = "Local or Remote Servers accessible by IP address"
     @serversframe = FXHorizontalFrame.new(@tabbook )
     frame0 = FXMatrix.new(@serversframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
     FXLabel.new(frame0,"")
@@ -51,7 +51,7 @@ class EC2_EnvCreateDialog < FXDialogBox
     FXLabel.new(frame0,"")
     FXLabel.new(frame0,"")
     servers_env_label = FXLabel.new(frame0, "Environment Name" )
-    servers_env_label.tipText = ""
+    servers_env_label.tipText = "A unique name to identified this environment in EC2Dream"
     servers_env = FXTextField.new(frame0, 60, nil, 0, :opts => FRAME_SUNKEN)
     FXLabel.new(frame0, "" )
 
@@ -59,25 +59,25 @@ class EC2_EnvCreateDialog < FXDialogBox
     # amazon aws
     #
     @amazontab = FXTabItem.new(@tabbook, "&Amazon EC2", nil)
-    @amazontab.tipText = ""
+    @amazontab.tipText = "Amazon AWS Cloud"
     @amazonframe = FXHorizontalFrame.new(@tabbook )
     frame1 = FXMatrix.new(@amazonframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
     amazon_env_label = FXLabel.new(frame1, "Environment Name" )
-    amazon_env_label.tipText = ""
+    amazon_env_label.tipText = "A unique name to identified this environment in EC2Dream"
     amazon_env = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN)
     FXLabel.new(frame1, "" )
 
     #@amazon_access_key = textBox("Amazon Access Key",frame1)
     @amazon_access_key_label = FXLabel.new(frame1, "Amazon Access Key" )
-    @amazon_access_key_label.tipText = ""
+    @amazon_access_key_label.tipText = "Your AWS account's access key id.\nUsed to access the AWS API."
     @amazon_access_key = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN)
     FXLabel.new(frame1, "" )
     @amazon_secret_access_key_label = FXLabel.new(frame1, "Amazon Secret Access Key" )
-    @amazon_secret_access_key_label.tipText=""
+    @amazon_secret_access_key_label.tipText="Your AWS account's secret access key id.\nUsed to access the AWS API."
     @amazon_secret_access_key = FXTextField.new(frame1, 60, nil, 0, :opts => TEXTFIELD_PASSWD|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame1, "" )
     @ec2_url_label = FXLabel.new(frame1, "Region (Default US-Virginia)" )
-    @ec2_url_label.tipText=""
+    @ec2_url_label.tipText="The AWS Region you wish to access.\nEach Amazon EC2 region is completely isolated.\nCreate separate environments for multiple regions."
     @ec2_url = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @ec2_url_button = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @magnifier = @ec2_main.makeIcon("magnifier.png")
@@ -103,20 +103,21 @@ class EC2_EnvCreateDialog < FXDialogBox
     # Google Compute Engine
     #
     @googletab = FXTabItem.new(@tabbook, "&Google Compute", nil)
-    @googletab.tipText = ""
+    @googletab.tipText = "Google Compute Engine Cloud"
     @googleframe = FXHorizontalFrame.new(@tabbook )
     frame8 = FXMatrix.new(@googleframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
     #google_env = textBox("Environment Name",frame8)
     google_env_label = FXLabel.new(frame8, "Environment Name" )
-    google_env_label.tipText = ""
+    google_env_label.tipText = "A unique name to identified this environment in EC2Dream"
     google_env = FXTextField.new(frame8, 60, nil, 0, :opts => FRAME_SUNKEN)
     FXLabel.new(frame8, "" )
     #@google_client_email = textBox("Google Client Email",frame8)
     @google_client_email_label = FXLabel.new(frame8, "Google Client Email" )
-    @google_client_email_label.tipText = ""
+    @google_client_email_label.tipText = "Your google email id"
     @google_client_email = FXTextField.new(frame8, 60, nil, 0, :opts => FRAME_SUNKEN)
     FXLabel.new(frame8, "" )
-    FXLabel.new(frame8, "Google Key Location" )
+    @google_key_location_label = FXLabel.new(frame8, "Google Key Location" )
+    @google_key_location_label.tipText = "the location of your access key"
     @google_key_location = FXTextField.new(frame8, 60, nil, 0, :opts => TEXTFIELD_PASSWD|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     google_open = FXButton.new(frame8, "", nil, self, ID_ACCEPT, BUTTON_TOOLBAR|LAYOUT_LEFT)
     google_open.icon = @magnifier
@@ -126,10 +127,12 @@ class EC2_EnvCreateDialog < FXDialogBox
         @google_key_location.text = google_cert
       end
     }
-    FXLabel.new(frame8, "Google Project" )
+    @google_project_label = FXLabel.new(frame8, "Google Project" )
+    @google_project_label.tipText = "All Google Compute Engine resources belong to a project. Projects form the basis for enabling and using the Google Cloud Platform services"
     @google_project = FXTextField.new(frame8, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame8, "" )
-    FXLabel.new(frame8, "Google Zone" )
+    @google_zone_label = FXLabel.new(frame8, "Google Zone" )
+    @google_zone_label.tipText = "Google Compute Engine allows you to choose the region and zone where certain resources live. Zones are of the format <region>-<zone>" 
     @google_zone = FXTextField.new(frame8, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @google_zone_button = FXButton.new(frame8, "", :opts => BUTTON_TOOLBAR)
     @google_zone_button.icon = @magnifier
@@ -178,29 +181,29 @@ class EC2_EnvCreateDialog < FXDialogBox
     # openstack
     #
     @openstacktab = FXTabItem.new(@tabbook, "&OpenStack", nil)
-    @openstacktab.tipText = ""
+    @openstacktab.tipText = "Openstack Cloud"
     @openstackframe = FXHorizontalFrame.new(@tabbook )
     frame3 = FXMatrix.new(@openstackframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
     #openstack_env = textBox("Environment Name",frame3)
     openstack_env_label = FXLabel.new(frame3, "Environment Name" )
-    openstack_env_label.tipText = ""
+    openstack_env_label.tipText = "A unique name to identified this environment in EC2Dream"
     openstack_env = FXTextField.new(frame3, 60, nil, 0, :opts => FRAME_SUNKEN)
     FXLabel.new(frame3, "" )
     #@openstack_access_key = textBox("User Name",frame3)
     @openstack_access_key_label = FXLabel.new(frame3, "User Name" )
-    @openstack_access_key_label.tipText = ""
+    @openstack_access_key_label.tipText = "Your Openstack user name."
     @openstack_access_key = FXTextField.new(frame3, 60, nil, 0, :opts => FRAME_SUNKEN)
     FXLabel.new(frame3, "" )
     @openstack_secret_access_key_label = FXLabel.new(frame3, "Password" )
-    @openstack_secret_access_key_label.tipText = ""
+    @openstack_secret_access_key_label.tipText = "Your Openstack password."
     @openstack_secret_access_key = FXTextField.new(frame3, 60, nil, 0, :opts => TEXTFIELD_PASSWD|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame3, "" )
     @openstack_url_label = FXLabel.new(frame3, "URL (Default Trystack)" )
-    @openstack_url_label.tipText = ""
+    @openstack_url_label.tipText = "Your Cloud's The OpenStack Identity or Nova URL Endpoint."
     @openstack_url = FXTextField.new(frame3, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame3, "" )
     @openstack_tenant_label = FXLabel.new(frame3, "Tenant ID" )
-    @openstack_tenant_label.tipText = ""
+    @openstack_tenant_label.tipText = "The initial implementation of OpenStack Compute had its own authentication system and used the term project.\nWhen authentication moved into the OpenStack Identity (keystone) project, it used the term tenant to refer to a group of users.\nBecause of this legacy, some of the OpenStack tools refer to projects and some refer to tenants."
     @openstack_tenant = FXTextField.new(frame3, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     if ENV['AMAZON_ACCESS_KEY_ID'] != nil and ENV['AMAZON_ACCESS_KEY_ID'] != ""
       @openstack_access_key.text = ENV['AMAZON_ACCESS_KEY_ID']
@@ -220,33 +223,33 @@ class EC2_EnvCreateDialog < FXDialogBox
     # openstack_hp
     #
     @hptab = FXTabItem.new(@tabbook, "&HP OpenStack", nil)
-    @hptab.tipText = ""
+    @hptab.tipText = "HP Helion Public Cloud"
     @hpframe = FXHorizontalFrame.new(@tabbook )
     frame4 = FXMatrix.new(@hpframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
     #hp_env = textBox("Environment Name",frame4)
     hp_env_label = FXLabel.new(frame4, "Environment Name" )
-    hp_env_label.tipText = ""
+    hp_env_label.tipText = "A unique name to identified this environment in EC2Dream"
     hp_env = FXTextField.new(frame4, 60, nil, 0, :opts => FRAME_SUNKEN)
     FXLabel.new(frame4, "" )
     #@hp_access_key = textBox("HP User Name",frame4)
     @hp_access_label = FXLabel.new(frame4, "HP User Name" )
-    @hp_access_label.tipText = ""
+    @hp_access_label.tipText = "Your HP Openstack user name."
     @hp_access = FXTextField.new(frame4, 60, nil, 0, :opts => FRAME_SUNKEN)
     FXLabel.new(frame4, "" )
     @hp_secret_access_key_label = FXLabel.new(frame4, "HP Password" )
-    @hp_secret_access_key_label.tipText = ""
+    @hp_secret_access_key_label.tipText = "Your HP Openstack password."
     @hp_secret_access_key = FXTextField.new(frame4, 60, nil, 0, :opts => TEXTFIELD_PASSWD|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame4, "" )
     @hp_url_label = FXLabel.new(frame4, "HP URL" )
-    @hp_url_label.tipText = ""
+    @hp_url_label.tipText = "HP Cloud Identity Service API Endpoint"
     @hp_url = FXTextField.new(frame4, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame4, "" )
     @hp_tenant_label = FXLabel.new(frame4, "HP Tenant ID" )
-    @hp_tenant_label.tipText = ""
+    @hp_tenant_label.tipText = "The initial implementation of OpenStack Compute had its own authentication system and used the term project.\nWhen authentication moved into the OpenStack Identity (keystone) project, it used the term tenant to refer to a group of users.\nBecause of this legacy, some of the OpenStack tools refer to projects and some refer to tenants."
     @hp_tenant = FXTextField.new(frame4, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame4, "" )
     @hp_avl_zone_label = FXLabel.new(frame4, "HP Avl Zone" )
-    @hp_avl_zone_label.tipText = ""
+    @hp_avl_zone_label.tipText = "The region and availability zone you wish to access.\nCreate multiple environments for multiple availability zones."
     @hp_avl_zone = FXTextField.new(frame4, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @hp_avl_zone_button = FXButton.new(frame4, "", :opts => BUTTON_TOOLBAR)
     @hp_avl_zone_button.icon = @magnifier
@@ -286,25 +289,25 @@ class EC2_EnvCreateDialog < FXDialogBox
     # openstack_rackspace
     #
     @racktab = FXTabItem.new(@tabbook, "&Rackspace", nil)
-    @racktab.tipText = ""
+    @racktab.tipText = "Rackspace Public Cloud"
     @rackframe = FXHorizontalFrame.new(@tabbook )
     frame5 = FXMatrix.new(@rackframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
     #rack_env = textBox("Environment Name",frame5)
     rack_env_label = FXLabel.new(frame5, "Environment Name" )
-    rack_env_label.tipText = ""
+    rack_env_label.tipText = "A unique name to identified this environment in EC2Dream"
     rack_env = FXTextField.new(frame5, 60, nil, 0, :opts => FRAME_SUNKEN)
     FXLabel.new(frame5, "" )
     #@rack_access_key = textBox("Rackspace User Name",frame5)
     @rack_access_key_label = FXLabel.new(frame5, "Rackspace User Name" )
-    @rack_access_key_label.tipText = ""
+    @rack_access_key_label.tipText = "Your HP Openstack user name."
     @rack_access_key = FXTextField.new(frame5, 60, nil, 0, :opts => FRAME_SUNKEN)
     FXLabel.new(frame5, "" )
     @rack_secret_access_key_label = FXLabel.new(frame5, "Rackspace API Key" )
-    @rack_secret_access_key_label.tipText = ""
+    @rack_secret_access_key_label.tipText = "Your HP Openstack API Key"
     @rack_secret_access_key = FXTextField.new(frame5, 60, nil, 0, :opts => TEXTFIELD_PASSWD|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame5, "" )
     @rack_url_label = FXLabel.new(frame5, "Rackspace Endpoint (Default Dallas)" )
-    @rack_url_label.tipText = ""
+    @rack_url_label.tipText = "Used to identity the region to the rackspace API."
     @rack_url = FXTextField.new(frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @rack_url_button = FXButton.new(frame5, "", :opts => BUTTON_TOOLBAR)
     @rack_url_button.icon = @magnifier
@@ -324,7 +327,7 @@ class EC2_EnvCreateDialog < FXDialogBox
       @rack_secret_access_key.text = ENV['AMAZON_SECRET_ACCESS_KEY']
     end
     @rack_url.text = "https://servers.api.rackspacecloud.com/v2"
-
+    
     #
     # cloudstack
     #
