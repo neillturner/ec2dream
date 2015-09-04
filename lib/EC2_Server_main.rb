@@ -361,15 +361,6 @@ class EC2_Server
         sender.enabled = false
       end
     end
-    #@chef_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
-    #@chef_button.icon = @kitchenci
-    #@chef_button.tipText = " Run Test Kitchen"
-    #@chef_button.connect(SEL_COMMAND) do |sender, sel, data|
-    #  run_kitchen
-    #end
-    #@chef_button.connect(SEL_UPDATE) do |sender, sel, data|
-    #   enable_if_ec2_server_loaded(sender)
-    #end
     @graph_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
     @graph_button.icon = @chart
     @graph_button.tipText = " Monitoring Graphs "
@@ -423,17 +414,6 @@ class EC2_Server
         dialog.execute
       end
     end
-    #FXLabel.new(@frame1s, "" )
-    #FXLabel.new(@frame1s, "Kitchen Instance" )
-    #@server['Chef_Node'] = FXTextField.new(@frame1s, 20, nil, 0, :opts => FRAME_SUNKEN)
-    #@server['Chef_Node'].connect(SEL_COMMAND) do
-    #   instance_id = @server['Instance_ID'].text
-    #   @ec2_chef_node[instance_id] = @server['Chef_Node'].text
-    #   if @ec2_main.launch.loaded == true
-    #      @ec2_main.launch.put('Chef_Node',@server['Chef_Node'].text)
-    #      @ec2_main.launch.save
-    #   end
-    #end
     FXLabel.new(@frame1, "" )
     FXLabel.new(@frame1, "Instance Id" )
     @frame1t = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
@@ -452,16 +432,6 @@ class EC2_Server
     end
     FXLabel.new(@frame1t, "IAM Role" )
     @server['test_kitchen_path'] = FXTextField.new(@frame1t, 25, nil, 0, :opts => TEXTFIELD_READONLY)
-    #@server['test_kitchen_path_button'] = FXButton.new(@frame1t, " ",:opts => BUTTON_TOOLBAR)
-    #@server['test_kitchen_path_button'].icon = @modify
-    #@server['test_kitchen_path_button'].tipText = "  Configure Test Kitchen Path  "
-    #@server['test_kitchen_path_button'].connect(SEL_COMMAND) do |sender, sel, data|
-    #    dialog = KIT_PathCreateDialog.new(@ec2_main)
-    #    dialog.execute
-    #    if dialog.success
-    #        @server['test_kitchen_path'].text=@ec2_main.settings.get('TEST_KITCHEN_PATH')
-    #    end
-    #end
     FXLabel.new(@frame1, "" )
     FXLabel.new(@frame1, "Tags" )
     @server['Tags'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
@@ -623,7 +593,7 @@ class EC2_Server
       end
     end
     @server['Win_Admin_Password_label'] = FXLabel.new(@frame1su, "Win Admin Pswd" )
-    @server['Win_Admin_Password_label'].tipText = "OPTION: Windows Administrator user password for use with Remote Desktop.\nCan be populated by pressing 'Decrypt Windows Admin Password' button\n.It my take several minutes after the Windows Server is started before a decrypted is returned."
+    @server['Win_Admin_Password_label'].tipText = "OPTIONAL: Windows Administrator user password for use with Remote Desktop.\nCan be populated by pressing 'Decrypt Windows Admin Password' button\n.It my take several minutes after the Windows Server is started before a decrypted is returned."
     @server['Win_Admin_Password'] = FXTextField.new(@frame1su, 20, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_PASSWD)
     @server['Win_Admin_Password'].connect(SEL_COMMAND) do |sender, sel, data|
       instance_id = @server['Instance_ID'].text
@@ -924,7 +894,7 @@ class EC2_Server
     end
     FXLabel.new(@frame3, "" )
     @ops_server['Admin_Password_label'] = FXLabel.new(@frame3, "SSH/Win Admin Password" )
-    @ops_server['Admin_Password_label'].tipText = "OPTION: SSH user or Windows Administrator user password for use with Remote Desktop."
+    @ops_server['Admin_Password_label'].tipText = "OPTIONAL: SSH user or Windows Administrator user password for use with Remote Desktop."
     @ops_server['Admin_Password'] = FXTextField.new(@frame3, 60, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_PASSWD)
     @ops_server['Admin_Password'].connect(SEL_COMMAND) do |sender, sel, data|
       instance_id = @ops_server['Instance_ID'].text
@@ -1187,27 +1157,27 @@ class EC2_Server
     @frame5 = FXMatrix.new(@page1, 3, MATRIX_BY_COLUMNS|LAYOUT_FILL)
     @frame5.hide()
     @loc_server['server_label'] = FXLabel.new(@frame5, "Server" )
-    @loc_server['server_label'].tipText = "" 
+    @loc_server['server_label'].tipText = "REQUIRED: The unique name in EC2Dream to identify the server." 
     @loc_server['server'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
     FXLabel.new(@frame5, "" )
     @loc_server['address_label'] = FXLabel.new(@frame5, "Address" )
-    @loc_server['address_label'].tipText = ""
+    @loc_server['address_label'].tipText = "REQUIRED: The IP Address or DNS name for SSH access to the server."
     @loc_server['address'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     FXLabel.new(@frame5, "" )
     @loc_server['address_port_label'] = FXLabel.new(@frame5, "Address Port" )
-    @loc_server['address_port_label'].tipText = ""
+    @loc_server['address_port_label'].tipText = "OPTIONAL: The port to use for SSH Access.\nDEFAULT: 22"
     @loc_server['address_port'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     FXLabel.new(@frame5, "(Default 22)" )
     @loc_server['ssh_user_label'] = FXLabel.new(@frame5, "SSH User" )
-    @loc_server['ssh_user_label'].tipText = ""
+    @loc_server['ssh_user_label'].tipText = "OPTIONAL: SSH User for SSH access to the server.\nFor Windows Server Remote Desktop user."
     @loc_server['ssh_user'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     FXLabel.new(@frame5, "" )
     @loc_server['ssh_password_label'] = FXLabel.new(@frame5, "SSH Password" )
-    @loc_server['ssh_password_label'].tipText = ""
+    @loc_server['ssh_password_label'].tipText = "OPTIONAL: SSH password or Windows administrator password.\nNot required if using and SSH key."
     @loc_server['ssh_password'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     FXLabel.new(@frame5, "" )
     @loc_server['ssh_key_label'] = FXLabel.new(@frame5, "SSH key" )
-    @loc_server['ssh_key_label'].tipText = "" 
+    @loc_server['ssh_key_label'].tipText = "OPTIONAL: SSH Key for SSH access to the server." 
     @loc_server['ssh_key'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     @loc_server['ssh_key_button'] = FXButton.new(@frame5, "", :opts => BUTTON_TOOLBAR)
     @loc_server['ssh_key_button'].icon = @magnifier
@@ -1226,7 +1196,7 @@ class EC2_Server
       end
     end
     @loc_server['putty_key_label'] = FXLabel.new(@frame5, "Putty Key" )
-    @loc_server['putty_key_label'].tipText = ""
+    @loc_server['putty_key_label'].tipText = "OPTIONAL: Putty Key for Putty access to the server."
     @loc_server['putty_key'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     @loc_server['putty_key_button'] = FXButton.new(@frame5, "", :opts => BUTTON_TOOLBAR)
     @loc_server['putty_key_button'].icon = @magnifier
@@ -1245,7 +1215,7 @@ class EC2_Server
       end
     end
     @loc_server['windows_server_label'] = FXLabel.new(@frame5, "Windows Server" )
-    @loc_server['windows_server_label'].tipText = ""
+    @loc_server['windows_server_label'].tipText = "true or false. If true Remote Desktop will be used to access the server."
     @loc_server['windows_server'] = FXComboBox.new(@frame5, 15, :opts => COMBOBOX_STATIC|COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
     @loc_server['windows_server'].numVisible = 2
     @loc_server['windows_server'].appendItem("true")
@@ -1258,23 +1228,21 @@ class EC2_Server
     FXLabel.new(@frame5, "" )
     FXLabel.new(@frame5, "" )
     FXLabel.new(@frame5, "" )
-    @loc_server['kitchen_instance_label'] = FXLabel.new(@frame5, "Kitchen Instance" )
-    @loc_server['kitchen_instance_label'].tipText = ""
-    @loc_server['kitchen_instance'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
-    FXLabel.new(@frame5, "" )
-    @loc_server['test_kitchen_path_label'] = FXLabel.new(@frame5, "Kitchen Path" )
-    @loc_server['test_kitchen_path_label'].tipText = ""
-    @loc_server['test_kitchen_path'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
-    @loc_server['test_kitchen_path_button'] = FXButton.new(@frame5, " ",:opts => BUTTON_TOOLBAR)
-    @loc_server['test_kitchen_path_button'].icon = @modify
-    @loc_server['test_kitchen_path_button'].tipText = "  Configure Test Kitchen Path  "
-    @loc_server['test_kitchen_path_button'].connect(SEL_COMMAND) do |sender, sel, data|
-      dialog = KIT_PathCreateDialog.new(@ec2_main)
-      dialog.execute
-      if dialog.success
-        @loc_server['test_kitchen_path'].text=@ec2_main.settings.get('TEST_KITCHEN_PATH')
-      end
-    end
+    #FXLabel.new(@frame5, "Kitchen Instance" )
+    #@loc_server['kitchen_instance'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    #FXLabel.new(@frame5, "" )
+    #FXLabel.new(@frame5, "Kitchen Path" )
+    #@loc_server['test_kitchen_path'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
+    #@loc_server['test_kitchen_path_button'] = FXButton.new(@frame5, " ",:opts => BUTTON_TOOLBAR)
+    #@loc_server['test_kitchen_path_button'].icon = @modify
+    #@loc_server['test_kitchen_path_button'].tipText = "  Configure Test Kitchen Path  "
+    #@loc_server['test_kitchen_path_button'].connect(SEL_COMMAND) do |sender, sel, data|
+    #  dialog = KIT_PathCreateDialog.new(@ec2_main)
+    #  dialog.execute
+    #  if dialog.success
+    #    @loc_server['test_kitchen_path'].text=@ec2_main.settings.get('TEST_KITCHEN_PATH')
+    #  end
+    #end
     FXLabel.new(@frame5, "" )
     FXLabel.new(@frame5, "" )
     FXLabel.new(@frame5, "" )
@@ -1285,26 +1253,27 @@ class EC2_Server
     FXLabel.new(@frame5, "Tunnelling - Bastion Host" )
     FXLabel.new(@frame5, "" )
     @loc_server['local_port_label'] = FXLabel.new(@frame5, "Local Port" )
-    @loc_server['local_port_label'].tipText = ""
+    @loc_server['local_port_label'].tipText = "OPTIONAL: SSH port to use if different from default 22.\nTypically used when doing SSH Tunneling."
     @loc_server['local_port'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     FXLabel.new(@frame5, "" )
     @loc_server['bastion_host_label'] = FXLabel.new(@frame5, "Bastion Host" )
+    @loc_server['bastion_host_label'].tipText = "OPTIONAL: IP address or DNS of bastion server for SSH Tunneling."
     @loc_server['bastion_host'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     FXLabel.new(@frame5, "" )
     @loc_server['bastion_port_label'] = FXLabel.new(@frame5, "Bastion Port" )
-    @loc_server['bastion_port_label'].tipText = ""
+    @loc_server['bastion_port_label'].tipText = "OPTIONAL: SSH Port of Bastion Host"
     @loc_server['bastion_port'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     FXLabel.new(@frame5, "" )
     @loc_server['bastion_user_label'] = FXLabel.new(@frame5, "Bastion User" )
-    @loc_server['bastion_user_label'].tipText = ""
+    @loc_server['bastion_user_label'].tipText = "OPTIONAL: SSH User for Bastion Host"
     @loc_server['bastion_user'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     FXLabel.new(@frame5, "" )
     @loc_server['bastion_password_label'] = FXLabel.new(@frame5, "Bastion Password" )
-    @loc_server['bastion_password_label'].tipText = ""
+    @loc_server['bastion_password_label'].tipText = "OPTIONAL: SSH Password for Basion Host"
     @loc_server['bastion_password'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     FXLabel.new(@frame5, "" )
     @loc_server['bastion_ssh_key_label'] = FXLabel.new(@frame5, "Bastion SSH key" )
-    @loc_server['bastion_ssh_key_label'].tipText = ""
+    @loc_server['bastion_ssh_key_label'].tipText = "OPTIONAL: SSH Key for Bastion Host"
     @loc_server['bastion_ssh_key'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     @loc_server['bastion_ssh_key_button'] = FXButton.new(@frame5, "", :opts => BUTTON_TOOLBAR)
     @loc_server['bastion_ssh_key_button'].icon = @magnifier
@@ -1323,7 +1292,7 @@ class EC2_Server
       end
     end
     @loc_server['bastion_putty_key_label'] = FXLabel.new(@frame5, "Bastion Putty Key" )
-    @loc_server['bastion_putty_key_label'].tipText = ""
+    @loc_server['bastion_putty_key_label'].tipText = "OPTIONAL: Putty key for Bastion Host."
     @loc_server['bastion_putty_key'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     @loc_server['bastion_putty_key_button'] = FXButton.new(@frame5, "", :opts => BUTTON_TOOLBAR)
     @loc_server['bastion_putty_key_button'].icon = @magnifier
@@ -1349,44 +1318,10 @@ class EC2_Server
     FXLabel.new(@frame6, "Name" )
     @frame6s = FXHorizontalFrame.new(@frame6,LAYOUT_FILL_X, :padding => 0)
     @google_server['Name'] = FXTextField.new(@frame6s, 20, nil, 0, :opts => TEXTFIELD_READONLY)
-    #FXLabel.new(@frame6s, "" )
-    #FXLabel.new(@frame6s, "Kitchen Instance" )
-    #@google_server['Chef_Node'] = FXTextField.new(@frame6s, 21, nil, 0, :opts => FRAME_SUNKEN)
-    #@google_server['Chef_Node'].connect(SEL_COMMAND) do
-    #  instance_id = @google_server['Instance_ID'].text
-    #  @ec2_chef_node[instance_id] = @google_server['Chef_Node'].text
-    #  if @ec2_main.launch.loaded == true
-    #    @ec2_main.launch.google_put('Chef_Node',@google_server['Chef_Node'].text)
-    #    @ec2_main.launch.save
-    #  end
-    #end
     FXLabel.new(@frame6, "" )
     FXLabel.new(@frame6, "Instance ID" )
     @frame6t = FXHorizontalFrame.new(@frame6,LAYOUT_FILL_X, :padding => 0)
     @google_server['Instance_ID'] = FXTextField.new(@frame6t, 25, nil, 0, :opts => TEXTFIELD_READONLY)
-    #FXLabel.new(@frame6t, "Kitchen Path" )
-    #@google_server['test_kitchen_path'] = FXTextField.new(@frame6t, 25, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_READONLY)
-    #@google_server['test_kitchen_path_button'] = FXButton.new(@frame6t, " ",:opts => BUTTON_TOOLBAR)
-    #@google_server['test_kitchen_path_button'].icon = @modify
-    #@google_server['test_kitchen_path_button'].tipText = "  Configure Test Kitchen Path  "
-    #@google_server['test_kitchen_path_button'].connect(SEL_COMMAND) do |sender, sel, data|
-    #  dialog = KIT_PathCreateDialog.new(@ec2_main)
-    #  dialog.execute
-    #  if dialog.success
-    #    @google_server['test_kitchen_path'].text=@ec2_main.settings.get('TEST_KITCHEN_PATH')
-    #  end
-    #end
-    #FXLabel.new(@frame6t, "Puppet Manifest" )
-    #@google_server['Puppet_Manifest'] = FXTextField.new(@frame6t, 15, nil, 0, :opts => FRAME_SUNKEN)
-    #@google_server['Puppet_Manifest'].visible=false
-    #@google_server['Puppet_Manifest'].connect(SEL_COMMAND) do
-    #   instance_id = @google_server['Instance_ID'].text
-    #   @ec2_puppet_manifest[instance_id] = @google_server['Puppet_Manifest'].text
-    #   if @ec2_main.launch.loaded == true
-    #      @ec2_main.launch.put('Puppet_Manifest',@google_server['Puppet_Manifest'].text)
-    #      @ec2_main.launch.save
-    #   end
-    #end
     FXLabel.new(@frame6, "" )
     FXLabel.new(@frame6, "State" )
     @frame6j = FXHorizontalFrame.new(@frame6,LAYOUT_FILL_X, :padding => 0)
@@ -1442,7 +1377,7 @@ class EC2_Server
       end
     else
       @google_server['Putty_Private_Key_label'] = FXLabel.new(@frame6, "Putty Private Key" )
-      @google_server['Putty_Private_Key_label'].tipText = ""
+      @google_server['Putty_Private_Key_label'].tipText = "OPTIONAL: Putty Key for Putty access to the server."
       @google_server['Putty_Private_Key'] = FXTextField.new(@frame6, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
       @google_server['Putty_Private_Key'].connect(SEL_COMMAND) do
         instance_id = @google_server['Instance_ID'].text
@@ -1473,7 +1408,7 @@ class EC2_Server
       end
     end
     @google_server['EC2_SSH_User_label'] = FXLabel.new(@frame6, "SSH/Win Admin User" )
-    @google_server['EC2_SSH_User_label'].tipText = "" 
+    @google_server['EC2_SSH_User_label'].tipText = "OPTIONAL: SSH User for SSH access to the server.\nFor Windows Server Remote Desktop user.\nDEFAULT: defaults to value specified in Environment tab." 
     @google_server['EC2_SSH_User'] = FXTextField.new(@frame6, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @google_server['EC2_SSH_User'].connect(SEL_COMMAND) do |sender, sel, data|
       if @ec2_main.launch.loaded == true
@@ -1483,7 +1418,7 @@ class EC2_Server
     end
     FXLabel.new(@frame6, "" )
     @google_server['Admin_Password_label'] = FXLabel.new(@frame6, "SSH/Win Admin Password" )
-    @google_server['Admin_Password_label'].tipText = ""
+    @google_server['Admin_Password_label'].tipText = "OPTIONAL: SSH User password or Windows Administrator user password for use with Remote Desktop."
     @google_server['Admin_Password'] = FXTextField.new(@frame6, 60, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_PASSWD)
     @google_server['Admin_Password'].connect(SEL_COMMAND) do |sender, sel, data|
       instance_id = @google_server['Instance_ID'].text
@@ -1529,7 +1464,7 @@ class EC2_Server
       dialog.execute
     end
     @google_server['Public_Addr_label'] = FXLabel.new(@frame6, "IP Addr" )
-    @google_server['Public_Addr_label'].tipText = ""
+    @google_server['Public_Addr_label'].tipText = "Public IP used as address for ssh."
     @google_server['Public_Addr'] = FXTextField.new(@frame6, 40, nil, 0, :opts => FRAME_SUNKEN)
     @google_server['Public_Addr'].connect(SEL_COMMAND) do  |sender, sel, data|
       instance_id = @google_server['Instance_ID'].text
