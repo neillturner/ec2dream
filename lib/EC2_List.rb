@@ -716,7 +716,7 @@ class EC2_List
     elsif type == "Test Kitchen"
       path = ".kitchen.yml"
       path = Pathname.new($ec2_main.settings.get("KITCHEN_YAML")).basename  if $ec2_main.settings.get("KITCHEN_YAML")!= ""
-      @title.text = "#{@type} - #{path}"            
+      @title.text = "#{@type} - #{path}"
     else
       @title.text = @type + "    "
     end
@@ -799,6 +799,7 @@ class EC2_List
           puts "CMD #{cmd}"
           response = eval(cmd)
           #puts "RESPONSE.BODY #{response.body}"
+          #puts "RESPONSE.STATUS #{response.status}"
           if @ec2_main.settings.cloudfoundry
             @data = response
           else

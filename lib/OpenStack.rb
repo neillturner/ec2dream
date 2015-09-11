@@ -27,12 +27,19 @@ class OpenStack
       begin
         case type
         when 'Image'
-          @conn[type] = Fog::Image.new({:provider => 'OpenStack', :openstack_auth_url => $ec2_main.settings.get('EC2_URL'), :openstack_api_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :openstack_username => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :openstack_tenant   => $ec2_main.settings.get("AMAZON_ACCOUNT_ID")})
+          puts "*** Image"
+          @conn[type] = Fog::Image.new({:connection_options => {:ssl_verify_peer => false}, :provider => 'OpenStack', :openstack_auth_url => $ec2_main.settings.get('EC2_URL'), :openstack_api_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :openstack_username => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :openstack_tenant   => $ec2_main.settings.get("AMAZON_ACCOUNT_ID")})
         when 'Volume'
-          @conn[type] = Fog::Volume.new({:provider => 'OpenStack', :openstack_auth_url => $ec2_main.settings.get('EC2_URL'), :openstack_api_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :openstack_username => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :openstack_tenant   => $ec2_main.settings.get("AMAZON_ACCOUNT_ID")})
+          puts "*** Volume"
+          @conn[type] = Fog::Volume.new({:connection_options => {:ssl_verify_peer => false}, :provider => 'OpenStack', :openstack_auth_url => $ec2_main.settings.get('EC2_URL'), :openstack_api_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :openstack_username => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :openstack_tenant   => $ec2_main.settings.get("AMAZON_ACCOUNT_ID")})
         when 'Compute'
-          @conn[type] = Fog::Compute.new({:provider => 'OpenStack', :openstack_auth_url => $ec2_main.settings.get('EC2_URL'), :openstack_api_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :openstack_username => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :openstack_tenant   => $ec2_main.settings.get("AMAZON_ACCOUNT_ID")})
+          puts "***Compute"
+          @conn[type] = Fog::Compute.new({:connection_options => {:ssl_verify_peer => false}, :provider => 'OpenStack', :openstack_auth_url => $ec2_main.settings.get('EC2_URL'), :openstack_api_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :openstack_username => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :openstack_tenant   => $ec2_main.settings.get("AMAZON_ACCOUNT_ID")})
+        when 'Orchestration'
+          puts "***Orchestration"
+          @conn[type] = Fog::Orchestration.new({:connection_options => {:ssl_verify_peer => false}, :provider => 'OpenStack', :openstack_auth_url => $ec2_main.settings.get('EC2_URL'), :openstack_api_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :openstack_username => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :openstack_tenant   => $ec2_main.settings.get("AMAZON_ACCOUNT_ID")})
         else
+          puts "***Nil"
           nil
         end
       rescue

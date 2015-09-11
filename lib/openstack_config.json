@@ -126,6 +126,58 @@
       "dialog_parm": ["","","","","","","","",""],
       "keys": ["imageId","imageLocation"]
     }
-   }
+   },
+    "Orchestration":{
+       "Templates":{
+          "request":"",
+          "name":"templates",
+          "response": "",
+          "response_code": 200,
+          "action": ["create configuration","delete configuration", "edit configuration, create or update stack"," cfndsl examples ","","validate","view stack events","view resources","edit"],
+          "icon": ["@create","@delete","@edit","@market_icon","@csv","@check","@events","@viewstack","@script_edit"],
+          "tooltip":[" New Configuration "," Delete Configuration ","Edit Configuration, Create or Update Stack"," cfndsl examples "," Csv Data "," Validate Template ","  View Stack Events  ","   View Stack Resources  ","   Edit Template  "],
+          "dialog":["CF_CreateDialog","CF_DeleteDialog","@stack_name = @curr_item;CF_EditDialog","browser('https://github.com/neillturner/cfndsl_examples')","","CF_ValidateDialog","@stack_name = @curr_item;load('Stack Events','CloudFormation')","@stack_name = @curr_item;load('Stack Resources','CloudFormation')","@stack_name = @curr_item;edit(@template_file)"],
+          "dialog_parm": ["","","","","","@template_file","@template_file","",""],
+          "keys": ["stack_name"]
+       },
+       "Stacks":{
+          "request":"list_stack_data",
+          "name":"stacks",
+          "response": "response.body['stacks']",
+          "response_code": 200,
+          "action": ["create configuration","delete stack", "get template","","","","view stack events","view resources",""],
+          "icon": ["@create","@delete","@edit","","@csv","","@events","@viewstack",""],
+          "tooltip":[" New Configuration "," Delete Stack ","Get Template",""," Csv Data ",""," View Stack Events  ","  View Stack Resources  ",""],
+          "dialog":["CF_CreateDialog","CF_StackDeleteDialog","CF_GetTemplateDialog","","","","@stack_name = @curr_item;load('Stack Events','CloudFormation')","@stack_name = @curr_item;load('Stack Resources','CloudFormation')",""],
+          "dialog_parm": ["","","","","","","","",""],
+          "keys": ["StackName","StackStatus"]
+       },
+       "Stack Events":{
+          "request":"describe_stack_events(@stack_name)",
+          "name":"stack_events",
+          "response": "response.body['StackEvents']",
+          "response_code": 200,
+          "action": ["","delete stack", "","","","","","",""],
+          "icon": ["","@delete","","","@csv","","","",""],
+          "tooltip":[""," Delete Stack ","",""," Csv Data ","","","",""],
+          "dialog":["","CF_StackDeleteDialog","","","","","","",""],
+          "dialog_parm": ["","","","","","","","",""],
+          "menu": true,
+          "keys": ["StackName","LogicalResourceId","ResourceType","Timestamp"]
+       },
+       "Stack Resources":{
+          "request":"describe_stack_resources({'StackName' => @stack_name})",
+          "name":"stack_resources",
+          "response": "response.body['StackResources']",
+          "response_code": 200,
+          "action": ["","delete stack", "","","","","","",""],
+          "icon": ["","@delete","","","@csv","","","",""],
+          "tooltip":[""," Delete Stack ","",""," Csv Data ","","","",""],
+          "dialog":["","CF_StackDeleteDialog","","","","","","",""],
+          "dialog_parm": ["","","","","","","","",""],
+          "menu": true,
+          "keys": ["StackName","LogicalResourceId","ResourceType","Timestamp"]
+       }
+    }
  }
 }

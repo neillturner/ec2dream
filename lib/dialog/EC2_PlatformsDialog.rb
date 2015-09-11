@@ -18,7 +18,7 @@ class EC2_PlatformsDialog < FXDialogBox
     @item_name[3] = "openstack_hp"
     @item_name[4] = "openstack_rackspace"
     @item_name[5] = "servers"
-#    @item_name[6] = "cloudstack"
+    @item_name[6] = "softlayer"
 #    @item_name[7] = "cloudfoundry"
 #    @item_name[8] = "eucalyptus"
     super(owner, "Select Platform", :opts => DECOR_ALL, :width => 400, :height => 200)

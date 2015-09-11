@@ -132,7 +132,7 @@ class EC2_EnvCreateDialog < FXDialogBox
     @google_project = FXTextField.new(frame8, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame8, "" )
     @google_zone_label = FXLabel.new(frame8, "Google Zone" )
-    @google_zone_label.tipText = "Google Compute Engine allows you to choose the region and zone where certain resources live. Zones are of the format <region>-<zone>" 
+    @google_zone_label.tipText = "Google Compute Engine allows you to choose the region and zone where certain resources live. Zones are of the format <region>-<zone>"
     @google_zone = FXTextField.new(frame8, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @google_zone_button = FXButton.new(frame8, "", :opts => BUTTON_TOOLBAR)
     @google_zone_button.icon = @magnifier
@@ -202,7 +202,7 @@ class EC2_EnvCreateDialog < FXDialogBox
     @openstack_url_label.tipText = "Your Cloud's The OpenStack Identity or Nova URL Endpoint."
     @openstack_url = FXTextField.new(frame3, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame3, "" )
-    @openstack_tenant_label = FXLabel.new(frame3, "Tenant ID" )
+    @openstack_tenant_label = FXLabel.new(frame3, "Project" )
     @openstack_tenant_label.tipText = "The initial implementation of OpenStack Compute had its own authentication system and used the term project.\nWhen authentication moved into the OpenStack Identity (keystone) project, it used the term tenant to refer to a group of users.\nBecause of this legacy, some of the OpenStack tools refer to projects and some refer to tenants."
     @openstack_tenant = FXTextField.new(frame3, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     if ENV['AMAZON_ACCESS_KEY_ID'] != nil and ENV['AMAZON_ACCESS_KEY_ID'] != ""
@@ -327,48 +327,31 @@ class EC2_EnvCreateDialog < FXDialogBox
       @rack_secret_access_key.text = ENV['AMAZON_SECRET_ACCESS_KEY']
     end
     @rack_url.text = "https://servers.api.rackspacecloud.com/v2"
-    
-    #
-    # cloudstack
-    #
-    #@cloudstacktab = FXTabItem.new(@tabbook, "&CloudStack", nil)
-    #@cloudstackframe = FXHorizontalFrame.new(@tabbook )
-    #frame6 = FXMatrix.new(@cloudstackframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
-    #cloudstack_env = textBox("Environment Name",frame6)
-    #@cloudstack_access_key = textBox("CloudStack API Key",frame6)
-    #FXLabel.new(frame6, "CloudStack Secret Key" )
-    #@cloudstack_secret_access_key = FXTextField.new(frame6, 60, nil, 0, :opts => TEXTFIELD_PASSWD|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
-    #FXLabel.new(frame6, "" )
-    #FXLabel.new(frame6, "CloudStack URL" )
-    #@cloudstack_url = FXTextField.new(frame6, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
-    #if ENV['AMAZON_ACCESS_KEY_ID'] != nil and ENV['AMAZON_ACCESS_KEY_ID'] != ""
-    #  @cloudstack_access_key.text = ENV['AMAZON_ACCESS_KEY_ID']
-    #end
-    #if ENV['AMAZON_SECRET_ACCESS_KEY'] != nil and ENV['AMAZON_SECRET_ACCESS_KEY'] != ""
-    #  @cloudstack_secret_access_key.text = ENV['AMAZON_SECRET_ACCESS_KEY']
-    #end
-    ##if ENV['AMAZON_SECRET_ACCESS_KEY'] != nil and ENV['AMAZON_SECRET_ACCESS_KEY'] != ""
-    ##     @openstack_secret_access_key.text = ENV['AMAZON_SECRET_ACCESS_KEY']
-    ##end
-    ##if ENV['EC2_URL'] != nil and ENV['EC2_URL'] != ""
-    ##    @cloudstack_url.text =  ENV['EC2_URL']
-    ##else
-    ## @cloudstack_url.text = "http://cloud-bridge-hostname:8090/bridge"  # cloudstack 4.0
-    #@cloudstack_url.text = "http://localhost:7080/awsapi"                # cloudstack 4.1
-    ##end
-    #FXLabel.new(frame6, "")
-    #FXLabel.new(frame6, "")
-    #FXLabel.new(frame6, "")
-    #FXLabel.new(frame6, "")
-    #FXLabel.new(frame6, "")
-    #FXLabel.new(frame6, "NOTE: Cloudstack 4.1 is supported by default. To change the version edit")
-    #FXLabel.new(frame6, "")
-    #FXLabel.new(frame6, "")
-    #FXLabel.new(frame6, "the file cloudstack.rb in the lib folder to set the correct AWS API Version")
-    #FXLabel.new(frame6, "")
-    #FXLabel.new(frame6, "")
-    #FXLabel.new(frame6, "")
 
+    #
+    # softlayer
+    #
+    @softlayertab = FXTabItem.new(@tabbook, "&softlayer", nil)
+    @softlayerframe = FXHorizontalFrame.new(@tabbook )
+    frame6 = FXMatrix.new(@softlayerframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
+    softlayer_env_label = FXLabel.new(frame6, "Environment Name" )
+    softlayer_env_label.tipText = "A unique name to identified this environment in EC2Dream"
+    softlayer_env = FXTextField.new(frame6, 60, nil, 0, :opts => FRAME_SUNKEN)
+    FXLabel.new(frame6, "" )
+    @softlayer_access_key_label = FXLabel.new(frame6, "Softlayer Username" )
+    @softlayer_access_key_label.tipText = "Your Softlayer account's username.\nUsed to access the Softlayer API."
+    @softlayer_access_key = FXTextField.new(frame6, 60, nil, 0, :opts => FRAME_SUNKEN)
+    FXLabel.new(frame6, "" )
+    @softlayer_secret_access_key_label = FXLabel.new(frame6, "Softlayer API Key" )
+    @softlayer_secret_access_key_label.tipText = "Your Softlayer account's API Key.\nUsed to access the Softlayer API."
+    @softlayer_secret_access_key = FXTextField.new(frame6, 60, nil, 0, :opts => TEXTFIELD_PASSWD|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+    FXLabel.new(frame6, "" )
+    if ENV['AMAZON_ACCESS_KEY_ID'] != nil and ENV['AMAZON_ACCESS_KEY_ID'] != ""
+      @softlayer_access_key.text = ENV['AMAZON_ACCESS_KEY_ID']
+    end
+    if ENV['AMAZON_SECRET_ACCESS_KEY'] != nil and ENV['AMAZON_SECRET_ACCESS_KEY'] != ""
+      @softlayer_secret_access_key.text = ENV['AMAZON_SECRET_ACCESS_KEY']
+    end
     #
     # cloudfoundry
     #
@@ -407,6 +390,7 @@ class EC2_EnvCreateDialog < FXDialogBox
       openstack_env.text = amazon_env.text
       hp_env.text = amazon_env.text
       rack_env.text = amazon_env.text
+      softlayer_env.text = amazon_env.text
       servers_env = amazon_env.text
       @new_env = amazon_env.text
       @ec2_platform = "amazon"
@@ -417,6 +401,7 @@ class EC2_EnvCreateDialog < FXDialogBox
       google_env.text = google_env.text
       openstack_env.text = google_env.text
       rack_env.text = google_env.text
+      softlayer_env.text = google_env.text
       servers_env = google_env.text
       @new_env = google_env.text
       @ec2_platform = "google"
@@ -428,7 +413,7 @@ class EC2_EnvCreateDialog < FXDialogBox
    #   openstack_env.text = euca_env.text
    #   hp_env.text = euca_env.text
    #   rack_env.text = euca_env.text
-   #   cloudstack_env.text = euca_env.text
+   #   softlayer_env.text = euca_env.text
    #   cloudfoundry_env = euca_env.text
    #   servers_env = euca_env.text
    #   @new_env = euca_env.text
@@ -440,6 +425,7 @@ class EC2_EnvCreateDialog < FXDialogBox
       google_env.text = openstack_env.text
       hp_env.text = openstack_env.text
       rack_env.text = openstack_env.text
+      softlayer_env.text = openstack_env.text
       servers_env = openstack_env.text
       @new_env = openstack_env.text
       @ec2_platform = "openstack"
@@ -450,6 +436,7 @@ class EC2_EnvCreateDialog < FXDialogBox
       google_env.text = hp_env.text
       openstack_env.text = hp_env.text
       rack_env.text = hp_env.text
+      softlayer_env.text = hp_env.text
       servers_env = hp_env.text
       @new_env = hp_env.text
       @ec2_platform = "openstack_hp"
@@ -460,23 +447,22 @@ class EC2_EnvCreateDialog < FXDialogBox
       google_env.text = rack_env.text
       hp_env.text = rack_env.text
       openstack_env.text = rack_env.text
+      softlayer_env.text = rack_env.text
       servers_env = rack_env.text
       @new_env = rack_env.text
       @ec2_platform = "openstack_rackspace"
     }
 
-    #cloudstack_env.connect(SEL_CHANGED) {
-    #  amazon_env.text = cloudstack_env.text
-    #  google_env.text = cloudstack_env.text
-    #  euca_env.text = cloudstack_env.text
-    #  hp_env.text = cloudstack_env.text
-    #  rack_env.text = cloudstack_env.text
-    #  openstack_env.text = cloudstack_env.text
-    #  cloudfoundry_env = cloudstack_env.text
-    #  servers_env = cloudstack_env.text
-    #  @new_env = cloudstack_env.text
-    #  @ec2_platform = "cloudstack"
-    #}
+    softlayer_env.connect(SEL_CHANGED) {
+      amazon_env.text = softlayer_env.text
+      google_env.text = softlayer_env.text
+      hp_env.text = softlayer_env.text
+      rack_env.text = softlayer_env.text
+      openstack_env.text = softlayer_env.text
+      servers_env = softlayer_env.text
+      @new_env = softlayer_env.text
+      @ec2_platform = "softlayer"
+    }
 
     #cloudfoundry_env.connect(SEL_CHANGED) {
     #  amazon_env.text = cloudfoundry_env.text
@@ -495,6 +481,7 @@ class EC2_EnvCreateDialog < FXDialogBox
       google_env.text = servers_env.text
       hp_env.text = servers_env.text
       rack_env.text = servers_env.text
+      softlayer_env.text = servers_env.text
       openstack_env.text = servers_env.text
       @new_env = servers_env.text
       @ec2_platform = "servers"
@@ -625,17 +612,14 @@ class EC2_EnvCreateDialog < FXDialogBox
         settings.put("EC2_URL",@rack_url.text)
       end
       settings.put('SSL_CERT_FILE',"ca-bundle.crt")
-   # elsif @ec2_platform == "cloudstack"
-   #   if @cloudstack_access_key.text != nil
-   #     settings.put("AMAZON_ACCESS_KEY_ID",@cloudstack_access_key.text)
-   #   end
-   #   if @cloudstack_secret_access_key.text != nil
-   #     settings.put("AMAZON_SECRET_ACCESS_KEY",@cloudstack_secret_access_key.text)
-   #   end
-   #   if @cloudstack_url.text != nil
-   #     settings.put("EC2_URL",@cloudstack_url.text)
-   #   end
-   #   settings.put('SSL_CERT_FILE',"ca-bundle.crt")
+    elsif @ec2_platform == "softlayer"
+      if @softlayer_access_key.text != nil
+        settings.put("AMAZON_ACCESS_KEY_ID",@softlayer_access_key.text)
+      end
+      if @softlayer_secret_access_key.text != nil
+        settings.put("AMAZON_SECRET_ACCESS_KEY",@softlayer_secret_access_key.text)
+      end
+      settings.put('SSL_CERT_FILE',"ca-bundle.crt")
    # elsif @ec2_platform == "cloudfoundry"
    #   if @cloudfoundry_access_key.text != nil
    #     settings.put("AMAZON_ACCESS_KEY_ID",@cloudfoundry_access_key.text)

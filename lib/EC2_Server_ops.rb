@@ -9,7 +9,6 @@ class EC2_Server
     ops_clear('Instance_ID')
     ENV['EC2_INSTANCE'] = ""
     ops_clear('Name')
-    ops_clear('Chef_Node')
     ops_clear('Security_Groups')
     ops_clear('Image_ID')
     ops_clear('State')
@@ -75,7 +74,6 @@ class EC2_Server
         return
       end
       @ops_server['Name'].text = r[:name]
-      @ops_server['Chef_Node'].text = ops_get_chef_node
       @ops_server['Image_ID'].text = r[:aws_image_id]['id']
       @ops_server['State'].text = r[:aws_state]
       @server_status = @ops_server['State'].text
@@ -210,18 +208,6 @@ class EC2_Server
     end
   end
 
-  def ops_get_chef_node
-    instance_id = @ops_server['Instance_ID'].text
-    if @ec2_chef_node[instance_id] != nil and @ec2_chef_node[instance_id] != ""
-      cn =  @ec2_chef_node[instance_id]
-    else
-      cn = @ec2_main.launch.get('Chef_Node')
-      if cn == nil or cn == ""
-        cn = "default-server"
-      end
-    end
-    return cn
-  end
 end
 
 

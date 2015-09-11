@@ -161,7 +161,7 @@ class EC2_Settings
     FXLabel.new(frame1, "  PuTTY, ssh and SCP Settings", nil, LAYOUT_CENTER_X)
     FXLabel.new(frame1, "" )
     @settings['EC2_SSH_USER_LABEL'] = FXLabel.new(frame1, "SSH_USER" )
-    @settings['EC2_SSH_USER_LABEL'].tipText = "OPTIONAL: The default user to use when accessing a server with SSH" 
+    @settings['EC2_SSH_USER_LABEL'].tipText = "OPTIONAL: The default user to use when accessing a server with SSH"
     @settings['EC2_SSH_USER'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame1, "" )
     @settings['EC2_SSH_PRIVATE_KEY_LABEL'] = FXLabel.new(frame1, "SSH_PRIVATE_KEY" )
@@ -424,30 +424,30 @@ class EC2_Settings
       ENV['SSL_CERT_FILE'] = ssl_cert
       if @settings['EC2_PLATFORM'].text=="google"
         @settings['AMAZON_ACCESS_KEY_ID_LABEL'].text="CLIENT_EMAIL"
-        @settings['AMAZON_ACCESS_KEY_ID_LABEL'].tipText="Your google email id"
+        @settings['AMAZON_ACCESS_KEY_ID_LABEL'].tipText="GOOGLE: Your user email id"
         @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].text="KEY_LOCATION"
-        @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].tipText="the location of your access key"
+        @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].tipText="GOOGLE: the location of your access key"
         @settings['AMAZON_ACCOUNT_ID_LABEL'].text=""
         @settings['AMAZON_ACCOUNT_ID_LABEL'].tipText=""
         @settings['EC2_URL_LABEL'].text="PROJECT"
-        @settings['EC2_URL_LABEL'].tipText="Your Google Project"
+        @settings['EC2_URL_LABEL'].tipText="GOOGLE: Your Google Project"
         @settings['AVAILABILITY_ZONE_LABEL'].text = "ZONE"
-        @settings['AVAILABILITY_ZONE_LABEL'].tipText = "Google zone to access. it is <region>-<zone> format."
+        @settings['AVAILABILITY_ZONE_LABEL'].tipText = "GOGGLE: zone to access. it is <region>-<zone> format."
         @settings['AMAZON_NICKNAME_TAG_LABEL'].text=""
         @settings['AMAZON_NICKNAME_TAG_LABEL'].tipText=""
       else
         @settings['AMAZON_ACCESS_KEY_ID_LABEL'].text="ACCESS_KEY"
-        @settings['AMAZON_ACCESS_KEY_ID_LABEL'].tipText = "Your cloud account's access key id.\nUsed to access the cloud providers API."
+        @settings['AMAZON_ACCESS_KEY_ID_LABEL'].tipText = "AWS: Your AWS account's access key id.\nOPENSTACK: Openstack User Name."
         @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].text="SECRET_ACCESS_KEY"
-        @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].tipText = "Your cloud account's secret access key id.\nUsed to access the cloud providers API."
+        @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].tipText = "AWS: Your AWS account's secret access key id.\nOPENSTACK: Openstack Password."
         @settings['AMAZON_ACCOUNT_ID_LABEL'].text="ACCOUNT_ID"
-        @settings['AMAZON_ACCOUNT_ID_LABEL'].tipText = "Your Account ID of your cloud provider.\nOPTIONAL for AWS.\nFor AWS this is your account ID 12-digit number, such as 123456789012."
+        @settings['AMAZON_ACCOUNT_ID_LABEL'].tipText = "AWS: OPTIONAL Your AWS 12 digit Account ID.\nOPENSTACK: Openstack Project ID."
         @settings['EC2_URL_LABEL'].text="URL"
-        @settings['EC2_URL_LABEL'].tipText = "The Endpoint address for your cloud provider region."
+        @settings['EC2_URL_LABEL'].tipText = "AWS@ The Endpoint address for your AWS region.\nOPENSTACK: the URL of the Openstack Identity Server. Should end in /tokens"
         @settings['AVAILABILITY_ZONE_LABEL'].text = "AVAILABILITY_ZONE"
-        @settings['AVAILABILITY_ZONE_LABEL'].tipText = "The availability zone of your cloud provider.\nOPTIONAL for AWS: Used by default when creating servers."
+        @settings['AVAILABILITY_ZONE_LABEL'].tipText = "AWS: OPTIONAL: The AWS availability used by default when creating servers."
         @settings['AMAZON_NICKNAME_TAG_LABEL'].text="NICKNAME TAG"
-        @settings['AMAZON_NICKNAME_TAG_LABEL'].tipText = "OPTIONAL: The AWS Tag using to identifer the name of a resource.\nDEFAULTS to Name."
+        @settings['AMAZON_NICKNAME_TAG_LABEL'].tipText = "AWS: OPTIONAL: The AWS Tag using to identifer the name of a resource. DEFAULTS to Name."
       end
     end
     @ec2_main.app.forceRefresh

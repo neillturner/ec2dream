@@ -1,0 +1,212 @@
+{
+ "Cloud":{
+   "Compute":{
+     "Local Servers":{
+          "request":"",
+          "name":"local_server",
+          "response": "",
+          "response_code": 200,
+          "action": ["create","", "edit","","","","","",""],
+          "icon": ["@create","","@edit","","@csv","","","",""],
+          "tooltip":[" Create Config ",""," Edit Config ",""," Csv Data ","","","",""],
+          "dialog":["LOC_CreateDialog","","$ec2_main.server.loc_load(@curr_item);$ec2_main.tabBook.setCurrent(1)","","","","","",""],
+          "dialog_parm": ["","","","","","","","",""],
+          "keys": ["server"]
+    },
+    "VMs":{
+      "request":"get_vms",
+      "name":"instance",
+      "response": "response.body",
+      "response_code": 200,
+      "action": ["","", "","","","","","",""],
+      "icon": ["","","","","@csv","","","",""],
+      "tooltip":["","","",""," csv data ","","","",""],
+      "dialog":["","","","","","","","",""],
+      "dialog_parm": ["","","","","","","","",""],
+      "keys": []
+    },
+    "VM Tags":{
+      "request":"get_vm_tags",
+      "name":"vm_tags",
+      "response": "response.body",
+      "response_code": 200,
+      "action": ["","", "","","","","","",""],
+      "icon": ["","","","","@csv","","","",""],
+      "tooltip":["","","",""," csv data ","","","",""],
+      "dialog":["","","","","","","","",""],
+      "dialog_parm": ["","","","","","","","",""],
+      "keys": []
+    },
+    "Virtual Guest Users":{
+      "request":"get_virtual_guest_users",
+      "name":"virtual_guest_users",
+      "response": "response.body",
+      "response_code": 200,
+      "action": ["","", "","","","","","",""],
+      "icon": ["","","","","@csv","","","",""],
+      "tooltip":["","","",""," csv data ","","","",""],
+      "dialog":["","","","","","","","",""],
+      "dialog_parm": ["","","","","","","","",""],
+      "keys": []
+    },
+    "Bare Metal Servers":{
+      "request":"get_bare_metal_servers",
+      "name":"bare_metal_servers",
+      "response": "response.body",
+      "response_code": 200,
+      "action": ["","", "","","","","","",""],
+      "icon": ["","","","","@csv","","","",""],
+      "tooltip":["","","",""," csv data ","","","",""],
+      "dialog":["","","","","","","","",""],
+      "dialog_parm": ["","","","","","","","",""],
+      "keys": []
+    },
+    "Bare Metal Tags":{
+      "request":"get_bare_metal_tags",
+      "name":"bare_metal_tags",
+      "response": "response.body",
+      "response_code": 200,
+      "action": ["","", "","","","","","",""],
+      "icon": ["","","","","@csv","","","",""],
+      "tooltip":["","","",""," csv data ","","","",""],
+      "dialog":["","","","","","","","",""],
+      "dialog_parm": ["","","","","","","","",""],
+      "keys": []
+    },
+    "Bare Metal Users":{
+      "request":"get_bare_metal_users",
+      "name":"bare_metal_users",
+      "response": "response.body",
+      "response_code": 200,
+      "action": ["","", "","","","","","",""],
+      "icon": ["","","","","@csv","","","",""],
+      "tooltip":["","","",""," csv data ","","","",""],
+      "dialog":["","","","","","","","",""],
+      "dialog_parm": ["","","","","","","","",""],
+      "keys": []
+    },
+    "Tags":{
+      "request":"describe_tags",
+      "name":"tags",
+      "response": "response.body",
+      "response_code": 200,
+      "action": ["","", "","","","","","",""],
+      "icon": ["","","","","@csv","","","",""],
+      "tooltip":["","","",""," csv data ","","","",""],
+      "dialog":["","","","","","","","",""],
+      "dialog_parm": ["","","","","","","","",""],
+      "keys": []
+    },
+    "Key Pairs":{
+      "request":"get_key_pairs",
+      "name":"key_pairs",
+      "response": "response.body",
+      "response_code": 200,
+      "action": ["","", "","","","","","",""],
+      "icon": ["","","","","@csv","","","",""],
+      "tooltip":["","","",""," csv data ","","","",""],
+      "dialog":["","","","","","","","",""],
+      "dialog_parm": ["","","","","","","","",""],
+      "keys": ["id","label"]
+    },
+      "Test Kitchen":{
+          "request":"",
+          "name":"test_kitchen",
+          "response": "",
+          "response_code": 200,
+          "action": ["config","logs","select","edit","","","","",""],
+          "icon": ["@edit","@script","@server","@script_edit","@csv","","","",""],
+          "tooltip":["Configure Test Kitchen Path","View Logs"," Select Server ","Edit kitchen.yml"," Csv Data ","","","",""],
+          "dialog":["KIT_PathCreateDialog","KIT_LogSelectDialog","$ec2_main.kitchen.kit_load(@curr_item,@curr_driver,@curr_provisioner,@curr_last_action,@curr_verifier,@curr_transport);$ec2_main.tabBook.setCurrent(4)","edit(@ec2_main.settings.get('TEST_KITCHEN_PATH')+'/.kitchen.yml')","","","","",""],
+          "dialog_parm": ["","","","","","","","",""],
+          "keys": ["Instance","Last-Action"]
+    },
+     "Vagrant":{
+          "request":"",
+          "name":"vagrant",
+          "response": "",
+          "response_code": 200,
+          "action": ["create","delete", "edit","vagrant up","","vagrant destroy","","",""],
+          "icon": ["@create","@delete","@edit","@rocket","@csv","@disconnect","","",""],
+          "tooltip":[" Create Vagrantfile ","  Delete Vagrantfile "," Edit Vagrantfile "," vagrant up "," Csv Data "," vagrant destroy ","","",""],
+          "dialog":["VAG_CreateDialog","VAG_DeleteDialog","edit(@vagrant_file)","VAG_UpDialog","","VAG_DestroyDialog","","",""],
+          "dialog_parm": ["","","","","","","","",""],
+          "keys": []
+    }
+   },
+   "Network":{
+     "VLANs":{
+          "request":"list_networks",
+          "name":"vlans",
+          "response": "response.body",
+          "response_code": 200,
+          "action": ["","", "","","","","","",""],
+          "icon": ["","","","","@csv","","","",""],
+          "tooltip":["","","",""," Csv Data ","","","",""],
+          "dialog":["","","","","","","","",""],
+          "dialog_parm": ["","","","","","","","",""],
+          "keys": ["id"]
+      },
+     "Subnets":{
+          "request":"list_subnets",
+          "name":"vlans",
+          "response": "response.body",
+          "response_code": 200,
+          "action": ["","", "","","","","","",""],
+          "icon": ["","","","","@csv","","","",""],
+          "tooltip":["","","",""," Csv Data ","","","",""],
+          "dialog":["","","","","","","","",""],
+          "dialog_parm": ["","","","","","","","",""],
+          "keys": ["id"]
+      },
+     "IP Addresses":{
+          "request":"get_ip_addresses",
+          "name":"ip_addresses",
+          "response": "response.body",
+          "response_code": 200,
+          "action": ["","", "","","","","","",""],
+          "icon": ["","","","","@csv","","","",""],
+          "tooltip":["","","",""," Csv Data ","","","",""],
+          "dialog":["","","","","","","","",""],
+          "dialog_parm": ["","","","","","","","",""],
+          "keys": []
+      },
+     "Global IP Records":{
+          "request":"get_global_ip_records",
+          "name":"global_ip_records",
+          "response": "response.body",
+          "response_code": 200,
+          "action": ["","", "","","","","","",""],
+          "icon": ["","","","","@csv","","","",""],
+          "tooltip":["","","",""," Csv Data ","","","",""],
+          "dialog":["","","","","","","","",""],
+          "dialog_parm": ["","","","","","","","",""],
+          "keys": []
+      },
+     "Datacenters":{
+          "request":"get_datacenters",
+          "name":"datacenters",
+          "response": "response.body",
+          "response_code": 200,
+          "action": ["","", "","","","","","",""],
+          "icon": ["","","","","@csv","","","",""],
+          "tooltip":["","","",""," Csv Data ","","","",""],
+          "dialog":["","","","","","","","",""],
+          "dialog_parm": ["","","","","","","","",""],
+          "keys": []
+      },
+     "Maintenance Windows":{
+          "request":"get_maintenance_windows",
+          "name":"maintenance_windows",
+          "response": "response.body",
+          "response_code": 200,
+          "action": ["","", "","","","","","",""],
+          "icon": ["","","","","@csv","","","",""],
+          "tooltip":["","","",""," Csv Data ","","","",""],
+          "dialog":["","","","","","","","",""],
+          "dialog_parm": ["","","","","","","","",""],
+          "keys": []
+      }
+    }
+ }
+}

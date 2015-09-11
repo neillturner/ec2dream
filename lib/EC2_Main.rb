@@ -23,6 +23,7 @@ require 'Google_compute'
 require 'Hp'
 require 'Rackspace'
 require 'OpenStack'
+require 'Softlayer'
 require 'Eucalyptus'
 require 'CloudStack'
 require 'Cloud_Foundry'
@@ -350,6 +351,12 @@ class EC2_Main < FXMainWindow
         else
           @OpenStack = OpenStack.new
         end
+      when "softlayer"
+        if @Softlayer != nil
+          @Softlayer
+        else
+          @Softlayer = Softlayer.new
+        end
       when "eucalyptus"
         if @Eucalyptus != nil
           @Eucalyptus
@@ -383,6 +390,7 @@ class EC2_Main < FXMainWindow
       @Hp = nil
       @Rackspace = nil
       @OpenStack = nil
+      @Softlayer = nil
       @Eucalyptus = nil
       @CloudStack = nil
       @Cloud_Foundry = nil
