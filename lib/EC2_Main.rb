@@ -8,7 +8,8 @@ require 'resolv'
 require 'EC2_Settings'
 require 'EC2_Server'
 require 'EC2_SecGrp'
-require 'EC2_Launch'
+#require 'EC2_Launch'
+require 'EC2_Launch_profile'
 require 'EC2_Environment'
 require 'EC2_List'
 require 'EC2_Kitchen'
@@ -24,9 +25,9 @@ require 'Hp'
 require 'Rackspace'
 require 'OpenStack'
 require 'Softlayer'
-require 'Eucalyptus'
-require 'CloudStack'
-require 'Cloud_Foundry'
+#require 'Eucalyptus'
+#require 'CloudStack'
+#require 'Cloud_Foundry'
 require 'Servers'
 require 'EC2_version'
 
@@ -90,7 +91,8 @@ class EC2_Main < FXMainWindow
       @server = EC2_Server.new(self)
 
       # Launch panel
-      @launch = EC2_Launch.new(self)
+      #  @launch = EC2_Launch.new(self)
+      @launch = EC2_Launch_profile.new(self, app)
 
       # SecGrp panel
       @secgrp = EC2_SecGrp.new(self)
@@ -151,10 +153,10 @@ class EC2_Main < FXMainWindow
     def tree_top_level(item)
       if item.text == "Environments"
         puts "environment"
-        @tabBook.setCurrent(5)
+        @tabBook.setCurrent(4)
       elsif item.text == "Env - #{@environment.env}"
         puts "environment"
-        @tabBook.setCurrent(5)
+        @tabBook.setCurrent(4)
       end
     end
 
@@ -166,11 +168,11 @@ class EC2_Main < FXMainWindow
         when "Refresh"
           puts "refresh environment"
           treeCache.refresh()
-        when "Launch"
-          puts "launch"
-          @launch.clear_panel
-          @tabBook.setCurrent(2)
-        when "Servers","Apps"
+#        when "Launch"
+#          puts "launch"
+#          @launch.clear_panel
+#          @tabBook.setCurrent(2)
+        when "Servers"    #,"Apps"
           puts "#{item.text}"
           @tabBook.setCurrent(0)
           @list.load(item.text)
@@ -206,31 +208,31 @@ class EC2_Main < FXMainWindow
       elsif ((item.parent).text).start_with? "vpc-"
         process_server(item,(item.parent).text)
       else
-        case (item.parent).text
-        when "Apps"
-          sa = (item.text).split"/"
-          g = ""
-          if sa.size>1
-            g = sa[0]
-            if g != nil and g != ""
-              @launch.load(g)
-              @server.load(item.text)
-              @tabBook.setCurrent(1)
-            end
-          else
-            @launch.load(item.text)
-            @server.clear_panel
-            @tabBook.setCurrent(2)
-          end
-        when "Launch"
-          puts "Launch #{item.text} "
-          @launch.load(item.text)
-          @tabBook.setCurrent(2)
-        else
-          puts "second level menu #{item.text} #{(item.parent).text}"
-          @tabBook.setCurrent(0)
-          @list.load(item.text,(item.parent).text)
-        end
+        #case (item.parent).text
+        #when "Apps"
+        #  sa = (item.text).split"/"
+        #  g = ""
+        #  if sa.size>1
+        #    g = sa[0]
+        #    if g != nil and g != ""
+        #      @launch.load(g)
+        #      @server.load(item.text)
+        #      @tabBook.setCurrent(1)
+        #    end
+        #  else
+        #    @launch.load(item.text)
+        #    @server.clear_panel
+        #    @tabBook.setCurrent(2)
+        #  end
+        #when "Launch"
+        #  puts "Launch #{item.text} "
+        #  @launch.load(item.text)
+        #  @tabBook.setCurrent(2)
+        #else
+        puts "second level menu #{item.text} #{(item.parent).text}"
+        @tabBook.setCurrent(0)
+        @list.load(item.text,(item.parent).text)
+        #end
       end
     end
 
@@ -261,7 +263,7 @@ class EC2_Main < FXMainWindow
         @launch.clear_panel
         # comment out for openstack code problem
         @secgrp.load(item.text,vpc)
-        @tabBook.setCurrent(3)
+        @tabBook.setCurrent(2)
       end
     end
 
@@ -357,24 +359,24 @@ class EC2_Main < FXMainWindow
         else
           @Softlayer = Softlayer.new
         end
-      when "eucalyptus"
-        if @Eucalyptus != nil
-          @Eucalyptus
-        else
-          @Eucalyptus = Eucalyptus.new
-        end
-      when "cloudstack"
-        if @CloudStack != nil
-          @CloudStack
-        else
-          @CloudStack = CloudStack.new
-        end
-      when "cloudfoundry"
-        if @Cloud_Foundry != nil
-          @Cloud_Foundry
-        else
-          @Cloud_Foundry = Cloud_Foundry.new
-        end
+ #     when "eucalyptus"
+ #       if @Eucalyptus != nil
+ #         @Eucalyptus
+ #       else
+ #         @Eucalyptus = Eucalyptus.new
+ #       end
+ #     when "cloudstack"
+ #       if @CloudStack != nil
+ #         @CloudStack
+ #       else
+ #         @CloudStack = CloudStack.new
+ #       end
+ #     when "cloudfoundry"
+ #       if @Cloud_Foundry != nil
+ #         @Cloud_Foundry
+ #       else
+ #         @Cloud_Foundry = Cloud_Foundry.new
+ #       end
       when "servers"
         if @Servers != nil
           @Servers
@@ -391,10 +393,10 @@ class EC2_Main < FXMainWindow
       @Rackspace = nil
       @OpenStack = nil
       @Softlayer = nil
-      @Eucalyptus = nil
-      @CloudStack = nil
-      @Cloud_Foundry = nil
-      @Servers = nil
+  #    @Eucalyptus = nil
+  #    @CloudStack = nil
+  #    @Cloud_Foundry = nil
+  #    @Servers = nil
     end
 
     def app

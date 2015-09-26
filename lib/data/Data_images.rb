@@ -98,7 +98,7 @@ class Data_images
           end
         end
       else
-        if executable == "all" or @ec2_main.settings.openstack and !@ec2_main.settings.google
+        if executable == "all" or @ec2_main.settings.openstack and !@ec2_main.settings.google and !@ec2_main.settings.softlayer
           status = @ec2_main.imageCache.status
           if status == "loading"
             error_message("Public Images","Public Images currently are loading")
@@ -216,6 +216,11 @@ class Data_images
           x.each do |y|
             data = hash_ops_image(y)
           end
+        elsif @ec2_main.settings.softlayer
+          x = conn.images.all
+          x.each do |y|
+            data = hash_softlayer_image(y)
+          end
         elsif @ec2_main.settings.google
           data = google_self()
         elsif ((conn.class).to_s).start_with? "Fog::Compute::AWS"
@@ -260,6 +265,20 @@ class Data_images
             x = conn.images.all
             x.each do |y|
               data.push(hash_ops_image(y))
+            end
+          end
+        elsif @ec2_main.settings.softlayer
+          if conn != nil
+            if owner == 'self'
+              x = conn.images.private
+              x.each do |y|
+                data.push(hash_softlayer_image(y))
+              end
+            else
+              x = conn.images.all
+              x.each do |y|
+                data.push(hash_softlayer_image(y))
+              end
             end
           end
         elsif @ec2_main.settings.google
@@ -311,6 +330,20 @@ class Data_images
               x = conn.images.all
               x.each do |y|
                 data.push(hash_ops_image(y))
+              end
+            end
+          end
+        elsif @ec2_main.settings.softlayer
+          if conn != nil
+            if executable == "all"
+              x = conn.images.all
+              x.each do |y|
+                data.push(hash_softlayer_image(y))
+              end
+            else
+               x = conn.images.private
+               x.each do |y|
+                 data.push(hash_softlayer_image(y))
               end
             end
           end
@@ -614,6 +647,19 @@ class Data_images
     r['architecture'] = type
     r['rootDeviceType'] =  r['sourceType']
     r['imageLocation'] =  r['name']
+    return r
+  end
+
+  def hash_softlayer_image(y,type="")
+    r = {}
+    r['id'] = y.id
+    r['name'] =  y.name
+    r['parent_id'] =  y.parent_id
+    r['public_flag'] =  y.public_flag
+    r['status_id'] =  y.status_id
+    r['transaction_id'] =  y.transaction_id
+    r['user_record_id'] =  y.user_record_id
+    r['summary'] =  y.summary
     return r
   end
 

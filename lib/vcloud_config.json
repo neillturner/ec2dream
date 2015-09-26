@@ -1,7 +1,6 @@
 {
  "Cloud":{
    "Compute":{
-    "Launch": {},
     "Test Kitchen":{
           "request":"",
           "name":"test_kitchen",
@@ -10,7 +9,7 @@
           "action": ["config","logs","select","edit","","","","",""],
           "icon": ["@edit","@script","@server","@script_edit","@csv","","","",""],
           "tooltip":["Configure Test Kitchen Path","View Logs"," Select Server ","Edit kitchen.yml"," Csv Data ","","","",""],
-          "dialog":["KIT_PathCreateDialog","KIT_LogSelectDialog","$ec2_main.kitchen.kit_load(@curr_item,@curr_driver,@curr_provisioner,@curr_last_action,@curr_verifier,@curr_transport);$ec2_main.tabBook.setCurrent(4)","edit(@ec2_main.settings.get('TEST_KITCHEN_PATH')+'/.kitchen.yml')","","","","",""],
+          "dialog":["KIT_PathCreateDialog","KIT_LogSelectDialog","$ec2_main.kitchen.kit_load(@curr_item,@curr_driver,@curr_provisioner,@curr_last_action,@curr_verifier,@curr_transport);$ec2_main.tabBook.setCurrent(3)","edit(@ec2_main.settings.get('TEST_KITCHEN_PATH')+'/.kitchen.yml')","","","","",""],
           "dialog_parm": ["","","","","","","","",""],
           "keys": ["Instance","Last-Action"]
     },
@@ -46,7 +45,7 @@
           "action": ["config","logs","select","edit","","","","",""],
           "icon": ["@edit","@script","@server","@script_edit","@csv","","","",""],
           "tooltip":["Configure Test Kitchen Path","View Logs"," Select Server ","Edit kitchen.yml"," Csv Data ","","","",""],
-          "dialog":["KIT_PathCreateDialog","KIT_LogSelectDialog","$ec2_main.kitchen.kit_load(@curr_item,@curr_driver,@curr_provisioner,@curr_last_action);$ec2_main.tabBook.setCurrent(4)","edit(@ec2_main.settings.get('TEST_KITCHEN_PATH')+'/.kitchen.yml')","","","","",""],
+          "dialog":["KIT_PathCreateDialog","KIT_LogSelectDialog","$ec2_main.kitchen.kit_load(@curr_item,@curr_driver,@curr_provisioner,@curr_last_action);$ec2_main.tabBook.setCurrent(3)","edit(@ec2_main.settings.get('TEST_KITCHEN_PATH')+'/.kitchen.yml')","","","","",""],
           "dialog_parm": ["","","","","","","","",""],
           "keys": ["name","href"]
     },
@@ -70,7 +69,7 @@
       "action": ["create","edit", "",""," csv data ","","","",""],
       "icon": ["@create", "@edit", "","","@csv","","","",""],
       "tooltip":[" Create Security Group "," Edit Security Group ", "","","csv data","","","",""],
-      "dialog":["EC2_SecGrp_CreateDialog","$ec2_main.secgrp.load(@curr_item);$ec2_main.tabBook.setCurrent(3)", "","","","","","",""],
+      "dialog":["EC2_SecGrp_CreateDialog","$ec2_main.secgrp.load(@curr_item);$ec2_main.tabBook.setCurrent(2)", "","","","","","",""],
       "dialog_parm": ["","", "","","","","","",""],
       "keys": ["name","href"]
     },

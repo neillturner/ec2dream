@@ -47,8 +47,8 @@ class EC2_Launch
     @add.create
     @cross = @ec2_main.makeIcon("cross.png")
     @cross.create
-    tab = FXTabItem.new(@ec2_main.tabBook, " Launch ")
-    page1 = FXVerticalFrame.new(@ec2_main.tabBook, LAYOUT_FILL, :padding => 0)
+ #   tab = FXTabItem.new(@ec2_main.tabBook, " Launch ")
+    page1 = FXVerticalFrame.new(@ec2_main, LAYOUT_FILL, :padding => 0) # @ec2_main.tabBook
     #
     # buttons frame
     #
@@ -58,20 +58,20 @@ class EC2_Launch
     @refresh_button.icon = @arrow_refresh
     @refresh_button.tipText = "Refresh Environment"
     @refresh_button.connect(SEL_COMMAND) do |sender, sel, data|
-      if @type == "cfy"
-        dialog = CFY_LaunchDialog.new(@ec2_main)
-        dialog.execute
-        selected = dialog.selected
-        if selected != nil and selected != ""
-          if selected == "Create New Launch"
-            clear_cfy_panel
-          else
-            load_cfy(selected)
-          end
-        end
-      else
+ #     if @type == "cfy"
+ #       dialog = CFY_LaunchDialog.new(@ec2_main)
+ #       dialog.execute
+ #       selected = dialog.selected
+ #       if selected != nil and selected != ""
+ #         if selected == "Create New Launch"
+ #           clear_cfy_panel
+ #         else
+ #           load_cfy(selected)
+ #         end
+ #       end
+ #     else
         @ec2_main.treeCache.refresh
-      end
+ #     end
     end
     @refresh_button.connect(SEL_UPDATE) do |sender, sel, data|
       if @type == "cfy"

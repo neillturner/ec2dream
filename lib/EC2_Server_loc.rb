@@ -13,6 +13,7 @@ class EC2_Server
     @frame4.hide()
     @frame6.hide()
     @frame5.show()
+    @frame7.hide()
     @page1.width=300
     r = loc_get_local_server(server_name)
     if r['server'] != nil and r['server'] != ""

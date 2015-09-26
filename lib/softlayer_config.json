@@ -1,6 +1,18 @@
 {
  "Cloud":{
    "Compute":{
+      "Test Kitchen":{
+          "request":"",
+          "name":"test_kitchen",
+          "response": "",
+          "response_code": 200,
+          "action": ["config","logs","select","edit","","","","",""],
+          "icon": ["@edit","@script","@server","@script_edit","@csv","","","",""],
+          "tooltip":["Configure Test Kitchen Path","View Logs"," Select Server ","Edit kitchen.yml"," Csv Data ","","","",""],
+          "dialog":["KIT_PathCreateDialog","KIT_LogSelectDialog","$ec2_main.kitchen.kit_load(@curr_item,@curr_driver,@curr_provisioner,@curr_last_action,@curr_verifier,@curr_transport);$ec2_main.tabBook.setCurrent(3)","edit(@ec2_main.settings.get('TEST_KITCHEN_PATH')+'/.kitchen.yml')","","","","",""],
+          "dialog_parm": ["","","","","","","","",""],
+          "keys": ["Instance","Last-Action"]
+    },
      "Local Servers":{
           "request":"",
           "name":"local_server",
@@ -18,12 +30,12 @@
       "name":"instance",
       "response": "response.body",
       "response_code": 200,
-      "action": ["","", "","","","","","",""],
-      "icon": ["","","","","@csv","","","",""],
-      "tooltip":["","","",""," csv data ","","","",""],
-      "dialog":["","","","","","","","",""],
+      "action": ["view","", "","","","","","",""],
+      "icon": ["@view","","","","@csv","","","",""],
+      "tooltip":[" View Server ","","",""," csv data ","","","",""],
+      "dialog":["$ec2_main.server.load(@curr_item);$ec2_main.tabBook.setCurrent(1)","","","","","","","",""],
       "dialog_parm": ["","","","","","","","",""],
-      "keys": []
+      "keys": ["id","hostname","primaryIpAddress","primaryBackendIpAddress"]
     },
     "VM Tags":{
       "request":"get_vm_tags",
@@ -85,6 +97,31 @@
       "dialog_parm": ["","","","","","","","",""],
       "keys": []
     },
+    "Images":{
+      "request":"images.private",
+      "name":"images",
+      "response": "response.body",
+      "response_code": 200,
+      "action": ["public images","", "","","","","","",""],
+      "icon": ["@view","","","","@csv","","","",""],
+      "tooltip":["  Public Images  ","","",""," csv data ","","","",""],
+      "dialog":["load('Public Images','Compute')","","","","","","","",""],
+      "dialog_parm": ["","","","","","","","",""],
+      "keys": ["name","id"]
+    },
+    "Public Images":{
+      "request":"images.all",
+      "name":"images",
+      "response": "response.body",
+      "response_code": 200,
+      "action": ["","", "","","","","","",""],
+      "icon": ["","","","","@csv","","","",""],
+      "tooltip":["","","",""," csv data ","","","",""],
+      "dialog":["","","","","","","","",""],
+      "dialog_parm": ["","","","","","","","",""],
+      "menu": false,
+      "keys": ["name","id"]
+    },
     "Tags":{
       "request":"describe_tags",
       "name":"tags",
@@ -108,18 +145,6 @@
       "dialog":["","","","","","","","",""],
       "dialog_parm": ["","","","","","","","",""],
       "keys": ["id","label"]
-    },
-      "Test Kitchen":{
-          "request":"",
-          "name":"test_kitchen",
-          "response": "",
-          "response_code": 200,
-          "action": ["config","logs","select","edit","","","","",""],
-          "icon": ["@edit","@script","@server","@script_edit","@csv","","","",""],
-          "tooltip":["Configure Test Kitchen Path","View Logs"," Select Server ","Edit kitchen.yml"," Csv Data ","","","",""],
-          "dialog":["KIT_PathCreateDialog","KIT_LogSelectDialog","$ec2_main.kitchen.kit_load(@curr_item,@curr_driver,@curr_provisioner,@curr_last_action,@curr_verifier,@curr_transport);$ec2_main.tabBook.setCurrent(4)","edit(@ec2_main.settings.get('TEST_KITCHEN_PATH')+'/.kitchen.yml')","","","","",""],
-          "dialog_parm": ["","","","","","","","",""],
-          "keys": ["Instance","Last-Action"]
     },
      "Vagrant":{
           "request":"",

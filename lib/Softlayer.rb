@@ -27,19 +27,14 @@ class Softlayer
       begin
         case type
         when 'Image'
-          puts "*** Image"
-          @conn[type] = Fog::Image.new({:connection_options => {:ssl_verify_peer => false}, :provider => 'softlayer', :softlayer_api_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :softlayer_username => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID')})
+          @conn[type] = Fog::Image.new({:provider => 'softlayer', :softlayer_api_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :softlayer_username => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID')})
         when 'Volume'
-          puts "*** Volume"
-          @conn[type] = Fog::Volume.new({:connection_options => {:ssl_verify_peer => false}, :provider => 'softlayer', :softlayer_api_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :softlayer_username => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID')})
+          @conn[type] = Fog::Volume.new({:provider => 'softlayer', :softlayer_api_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :softlayer_username => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID')})
         when 'Compute'
-          puts "***Compute"
-          @conn[type] = Fog::Compute.new({:connection_options => {:ssl_verify_peer => false}, :provider => 'softlayer', :softlayer_api_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :softlayer_username => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID')})
+          @conn[type] = Fog::Compute.new({:provider => 'softlayer', :softlayer_api_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :softlayer_username => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID')})
         when 'Network'
-          puts "***Network"
-          @conn[type] = Fog::Network.new({:connection_options => {:ssl_verify_peer => false}, :provider => 'softlayer', :softlayer_api_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :softlayer_username => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID')})
+          @conn[type] = Fog::Network.new({:provider => 'softlayer', :softlayer_api_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :softlayer_username => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID')})
         else
-          puts "***Nil"
           nil
         end
       rescue

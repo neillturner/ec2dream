@@ -9,7 +9,6 @@ class EC2_Server
     google_clear('Instance_ID')
     ENV['EC2_INSTANCE'] = ""
     google_clear('Name')
-    google_clear('Chef_Node')
     google_clear('State')
     @google_server['Addresses'].setVisibleRows(5)
     @google_server['Addresses'].setText("")
@@ -38,6 +37,7 @@ class EC2_Server
     @frame5.hide()
     @frame3.hide()
     @frame6.show()
+    @frame7.hide()
     @server_status = ""
     @secgrp = ""
   end
@@ -55,6 +55,7 @@ class EC2_Server
     @frame5.hide()
     @frame3.hide()
     @frame6.show()
+    @frame7.hide()
     @google_server['Instance_ID'].text = instance_id
     ENV['EC2_INSTANCE'] = instance_id
     #puts "instance id #{instance_id}"
@@ -68,7 +69,6 @@ class EC2_Server
         return
       end
       @google_server['Name'].text = r['name']
-      @google_server['Chef_Node'].text = google_get_chef_node
       @google_server['State'].text = r['status']
       @server_status = @google_server['State'].text
       @google_server['Launch_Time'].text = convert_time(r['creationTimestamp'])
@@ -182,7 +182,6 @@ class EC2_Server
         @google_server['Admin_Password'].text =  r[:password]
       end
     end
-    @google_server['test_kitchen_path'].text=@ec2_main.settings.get('TEST_KITCHEN_PATH')
     set_ec2dream_hostname
     @ec2_main.app.forceRefresh
   end
@@ -198,19 +197,6 @@ class EC2_Server
         error_message("Terminate Instance Failed",$!)
       end
     end
-  end
-
-  def google_get_chef_node
-    instance_id = @google_server['Instance_ID'].text
-    if @ec2_chef_node[instance_id] != nil and @ec2_chef_node[instance_id] != ""
-      cn =  @ec2_chef_node[instance_id]
-    else
-      cn = @ec2_main.launch.get('Chef_Node')
-      if cn == nil or cn == ""
-        cn = "default-server"
-      end
-    end
-    return cn
   end
 
   def google_last(parm)

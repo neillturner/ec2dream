@@ -435,6 +435,21 @@ class EC2_Settings
         @settings['AVAILABILITY_ZONE_LABEL'].tipText = "GOGGLE: zone to access. it is <region>-<zone> format."
         @settings['AMAZON_NICKNAME_TAG_LABEL'].text=""
         @settings['AMAZON_NICKNAME_TAG_LABEL'].tipText=""
+      elsif @settings['EC2_PLATFORM'].text=="softlayer"
+        @settings['AMAZON_ACCESS_KEY_ID_LABEL'].text="USER"
+        @settings['AMAZON_ACCESS_KEY_ID_LABEL'].tipText="SOFTLAYER: Your softlayer user name"
+        @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].text="API KEY"
+        @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].tipText="SOFTLAYER: Your softlayer api key"
+        @settings['AMAZON_ACCOUNT_ID_LABEL'].text=""
+        @settings['AMAZON_ACCOUNT_ID_LABEL'].tipText=""
+        @settings['EC2_URL_LABEL'].text=""
+        @settings['EC2_URL_LABEL'].tipText=""
+        @settings['AVAILABILITY_ZONE_LABEL'].text = ""
+        @settings['AVAILABILITY_ZONE_LABEL'].tipText = "G"
+        @settings['AMAZON_NICKNAME_TAG_LABEL'].text=""
+        @settings['AMAZON_NICKNAME_TAG_LABEL'].tipText=""
+        ENV['softlayer_user'] = @settings['AMAZON_ACCESS_KEY_ID'].text
+        ENV['softlayer_api_key'] = @settings['AMAZON_SECRET_ACCESS_KEY'].text
       else
         @settings['AMAZON_ACCESS_KEY_ID_LABEL'].text="ACCESS_KEY"
         @settings['AMAZON_ACCESS_KEY_ID_LABEL'].tipText = "AWS: Your AWS account's access key id.\nOPENSTACK: Openstack User Name."
@@ -538,6 +553,18 @@ class EC2_Settings
   def openstack
     begin
       if $ec2_main.cloud.api == 'openstack'
+        true
+      else
+        false
+      end
+    rescue
+      false
+    end
+  end
+
+  def softlayer
+    begin
+      if $ec2_main.cloud.api == 'softlayer'
         true
       else
         false

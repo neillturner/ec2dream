@@ -234,7 +234,7 @@ class EC2_EnvCreateDialog < FXDialogBox
     #@hp_access_key = textBox("HP User Name",frame4)
     @hp_access_label = FXLabel.new(frame4, "HP User Name" )
     @hp_access_label.tipText = "Your HP Openstack user name."
-    @hp_access = FXTextField.new(frame4, 60, nil, 0, :opts => FRAME_SUNKEN)
+    @hp_access_key = FXTextField.new(frame4, 60, nil, 0, :opts => FRAME_SUNKEN)
     FXLabel.new(frame4, "" )
     @hp_secret_access_key_label = FXLabel.new(frame4, "HP Password" )
     @hp_secret_access_key_label.tipText = "Your HP Openstack password."
@@ -331,7 +331,7 @@ class EC2_EnvCreateDialog < FXDialogBox
     #
     # softlayer
     #
-    @softlayertab = FXTabItem.new(@tabbook, "&softlayer", nil)
+    @softlayertab = FXTabItem.new(@tabbook, "&Softlayer", nil)
     @softlayerframe = FXHorizontalFrame.new(@tabbook )
     frame6 = FXMatrix.new(@softlayerframe, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
     softlayer_env_label = FXLabel.new(frame6, "Environment Name" )

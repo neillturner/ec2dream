@@ -33,6 +33,9 @@ class EC2_Server
     @block_mapping = []
     @flavor = {}
     @image = {}
+    @softlayer_server = {}
+    @softlayer_public_addr = {}
+    @softlayer_admin_pw = {}
     @curr_row = nil
     @arrow_refresh = @ec2_main.makeIcon("arrow_redo.png")
     @arrow_refresh.create
@@ -66,8 +69,6 @@ class EC2_Server
     @stop_icon.create
     @create_image_icon = @ec2_main.makeIcon("package.png")
     @create_image_icon.create
-    #@kitchenci = @ec2_main.makeIcon("kitchenci.png")
-    #@kitchenci.create
     @view = @ec2_main.makeIcon("application_view_icons.png")
     @view.create
     @tag_red = @ec2_main.makeIcon("tag_red.png")
@@ -98,7 +99,7 @@ class EC2_Server
     @style.create
     @lightbulb = @ec2_main.makeIcon("lightbulb.png")
     @lightbulb.create
-    
+
     tab2 = FXTabItem.new(@ec2_main.tabBook, " Server ")
     @page1 = FXVerticalFrame.new(@ec2_main.tabBook, LAYOUT_FILL, :padding => 0)
     page1a = FXHorizontalFrame.new(@page1,LAYOUT_FILL_X, :padding => 0)
@@ -107,17 +108,15 @@ class EC2_Server
     @refresh_button.icon = @arrow_refresh
     @refresh_button.tipText = "Server Status Refresh"
     @refresh_button.connect(SEL_COMMAND) do |sender, sel, data|
-      if @type == "ec2"  or @type == "ops" or @type == "google"
+      if @type == "ec2"  or @type == "ops" or @type == "google" or @type == "softlayer"
         begin
           s = currentInstance
           if s != nil and s != ""
-            @ec2_main.serverCache.refresh(s)
+            @ec2_main.serverCache.refresh(s) if @type == "ec2"  or @type == "ops" or @type == "google"
             load(s)
           end
         rescue
         end
-      elsif @type == "cfy"
-        cfy_refresh(@appname)
       end
     end
     @refresh_button.connect(SEL_UPDATE) do |sender, sel, data|
@@ -127,22 +126,22 @@ class EC2_Server
     @putty_button.icon = @monitor
     @putty_button.tipText = " SSH "
     @putty_button.connect(SEL_COMMAND) do |sender, sel, data|
-      if @type == "ec2" or @type == "ops" or @type == "google"
+      if @type == "ec2" or @type == "ops" or @type == "google" or @type == "softlayer"
         run_ssh
       elsif @type == "loc"
         loc_ssh
-      elsif @type == "cfy"
-        dialog = CFY_AppUploadDialog.new(@ec2_main,@cfy_server['name'].text)
-        dialog.execute
+ #     elsif @type == "cfy"
+ #       dialog = CFY_AppUploadDialog.new(@ec2_main,@cfy_server['name'].text)
+ #       dialog.execute
       end
     end
     @putty_button.connect(SEL_UPDATE) do |sender, sel, data|
       enable_if_server_loaded(sender)
-      if @type == "cfy"
-        @putty_button.icon = @upload
-        @putty_button.tipText = " Upload App "
-        sender.enabled = true
-      elsif loaded
+ #     if @type == "cfy"
+ #       @putty_button.icon = @upload
+ #       @putty_button.tipText = " Upload App "
+ #       sender.enabled = true
+      if loaded
         @putty_button.icon = @monitor
         @putty_button.tipText = " SSH "
       end
@@ -151,20 +150,20 @@ class EC2_Server
     @winscp_button.icon = @put
     @winscp_button.tipText = "  SCP  "
     @winscp_button.connect(SEL_COMMAND) do |sender, sel, data|
-      if @type == "ec2" or @type == "ops"  or @type == "google"
+      if @type == "ec2" or @type == "ops"  or @type == "google" or @type == "softlayer"
         run_scp
       elsif @type == "loc"
         loc_winscp
-      elsif @type == "cfy"
-        cfy_restart
+#      elsif @type == "cfy"
+#        cfy_restart
       end
     end
     @winscp_button.connect(SEL_UPDATE) do |sender, sel, data|
-      if @type == "cfy"
-        sender.enabled = true
-        @winscp_button.icon = @reboot
-        @winscp_button.tipText = " Restart App  "
-      elsif loaded
+ #     if @type == "cfy"
+ #       sender.enabled = true
+ #       @winscp_button.icon = @reboot
+ #       @winscp_button.tipText = " Restart App  "
+      if loaded
         sender.enabled = true
         @winscp_button.icon = @put
         @winscp_button.tipText = "  SCP  "
@@ -198,8 +197,8 @@ class EC2_Server
         ops_terminate
       elsif @type == "google"
         google_terminate
-      elsif @type == "cfy"
-        cfy_delete
+      elsif @type == "softlayer"
+        softlayer_delete
       elsif @type == "loc"
         loc_save
       end
@@ -214,9 +213,8 @@ class EC2_Server
         sender.enabled = true
       elsif @type == "google" and (@server_status == "RUNNING")
         sender.enabled = true
-      elsif @type == "cfy"
+      elsif @type == "softlayer"  and @softlayer_server['Created_At'].text!=nil and @softlayer_server['Created_At'].text!=""
         sender.enabled = true
-        @terminate_button.tipText = " Delete App "
       elsif @type == "loc"
         @terminate_button.icon = @save
         sender.enabled = true
@@ -281,20 +279,20 @@ class EC2_Server
     @start_button.icon = @start_icon
     @start_button.tipText = " Start Instance "
     @start_button.connect(SEL_COMMAND) do |sender, sel, data|
-      if @type == "cfy"
-        cfy_start
-      else
+#      if @type == "cfy"
+#        cfy_start
+#      else
         start_instance
-      end
+#      end
     end
     @start_button.connect(SEL_UPDATE) do |sender, sel, data|
-      if loaded and @type == "cfy"
-        sender.enabled = true
-        @start_button.icon = @start_icon
-        @start_button.tipText = " Start App "
-      else
+#      if loaded and @type == "cfy"
+#        sender.enabled = true
+#        @start_button.icon = @start_icon
+#        @start_button.tipText = " Start App "
+#      else
         enable_if_ebs_ec2_server_loaded(sender)
-      end
+#      end
     end
     @stop_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
     @stop_button.icon = @stop_icon
@@ -302,8 +300,8 @@ class EC2_Server
     @stop_button.connect(SEL_COMMAND) do |sender, sel, data|
       if @type == "ec2"
         stop_instance
-      elsif @type == "cfy"
-        cfy_stop
+#      elsif @type == "cfy"
+#        cfy_stop
       elsif @type == "ops"
         instance = @ops_server['Instance_ID'].text
         dialog = EC2_InstanceRebootDialog.new(@ec2_main,instance)
@@ -322,10 +320,10 @@ class EC2_Server
         sender.enabled = true
         @stop_button.icon = @reboot
         @stop_button.tipText = " Reboot  "
-      elsif loaded and @type == "cfy"
-        sender.enabled = true
-        @stop_button.icon = @stop_icon
-        @stop_button.tipText = " Stop App "
+#      elsif loaded and @type == "cfy"
+#        sender.enabled = true
+#        @stop_button.icon = @stop_icon
+#        @stop_button.tipText = " Stop App "
       else
         sender.enabled = false
       end
@@ -390,9 +388,9 @@ class EC2_Server
       end
     end
     @tunnel_button.connect(SEL_UPDATE) do |sender, sel, data|
-      if @type == "cfy"
-        sender.enabled = false
-      elsif loaded
+#      if @type == "cfy"
+#        sender.enabled = false
+      if loaded
         sender.enabled = true
       else
         sender.enabled = false
@@ -742,33 +740,10 @@ class EC2_Server
     FXLabel.new(@frame3, "Name" )
     @frame3s = FXHorizontalFrame.new(@frame3,LAYOUT_FILL_X, :padding => 0)
     @ops_server['Name'] = FXTextField.new(@frame3s, 20, nil, 0, :opts => TEXTFIELD_READONLY)
-    #FXLabel.new(@frame3s, "" )
-    #FXLabel.new(@frame3s, "Kitchen Instance" )
-    #@ops_server['Chef_Node'] = FXTextField.new(@frame3s, 21, nil, 0, :opts => FRAME_SUNKEN)
-    #@ops_server['Chef_Node'].connect(SEL_COMMAND) do
-    #  instance_id = @ops_server['Instance_ID'].text
-    #  @ec2_chef_node[instance_id] = @ops_server['Chef_Node'].text
-    #  if @ec2_main.launch.loaded == true
-    #    @ec2_main.launch.ops_put('Chef_Node',@ops_server['Chef_Node'].text)
-    #    @ec2_main.launch.ops_save
-    #  end
-    #end
     FXLabel.new(@frame3, "" )
     FXLabel.new(@frame3, "Security Groups" )
     @frame3t = FXHorizontalFrame.new(@frame3,LAYOUT_FILL_X, :padding => 0)
     @ops_server['Security_Groups'] = FXTextField.new(@frame3t, 25, nil, 0, :opts => TEXTFIELD_READONLY)
-    #FXLabel.new(@frame3t, "Kitchen Path" )
-    #@ops_server['test_kitchen_path'] = FXTextField.new(@frame3t, 25, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_READONLY)
-    #@ops_server['test_kitchen_path_button'] = FXButton.new(@frame3t, " ",:opts => BUTTON_TOOLBAR)
-    #@ops_server['test_kitchen_path_button'].icon = @modify
-    #@ops_server['test_kitchen_path_button'].tipText = "  Configure Test Kitchen Path  "
-    #@ops_server['test_kitchen_path_button'].connect(SEL_COMMAND) do |sender, sel, data|
-    #  dialog = KIT_PathCreateDialog.new(@ec2_main)
-    #  dialog.execute
-    #  if dialog.success
-    #    @ops_server['test_kitchen_path'].text=@ec2_main.settings.get('TEST_KITCHEN_PATH')
-    #  end
-    #end
     FXLabel.new(@frame3, "" )
     FXLabel.new(@frame3, "Instance ID" )
     @ops_server['Instance_ID'] = FXTextField.new(@frame3, 50, nil, 0, :opts => TEXTFIELD_READONLY)
@@ -798,7 +773,7 @@ class EC2_Server
     @ops_server['Addresses'] = FXTextField.new(@frame3, 60, nil, 0, :opts => TEXTFIELD_READONLY)
     FXLabel.new(@frame3, "" )
     @ops_server['Public_Addr_label'] = FXLabel.new(@frame3, "Public IP Addr" )
-    @ops_server['Public_Addr_label'].tipText = "Public IP Address used by SSH to access the server.\nOverride the address if you need to access it via a different IP Address"  
+    @ops_server['Public_Addr_label'].tipText = "Public IP Address used by SSH to access the server.\nOverride the address if you need to access it via a different IP Address"
     @ops_server['Public_Addr'] = FXTextField.new(@frame3, 40, nil, 0, :opts => FRAME_SUNKEN)
     @ops_server['Public_Addr'].connect(SEL_COMMAND) do  |sender, sel, data|
       instance_id = @ops_server['Instance_ID'].text
@@ -853,7 +828,7 @@ class EC2_Server
       end
     else
       @ops_server['Putty_Private_Key_label'] = FXLabel.new(@frame3, "Putty Private Key" )
-      @ops_server['Putty_Private_Key_label'].tipText = "OPTIONAL: Putty Key for Putty access to the server.\nDEFAULT: defaults to value specified in Environment tab." 
+      @ops_server['Putty_Private_Key_label'].tipText = "OPTIONAL: Putty Key for Putty access to the server.\nDEFAULT: defaults to value specified in Environment tab."
       @ops_server['Putty_Private_Key'] = FXTextField.new(@frame3, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
       @ops_server['Putty_Private_Key'].connect(SEL_COMMAND) do
         instance_id = @ops_server['Instance_ID'].text
@@ -1157,7 +1132,7 @@ class EC2_Server
     @frame5 = FXMatrix.new(@page1, 3, MATRIX_BY_COLUMNS|LAYOUT_FILL)
     @frame5.hide()
     @loc_server['server_label'] = FXLabel.new(@frame5, "Server" )
-    @loc_server['server_label'].tipText = "REQUIRED: The unique name in EC2Dream to identify the server." 
+    @loc_server['server_label'].tipText = "REQUIRED: The unique name in EC2Dream to identify the server."
     @loc_server['server'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
     FXLabel.new(@frame5, "" )
     @loc_server['address_label'] = FXLabel.new(@frame5, "Address" )
@@ -1177,7 +1152,7 @@ class EC2_Server
     @loc_server['ssh_password'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     FXLabel.new(@frame5, "" )
     @loc_server['ssh_key_label'] = FXLabel.new(@frame5, "SSH key" )
-    @loc_server['ssh_key_label'].tipText = "OPTIONAL: SSH Key for SSH access to the server." 
+    @loc_server['ssh_key_label'].tipText = "OPTIONAL: SSH Key for SSH access to the server."
     @loc_server['ssh_key'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     @loc_server['ssh_key_button'] = FXButton.new(@frame5, "", :opts => BUTTON_TOOLBAR)
     @loc_server['ssh_key_button'].icon = @magnifier
@@ -1228,21 +1203,6 @@ class EC2_Server
     FXLabel.new(@frame5, "" )
     FXLabel.new(@frame5, "" )
     FXLabel.new(@frame5, "" )
-    #FXLabel.new(@frame5, "Kitchen Instance" )
-    #@loc_server['kitchen_instance'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
-    #FXLabel.new(@frame5, "" )
-    #FXLabel.new(@frame5, "Kitchen Path" )
-    #@loc_server['test_kitchen_path'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT|TEXTFIELD_READONLY)
-    #@loc_server['test_kitchen_path_button'] = FXButton.new(@frame5, " ",:opts => BUTTON_TOOLBAR)
-    #@loc_server['test_kitchen_path_button'].icon = @modify
-    #@loc_server['test_kitchen_path_button'].tipText = "  Configure Test Kitchen Path  "
-    #@loc_server['test_kitchen_path_button'].connect(SEL_COMMAND) do |sender, sel, data|
-    #  dialog = KIT_PathCreateDialog.new(@ec2_main)
-    #  dialog.execute
-    #  if dialog.success
-    #    @loc_server['test_kitchen_path'].text=@ec2_main.settings.get('TEST_KITCHEN_PATH')
-    #  end
-    #end
     FXLabel.new(@frame5, "" )
     FXLabel.new(@frame5, "" )
     FXLabel.new(@frame5, "" )
@@ -1348,7 +1308,7 @@ class EC2_Server
     FXLabel.new(@frame6, "" )
     if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("mingw") == nil
       @google_server['SSH_Private_Key_label'] = FXLabel.new(@frame6,"SSH Private Key" )
-      @google_server['SSH_Private_Key_label'].tipText = "OPTIONAL: SSH Key for SSH access to the server.\nDEFAULT: defaults to value specified in Environment tab."  
+      @google_server['SSH_Private_Key_label'].tipText = "OPTIONAL: SSH Key for SSH access to the server.\nDEFAULT: defaults to value specified in Environment tab."
       @google_server['SSH_Private_Key'] = FXTextField.new(@frame6, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
       @google_server['SSH_Private_Key'].connect(SEL_COMMAND) do
         instance_id = @google_server['Instance_ID'].text
@@ -1408,7 +1368,7 @@ class EC2_Server
       end
     end
     @google_server['EC2_SSH_User_label'] = FXLabel.new(@frame6, "SSH/Win Admin User" )
-    @google_server['EC2_SSH_User_label'].tipText = "OPTIONAL: SSH User for SSH access to the server.\nFor Windows Server Remote Desktop user.\nDEFAULT: defaults to value specified in Environment tab." 
+    @google_server['EC2_SSH_User_label'].tipText = "OPTIONAL: SSH User for SSH access to the server.\nFor Windows Server Remote Desktop user.\nDEFAULT: defaults to value specified in Environment tab."
     @google_server['EC2_SSH_User'] = FXTextField.new(@frame6, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @google_server['EC2_SSH_User'].connect(SEL_COMMAND) do |sender, sel, data|
       if @ec2_main.launch.loaded == true
@@ -1491,6 +1451,183 @@ class EC2_Server
     @google_server['Metadata'].setVisibleRows(10)
     @google_server['Metadata'].setText("")
     FXLabel.new(@frame6, "" )
+
+    #
+    # softlayer frame
+    #
+    @frame7 = FXMatrix.new(@page1, 3, MATRIX_BY_COLUMNS|LAYOUT_FILL)
+    @frame7.hide()
+    FXLabel.new(@frame7, "Name" )
+    @softlayer_server['Name'] = FXTextField.new(@frame7, 20, nil, 0, :opts => TEXTFIELD_READONLY)
+    FXLabel.new(@frame7, "" )
+    FXLabel.new(@frame7, "ID" )
+    @softlayer_server['Instance_ID'] = FXTextField.new(@frame7, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+    FXLabel.new(@frame7, "" )
+    FXLabel.new(@frame7, "Fqdn" )
+    @softlayer_server['Fqdn'] = FXTextField.new(@frame7, 60, nil, 0, :opts => TEXTFIELD_READONLY)
+    FXLabel.new(@frame7, "" )
+    FXLabel.new(@frame7, "Create Time" )
+    @softlayer_server['Created_At'] = FXTextField.new(@frame7, 60, nil, 0, :opts => TEXTFIELD_READONLY)
+    FXLabel.new(@frame7, "" )
+
+    FXLabel.new(@frame7, "Tags" )
+    @softlayer_server['Tags'] = FXTextField.new(@frame7, 60, nil, 0, :opts => TEXTFIELD_READONLY)
+    FXLabel.new(@frame7, "" )
+    FXLabel.new(@frame7, "Image_Id" )
+    @softlayer_server['Image_Id'] = FXTextField.new(@frame7, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+    FXLabel.new(@frame7, "" )
+    FXLabel.new(@frame7, "Machine Type" )
+    @softlayer_server['Flavor_Id'] = FXTextField.new(@frame7, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+    FXLabel.new(@frame7, "" )
+    FXLabel.new(@frame7, "OS Code")
+    @softlayer_server['Os_Code'] = FXTextField.new(@frame7, 60, nil, 0, :opts => TEXTFIELD_READONLY)
+    FXLabel.new(@frame7, "" )
+    FXLabel.new(@frame7, "Key Pairs")
+    @softlayer_server['Key_Pairs'] = FXTextField.new(@frame7, 60, nil, 0, :opts => TEXTFIELD_READONLY)
+    FXLabel.new(@frame7, "" )
+    if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("mingw") == nil
+      @softlayer_server['SSH_Private_Key_label'] = FXLabel.new(@frame7,"SSH Private Key" )
+      @softlayer_server['SSH_Private_Key_label'].tipText = "OPTIONAL: SSH Key for SSH access to the server.\nDEFAULT: defaults to value specified in Environment tab."
+      @softlayer_server['SSH_Private_Key'] = FXTextField.new(@frame7, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+      @softlayer_server['SSH_Private_Key'].connect(SEL_COMMAND) do
+        instance_id = @softlayer_server['ID'].text
+        @ec2_ssh_private_key[instance_id] = @softlayer_server['SSH_Private_Key'].text
+        @ec2_main.launch.ops_put('SSH_Private_Key',@softlayer_server['SSH_Private_Key'].text)
+        @ec2_main.launch.ops_save
+      end
+      @softlayer_server['SSH_Private_Key_Button'] = FXButton.new(@frame7, "", :opts => BUTTON_TOOLBAR)
+      @softlayer_server['SSH_Private_Key_Button'].icon = @magnifier
+      @softlayer_server['SSH_Private_Key_Button'].tipText = "Browse..."
+      @softlayer_server['SSH_Private_Key_Button'].connect(SEL_COMMAND) do
+        dialog = FXFileDialog.new(@frame7, "Select pem file")
+        dialog.patternList = [
+          "Pem Files (*.pem)"
+        ]
+        dialog.selectMode = SELECTFILE_EXISTING
+        if dialog.execute != 0
+          @softlayer_server['SSH_Private_Key'].text = dialog.filename
+          instance_id = @softlayer_server['Instance_ID'].text
+          @ec2_ssh_private_key[instance_id] = @softlayer_server['SSH_Private_Key'].text
+          if @ec2_main.launch.loaded == true
+            @ec2_main.launch.ops_put('SSH_Private_Key',@softlayer_server['SSH_Private_Key'].text)
+            @ec2_main.launch.save
+          end
+        end
+      end
+    else
+      @softlayer_server['Putty_Private_Key_label'] = FXLabel.new(@frame7, "Putty Private Key" )
+      @softlayer_server['Putty_Private_Key_label'].tipText = "OPTIONAL: Putty Key for Putty access to the server."
+      @softlayer_server['Putty_Private_Key'] = FXTextField.new(@frame7, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+      @softlayer_server['Putty_Private_Key'].connect(SEL_COMMAND) do
+        instance_id = @softlayer_server['Instance_ID'].text
+        @putty_private_key[instance_id] = @softlayer_server['Putty_Private_Key'].text
+        if @ec2_main.launch.loaded == true
+          @ec2_main.launch.ops_put('Putty_Private_Key',@softlayer_server['Putty_Private_Key'].text)
+          @ec2_main.launch.save
+        end
+      end
+      @softlayer_server['Putty_Private_Key_Button'] = FXButton.new(@frame7, "", :opts => BUTTON_TOOLBAR)
+      @softlayer_server['Putty_Private_Key_Button'].icon = @magnifier
+      @softlayer_server['Putty_Private_Key_Button'].tipText = "Browse..."
+      @softlayer_server['Putty_Private_Key_Button'].connect(SEL_COMMAND) do
+        dialog = FXFileDialog.new(@frame7, "Select ppk file")
+        dialog.patternList = [
+          "Pem Files (*.ppk)"
+        ]
+        dialog.selectMode = SELECTFILE_EXISTING
+        if dialog.execute != 0
+          @softlayer_server['Putty_Private_Key'].text = dialog.filename
+          instance_id = @softlayer_server['Instance_ID'].text
+          @putty_private_key[instance_id] = @softlayer_server['Putty_Private_Key'].text
+          if @ec2_main.launch.loaded == true
+            @ec2_main.launch.ops_put('Putty_Private_Key',@softlayer_server['Putty_Private_Key'].text)
+            @ec2_main.launch.save
+          end
+        end
+      end
+    end
+    @softlayer_server['EC2_SSH_User_label'] = FXLabel.new(@frame7, "SSH/Win Admin User" )
+    @softlayer_server['EC2_SSH_User_label'].tipText = "OPTIONAL: SSH User for SSH access to the server.\nFor Windows Server Remote Desktop user.\nDEFAULT: defaults to value specified in Environment tab."
+    @softlayer_server['EC2_SSH_User'] = FXTextField.new(@frame7, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+    @softlayer_server['EC2_SSH_User'].connect(SEL_COMMAND) do |sender, sel, data|
+      if @ec2_main.launch.loaded == true
+        @ec2_main.launch.softlayer_put('EC2_SSH_User',data)
+        @ec2_main.launch.save
+      end
+    end
+    FXLabel.new(@frame7, "" )
+    @softlayer_server['Admin_Password_label'] = FXLabel.new(@frame7, "SSH/Win Admin Password" )
+    @softlayer_server['Admin_Password_label'].tipText = "OPTIONAL: SSH User password or Windows Administrator user password for use with Remote Desktop."
+    @softlayer_server['Admin_Password'] = FXTextField.new(@frame7, 60, nil, 0, :opts => FRAME_SUNKEN|TEXTFIELD_PASSWD)
+    @softlayer_server['Admin_Password'].connect(SEL_COMMAND) do |sender, sel, data|
+      instance_id = @softlayer_server['Instance_ID'].text
+      @softlayer_admin_pw[instance_id] = data
+      if @ec2_main.launch.loaded == true
+        @ec2_main.launch.ops_put('Admin_Password',data)
+        @ec2_main.launch.ops_save
+      end
+    end
+    @frame7g = FXHorizontalFrame.new(@frame7,LAYOUT_FILL_X, :padding => 0)
+    @softlayer_server['Admin_Password_Button'] = FXButton.new(@frame7g, "", :opts => BUTTON_TOOLBAR)
+    @softlayer_server['Admin_Password_Button'].icon = @key
+    @softlayer_server['Admin_Password_Button'].tipText = "Change Admin Password"
+    @softlayer_server['Admin_Password_Button'].connect(SEL_COMMAND) do
+      if loaded
+        begin
+          instance_id = @softlayer_server['Instance_ID'].text
+          dialog = EC2_InstanceAdminPasswordDialog.new(@ec2_main,instance_id)
+          dialog.execute
+          if dialog.updated
+            pw = dialog.selected
+            @softlayer_server['Admin_Password'].text = pw
+            instance_id = @softlayer_server['Instance_ID'].text
+            @softlayer_admin_pw[instance_id] = pw
+            if @ec2_main.launch.loaded == true
+              @ec2_main.launch.ops_put('Admin_Password',pw)
+              @ec2_main.launch.ops_save
+            end
+            FXMessageBox.information(@ec2_main,MBOX_OK,"Admin Password","Admin password #{pw} saved")
+          end
+        rescue
+          error_message("Error - Unable to update admin password", $!)
+        end
+      else
+        error_message("Error","Server not running. Press refresh")
+      end
+    end
+    @softlayer_server['Admin_Password_Button2'] = FXButton.new(@frame7g, "", :opts => BUTTON_TOOLBAR)
+    @softlayer_server['Admin_Password_Button2'].icon = @magnifier
+    @softlayer_server['Admin_Password_Button2'].tipText = "Show Admin Password"
+    @softlayer_server['Admin_Password_Button2'].connect(SEL_COMMAND) do
+      dialog = EC2_ShowPasswordDialog.new(@ec2_main,"Admin Password",@softlayer_server['Admin_Password'].text)
+      dialog.execute
+    end
+    @softlayer_server['Public_IP_label'] = FXLabel.new(@frame7, "Public IP Addr" )
+    @softlayer_server['Public_IP_label'].tipText = "Public IP used as address for ssh."
+    @softlayer_server['Public_IP_Address'] = FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN)
+    @softlayer_server['Public_IP_Address'].connect(SEL_COMMAND) do  |sender, sel, data|
+      instance_id = @softlayer_server['Instance_ID'].text
+      @softlayer_public_addr[instance_id] = data
+      #@ec2_main.launch.ops_put('Public_IP_Address',data)
+      #@ec2_main.launch.save
+    end
+    FXLabel.new(@frame7, "" )
+    FXLabel.new(@frame7, "Private IP" )
+    @softlayer_server['Private_IP_Address'] = FXTextField.new(@frame7, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+    FXLabel.new(@frame7, "" )
+    FXLabel.new(@frame7, "Networks" )
+    @softlayer_server['Network_Components'] =  FXText.new(@frame7, :opts => TEXT_WORDWRAP|LAYOUT_FILL|TEXTFIELD_READONLY)
+    @softlayer_server['Network_Components'].setVisibleRows(5)
+    @softlayer_server['Network_Components'].setText("")
+    FXLabel.new(@frame7, "" )
+    FXLabel.new(@frame7, "Disks" )
+    @softlayer_server['Disks'] =  FXText.new(@frame7, :opts => TEXT_WORDWRAP|LAYOUT_FILL|TEXTFIELD_READONLY)
+    @softlayer_server['Disks'].setVisibleRows(5)
+    @softlayer_server['Disks'].setText("")
+    FXLabel.new(@frame7, "" )
+    #FXLabel.new(@frame7, "Provision_Script" )
+    #@softlayer_server['Provision_Script'] =  FXTextField.new(@frame7, 40, nil, 0, :opts => FRAME_SUNKEN)
+    #FXLabel.new(@frame7, "" )
   end
 
   def run_scp
@@ -1506,6 +1643,13 @@ class EC2_Server
       user = @ec2_main.settings.get('EC2_SSH_USER') if user == nil or user == ''
       address = @google_server['Public_Addr'].text
       password = ""
+      local_port = nil  # not added yet
+    elsif @type == "softlayer"
+      user = @softlayer_server['EC2_SSH_User'].text
+      #user = @ec2_main.settings.get('EC2_SSH_USER') if user == nil or user == ''
+      #address = @softlayer_server['Public_IP_Address'].text
+      address = @softlayer_server['Private_IP_Address'].text #if address == nil or address == ""
+      password = @softlayer_server['Admin_Password'].text
       local_port = nil  # not added yet
     else
       address = @server['Public_IP'].text
@@ -1533,6 +1677,13 @@ class EC2_Server
       user = @ec2_main.launch.google_get("EC2_SSH_User")
       user = @ec2_main.settings.get('EC2_SSH_USER') if user == nil or user == ''
       password = ""
+      local_port = nil  # not added yet
+    elsif @type == "softlayer"
+      user = @softlayer_server['EC2_SSH_User'].text
+      #user = @ec2_main.settings.get('EC2_SSH_USER') if user == nil or user == ''
+      #address = @softlayer_server['Public_IP_Address'].text
+      address = @softlayer_server['Private_IP_Address'].text #if address == nil or address == ""
+      password = @softlayer_server['Admin_Password'].text
       local_port = nil  # not added yet
     else
       address = @server['Public_IP'].text
@@ -1611,19 +1762,19 @@ class EC2_Server
     end
   end
 
-  def get_chef_node
-    instance_id = @server['Instance_ID'].text
-    if @ec2_chef_node[instance_id] != nil and @ec2_chef_node[instance_id] != ""
-      cn =  @ec2_chef_node[instance_id]
-    else
-      cn = @ec2_main.launch.get('Chef_Node')
-      if cn == nil or cn == ""
-        cn = "default-server"
-      end
-    end
-    puts "chef_node #{cn}"
-    return cn
-  end
+#  def get_chef_node
+#   instance_id = @server['Instance_ID'].text
+#    if @ec2_chef_node[instance_id] != nil and @ec2_chef_node[instance_id] != ""
+#      cn =  @ec2_chef_node[instance_id]
+#    else
+#      cn = @ec2_main.launch.get('Chef_Node')
+#      if cn == nil or cn == ""
+#        cn = "default-server"
+#      end
+#    end
+#    puts "chef_node #{cn}"
+#    return cn
+#  end
 
   def get_pk
     pk = ""
@@ -1646,6 +1797,16 @@ class EC2_Server
         if pk == nil or pk == ""
           pk = @ec2_main.settings.get('EC2_SSH_PRIVATE_KEY')
         end
+      end
+    elsif @type == "softlayer"
+      instance_id = @softlayer_server['Instance_ID'].text
+      if @ec2_ssh_private_key[instance_id] != nil and @ec2_ssh_private_key[instance_id] != ""
+        pk =  @ec2_ssh_private_key[instance_id]
+      else
+        #pk = @ec2_main.launch.google_get('EC2_SSH_Private_Key')
+        #if pk == nil or pk == ""
+          pk = @ec2_main.settings.get('EC2_SSH_PRIVATE_KEY')
+        #end
       end
     elsif @type == "google"
       instance_id = @google_server['Instance_ID'].text
@@ -1683,6 +1844,16 @@ class EC2_Server
           pk = @ec2_main.settings.get('PUTTY_PRIVATE_KEY')
         end
       end
+    elsif @type == "softlayer"
+      instance_id = @ops_server['Instance_ID'].text
+      if @putty_private_key[instance_id] != nil and @putty_private_key[instance_id] != ""
+        pk =  @putty_private_key[instance_id]
+      else
+        #pk = @ec2_main.launch.ops_get('Putty_Private_Key')
+        #if pk == nil or pk == ""
+          pk = @ec2_main.settings.get('PUTTY_PRIVATE_KEY')
+        #end
+      end
     elsif @type == "google"
       instance_id = @google_server['Instance_ID'].text
       if @putty_private_key[instance_id] != nil and @putty_private_key[instance_id] != ""
@@ -1704,6 +1875,8 @@ class EC2_Server
       return @ops_server['Instance_ID'].text
     elsif @type == "google"
       return @google_server['Instance_ID'].text
+    elsif @type == "softlayer"
+      return @softlayer_server['Instance_ID'].text
     else
       return ""
     end
@@ -1721,8 +1894,12 @@ class EC2_Server
       return @ops_server['Public_Addr'].text
     elsif @type == "google"
       return @google_server['Name'].text
-    elsif @type == "cfy"
-      return @cfy_server['name'].text
+    elsif @type == "softlayer"
+      if @softlayer_server['Public_IP_Address'].text != nil and @softlayer_server['Public_IP_Address'].text != ""
+        return @softlayer_server['Public_IP_Address'].text
+      else
+        return @softlayer_server['Private_IP_Address'].text
+      end
     else
       return ""
     end
@@ -1746,7 +1923,7 @@ class EC2_Server
       return true
     elsif @type == "google" and @server_status == "RUNNING"
       return true
-    elsif @type == "cfy"
+    elsif @type == "softlayer" and @softlayer_server['Created_At'].text!=nil and @softlayer_server['Created_At'].text!=""
       return true
     elsif @type == "loc"
       return true
@@ -1755,9 +1932,6 @@ class EC2_Server
     end
   end
 
-
-
-
   def enable_if_env_set(sender)
     @env = @ec2_main.environment.env
     if @env != nil and @env.length>0
@@ -1765,11 +1939,10 @@ class EC2_Server
     else
       sender.enabled = false
     end
-
   end
 
   def enable_if_server_loaded(sender)
-    if loaded and ["ec2","ops","google","cfy","loc","kit"].include? @type
+    if loaded and ["ec2","ops","google","cfy","loc","softlayer","kit"].include? @type
       sender.enabled = true
     else
       sender.enabled = false
@@ -1785,7 +1958,7 @@ class EC2_Server
   end
 
   def enable_if_ec2_server_loaded(sender)
-    if loaded and (@type == "ec2" or @type == "ops" or @type == "google" or @type == "loc")
+    if loaded and (@type == "ec2" or @type == "ops" or @type == "google" or @type == "softlayer" or @type == "loc")
       sender.enabled = true
     else
       sender.enabled = false
@@ -1826,6 +1999,8 @@ class EC2_Server
       ENV['EC2DREAM_HOSTNAME'] = @ops_server['Public_Addr'].text if @ops_server['Public_Addr'].text != nil
     elsif @type == "google"
       ENV['EC2DREAM_HOSTNAME'] = @google_server['Public_Addr'].text if @google_server['Public_Addr'].text != nil
+    elsif @type == "softlayer"
+      ENV['EC2DREAM_HOSTNAME'] = @softlayer_server['Public_IP_Address'].text if @softlayer_server['Public_IP_Address'].text != nil
     elsif @type == "loc"
       ENV['EC2DREAM_HOSTNAME'] = @loc_server['address'].text if @loc_server['address'].text != nil
     end

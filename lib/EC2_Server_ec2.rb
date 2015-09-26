@@ -52,6 +52,7 @@ class EC2_Server
       @frame4.hide()
       @frame5.hide()
       @frame6.hide()
+      @frame7.hide()
       @server_status = ""
       @secgrp = ""
     end
@@ -65,8 +66,8 @@ class EC2_Server
     puts "load "+instance_id
     if  @ec2_main.settings.openstack
       ops_load(instance_id)
-    elsif  @ec2_main.settings.cloudfoundry
-      cfy_load(instance_id)
+    elsif  @ec2_main.settings.softlayer
+      softlayer_load(instance_id)
     elsif  @ec2_main.settings.google
       google_load(instance_id)
     else
@@ -76,6 +77,7 @@ class EC2_Server
       @frame4.hide()
       @frame5.hide()
       @frame6.hide()
+      @frame7.hide()
       @server['Instance_ID'].text = instance_id
       ENV['EC2_INSTANCE'] = instance_id
       r = @ec2_main.serverCache.instance(instance_id)
@@ -153,7 +155,7 @@ class EC2_Server
         load_block_mapping(r)
         @server['Instance_Life_Cycle'].text = r['instanceLifecycle']
         @server['Spot_Instance_Request_Id'].text = r['spotInstanceRequestId']
-        @server['test_kitchen_path'].text = ""
+        @server['test_kitchen_path'].text = ""  #used for iam role
         if !r["iamInstanceProfile"].empty?
           s=r["iamInstanceProfile"]["arn"]
           sa = s.split"/"

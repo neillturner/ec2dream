@@ -72,8 +72,8 @@ require 'dialog/AS_AlarmCreateDialog'
 require 'dialog/AS_AlarmEditDialog'
 require 'dialog/AS_AlarmDeleteDialog'
 
-require 'dialog/CFY_ServiceCreateDialog'
-require 'dialog/CFY_ServiceDeleteDialog'
+#require 'dialog/CFY_ServiceCreateDialog'
+#require 'dialog/CFY_ServiceDeleteDialog'
 
 require 'dialog/LOC_CreateDialog'
 
@@ -261,18 +261,22 @@ class EC2_List
     @create_button.connect(SEL_COMMAND) do |sender, sel, data|
       case @type
       when "Images"
-        dialog = EC2_ImageSelectDialog.new(@ec2_main,@search_type,@search_platform,@search_root,@search_search)
-        dialog.execute
-        @image_search =  dialog.search
-        @image_type = dialog.type
-        @image_platform = dialog.platform
-        @image_root = dialog.root_device_type
-        @search_search =  dialog.search
-        @search_type = dialog.type
-        @search_platform = dialog.platform
-        @search_root = dialog.root_device_type
-        if dialog.selected
-          load_sort(@type,@curr_sort,@connection)
+        if @ec2_main.settings.softlayer
+          call_dialog(0)
+        else
+          dialog = EC2_ImageSelectDialog.new(@ec2_main,@search_type,@search_platform,@search_root,@search_search)
+          dialog.execute
+          @image_search =  dialog.search
+          @image_type = dialog.type
+          @image_platform = dialog.platform
+          @image_root = dialog.root_device_type
+          @search_search =  dialog.search
+          @search_type = dialog.type
+          @search_platform = dialog.platform
+          @search_root = dialog.root_device_type
+          if dialog.selected
+            load_sort(@type,@curr_sort,@connection)
+          end
         end
       when "Cloud Formation Stacks"
         dialog = CF_StackDialog.new(@ec2_main)
@@ -700,6 +704,20 @@ class EC2_List
     @connection = connection
     @type = type
     @curr_item = ""
+    if @ec2_main.settings.softlayer
+      if @type == "Public Images"
+        @type="Images"
+        @image_type = "Public Images"
+        @image_platform = "All Platforms"
+        @image_root = ""
+        @image_search = ""
+      elsif @type=="Images"
+        @image_type = "Owned By Me"
+        @image_platform = "All Platforms"
+        @image_root = ""
+        @image_search = ""
+      end
+    end
     if @type == "Images"
       status = $ec2_main.imageCache.status
       if status == "loaded"
@@ -724,6 +742,7 @@ class EC2_List
     @config = $ec2_main.cloud.config["Cloud"][connection][@type]
     @data = []
     if @type == "Images"
+      #puts "*** @image_platform #{@image_platform}"
       @data = @ec2_main.environment.images.get_images(@image_type, @image_platform, @image_root, @image_search, @tags_filter)
       if @data.empty?
         image_error_message = @ec2_main.environment.images.error_message
@@ -798,6 +817,7 @@ class EC2_List
           end
           puts "CMD #{cmd}"
           response = eval(cmd)
+          #puts "RESPONSE #{response}"
           #puts "RESPONSE.BODY #{response.body}"
           #puts "RESPONSE.STATUS #{response.status}"
           if @ec2_main.settings.cloudfoundry

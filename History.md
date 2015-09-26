@@ -1,3 +1,9 @@
+### Version 4.0.6 October 2015
+Add softlayer support
+Remove cloudstack, eucalyptus and cloudfoundry support
+Remove launch tab and support
+Add tooltip documentation
+
 ### Version 4.0.5 July 2015
 add KITCHEN_YAML environment setting.
 

@@ -782,6 +782,23 @@ class Data_servers
     return data
   end
 
+# Get a softlayer server
+  def  get_softlayer_server(parm)
+    data = {}
+    conn = @ec2_main.environment.connection
+    if conn != nil
+      response = conn.get_vm(parm)
+      if response.status == 200
+        data = response.body
+        puts "*** get vm #{data}"
+      else
+        data = {}
+      end
+    else
+      raise "Connection Error"
+    end
+    return data
+  end
 
 
   # Insert a google server
