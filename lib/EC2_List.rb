@@ -51,6 +51,7 @@ require 'dialog/ELB_PolicyDialog'
 require 'dialog/ELB_InstancesDialog'
 
 require 'dialog/AS_CapacityDialog'
+require 'dialog/AS_LaunchConfigurationCreateDialog'
 require 'dialog/AS_LaunchConfigurationDeleteDialog'
 require 'dialog/AS_InstancesDialog'
 require 'dialog/AS_GroupDialog'
