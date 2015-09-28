@@ -3,8 +3,8 @@ class EC2_Server
   def clear_panel
     if  @ec2_main.settings.openstack
       ops_clear_panel
-    elsif  @ec2_main.settings.cloudfoundry
-      cfy_clear_panel
+    elsif  @ec2_main.settings.softlayer
+      softlayer_clear_panel
     elsif  @ec2_main.settings.google
       google_clear_panel
     else
@@ -12,7 +12,6 @@ class EC2_Server
       clear('Instance_ID')
       ENV['EC2_INSTANCE'] = ""
       clear('Security_Groups')
-      #clear('Chef_Node')
       clear('Tags')
       clear('Image_ID')
       clear('State')
@@ -91,8 +90,6 @@ class EC2_Server
         else
           @server['Tags'].text =  ""
         end
-        #@server['Chef_Node'].text = get_chef_node
-        #@server['Puppet_Manifest'].text = get_puppet_manifest
         @server['Image_ID'].text = r['imageId']
         @server['State'].text = r['instanceState']['name']
         @server_status = @server['State'].text
@@ -231,7 +228,6 @@ class EC2_Server
     answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm Termination","Confirm Termination of Server Instance "+instance)
     if answer == MBOX_CLICKED_YES
       begin
-        #r = ec2.terminate_instances([instance])
         r = @ec2_main.environment.servers.delete_server(instance)
       rescue
         error_message("Terminate Instance Failed",$!)
@@ -244,7 +240,6 @@ class EC2_Server
     answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm Stop","Confirm Stop of Server Instance "+instance)
     if answer == MBOX_CLICKED_YES
       begin
-        #r = ec2.stop_instances(instance)
         r = @ec2_main.environment.servers.stop_instances(instance)
       rescue
         error_message("Stop Instance Failed",$!)
@@ -257,7 +252,6 @@ class EC2_Server
     answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm Start","Confirm Start of Server Instance "+instance)
     if answer == MBOX_CLICKED_YES
       begin
-        #r = ec2.start_instances(instance)
         r = @ec2_main.environment.servers.start_instances(instance)
       rescue
         error_message("Start Instance Failed",$!)

@@ -54,7 +54,7 @@ class EC2_Main < FXMainWindow
     puts "main.initialize "+RUBY_PLATFORM
     $ec2_main = self
     @initial_startup = false
-    @app = app
+ #   @app = app
     super(app, "#{product} v#{EC2Dream::VERSION} - Build and Manage Cloud Servers", :opts => DECOR_ALL, :width => 900, :height => 650)
 
     # Status bar
@@ -172,7 +172,7 @@ class EC2_Main < FXMainWindow
 #          puts "launch"
 #          @launch.clear_panel
 #          @tabBook.setCurrent(2)
-        when "Servers"    #,"Apps"
+        when "Servers"
           puts "#{item.text}"
           @tabBook.setCurrent(0)
           @list.load(item.text)
@@ -396,12 +396,12 @@ class EC2_Main < FXMainWindow
   #    @Eucalyptus = nil
   #    @CloudStack = nil
   #    @Cloud_Foundry = nil
-  #    @Servers = nil
+      @Servers = nil
     end
 
-    def app
-      return @app
-    end
+  #  def app
+  #    return @app
+  #  end
 
     def onCmdTracking(sender, sel, ptr)
       @splitter.splitterStyle ^= SPLITTER_TRACKING

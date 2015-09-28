@@ -73,9 +73,6 @@ require 'dialog/AS_AlarmCreateDialog'
 require 'dialog/AS_AlarmEditDialog'
 require 'dialog/AS_AlarmDeleteDialog'
 
-#require 'dialog/CFY_ServiceCreateDialog'
-#require 'dialog/CFY_ServiceDeleteDialog'
-
 require 'dialog/LOC_CreateDialog'
 
 require 'dialog/KIT_LogSelectDialog'
