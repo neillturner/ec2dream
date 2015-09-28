@@ -448,7 +448,7 @@ class EC2_Settings
         @settings['AVAILABILITY_ZONE_LABEL'].tipText = "G"
         @settings['AMAZON_NICKNAME_TAG_LABEL'].text=""
         @settings['AMAZON_NICKNAME_TAG_LABEL'].tipText=""
-        ENV['softlayer_user'] = @settings['AMAZON_ACCESS_KEY_ID'].text
+        ENV['softlayer_username'] = @settings['AMAZON_ACCESS_KEY_ID'].text
         ENV['softlayer_api_key'] = @settings['AMAZON_SECRET_ACCESS_KEY'].text
       else
         @settings['AMAZON_ACCESS_KEY_ID_LABEL'].text="ACCESS_KEY"

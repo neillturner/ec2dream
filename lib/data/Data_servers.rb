@@ -441,6 +441,13 @@ class Data_servers
         else
           data = {}
         end
+      elsif @ec2_main.settings.softlayer
+        response = conn.delete_vm(server_id)
+        if response.status == 200
+          data = response.body
+        else
+          data = {}
+        end
       else
         data = conn.terminate_instances([server_id])
       end
@@ -790,7 +797,6 @@ class Data_servers
       response = conn.get_vm(parm)
       if response.status == 200
         data = response.body
-        puts "*** get vm #{data}"
       else
         data = {}
       end

@@ -198,7 +198,7 @@ class EC2_Server
       elsif @type == "google"
         google_terminate
       elsif @type == "softlayer"
-        softlayer_delete
+        softlayer_terminate
       elsif @type == "loc"
         loc_save
       end
@@ -1458,7 +1458,7 @@ class EC2_Server
     @frame7 = FXMatrix.new(@page1, 3, MATRIX_BY_COLUMNS|LAYOUT_FILL)
     @frame7.hide()
     FXLabel.new(@frame7, "Name" )
-    @softlayer_server['Name'] = FXTextField.new(@frame7, 20, nil, 0, :opts => TEXTFIELD_READONLY)
+    @softlayer_server['Name'] = FXTextField.new(@frame7, 40, nil, 0, :opts => TEXTFIELD_READONLY)
     FXLabel.new(@frame7, "" )
     FXLabel.new(@frame7, "ID" )
     @softlayer_server['Instance_ID'] = FXTextField.new(@frame7, 25, nil, 0, :opts => TEXTFIELD_READONLY)

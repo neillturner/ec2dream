@@ -70,8 +70,9 @@ class EC2_Server
       @softlayer_server['Fqdn'].text = r['fullyQualifiedDomainName']
       @softlayer_server['Created_At'].text = r['createDate']
       @softlayer_server['Tags'].text = r['tags']
-#      @softlayer_server['Image_Id'].text = r['image_id']
-#      @softlayer_server['Flavor_Id'].text = r['flavor_id']
+ # doesn't show these
+ #     @softlayer_server['Image_Id'].text = r['image_id'].to_s
+ #     @softlayer_server['Flavor_Id'].text = r['flavor_id']
       @softlayer_server['Os_Code'].text = r['operatingSystem'].to_s
       @softlayer_server['Key_Pairs'].text = r['sshKeys'].to_s
       @softlayer_server['Public_IP_Address'].text = r['primaryIpAddress']
@@ -79,7 +80,8 @@ class EC2_Server
 
       @softlayer_server['Network_Components'].text = r['backendNetworkComponents'].to_s
       @softlayer_server['Disks'].text = r['blockDevices'].to_s
-#      @softlayer_server['Provision_Script'].text = r['provision_script']
+ # doesn't show this
+ #     @softlayer_server['Provision_Script'].text = r['provision_script']
       if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("mingw") == nil
         @softlayer_server['SSH_Private_Key'].text = get_pk
       else
@@ -92,6 +94,7 @@ class EC2_Server
       else
         @softlayer_server['EC2_SSH_User'].text = @ec2_main.settings.get('EC2_SSH_USER')
       end
+# doesn't show this
 #      if @softlayer_admin_pw[instance_id] != nil and @softlayer_admin_pw[instance_id] != ""
 #        @softlayer_server['Admin_Password'].text = @softlayer_admin_pw[instance_id]
 #      else
@@ -109,23 +112,16 @@ class EC2_Server
   end
 
   def softlayer_terminate
-    #instance = @softlayer_server['Instance_ID'].text
+    instance_id = @softlayer_server['Instance_ID'].text
     instance = @softlayer_server['Name'].text
     answer = FXMessageBox.question(@ec2_main.tabBook,MBOX_YES_NO,"Confirm Termination","Confirm Termination of Server Instance "+instance)
     if answer == MBOX_CLICKED_YES
       begin
-        r = @ec2_main.environment.servers.delete_softlayer_server(instance)
+        r = @ec2_main.environment.servers.delete_server(instance_id)
       rescue
         error_message("Terminate Instance Failed",$!)
       end
     end
   end
 
-  def softlayer_last(parm)
-    if parm == nil or parm == "" or parm.index('/') == nil
-      return parm
-    else
-      return parm.split("/").last
-    end
-  end
 end
