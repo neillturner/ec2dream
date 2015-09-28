@@ -7,6 +7,7 @@ For installation see http://ec2dream.blogspot.co.uk/search/label/EC2Dream%20Inst
 ```
 **BREAKING CHANGE** Need to set in the Environment Tab
     field SSL_CERT_FILE to value ca-bundle.crt
+**This is now the default**
 ```
 
 EC2Dream is a visual cloud computing devops product that uses Fog and Ruby supporting:
