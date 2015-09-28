@@ -19,10 +19,10 @@ require 'data/Data_tags'
 require 'data/Data_elb'
 require 'data/Data_vpc'
 require 'data/Data_cloud_watch'
-require 'data/Data_cfy_app'
-require 'data/Data_cfy_service'
-require 'data/Data_cfy_system'
-require 'data/Data_cfy_user'
+#require 'data/Data_cfy_app'
+#require 'data/Data_cfy_service'
+#require 'data/Data_cfy_system'
+#require 'data/Data_cfy_user'
 require 'data/Data_auto_scaling_activities'
 require 'data/Data_auto_scaling_groups'
 require 'data/Data_auto_scaling_instances'
@@ -61,10 +61,10 @@ class EC2_Environment < FXImageFrame
     @data_elb = nil
     @data_vpc = nil
     @data_cloud_watch = nil
-    @data_cfy_app = nil
-    @data_cfy_service = nil
-    @data_cfy_system = nil
-    @data_cfy_user = nil
+    #@data_cfy_app = nil
+    #@data_cfy_service = nil
+    #@data_cfy_system = nil
+    #@data_cfy_user = nil
     @data_auto_scaling_activities = nil
     @data_launch_configurations = nil
     @data_auto_scaling_policies = nil
@@ -355,38 +355,38 @@ class EC2_Environment < FXImageFrame
       @data_cloud_watch = Data_cloud_watch.new(@ec2_main)
     end
   end
-  def cfy_app
-    puts "environment.cfy_app"
-    if @data_cfy_app != nil
-      return @data_cfy_app
-    else
-      @data_cfy_app = Data_cfy_app.new(@ec2_main)
-    end
-  end
-  def cfy_service
-    puts "environment.cfy_service"
-    if @data_cfy_service != nil
-      return @data_cfy_service
-    else
-      @data_cfy_service = Data_cfy_service.new(@ec2_main)
-    end
-  end
-  def cfy_system
-    puts "environment.cfy_system"
-    if @data_cfy_system != nil
-      return @data_cfy_system
-    else
-      @data_cfy_system = Data_cfy_system.new(@ec2_main)
-    end
-  end
-  def cfy_user
-    puts "environment.cfy_user"
-    if @data_cfy_user != nil
-      return @data_cfy_user
-    else
-      @data_cfy_user = Data_cfy_user.new(@ec2_main)
-    end
-  end
+  #def cfy_app
+  #  puts "environment.cfy_app"
+  #  if @data_cfy_app != nil
+  #    return @data_cfy_app
+  #  else
+  #    @data_cfy_app = Data_cfy_app.new(@ec2_main)
+  #  end
+  #end
+  #def cfy_service
+  #  puts "environment.cfy_service"
+  #  if @data_cfy_service != nil
+  #    return @data_cfy_service
+  #  else
+  #    @data_cfy_service = Data_cfy_service.new(@ec2_main)
+  #  end
+  #end
+  #def cfy_system
+  #  puts "environment.cfy_system"
+  #  if @data_cfy_system != nil
+  #    return @data_cfy_system
+  #  else
+  #    @data_cfy_system = Data_cfy_system.new(@ec2_main)
+  #  end
+  #end
+  #def cfy_user
+  #  puts "environment.cfy_user"
+  #  if @data_cfy_user != nil
+  #    return @data_cfy_user
+  #  else
+  #    @data_cfy_user = Data_cfy_user.new(@ec2_main)
+  #  end
+  #end
   def roles
     puts "environment.roles"
     if @data_roles != nil

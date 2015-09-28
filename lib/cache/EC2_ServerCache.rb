@@ -52,9 +52,9 @@ class EC2_ServerCache
 
   def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disconnect, vpc)
     settings = @ec2_main.settings
-    if settings.cloudfoundry
-      refreshCfyTree(tree, serverBranch, doc, light, nolight, connect, disconnect)
-    else
+    #if settings.cloudfoundry
+    #  refreshCfyTree(tree, serverBranch, doc, light, nolight, connect, disconnect)
+    #else
       puts "ServerCache.refreshVpcServerTree"
       @vpc_serverList[vpc]= {}
       #@vpc_securityGrps[vpc] = []
@@ -172,14 +172,14 @@ class EC2_ServerCache
       if @vpc_securityGrps[vpc].size>0
         tree.expandTree(serverBranch)
       end
-    end
+    #end
   end
 
   def refreshServerTree(tree, serverBranch, doc, light, nolight, connect, disconnect)
     settings = @ec2_main.settings
-    if settings.cloudfoundry
-      refreshCfyTree(tree, serverBranch, doc, light, nolight, connect, disconnect)
-    else
+    #if settings.cloudfoundry
+    #  refreshCfyTree(tree, serverBranch, doc, light, nolight, connect, disconnect)
+    #else
       puts "ServerCache.refreshServerTree"
       @serverList= {}
       @securityGrps = []
@@ -315,8 +315,7 @@ class EC2_ServerCache
       if @securityGrps.size>0
         tree.expandTree(serverBranch)
       end
-    end
-
+    #end
   end
 
   def refresh(instance_id)
@@ -752,73 +751,73 @@ class EC2_ServerCache
   # cloudfoundry methods
   #
 
-  def refreshCfyTree(tree, serverBranch, doc, light, nolight, connect, disconnect)
-    settings = @ec2_main.settings
-    puts "ServerCache.refreshCfyTree"
-    @serverList= Array.new
-    @serverState  = Array.new
-    @securityGrps = Array.new
-    @instances = {}
-    @sg_instances = {}
-    @sg_active_instances = {}
-    @profile_folder = "launch"
-    begin
-      items = Dir.entries(@ec2_main.settings.get_system('ENV_PATH')+"/"+@profile_folder)
-    rescue
-      error_message("Repository Location does not exist",$!)
-      return
-    end
-    if items != nil
-      items.each do |e|
-        e = e.to_s
-        if e != "." and e != ".." and e != ".properties"
-          sa = e.split"."
-          if sa.size>1 and sa[1] == "properties"
-            @securityGrps.push(sa[0])
-          end
-        end
-      end
-    end
-    @ec2_main.environment.cfy_app.find_all_apps().each do |r|
-      k = "#{r[:name]}/#{r[:staging][:model]}"
-      @serverList.push(k)
-      @serverState.push(r[:state])
-      @instances[k]=r
-      if @sg_instances["#{r[:name]}"] == nil
-        @sg_instances["#{r[:name]}"]=Array.new
-      end
-      @sg_instances["#{r[:name]}"].push(r)
-    end
-
-    i=0
-    while i<@serverList.size
-      if @serverList[i].index("/") != nil
-        case @serverState[i]
-        when "RUNNING","STARTED"
-          tree.appendItem(serverBranch, @serverList[i], light, light)
-        when "FLAPPING"
-          tree.appendItem(serverBranch, @serverList[i], disconnect, disconnect)
-        when "STARTING"
-          tree.appendItem(serverBranch, @serverList[i], connect, connect)
-        when "STOPPED","DOWN"
-          tree.appendItem(serverBranch, @serverList[i], @stopped, @stopped)
-        else
-          tree.appendItem(serverBranch, @serverList[i], nolight, nolight)
-        end
-      else
-        tree.appendItem(serverBranch, @serverList[i], doc, doc, @serverList[i])
-      end
-      i = i+1
-    end
-    i=0
-    while i<@securityGrps.size
-      if @sg_instances[@securityGrps[i]]==nil
-        tree.appendItem(serverBranch, @securityGrps[i], doc, doc, @securityGrps[i])
-      end
-      i = i+1
-    end
-    if @serverList.size>0 or @securityGrps.size>0
-      tree.expandTree(serverBranch)
-    end
-  end
+  #def refreshCfyTree(tree, serverBranch, doc, light, nolight, connect, disconnect)
+  #  settings = @ec2_main.settings
+  #  puts "ServerCache.refreshCfyTree"
+  #  @serverList= Array.new
+  #  @serverState  = Array.new
+  #  @securityGrps = Array.new
+  #  @instances = {}
+  #  @sg_instances = {}
+  #  @sg_active_instances = {}
+  #  @profile_folder = "launch"
+  #  begin
+  #    items = Dir.entries(@ec2_main.settings.get_system('ENV_PATH')+"/"+@profile_folder)
+  #  rescue
+  #    error_message("Repository Location does not exist",$!)
+  #    return
+  #  end
+  #  if items != nil
+  #    items.each do |e|
+  #      e = e.to_s
+  #      if e != "." and e != ".." and e != ".properties"
+  #        sa = e.split"."
+  #        if sa.size>1 and sa[1] == "properties"
+  #          @securityGrps.push(sa[0])
+  #        end
+  #      end
+  #    end
+  #  end
+  #  @ec2_main.environment.cfy_app.find_all_apps().each do |r|
+  #    k = "#{r[:name]}/#{r[:staging][:model]}"
+  #    @serverList.push(k)
+  #    @serverState.push(r[:state])
+  #    @instances[k]=r
+  #    if @sg_instances["#{r[:name]}"] == nil
+  #      @sg_instances["#{r[:name]}"]=Array.new
+  #    end
+  #    @sg_instances["#{r[:name]}"].push(r)
+  #  end
+  #
+  #  i=0
+  #  while i<@serverList.size
+  #    if @serverList[i].index("/") != nil
+  #      case @serverState[i]
+  #      when "RUNNING","STARTED"
+  #        tree.appendItem(serverBranch, @serverList[i], light, light)
+  #      when "FLAPPING"
+  #        tree.appendItem(serverBranch, @serverList[i], disconnect, disconnect)
+  #      when "STARTING"
+  #        tree.appendItem(serverBranch, @serverList[i], connect, connect)
+  #      when "STOPPED","DOWN"
+  #        tree.appendItem(serverBranch, @serverList[i], @stopped, @stopped)
+  #      else
+  #        tree.appendItem(serverBranch, @serverList[i], nolight, nolight)
+  #      end
+  #    else
+  #      tree.appendItem(serverBranch, @serverList[i], doc, doc, @serverList[i])
+  #    end
+  #    i = i+1
+  #  end
+  #  i=0
+  #  while i<@securityGrps.size
+  #    if @sg_instances[@securityGrps[i]]==nil
+  #      tree.appendItem(serverBranch, @securityGrps[i], doc, doc, @securityGrps[i])
+  #    end
+  #    i = i+1
+  #  end
+  ##  if @serverList.size>0 or @securityGrps.size>0
+  #    tree.expandTree(serverBranch)
+  #  end
+  #end
 end

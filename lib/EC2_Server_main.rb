@@ -25,9 +25,9 @@ class EC2_Server
     @google_server = {}
     @google_public_addr = {}
     @google_admin_pw = {}
-    @cfy_server = {}
-    @cfy_env = []
-    @cfy_env_curr_row = nil
+    #@cfy_server = {}
+    #@cfy_env = []
+    #@cfy_env_curr_row = nil
     @loc_server = {}
     @saved = false
     @block_mapping = []
@@ -919,212 +919,212 @@ class EC2_Server
     #
     @frame4 = FXMatrix.new(@page1, 3, MATRIX_BY_COLUMNS|LAYOUT_FILL)
     @frame4.hide()
-    FXLabel.new(@frame4, "Name" )
-    @cfy_server['name'] = FXTextField.new(@frame4, 25, nil, 0, :opts => TEXTFIELD_READONLY)
-    FXLabel.new(@frame4, "" )
-    FXLabel.new(@frame4, "State" )
-    @cfy_server['state'] = FXTextField.new(@frame4, 25, nil, 0, :opts => TEXTFIELD_READONLY)
-    FXLabel.new(@frame4, "" )
-    FXLabel.new(@frame4, "Model" )
-    @cfy_server['model'] = FXTextField.new(@frame4, 25, nil, 0, :opts => TEXTFIELD_READONLY)
-    FXLabel.new(@frame4, "" )
-    FXLabel.new(@frame4, "Stack" )
-    @cfy_server['stack'] = FXTextField.new(@frame4, 25, nil, 0, :opts => TEXTFIELD_READONLY)
-    FXLabel.new(@frame4, "" )
-    FXLabel.new(@frame4, "URIs" )
-    @cfy_server['uris'] = FXTable.new(@frame4,:height => 120, :opts => LAYOUT_FIX_HEIGHT|LAYOUT_FILL|TABLE_COL_SIZABLE|TABLE_ROW_SIZABLE|TABLE_READONLY  )
-    @cfy_server['uris'].connect(SEL_COMMAND) do |sender, sel, which|
-      @cfy_uris_curr_row = which.row
-      @cfy_server['uris'].selectRow(@cfy_uris_curr_row)
-    end
-    (@cfy_server['uris'].columnHeader).connect(SEL_COMMAND) do |sender, sel, which|
-    end
-    panel4a = FXHorizontalFrame.new(@frame4,LAYOUT_FILL_X, :padding => 0)
-    FXLabel.new(panel4a, " ",:opts => LAYOUT_LEFT )
-    @cfy_uris_create_button = FXButton.new(panel4a, " ",:opts => BUTTON_TOOLBAR)
-    @cfy_uris_create_button.icon = @create
-    @cfy_uris_create_button.tipText = "  Map URI  "
-    @cfy_uris_create_button.connect(SEL_COMMAND) do |sender, sel, data|
-      name = @cfy_server['name'].text
-      dialog = CFY_UriEditDialog.new(@ec2_main,name)
-      dialog.execute
-      if dialog.saved
-        cfy_refresh(@appname)
-      end
-    end
-    @cfy_uris_delete_button = FXButton.new(panel4a, " ",:opts => BUTTON_TOOLBAR)
-    @cfy_uris_delete_button.icon = @delete
-    @cfy_uris_delete_button.tipText = "  Unmap URI  "
-    @cfy_uris_delete_button.connect(SEL_COMMAND) do |sender, sel, data|
-      if @cfy_uris_curr_row == nil
-        error_message("No URI selected","No URI selected to unset")
-      else
-        name = @cfy_server['name'].text
-        var_name =  @cfy_server['uris'].getItemText(@cfy_uris_curr_row,0)
-        dialog = CFY_UriEditDialog.new(@ec2_main,name,"unmap",var_name)
-        dialog.execute
-        if dialog.saved
-          cfy_refresh(@appname)
-        end
-      end
-    end
-    @cfy_uris_delete_button.connect(SEL_UPDATE) do |sender, sel, data|
-      sender.enabled = true
-    end
-
-    FXLabel.new(@frame4, "Instances" )
-    panel4e = FXHorizontalFrame.new(@frame4,LAYOUT_FILL_X, :padding => 0)
-    @cfy_server['instances'] =  FXTextField.new(panel4e, 25, nil, 0, :opts => FRAME_SUNKEN)
-    @cfy_instances_edit_button = FXButton.new(panel4e, " ",:opts => BUTTON_TOOLBAR)
-    @cfy_instances_edit_button.icon = @edit
-    @cfy_instances_edit_button.tipText = "  Set Instances  "
-    @cfy_instances_edit_button.connect(SEL_COMMAND) do |sender, sel, data|
-      name = @cfy_server['name'].text
-      parm = @cfy_server['instances'].text
-      dialog = CFY_InstancesEditDialog.new(@ec2_main,name,parm)
-      if dialog.saved
-        cfy_refresh(@appname)
-      end
-    end
-    @cfy_instances_edit_button.connect(SEL_UPDATE) do |sender, sel, data|
-      sender.enabled = true
-    end
-    FXLabel.new(@frame4, "" )
-    FXLabel.new(@frame4, "Running Instances" )
-    @cfy_server['runningInstances'] = FXTextField.new(@frame4, 60, nil, 0, :opts => TEXTFIELD_READONLY)
-    FXLabel.new(@frame4, "" )
-    FXLabel.new(@frame4, "Memory" )
-    panel4f = FXHorizontalFrame.new(@frame4,LAYOUT_FILL_X, :padding => 0)
-    @cfy_server['memory'] = FXTextField.new(panel4f, 25, nil, 0, :opts => FRAME_SUNKEN)
-    @cfy_memory_edit_button = FXButton.new(panel4f, " ",:opts => BUTTON_TOOLBAR)
-    @cfy_memory_edit_button.icon = @edit
-    @cfy_memory_edit_button.tipText = "  Set Memory Size  "
-    @cfy_memory_edit_button.connect(SEL_COMMAND) do |sender, sel, data|
-      name = @cfy_server['name'].text
-      parm = @cfy_server['memory'].text
-      dialog = CFY_MemorySizeEditDialog.new(@ec2_main,name,parm)
-      if dialog.saved
-        cfy_refresh(@appname)
-      end
-    end
-    @cfy_memory_edit_button.connect(SEL_UPDATE) do |sender, sel, data|
-      sender.enabled = true
-    end
-    FXLabel.new(@frame4, "" )
-    FXLabel.new(@frame4, "Disk" )
-    @cfy_server['disk'] = FXTextField.new(@frame4, 25, nil, 0, :opts => TEXTFIELD_READONLY)
-    FXLabel.new(@frame4, "" )
-    FXLabel.new(@frame4, "FDS" )
-    @cfy_server['fds'] = FXTextField.new(@frame4, 25, nil, 0, :opts => TEXTFIELD_READONLY)
-    FXLabel.new(@frame4, "" )
-    FXLabel.new(@frame4, "Services" )
-    @cfy_server['services'] = FXTable.new(@frame4,:height => 120, :opts => LAYOUT_FIX_HEIGHT|LAYOUT_FILL|TABLE_COL_SIZABLE|TABLE_ROW_SIZABLE|TABLE_READONLY  )
-    @cfy_server['services'].connect(SEL_COMMAND) do |sender, sel, which|
-      @cfy_services_curr_row = which.row
-      @cfy_server['services'].selectRow(@cfy_services_curr_row)
-    end
-    (@cfy_server['services'].columnHeader).connect(SEL_COMMAND) do |sender, sel, which|
-    end
-    panel4c = FXHorizontalFrame.new(@frame4,LAYOUT_FILL_X, :padding => 0)
-    FXLabel.new(panel4c, " ",:opts => LAYOUT_LEFT )
-    @cfy_services_create_button = FXButton.new(panel4c, " ",:opts => BUTTON_TOOLBAR)
-    @cfy_services_create_button.icon = @create
-    @cfy_services_create_button.tipText = "  Bind Service  "
-    @cfy_services_create_button.connect(SEL_COMMAND) do |sender, sel, data|
-      name = @cfy_server['name'].text
-      dialog = CFY_ServiceEditDialog.new(@ec2_main,name)
-      dialog.execute
-      if dialog.saved
-        cfy_refresh(@appname)
-      end
-    end
-    @cfy_services_delete_button = FXButton.new(panel4c, " ",:opts => BUTTON_TOOLBAR)
-    @cfy_services_delete_button.icon = @delete
-    @cfy_services_delete_button.tipText = "  Unbind Service  "
-    @cfy_services_delete_button.connect(SEL_COMMAND) do |sender, sel, data|
-      if @cfy_services_curr_row == nil
-        error_message("No Service selected","No Service selected to unbind")
-      else
-        name = @cfy_server['name'].text
-        var_name =  @cfy_server['services'].getItemText(@cfy_services_curr_row,0)
-        dialog = CFY_ServiceEditDialog.new(@ec2_main,name,"unbind",var_name)
-        dialog.execute
-        if dialog.saved
-          cfy_refresh(@appname)
-        end
-      end
-    end
-    @cfy_services_delete_button.connect(SEL_UPDATE) do |sender, sel, data|
-      sender.enabled = true
-    end
-    FXLabel.new(@frame4, "Version" )
-    @cfy_server['version'] = FXTextField.new(@frame4, 60, nil, 0, :opts => TEXTFIELD_READONLY)
-    FXLabel.new(@frame4, "" )
-    FXLabel.new(@frame4, "Env" )
-    @cfy_server['env'] = FXTable.new(@frame4,:height => 180, :opts => LAYOUT_FIX_HEIGHT|LAYOUT_FILL|TABLE_COL_SIZABLE|TABLE_ROW_SIZABLE|TABLE_READONLY  )
-    @cfy_server['env'].connect(SEL_COMMAND) do |sender, sel, which|
-      @cfy_env_curr_row = which.row
-      @cfy_server['env'].selectRow(@cfy_env_curr_row)
-    end
-    (@cfy_server['env'].columnHeader).connect(SEL_COMMAND) do |sender, sel, which|
-    end
-    panel4d = FXHorizontalFrame.new(@frame4,LAYOUT_FILL_X, :padding => 0)
-    FXLabel.new(panel4d, " ",:opts => LAYOUT_LEFT )
-    @cfy_env_create_button = FXButton.new(panel4d, " ",:opts => BUTTON_TOOLBAR)
-    @cfy_env_create_button.icon = @create
-    @cfy_env_create_button.tipText = "  Set Environment Variable  "
-    @cfy_env_create_button.connect(SEL_COMMAND) do |sender, sel, data|
-      name = @cfy_server['name'].text
-      dialog = CFY_EnvEditDialog.new(@ec2_main,name)
-      dialog.execute
-      if dialog.saved
-        cfy_refresh(@appname)
-      end
-    end
-    @cfy_env_create_button.connect(SEL_UPDATE) do |sender, sel, data|
-      sender.enabled = true
-    end
-    @cfy_env_edit_button = FXButton.new(panel4d, " ",:opts => BUTTON_TOOLBAR)
-    @cfy_env_edit_button.icon = @modify
-    @cfy_env_edit_button.tipText = "  Edit Environment Variable  "
-    @cfy_env_edit_button.connect(SEL_COMMAND) do |sender, sel, data|
-      if @cfy_env_curr_row == nil
-        error_message("No Environment Variable selected","No Environment Variable selected to edit")
-      else
-        name = @cfy_server['name'].text
-        var_name =  @cfy_server['env'].getItemText(@cfy_env_curr_row,0)
-        dialog = CFY_EnvEditDialog.new(@ec2_main,name,"",var_name)
-        dialog.execute
-        if dialog.saved
-          cfy_refresh(@appname)
-        end
-      end
-    end
-    @cfy_env_edit_button.connect(SEL_UPDATE) do |sender, sel, data|
-      sender.enabled = true
-    end
-    @cfy_env_delete_button = FXButton.new(panel4d, " ",:opts => BUTTON_TOOLBAR)
-    @cfy_env_delete_button.icon = @delete
-    @cfy_env_delete_button.tipText = "  UnSet Environment Variable  "
-    @cfy_env_delete_button.connect(SEL_COMMAND) do |sender, sel, data|
-      if @cfy_env_curr_row == nil
-        error_message("No Environment Variable selected","No Environment Variable selected to unset")
-      else
-        name = @cfy_server['name'].text
-        var_name =  @cfy_server['env'].getItemText(@cfy_env_curr_row,0)
-        dialog = CFY_EnvEditDialog.new(@ec2_main,name,"unset",var_name)
-        dialog.execute
-        if dialog.saved
-          cfy_refresh(@appname)
-        end
-      end
-    end
-    @cfy_env_delete_button.connect(SEL_UPDATE) do |sender, sel, data|
-      sender.enabled = true
-    end
-    FXLabel.new(@frame4, "Meta" )
-    @cfy_server['meta'] = FXText.new(@frame4, :height => 100, :opts => LAYOUT_FIX_HEIGHT|TEXT_WORDWRAP|LAYOUT_FILL, :padding => 0)
-    FXLabel.new(@frame4, "" )
+    #FXLabel.new(@frame4, "Name" )
+    #@cfy_server['name'] = FXTextField.new(@frame4, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+    #FXLabel.new(@frame4, "" )
+    #FXLabel.new(@frame4, "State" )
+    #@cfy_server['state'] = FXTextField.new(@frame4, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+    #FXLabel.new(@frame4, "" )
+    #FXLabel.new(@frame4, "Model" )
+    #@cfy_server['model'] = FXTextField.new(@frame4, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+    #FXLabel.new(@frame4, "" )
+    #FXLabel.new(@frame4, "Stack" )
+    #@cfy_server['stack'] = FXTextField.new(@frame4, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+    #FXLabel.new(@frame4, "" )
+    #FXLabel.new(@frame4, "URIs" )
+    #@cfy_server['uris'] = FXTable.new(@frame4,:height => 120, :opts => LAYOUT_FIX_HEIGHT|LAYOUT_FILL|TABLE_COL_SIZABLE|TABLE_ROW_SIZABLE|TABLE_READONLY  )
+    #@cfy_server['uris'].connect(SEL_COMMAND) do |sender, sel, which|
+    #  @cfy_uris_curr_row = which.row
+    #  @cfy_server['uris'].selectRow(@cfy_uris_curr_row)
+    #end
+    #(@cfy_server['uris'].columnHeader).connect(SEL_COMMAND) do |sender, sel, which|
+    #end
+    #panel4a = FXHorizontalFrame.new(@frame4,LAYOUT_FILL_X, :padding => 0)
+    #FXLabel.new(panel4a, " ",:opts => LAYOUT_LEFT )
+    #@cfy_uris_create_button = FXButton.new(panel4a, " ",:opts => BUTTON_TOOLBAR)
+    #@cfy_uris_create_button.icon = @create
+    #@cfy_uris_create_button.tipText = "  Map URI  "
+    #@cfy_uris_create_button.connect(SEL_COMMAND) do |sender, sel, data|
+    #  name = @cfy_server['name'].text
+    #  dialog = CFY_UriEditDialog.new(@ec2_main,name)
+    #  dialog.execute
+    #  if dialog.saved
+    #    cfy_refresh(@appname)
+    #  end
+    #end
+    #@cfy_uris_delete_button = FXButton.new(panel4a, " ",:opts => BUTTON_TOOLBAR)
+    #@cfy_uris_delete_button.icon = @delete
+    #@cfy_uris_delete_button.tipText = "  Unmap URI  "
+    #@cfy_uris_delete_button.connect(SEL_COMMAND) do |sender, sel, data|
+    #  if @cfy_uris_curr_row == nil
+    #    error_message("No URI selected","No URI selected to unset")
+    #  else
+    #    name = @cfy_server['name'].text
+    #    var_name =  @cfy_server['uris'].getItemText(@cfy_uris_curr_row,0)
+    #    dialog = CFY_UriEditDialog.new(@ec2_main,name,"unmap",var_name)
+    #    dialog.execute
+    #    if dialog.saved
+    #      cfy_refresh(@appname)
+    #    end
+    #  end
+    #end
+    #@cfy_uris_delete_button.connect(SEL_UPDATE) do |sender, sel, data|
+    #  sender.enabled = true
+    #end
+    #
+    #FXLabel.new(@frame4, "Instances" )
+    #panel4e = FXHorizontalFrame.new(@frame4,LAYOUT_FILL_X, :padding => 0)
+    #@cfy_server['instances'] =  FXTextField.new(panel4e, 25, nil, 0, :opts => FRAME_SUNKEN)
+    #@cfy_instances_edit_button = FXButton.new(panel4e, " ",:opts => BUTTON_TOOLBAR)
+    #@cfy_instances_edit_button.icon = @edit
+    #@cfy_instances_edit_button.tipText = "  Set Instances  "
+    #@cfy_instances_edit_button.connect(SEL_COMMAND) do |sender, sel, data|
+    #  name = @cfy_server['name'].text
+    #  parm = @cfy_server['instances'].text
+    #  dialog = CFY_InstancesEditDialog.new(@ec2_main,name,parm)
+    #  if dialog.saved
+    #    cfy_refresh(@appname)
+    #  end
+    #end
+    #@cfy_instances_edit_button.connect(SEL_UPDATE) do |sender, sel, data|
+    #  sender.enabled = true
+    #end
+    #FXLabel.new(@frame4, "" )
+    #FXLabel.new(@frame4, "Running Instances" )
+    #@cfy_server['runningInstances'] = FXTextField.new(@frame4, 60, nil, 0, :opts => TEXTFIELD_READONLY)
+    #FXLabel.new(@frame4, "" )
+    #FXLabel.new(@frame4, "Memory" )
+    #panel4f = FXHorizontalFrame.new(@frame4,LAYOUT_FILL_X, :padding => 0)
+    #@cfy_server['memory'] = FXTextField.new(panel4f, 25, nil, 0, :opts => FRAME_SUNKEN)
+    #@cfy_memory_edit_button = FXButton.new(panel4f, " ",:opts => BUTTON_TOOLBAR)
+    #@cfy_memory_edit_button.icon = @edit
+    #@cfy_memory_edit_button.tipText = "  Set Memory Size  "
+    #@cfy_memory_edit_button.connect(SEL_COMMAND) do |sender, sel, data|
+    #  name = @cfy_server['name'].text
+    #  parm = @cfy_server['memory'].text
+    #  dialog = CFY_MemorySizeEditDialog.new(@ec2_main,name,parm)
+    #  if dialog.saved
+    #    cfy_refresh(@appname)
+    #  end
+    #end
+    #@cfy_memory_edit_button.connect(SEL_UPDATE) do |sender, sel, data|
+    #  sender.enabled = true
+    #end
+    #FXLabel.new(@frame4, "" )
+    #FXLabel.new(@frame4, "Disk" )
+    #@cfy_server['disk'] = FXTextField.new(@frame4, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+    #FXLabel.new(@frame4, "" )
+    #FXLabel.new(@frame4, "FDS" )
+    #@cfy_server['fds'] = FXTextField.new(@frame4, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+    #FXLabel.new(@frame4, "" )
+    #FXLabel.new(@frame4, "Services" )
+    #@cfy_server['services'] = FXTable.new(@frame4,:height => 120, :opts => LAYOUT_FIX_HEIGHT|LAYOUT_FILL|TABLE_COL_SIZABLE|TABLE_ROW_SIZABLE|TABLE_READONLY  )
+    #@cfy_server['services'].connect(SEL_COMMAND) do |sender, sel, which|
+    #  @cfy_services_curr_row = which.row
+    #  @cfy_server['services'].selectRow(@cfy_services_curr_row)
+    #end
+    #(@cfy_server['services'].columnHeader).connect(SEL_COMMAND) do |sender, sel, which|
+    #end
+    #panel4c = FXHorizontalFrame.new(@frame4,LAYOUT_FILL_X, :padding => 0)
+    #FXLabel.new(panel4c, " ",:opts => LAYOUT_LEFT )
+    #@cfy_services_create_button = FXButton.new(panel4c, " ",:opts => BUTTON_TOOLBAR)
+    #@cfy_services_create_button.icon = @create
+    #@cfy_services_create_button.tipText = "  Bind Service  "
+    #@cfy_services_create_button.connect(SEL_COMMAND) do |sender, sel, data|
+    #  name = @cfy_server['name'].text
+    #  dialog = CFY_ServiceEditDialog.new(@ec2_main,name)
+    #  dialog.execute
+    #  if dialog.saved
+    #    cfy_refresh(@appname)
+    #  end
+    #end
+    #@cfy_services_delete_button = FXButton.new(panel4c, " ",:opts => BUTTON_TOOLBAR)
+    #@cfy_services_delete_button.icon = @delete
+    #@cfy_services_delete_button.tipText = "  Unbind Service  "
+    #@cfy_services_delete_button.connect(SEL_COMMAND) do |sender, sel, data|
+    #  if @cfy_services_curr_row == nil
+    #    error_message("No Service selected","No Service selected to unbind")
+    #  else
+    #    name = @cfy_server['name'].text
+    #    var_name =  @cfy_server['services'].getItemText(@cfy_services_curr_row,0)
+    #    dialog = CFY_ServiceEditDialog.new(@ec2_main,name,"unbind",var_name)
+    #    dialog.execute
+    #    if dialog.saved
+    #      cfy_refresh(@appname)
+    #    end
+    #  end
+    #end
+    #@cfy_services_delete_button.connect(SEL_UPDATE) do |sender, sel, data|
+    #  sender.enabled = true
+    #end
+    #FXLabel.new(@frame4, "Version" )
+    #@cfy_server['version'] = FXTextField.new(@frame4, 60, nil, 0, :opts => TEXTFIELD_READONLY)
+    #FXLabel.new(@frame4, "" )
+    #FXLabel.new(@frame4, "Env" )
+    #@cfy_server['env'] = FXTable.new(@frame4,:height => 180, :opts => LAYOUT_FIX_HEIGHT|LAYOUT_FILL|TABLE_COL_SIZABLE|TABLE_ROW_SIZABLE|TABLE_READONLY  )
+    #@cfy_server['env'].connect(SEL_COMMAND) do |sender, sel, which|
+    #  @cfy_env_curr_row = which.row
+    #  @cfy_server['env'].selectRow(@cfy_env_curr_row)
+    #end
+    #(@cfy_server['env'].columnHeader).connect(SEL_COMMAND) do |sender, sel, which|
+    #end
+    #panel4d = FXHorizontalFrame.new(@frame4,LAYOUT_FILL_X, :padding => 0)
+    #FXLabel.new(panel4d, " ",:opts => LAYOUT_LEFT )
+    #@cfy_env_create_button = FXButton.new(panel4d, " ",:opts => BUTTON_TOOLBAR)
+    #@cfy_env_create_button.icon = @create
+    #@cfy_env_create_button.tipText = "  Set Environment Variable  "
+    #@cfy_env_create_button.connect(SEL_COMMAND) do |sender, sel, data|
+    #  name = @cfy_server['name'].text
+    #  dialog = CFY_EnvEditDialog.new(@ec2_main,name)
+    #  dialog.execute
+    #  if dialog.saved
+    #    cfy_refresh(@appname)
+    #  end
+    #end
+    #@cfy_env_create_button.connect(SEL_UPDATE) do |sender, sel, data|
+    #  sender.enabled = true
+    #end
+    #@cfy_env_edit_button = FXButton.new(panel4d, " ",:opts => BUTTON_TOOLBAR)
+    #@cfy_env_edit_button.icon = @modify
+    #@cfy_env_edit_button.tipText = "  Edit Environment Variable  "
+    #@cfy_env_edit_button.connect(SEL_COMMAND) do |sender, sel, data|
+    #  if @cfy_env_curr_row == nil
+    #    error_message("No Environment Variable selected","No Environment Variable selected to edit")
+    #  else
+    #    name = @cfy_server['name'].text
+    #    var_name =  @cfy_server['env'].getItemText(@cfy_env_curr_row,0)
+    #    dialog = CFY_EnvEditDialog.new(@ec2_main,name,"",var_name)
+    #    dialog.execute
+    #    if dialog.saved
+    #      cfy_refresh(@appname)
+    #    end
+    #  end
+    #end
+    #@cfy_env_edit_button.connect(SEL_UPDATE) do |sender, sel, data|
+    #  sender.enabled = true
+    #end
+    #@cfy_env_delete_button = FXButton.new(panel4d, " ",:opts => BUTTON_TOOLBAR)
+    #@cfy_env_delete_button.icon = @delete
+    #@cfy_env_delete_button.tipText = "  UnSet Environment Variable  "
+    #@cfy_env_delete_button.connect(SEL_COMMAND) do |sender, sel, data|
+    #  if @cfy_env_curr_row == nil
+    #    error_message("No Environment Variable selected","No Environment Variable selected to unset")
+    #  else
+    #    name = @cfy_server['name'].text
+    #    var_name =  @cfy_server['env'].getItemText(@cfy_env_curr_row,0)
+    #    dialog = CFY_EnvEditDialog.new(@ec2_main,name,"unset",var_name)
+    #    dialog.execute
+    #    if dialog.saved
+    #      cfy_refresh(@appname)
+    #    end
+    #  end
+    #end
+    #@cfy_env_delete_button.connect(SEL_UPDATE) do |sender, sel, data|
+    #  sender.enabled = true
+    #end
+    #FXLabel.new(@frame4, "Meta" )
+    #@cfy_server['meta'] = FXText.new(@frame4, :height => 100, :opts => LAYOUT_FIX_HEIGHT|TEXT_WORDWRAP|LAYOUT_FILL, :padding => 0)
+    #FXLabel.new(@frame4, "" )
 
     #
     # local server  frame
