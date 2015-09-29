@@ -4,6 +4,17 @@ require 'resolv'
 require 'fog'
 require 'common/EC2_ResourceTags'
 
+# For non-AWS images support is for either
+# 'Public Images' or 'Owned By Me'
+#
+#  calls @ec2_main.environment.images.get_images
+#  calls Data/data_images get_images
+#
+#  Owned By Me:  owner = "self" executable = ""
+#  then find images by owner  (if not hp)
+#
+#  Public Images: owner=""  executable = "all"
+#  then eventually go to images.find_by_executable
 
 class Data_images
 
@@ -15,9 +26,6 @@ class Data_images
 
   def get_images(type, platform, root, search, filter)
     puts "Data_Images.get_images(#{type}, #{platform}, #{root}, #{search}, #{filter})"
-    owner = ""
-    executable = ""
-    arch = ""
     search = search.downcase
     if @ec2_main.settings.openstack and root == "ebs"
       root = "snapshot"
@@ -25,12 +33,13 @@ class Data_images
     root_device=root
     image_locs = Array.new
     @tags_filter = filter
-    if platform == "Small(i386)"
-      arch = "i386"
-    end
-    if platform == "Large(x86_64)"
-      arch = "x86_64"
-    end
+
+    arch = ""
+    arch = "i386" if platform == "Small(i386)"
+    arch = "x86_64" if platform == "Large(x86_64)"
+
+    owner = ""
+    executable = ""
     case type
     when "Owned By Me"
       owner = "self"
@@ -41,14 +50,13 @@ class Data_images
     when "Private Images"
       executable =  "self"
     else
-      search = type.downcase
       type = "Public Images"
       executable = "all"
     end
+
     if @tags_filter[:image] != nil and !@tags_filter[:image].empty?
       i=0
       begin
-        #ec2.describe_images(:filters => @tags_filter[:image]).each do |r|
         @ec2_main.environment.images.all(@tags_filter[:image]).each do |r|
           if search != nil and search != ""
             loc = r['imageLocation'].downcase
@@ -76,7 +84,6 @@ class Data_images
     else
       if owner != "" and !@ec2_main.settings.openstack_hp
         i=0
-        #ec2.describe_images_by_owner(owner).each do |r|
         @ec2_main.environment.images.find_by_owner(owner).each do |r|
           if search != nil and search != ""
             loc = r['imageLocation'].downcase
@@ -125,12 +132,9 @@ class Data_images
                 r['imageId'] = l[0,l.length-1]
                 r['rootDeviceType'] = root_device
                 if owner == "self"
-                  #r[:aws_is_public]="Private"
                   if @ec2_main.settings.openstack_hp
                     r['rootDeviceType'] = "snapshot"
                   end
-                  #else
-                  #   r[:aws_is_public]="Public"
                 end
                 image_locs[i] = r
                 i = i+1
@@ -139,13 +143,11 @@ class Data_images
           end
         else
           i=0
-          #ec2.describe_images_by_executable_by(executable).each do |r|
           @ec2_main.environment.images.find_by_executable(executable).each do |r|
             if @ec2_main.settings.google
               image_locs[i] = r
               i = i+1
             else
-              #if r[:aws_is_public]
               if search != nil and search != ""
                 loc = r['imageLocation'].downcase
                 if loc.index(search) != nil
@@ -164,7 +166,6 @@ class Data_images
                   end
                 end
               end
-              #end
             end
           end
         end
@@ -178,34 +179,6 @@ class Data_images
   end
 
   # Retrieve a list of images.
-  #
-  # Accepts a set of filters as the last parameter.
-  #
-  # Filters: architecture, block-device-mapping.delete-on-termination block-device-mapping.device-name,
-  # block-device-mapping.snapshot-id, block-device-mapping.volume-size, description, image-id, image-type,
-  # is-public, kernel-id, manifest-location, name, owner-alias, owner-id, platform, product-code,
-  # ramdisk-id, root-device-name, root-device-type, state, state-reason-code, state-reason-message,
-  # tag-key, tag-value, tag:key, virtualization-type
-  #
-  #  ec2.describe_images #=>
-  #    [{:description=>"EBS backed Fedora core 8 i386",
-  #      'architecture'=>"i386",
-  #      'imageId'=>"ami-c2a3f5d4",
-  #      :aws_image_type=>"machine",
-  #      :root_device_name=>"/dev/sda1",
-  #      :image_class=>"elastic",
-  #      :aws_owner=>"937766719418",
-  #      'imageLocation'=>"937766719418/EBS backed FC8 i386",
-  #      :aws_state=>"available",
-  #      :block_device_mappings=>
-  #       [{:ebs_snapshot_id=>"snap-829a20eb",
-  #         :ebs_delete_on_termination=>true,
-  #         :device_name=>"/dev/sda1"}],
-  #      :name=>"EBS backed FC8 i386",
-  #      :aws_is_public=>true}, ... ]
-  #
-  #  ec2.describe_images(:filters => { 'image-type' => 'kernel', 'state' => 'available', 'tag:MyTag' => 'MyValue'})
-  #
   def all(filter=nil)
     data = []
     conn = @ec2_main.environment.connection
@@ -239,11 +212,7 @@ class Data_images
   end
 
   # Retrieve a list of images by image owner.
-  #
-  # Accepts an owner.
-  #
-  #   ec2.describe_images_by_owner('522821470517')
-  #
+
   def find_by_owner(owner)
     puts "find_by_owner(#{owner})"
     data = Array.new
@@ -301,12 +270,6 @@ class Data_images
   end
 
   # Retrieve a list of images by image executable by.
-  #
-  # Accepts executable_by
-  #
-  #   ec2.describe_images_by_executable_by('522821470517')
-  #   ec2.describe_images_by_executable_by('self')
-  #   ec2.describe_images_by_executable_by('all', :filters => { 'architecture' => 'i386' })
   def find_by_executable(executable)
     puts "find_by_executable(#{executable})"
     data = Array.new
@@ -470,6 +433,8 @@ class Data_images
         # openstack
       elsif @ec2_main.settings.google
         # google
+      elsif @ec2_main.settings.softlayer
+        # softlayer
       elsif conn.instance_of?(Fog::Compute)
         # no method is fog aws for this?
       else
@@ -552,29 +517,6 @@ class Data_images
   end
 
   # Register new image at Amazon.
-  # Options: :image_location, :name, :description, :architecture, :kernel_id, :ramdisk_id,
-  #          :root_device_name, :block_device_mappings, :virtualizationt_type(hvm|paravirtual)
-  #
-  # Returns new image id.
-  #
-  #  # Register S3 image
-  #  ec2.register_image('bucket_for_k_dzreyev/image_bundles/kd__CentOS_1_10_2009_10_21_13_30_43_MSD/image.manifest.xml') #=> 'ami-e444444d'
-  #
-  #  # or
-  #  image_reg_params = {  :image_location => 'bucket_for_k_dzreyev/image_bundles/kd__CentOS_1_10_2009_10_21_13_30_43_MSD/image.manifest.xml',
-  #                        :name => 'my-test-one-1',
-  #                        :description => 'My first test image' }
-  #  ec2.register_image(image_reg_params) #=> "ami-bca1f7aa"
-  #
-  #  # Register EBS image
-  #  image_reg_params = { :name        => 'my-test-image',
-  #                       :description => 'My first test image',
-  #                       :root_device_name => "/dev/sda1",
-  #                       :block_device_mappings => [ { :ebs_snapshot_id=>"snap-7360871a",
-  #                                                     :ebs_delete_on_termination=>true,
-  #                                                     :device_name=>"/dev/sda1"} ] }
-  #  ec2.register_image(image_reg_params) #=> "ami-b2a1f7a4"
-  #
   def register_image(options)
     data = {}
     conn = @ec2_main.environment.connection
@@ -627,18 +569,6 @@ class Data_images
 
 
   def hash_ops_image_aws(r)
-    # r['imageId'] = r['imageId']
-    # r['imageLocation']  = r['imageLocation']
-    # r[:aws_state] = r['imageState']
-    # if r['isPublic'] == 'true'
-    #    r[:aws_is_public]  = "true"
-    # else
-    #    r[:aws_is_public]  = "false"
-    #  end
-    # r['architecture'] = r['architecture']
-    #  r[:aws_owner] = r['imageOwnerId']
-    #  r['rootDeviceType'] = r['rootDeviceType']
-    # r[:root_device_name] = r['rootDeviceName']
     return r
   end
 

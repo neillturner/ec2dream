@@ -40,10 +40,9 @@ Gem::Specification.new do |spec|
   spec.add_dependency('gchartrb')
   spec.add_dependency('fog', '>= 1.20.0')
   spec.summary = 'Build and Manage Cloud Servers'
-  spec.description = 'Visual devops tool. Supports chef, puppet, ansible, test-kitchen with Hosted Servers and Clouds including Amazon AWS, Openstack, Rackspace, HP Cloud, Google Compute Engines and Vagrant.'
+  spec.description = 'Visual devops tool. Supports chef, puppet, ansible, test-kitchen with Hosted Servers and Clouds including Amazon AWS, Openstack, Rackspace, HP Cloud, Google Compute Engines, Softlayer and Vagrant.'
     candidates = Dir.glob("{lib}/**/*") +  ['History.md', 'README.md', 'ec2dream.ico', 'ec2dream.bmp' , 'ca-bundle.crt', 'ec2dream.gemspec']
     candidates = candidates +  Dir.glob("{chef}/**/*")
-    candidates = candidates +  Dir.glob("{puppet}/**/*")
     candidates = candidates +  Dir.glob("{launchrdp}/*")
     candidates = candidates +  Dir.glob("{putty}/*")
     candidates = candidates +  Dir.glob("{google}/*")
