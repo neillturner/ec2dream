@@ -15,6 +15,7 @@ EC2Dream is a visual cloud computing devops product that uses Fog and Ruby suppo
 *     Amazon AWS.
 *     Openstack Clouds:  Rackspace Cloud Servers and HP Cloud.
 *     Google Compute Engine
+*     IBM Softlayer
 *     Vagrant.
 *     Test Kitchen (Chef, Puppet, Ansible, Salt).
 
