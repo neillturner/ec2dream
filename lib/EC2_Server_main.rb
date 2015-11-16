@@ -1613,7 +1613,7 @@ class EC2_Server
     end
     FXLabel.new(@frame7, "" )
     FXLabel.new(@frame7, "Private IP" )
-    @softlayer_server['Private_IP_Address'] = FXTextField.new(@frame7, 25, nil, 0, :opts => TEXTFIELD_READONLY)
+    @softlayer_server['Private_IP_Address'] = FXTextField.new(@frame7, 40, nil, 0, :opts => TEXTFIELD_READONLY)
     FXLabel.new(@frame7, "" )
     FXLabel.new(@frame7, "Networks" )
     @softlayer_server['Network_Components'] =  FXText.new(@frame7, :opts => TEXT_WORDWRAP|LAYOUT_FILL|TEXTFIELD_READONLY)
@@ -1681,8 +1681,8 @@ class EC2_Server
     elsif @type == "softlayer"
       user = @softlayer_server['EC2_SSH_User'].text
       #user = @ec2_main.settings.get('EC2_SSH_USER') if user == nil or user == ''
-      #address = @softlayer_server['Public_IP_Address'].text
-      address = @softlayer_server['Private_IP_Address'].text #if address == nil or address == ""
+      address = @softlayer_server['Public_IP_Address'].text
+      address = @softlayer_server['Private_IP_Address'].text if address == nil or address == ""
       password = @softlayer_server['Admin_Password'].text
       local_port = nil  # not added yet
     else
