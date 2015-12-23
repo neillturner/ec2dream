@@ -109,7 +109,7 @@ class EC2_Settings
       end
     end
     @settings['AMAZON_ACCESS_KEY_ID_LABEL'] = FXLabel.new(frame1, "ACCESS_KEY_ID" )
-    @settings['AMAZON_ACCESS_KEY_ID_LABEL'].tipText = "AWS: Your AWS account's access key id.\nOPENSTACK: Openstack User Name.\nGOOGLE: Your user email id.\nSOFTLAYER: Your softlayer user name"
+    @settings['AMAZON_ACCESS_KEY_ID_LABEL'].tipText = "AWS: Your AWS account's access key id.\nAZURE: Azure PEM Key\nOPENSTACK: Openstack User Name.\nGOOGLE: Your user email id.\nSOFTLAYER: Your softlayer user name"
     @settings['AMAZON_ACCESS_KEY_ID'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame1, "" )
     @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'] = FXLabel.new(frame1, "SECRET_ACCESS_KEY" )
@@ -123,11 +123,11 @@ class EC2_Settings
       dialog.execute
     end
     @settings['AMAZON_ACCOUNT_ID_LABEL'] = FXLabel.new(frame1, "ACCOUNT_ID" )
-    @settings['AMAZON_ACCOUNT_ID_LABEL'].tipText = "AWS: OPTIONAL Your AWS 12 digit Account ID.\nOPENSTACK: Openstack Project ID."
+    @settings['AMAZON_ACCOUNT_ID_LABEL'].tipText = "AWS: OPTIONAL Your AWS 12 digit Account ID.\nAZURE: Subscription ID\nOPENSTACK: Openstack Project ID."
     @settings['AMAZON_ACCOUNT_ID'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame1, "" )
     @settings['EC2_URL_LABEL'] = FXLabel.new(frame1, "URL" )
-    @settings['EC2_URL_LABEL'].tipText = "AWS@ The Endpoint address for your AWS region.\nOPENSTACK: the URL of the Openstack Identity Server. Should end in /tokens\nGOOGLE: Your Google Project"
+    @settings['EC2_URL_LABEL'].tipText = "AWS@ The Endpoint address for your AWS region.\nAZURE: Azure API URL\nOPENSTACK: the URL of the Openstack Identity Server. Should end in /tokens\nGOOGLE: Your Google Project"
     @settings['EC2_URL'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @settings['EC2_URL_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @settings['EC2_URL_BUTTON'].icon = @magnifier
@@ -442,6 +442,13 @@ class EC2_Settings
         @settings['AMAZON_NICKNAME_TAG_LABEL'].text=""
         ENV['softlayer_username'] = @settings['AMAZON_ACCESS_KEY_ID'].text
         ENV['softlayer_api_key'] = @settings['AMAZON_SECRET_ACCESS_KEY'].text
+      elsif @settings['EC2_PLATFORM'].text=="azure"
+        @settings['AMAZON_ACCESS_KEY_ID_LABEL'].text="PEM KEY PATH"
+        @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].text=""
+        @settings['AMAZON_ACCOUNT_ID_LABEL'].text="SUBSCRIPTION ID"
+        @settings['EC2_URL_LABEL'].text="API URL"
+        @settings['AVAILABILITY_ZONE_LABEL'].text = ""
+        @settings['AMAZON_NICKNAME_TAG_LABEL'].text=""
       else
         @settings['AMAZON_ACCESS_KEY_ID_LABEL'].text="ACCESS_KEY"
         @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].text="SECRET_ACCESS_KEY"

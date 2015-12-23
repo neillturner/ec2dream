@@ -21,13 +21,10 @@ require 'cache/EC2_ServerCache'
 require 'cache/EC2_ImageCache'
 require 'Amazon'
 require 'Google_compute'
-require 'Hp'
+require 'Azure'
 require 'Rackspace'
 require 'OpenStack'
 require 'Softlayer'
-#require 'Eucalyptus'
-#require 'CloudStack'
-#require 'Cloud_Foundry'
 require 'Servers'
 require 'EC2_version'
 
@@ -54,7 +51,6 @@ class EC2_Main < FXMainWindow
     puts "main.initialize "+RUBY_PLATFORM
     $ec2_main = self
     @initial_startup = false
- #   @app = app
     super(app, "#{product} v#{EC2Dream::VERSION} - Build and Manage Cloud Servers", :opts => DECOR_ALL, :width => 900, :height => 650)
 
     # Status bar
@@ -168,10 +164,6 @@ class EC2_Main < FXMainWindow
         when "Refresh"
           puts "refresh environment"
           treeCache.refresh()
-#        when "Launch"
-#          puts "launch"
-#          @launch.clear_panel
-#          @tabBook.setCurrent(2)
         when "Servers"
           puts "#{item.text}"
           @tabBook.setCurrent(0)
@@ -208,27 +200,6 @@ class EC2_Main < FXMainWindow
       elsif ((item.parent).text).start_with? "vpc-"
         process_server(item,(item.parent).text)
       else
-        #case (item.parent).text
-        #when "Apps"
-        #  sa = (item.text).split"/"
-        #  g = ""
-        #  if sa.size>1
-        #    g = sa[0]
-        #    if g != nil and g != ""
-        #      @launch.load(g)
-        #      @server.load(item.text)
-        #      @tabBook.setCurrent(1)
-        #    end
-        #  else
-        #    @launch.load(item.text)
-        #    @server.clear_panel
-        #    @tabBook.setCurrent(2)
-        #  end
-        #when "Launch"
-        #  puts "Launch #{item.text} "
-        #  @launch.load(item.text)
-        #  @tabBook.setCurrent(2)
-        #else
         puts "second level menu #{item.text} #{(item.parent).text}"
         @tabBook.setCurrent(0)
         @list.load(item.text,(item.parent).text)
@@ -335,11 +306,11 @@ class EC2_Main < FXMainWindow
         else
           @Google = Google_compute.new
         end
-      when "openstack_hp"
-        if @Hp != nil
-          @Hp
+      when "azure"
+        if @Azure != nil
+          @Azure
         else
-          @Hp = Hp.new
+          @Azure = Azure.new
         end
       when "openstack_rackspace"
         if @Rackspace != nil
@@ -359,24 +330,6 @@ class EC2_Main < FXMainWindow
         else
           @Softlayer = Softlayer.new
         end
- #     when "eucalyptus"
- #       if @Eucalyptus != nil
- #         @Eucalyptus
- #       else
- #         @Eucalyptus = Eucalyptus.new
- #       end
- #     when "cloudstack"
- #       if @CloudStack != nil
- #         @CloudStack
- #       else
- #         @CloudStack = CloudStack.new
- #       end
- #     when "cloudfoundry"
- #       if @Cloud_Foundry != nil
- #         @Cloud_Foundry
- #       else
- #         @Cloud_Foundry = Cloud_Foundry.new
- #       end
       when "servers"
         if @Servers != nil
           @Servers
@@ -389,19 +342,12 @@ class EC2_Main < FXMainWindow
     def cloud_reset
       @Amazon = nil
       @Google = nil
-      @Hp = nil
+      @Azure = nil
       @Rackspace = nil
       @OpenStack = nil
       @Softlayer = nil
-  #    @Eucalyptus = nil
-  #    @CloudStack = nil
-  #    @Cloud_Foundry = nil
       @Servers = nil
     end
-
-  #  def app
-  #    return @app
-  #  end
 
     def onCmdTracking(sender, sel, ptr)
       @splitter.splitterStyle ^= SPLITTER_TRACKING
@@ -416,7 +362,6 @@ class EC2_Main < FXMainWindow
       end
       return 1
     end
-
 
     def enable_if_env_set(sender)
       @env = @environment.env

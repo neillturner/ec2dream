@@ -18,7 +18,7 @@ class EC2_Server
     softlayer_clear('Key_Pairs')
     softlayer_clear('Admin_Password')
     softlayer_clear('Public_IP_Address')
-    softlayer_clear('Private IP_Address')
+    softlayer_clear('Private_IP_Address')
     if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("mingw") == nil
       softlayer_clear('SSH_Private_Key')
     else
