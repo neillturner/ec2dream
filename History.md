@@ -1,3 +1,7 @@
+### Version 4.0.7 Jan 2016
+Add partial azure support
+remove hp cloud support
+
 ### Version 4.0.6 October 2015
 Add softlayer support
 Remove cloudstack, eucalyptus and cloudfoundry support

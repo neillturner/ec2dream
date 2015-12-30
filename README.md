@@ -10,29 +10,24 @@ For installation see http://ec2dream.blogspot.co.uk/search/label/EC2Dream%20Inst
 **This is now the default**
 ```
 
-EC2Dream is a visual cloud computing devops product that uses Fog and Ruby supporting:
-*     Local and Hosted Servers.
-*     Amazon AWS.
-*     Openstack Clouds:  Rackspace Cloud Servers and HP Cloud.
+EC2Dream is a graphic user interface that provides a 'single pane of glass' to do agile devops primarily on cloud servers using:
+*     Amazon AWS
+*     Azure
+*     Local and Hosted Servers
 *     Google Compute Engine
 *     IBM Softlayer
+*     Openstack Clouds
 *     Vagrant.
 *     Test Kitchen (Chef, Puppet, Ansible, Salt).
 
 All using the one client graphical interface and running on Windows, Linux or Mac OSX clients.
-(It is written in Ruby using the FXRuby graphics library).
+(It is written in Ruby using the FXRuby graphics library and Fog cloud services library).
 
 ### Features include:
 *   Multiple environments based on access key, region.
 *   A tree view of your servers.
 *   One click SSH, SCP and Remote Desktop access.
-*   One click Chef testing of cookbooks.
-*   One click deregister and delete Image.
-*   Launch and terminate Servers
 *   View Server's System log
-*   Save Launch profile
-*   Support for OpenStack HP Cloud and Rackspace including security groups, servers, keypairs, IP addresses, Block Storage volumes and
-*   Snapshots.
 *   Support for Local and Hosted Servers -  Servers running in local virtualized environments like Vagrant, VMWare or Virtual box.
 *   Support for ssh tunnelling allow support of servers in Amazon VPC.
 *   Support for Amazon AWS including Cloud Formation
