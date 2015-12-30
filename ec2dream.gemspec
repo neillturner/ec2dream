@@ -32,7 +32,8 @@ Gem::Specification.new do |spec|
   spec.homepage = 'http://ec2dream.blogspot.com'
   spec.required_ruby_version = '>= 2.1'
   spec.require_path = 'lib'
-  spec.add_dependency('fxruby', '<= 1.6.29')
+#  spec.add_dependency('fxruby', '<= 1.6.29')
+  spec.add_dependency('fxruby', '= 1.6.33')
   spec.add_dependency('net-ssh', '<= 2.9.2')
   spec.add_dependency('test-kitchen', '~> 1.4')
   spec.add_dependency('rubyzip', '>= 1.0.0')
