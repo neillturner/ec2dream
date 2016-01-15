@@ -99,7 +99,7 @@ class EC2_TreeCache
       @vpc_serverBranch.each do |vpcid,branch|
         @ec2_main.serverCache.refreshVpcServerTree(@tree, branch, @parallel, @light, @nolight, @connect, @disconnect,vpcid)
       end
-      refresh_launch
+      #refresh_launch
       if @ec2_main.environment.connection_failed
         @topmost.text = "Env - Error Connection failed"
       else
@@ -110,6 +110,8 @@ class EC2_TreeCache
     else
       puts "not loading the tree at environment load time"
     end
+    puts "TreeCache.load #{env} Complete"
+    puts ""
   end
 
   def load_empty
@@ -159,11 +161,13 @@ class EC2_TreeCache
         @vpc_serverBranch.each do |vpcid,branch|
           @ec2_main.serverCache.refreshVpcServerTree(@tree, branch, @parallel, @light, @nolight, @connect, @disconnect,vpcid)
         end
-        refresh_launch
+        #refresh_launch
       else
         refresh_env
       end
     end
+    puts "TreeCache.refesh Complete"
+    puts ""
   end
 
   def refresh_env
@@ -196,8 +200,11 @@ class EC2_TreeCache
       end
       end
     end
+    puts "TreeCache.refesh_env Complete"
+    puts ""
   end
 
+  # not needed anymore
   def refresh_launch
     puts "TreeCache.refresh_launch"
     if (@launchBranch != nil) and (@topmost == nil or (@topmost.class  == Fox::FXTreeItem and  @topmost.text != "Loading......"))

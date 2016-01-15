@@ -65,6 +65,7 @@ class EC2_ServerCache
       @vpc_sg_instances[vpc] = {}
       @vpc_sg_active_instances[vpc] = {}
       i=0
+      puts "ServerCache.refreshVpcServerTree #{vpc} processing instances"
       @ec2_main.environment.servers.all([],{'vpc-id'=>vpc}).each do |r|
         instance_id = r[:aws_instance_id]
         if @eip[instance_id] != nil
@@ -156,7 +157,7 @@ class EC2_ServerCache
         tree.expandTree(serverBranch)
       end
     end_time = Time.new
-    puts "ServerCache.refreshVpcServerTree #{vpc} processed #{@vpc_instances[vpc].size} instances in #{end_time-start_time} secs"
+    puts "ServerCache.refreshVpcServerTree #{vpc} processed #{@vpc_instances[vpc].size} instances in #{(end_time-start_time).round(0)} secs"
   end
 
   def refreshServerTree(tree, serverBranch, doc, light, nolight, connect, disconnect)
@@ -206,6 +207,7 @@ class EC2_ServerCache
       @sg_active_instances = {}
       #@tags_filter= @ec2_main.settings.load_filter()
       i=0
+      puts "ServerCache.refreshServerTree processing instances"
       @ec2_main.environment.servers.all.each do |r|
         if r['vpcId'] == nil or r['vpcId']==""
           instance_id = r[:aws_instance_id]
@@ -298,7 +300,7 @@ class EC2_ServerCache
         tree.expandTree(serverBranch)
       end
     end_time = Time.new
-    puts "ServerCache.refreshServerTree processed #{@instances.size} instances in #{end_time-start_time} secs"
+    puts "ServerCache.refreshServerTree processed #{@instances.size} instances in #{(end_time-start_time).round(0)} secs"
   end
 
   def refresh(instance_id)
