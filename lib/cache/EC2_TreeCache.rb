@@ -60,7 +60,7 @@ class EC2_TreeCache
   end
 
   def load(env)
-    puts "tree.cache.load #{env}"
+    puts "TreeCache.load #{env}"
     @env = env
     platform = @ec2_main.settings.get("EC2_PLATFORM")
     if @topmost == nil or (@topmost.class  == Fox::FXTreeItem and @topmost.text != "Loading......")
@@ -113,7 +113,7 @@ class EC2_TreeCache
   end
 
   def load_empty
-    puts "tree.cache.load_empty"
+    puts "TreeCache.load_empty"
     @tree.clearItems
     @vpc_serverBranch = {}
     @launchBranch = nil
@@ -142,8 +142,9 @@ class EC2_TreeCache
     instances = {}
     @status = "empty"
   end
+
   def refresh
-    puts "Tree.refesh"
+    puts "TreeCache.refesh"
     if @topmost == nil or (@topmost.class  == Fox::FXTreeItem and  @topmost.text != "Loading......")
       if @ec2_main.settings.amazon or @ec2_main.settings.openstack or @ec2_main.settings.cloudfoundry or @ec2_main.settings.cloudstack or @ec2_main.settings.eucalyptus or @ec2_main.settings.google
         @serverBranch.each do |a|
@@ -166,7 +167,7 @@ class EC2_TreeCache
   end
 
   def refresh_env
-    puts "Tree.refresh_env"
+    puts "TreeCache.refresh_env"
     if @topmost == nil or (@topmost.class  == Fox::FXTreeItem and  @topmost.text != "Loading......")
       command = Thread.new do
       @environments.each do |a|
@@ -198,7 +199,7 @@ class EC2_TreeCache
   end
 
   def refresh_launch
-    puts "Tree.refresh_launch"
+    puts "TreeCache.refresh_launch"
     if (@launchBranch != nil) and (@topmost == nil or (@topmost.class  == Fox::FXTreeItem and  @topmost.text != "Loading......"))
       @launchBranch.each do |a|
         @tree.removeItem(a)

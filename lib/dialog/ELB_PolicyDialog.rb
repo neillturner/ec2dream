@@ -14,7 +14,7 @@ include Fox
 class ELB_PolicyDialog < FXDialogBox
 
   def initialize(owner, load_balancer)
-    puts "ELBPolicyDialog.initialize"
+    puts "ELBPolicyDialog.initialize  #{load_balancer}"
     @ec2_main = owner
     @updated = false
     @lb_name = load_balancer

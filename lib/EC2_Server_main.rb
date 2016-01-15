@@ -1645,6 +1645,7 @@ class EC2_Server
       local_port = nil  # not added yet
     else
       address = @server['Public_IP'].text
+      address = @server['Private_IP'].text if address == nil or address == ""
       user = @ec2_main.launch.get("EC2_SSH_User")
       user = @ec2_main.settings.get('EC2_SSH_USER') if user == nil or user == ''
       password =""

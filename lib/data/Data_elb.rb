@@ -199,7 +199,7 @@ class Data_elb
     conn = @ec2_main.environment.elb_connection
     if conn != nil
       begin
-        response = conn.describe_load_balancers(options = {})
+        response = conn.describe_load_balancers(options)
         if response.status == 200
           data = response.body['DescribeLoadBalancersResult']['LoadBalancerDescriptions']
         else

@@ -11,7 +11,7 @@ class ELB_InstanceRegisterDialog < FXDialogBox
     puts "InstanceRegisterDialog.initialize"
     @ec2_main = owner
     @curr_item = ""
-    @item_name = @ec2_main.serverCache.instance_names
+    @item_name = @ec2_main.serverCache.instance_running_names_all
     instance_table.each do |e|
       @item_name.each_index do |i|
         if @item_name[i].index(e) != nil

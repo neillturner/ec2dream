@@ -117,7 +117,7 @@ class EC2_Environment < FXImageFrame
     @treeCache = @ec2_main.treeCache
     @treeCache.load(@env)
     @ec2_main.list.clear
-    @ec2_main.list.load("Instance Status") if @settings.amazon
+    #@ec2_main.list.load("Instance Status") if @settings.amazon
     @ec2_main.app.forceRefresh
   end
   def load_empty_env
@@ -180,7 +180,9 @@ class EC2_Environment < FXImageFrame
     puts "environment.connection"
     platform = @ec2_main.settings.get("EC2_PLATFORM")
     puts "Platform #{platform}"
-    $ec2_main.cloud.conn("Compute")
+    conn = $ec2_main.cloud.conn("Compute")
+    puts "environment.connection complete"
+    return conn 
   end
   def connection_failed
     return @ec2_failed
@@ -355,38 +357,6 @@ class EC2_Environment < FXImageFrame
       @data_cloud_watch = Data_cloud_watch.new(@ec2_main)
     end
   end
-  #def cfy_app
-  #  puts "environment.cfy_app"
-  #  if @data_cfy_app != nil
-  #    return @data_cfy_app
-  #  else
-  #    @data_cfy_app = Data_cfy_app.new(@ec2_main)
-  #  end
-  #end
-  #def cfy_service
-  #  puts "environment.cfy_service"
-  #  if @data_cfy_service != nil
-  #    return @data_cfy_service
-  #  else
-  #    @data_cfy_service = Data_cfy_service.new(@ec2_main)
-  #  end
-  #end
-  #def cfy_system
-  #  puts "environment.cfy_system"
-  #  if @data_cfy_system != nil
-  #    return @data_cfy_system
-  #  else
-  #    @data_cfy_system = Data_cfy_system.new(@ec2_main)
-  #  end
-  #end
-  #def cfy_user
-  #  puts "environment.cfy_user"
-  #  if @data_cfy_user != nil
-  #    return @data_cfy_user
-  #  else
-  #    @data_cfy_user = Data_cfy_user.new(@ec2_main)
-  #  end
-  #end
   def roles
     puts "environment.roles"
     if @data_roles != nil
