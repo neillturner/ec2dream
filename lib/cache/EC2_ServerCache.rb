@@ -51,27 +51,10 @@ class EC2_ServerCache
   end
 
   def refreshVpcServerTree(tree, serverBranch, doc, light, nolight, connect, disconnect, vpc)
-    settings = @ec2_main.settings
-    #if settings.cloudfoundry
-    #  refreshCfyTree(tree, serverBranch, doc, light, nolight, connect, disconnect)
-    #else
-      puts "ServerCache.refreshVpcServerTree"
+      start_time = Time.new
+      puts "ServerCache.refreshVpcServerTree #{vpc}"
+      settings = @ec2_main.settings
       @vpc_serverList[vpc]= {}
-      #@vpc_securityGrps[vpc] = []
-      #@vpc_secGrps[vpc] = {}
-      #eip = {}
-      #@ec2_main.environment.security_group.all('vpc-id'=>vpc).each do |r|
-      #   gp = r[:aws_group_name]
-      #   if gp != nil and gp != ""
-      #      @vpc_secGrps[vpc][gp]=r
-      #      @vpc_securityGrps[vpc].push(gp)
-      #   end
-      #end
-      #@ec2_main.environment.addresses.all.each do |r|
-      #   if r[:instance_id] != nil and r[:instance_id] != ""
-      #      eip[r[:instance_id]] = r[:public_ip]
-      #   end
-      #end
       @vpc_securityGrps[vpc] = @vpc_securityGrps[vpc].sort_by { |x| x.downcase }
       i=0
       @vpc_securityGrps[vpc].each do |s|
@@ -172,15 +155,14 @@ class EC2_ServerCache
       if @vpc_securityGrps[vpc].size>0
         tree.expandTree(serverBranch)
       end
-    #end
+    end_time = Time.new
+    puts "ServerCache.refreshVpcServerTree #{vpc} processed #{@vpc_instances[vpc].size} instances in #{end_time-start_time} secs"
   end
 
   def refreshServerTree(tree, serverBranch, doc, light, nolight, connect, disconnect)
-    settings = @ec2_main.settings
-    #if settings.cloudfoundry
-    #  refreshCfyTree(tree, serverBranch, doc, light, nolight, connect, disconnect)
-    #else
       puts "ServerCache.refreshServerTree"
+      start_time = Time.new
+      settings = @ec2_main.settings
       @serverList= {}
       @securityGrps = []
       @secGrps = {}
@@ -315,7 +297,8 @@ class EC2_ServerCache
       if @securityGrps.size>0
         tree.expandTree(serverBranch)
       end
-    #end
+    end_time = Time.new
+    puts "ServerCache.refreshServerTree processed #{@instances.size} instances in #{end_time-start_time} secs"
   end
 
   def refresh(instance_id)
