@@ -17,7 +17,7 @@ class CF_CreateDialog < FXDialogBox
     @magnifier.create
     @script_edit = @ec2_main.makeIcon("script_edit.png")
     @script_edit.create
-    super(@ec2_main, "Create Stack Configuration", :opts => DECOR_ALL, :width => 600, :height => 275)
+    super(@ec2_main, "Create Stack Configuration", :opts => DECOR_ALL, :width => 600, :height => 300)
     page1 = FXVerticalFrame.new(self, LAYOUT_FILL, :padding => 0)
     frame1 = FXMatrix.new(page1, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
     stack_name_label = FXLabel.new(frame1, "Stack Name" )
@@ -89,6 +89,10 @@ class CF_CreateDialog < FXDialogBox
     parameters_label.tipText = "OPTIONAL: A list of Parameters that specify input parameters for the cloudformtion stack.\n comma separated list of keyword=value. For example KeyPairName=MyKey,InstanceType=t2.micro"
     parameters = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
     FXLabel.new(frame1, "" )
+    parameter_separator_label = FXLabel.new(frame1, "Parameter Separator" )
+    parameter_separator_label.tipText = "OPTIONAL: Single Character used as separator between parameters, defaults to \",\"."
+    parameter_separator = FXTextField.new(frame1, 5, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
+    FXLabel.new(frame1, "" )
     disable_rollback_label = FXLabel.new(frame1, "Disable Rollback" )
     disable_rollback_label.tipText = "OPTIONAL: true or false. Controls rollback on stack creation failure, defaults to false."
     disable_rollback = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
@@ -107,7 +111,7 @@ class CF_CreateDialog < FXDialogBox
       if stack_name.text == nil or stack_name.text == ""
         error_message("Error","Stack Name not specified")
       else
-        save_stack(stack_name.text,cfndsl_file.text,cfndsl_parameters.text,pretty_print_json,template_file.text,parameters.text,disable_rollback.text,timeout_in_minutes.text)
+        save_stack(stack_name.text,cfndsl_file.text,cfndsl_parameters.text,pretty_print_json,template_file.text,parameters.text,parameter_separator.text,disable_rollback.text,timeout_in_minutes.text)
         if @saved == true
           self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
         end
@@ -126,6 +130,7 @@ class CF_CreateDialog < FXDialogBox
         end
         template_file.text = r['template_file']
         parameters.text = r['parameters']
+        parameter_separator.text = r['parameter_separator']
         if r['disable_rollback'] != nil and r['disable_rollback'] != ""
           disable_rollback.text = r['disable_rollback']
         else
@@ -150,7 +155,7 @@ class CF_CreateDialog < FXDialogBox
     return properties
   end
 
-  def save_stack(stack_name,cfndsl_file,cfndsl_parameters,pretty_print_json,template_file,parameters,disable_rollback,timeout_in_minutes)
+  def save_stack(stack_name,cfndsl_file,cfndsl_parameters,pretty_print_json,template_file,parameters,parameter_separator,disable_rollback,timeout_in_minutes)
     folder = "cf_templates"
     loc = EC2_Properties.new
     if loc != nil
@@ -166,6 +171,7 @@ class CF_CreateDialog < FXDialogBox
         end
         properties['template_file']=template_file
         properties['parameters']=parameters
+        properties['parameter_separator']=parameter_separator
         if disable_rollback != nil and disable_rollback != ""
           properties['disable_rollback'] = disable_rollback
         end

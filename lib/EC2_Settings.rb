@@ -13,6 +13,7 @@ require 'dialog/EC2_GenerateKeyDialog'
 require 'dialog/EC2_SystemDialog'
 require 'dialog/EC2_TerminalsDialog'
 require 'dialog/EC2_BastionEditDialog'
+require 'dialog/EC2_VpcDialog'
 require 'common/error_message'
 require 'common/read_properties'
 require 'common/save_properties'
@@ -158,6 +159,20 @@ class EC2_Settings
     @settings['AMAZON_NICKNAME_TAG_LABEL'].tipText = "AWS: OPTIONAL: The AWS Tag using to identifer the name of a resource. DEFAULTS to Name."
     @settings['AMAZON_NICKNAME_TAG'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame1, "" )
+    @settings['AMAZON_VPC_ID_LABEL'] = FXLabel.new(frame1, "VPC ID" )
+    @settings['AMAZON_VPC_ID_LABEL'].tipText = "AWS: OPTIONAL: Restrict to look at servers only from this VPC. DEFAULTS to All VPCs."
+    @settings['AMAZON_VPC_ID'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+    @settings['AMAZON_VPC_ID_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
+    @settings['AMAZON_VPC_ID_BUTTON'].icon = @magnifier
+    @settings['AMAZON_VPC_ID_BUTTON'].tipText = "Select..."
+    @settings['AMAZON_VPC_ID_BUTTON'].connect(SEL_COMMAND) do
+      dialog = EC2_VpcDialog.new(@ec2_main)
+      dialog.execute
+      it = dialog.selected
+      if it != nil and it != ""
+        @settings['AMAZON_VPC_ID'].text = it
+      end
+    end
     #
     #   PuTTY and WinSCP Settings
     #
@@ -410,6 +425,7 @@ class EC2_Settings
       end
       load_panel('AVAILABILITY_ZONE')
       load_panel('AMAZON_NICKNAME_TAG')
+      load_panel('AMAZON_VPC_ID')
       if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("mingw") == nil
         load_panel('TERMINAL_EMULATOR')
       end
@@ -433,6 +449,7 @@ class EC2_Settings
         @settings['EC2_URL_LABEL'].text="PROJECT"
         @settings['AVAILABILITY_ZONE_LABEL'].text = "ZONE"
         @settings['AMAZON_NICKNAME_TAG_LABEL'].text=""
+        @settings['AMAZON_VPC_ID_LABEL'].text=""
       elsif @settings['EC2_PLATFORM'].text=="softlayer"
         @settings['AMAZON_ACCESS_KEY_ID_LABEL'].text="USER"
         @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].text="API KEY"
@@ -440,6 +457,7 @@ class EC2_Settings
         @settings['EC2_URL_LABEL'].text=""
         @settings['AVAILABILITY_ZONE_LABEL'].text = ""
         @settings['AMAZON_NICKNAME_TAG_LABEL'].text=""
+        @settings['AMAZON_VPC_ID_LABEL'].text=""
         ENV['softlayer_username'] = @settings['AMAZON_ACCESS_KEY_ID'].text
         ENV['softlayer_api_key'] = @settings['AMAZON_SECRET_ACCESS_KEY'].text
       elsif @settings['EC2_PLATFORM'].text=="azure"
@@ -449,6 +467,7 @@ class EC2_Settings
         @settings['EC2_URL_LABEL'].text="API URL"
         @settings['AVAILABILITY_ZONE_LABEL'].text = ""
         @settings['AMAZON_NICKNAME_TAG_LABEL'].text=""
+        @settings['AMAZON_VPC_ID_LABEL'].text=""
       else
         @settings['AMAZON_ACCESS_KEY_ID_LABEL'].text="ACCESS_KEY"
         @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].text="SECRET_ACCESS_KEY"
@@ -456,6 +475,7 @@ class EC2_Settings
         @settings['EC2_URL_LABEL'].text="URL"
         @settings['AVAILABILITY_ZONE_LABEL'].text = "AVAILABILITY_ZONE"
         @settings['AMAZON_NICKNAME_TAG_LABEL'].text="NICKNAME TAG"
+        @settings['AMAZON_VPC_ID_LABEL'].text="VPC ID"
       end
     end
     @ec2_main.app.forceRefresh
@@ -483,6 +503,7 @@ class EC2_Settings
     clear('VAGRANT_REPOSITORY')
     clear('AVAILABILITY_ZONE')
     clear('AMAZON_NICKNAME_TAG')
+    clear('AMAZON_VPC_ID')
     clear('EXTERNAL_EDITOR')
     clear('EXTERNAL_BROWSER')
     clear('TIMEZONE')
@@ -630,6 +651,7 @@ class EC2_Settings
     save_setting("VAGRANT_REPOSITORY")
     save_setting("AVAILABILITY_ZONE")
     save_setting("AMAZON_NICKNAME_TAG")
+    save_setting("AMAZON_VPC_ID")
     if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("mingw") != nil
       save_setting("PUTTY_PRIVATE_KEY")
     end

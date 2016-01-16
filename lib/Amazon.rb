@@ -24,7 +24,7 @@ class Amazon
   def conn(type)
     #Fog.mock!
     if @conn[type] == nil
-      puts "Amazon.conn  #{type}"
+      start_time = Time.new
       ec2_url = $ec2_main.settings.get('EC2_URL')
       region = "us-east-1"
       if ec2_url != nil and ec2_url.length>0
@@ -69,9 +69,9 @@ class Amazon
           @conn[type] = Fog::AWS::SES.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY') )
         when 'SNS'
           @conn[type] = Fog::AWS::SNS.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY') )
-
         else
           nil
+          return
         end
       rescue
         reset_connection

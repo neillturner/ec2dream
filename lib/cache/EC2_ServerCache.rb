@@ -55,6 +55,10 @@ class EC2_ServerCache
       puts "ServerCache.refreshVpcServerTree #{vpc}"
       settings = @ec2_main.settings
       @vpc_serverList[vpc]= {}
+      if @vpc_securityGrps[vpc] == nil
+        puts "ERROR: Invalid VPC ID specified in Enviroment Settings"
+        @vpc_securityGrps[vpc] = {}
+      end
       @vpc_securityGrps[vpc] = @vpc_securityGrps[vpc].sort_by { |x| x.downcase }
       i=0
       @vpc_securityGrps[vpc].each do |s|
@@ -157,56 +161,66 @@ class EC2_ServerCache
         tree.expandTree(serverBranch)
       end
     end_time = Time.new
-    puts "ServerCache.refreshVpcServerTree #{vpc} processed #{@vpc_instances[vpc].size} instances in #{(end_time-start_time).round(0)} secs"
+    puts "------> Processed #{vpc} #{@vpc_instances[vpc].size} instances in #{(end_time-start_time).round(0)} secs"
   end
 
   def refreshServerTree(tree, serverBranch, doc, light, nolight, connect, disconnect)
-      puts "ServerCache.refreshServerTree"
+    puts "ServerCache.refreshServerTree"
+    start_time = Time.new
+    settings = @ec2_main.settings
+    @serverList= {}
+    @securityGrps = []
+    @secGrps = {}
+    @vpc_securityGrps = {}
+    @vpc_secGrps = {}
+    @eip = {}
+    platform = @ec2_main.settings.get("EC2_PLATFORM")
+    vpc_id = @ec2_main.settings.get("AMAZON_VPC_ID")
+    if @ec2_main.treeCache.status != "empty" || (vpc_id != nil and vpc_id != "")
+      puts "------> Connecting to #{platform} Cloud API"
       start_time = Time.new
-      settings = @ec2_main.settings
-      @serverList= {}
-      @securityGrps = []
-      @secGrps = {}
-
-      @vpc_securityGrps = {}
-      @vpc_secGrps = {}
-      @eip = {}
-      load_secGrps_tags
-      @ec2_main.environment.security_group.all.each do |r|
-        if r['groupId'] != nil
-          r['tagSet'] =  @secGrps_tags[r['groupId']]
-        end
-        gp = r[:aws_group_name]
-        if gp != nil and gp != ""
-          if (r['vpcId'] == nil or r['vpcId']=="")
-            @secGrps[gp]=r
-            @securityGrps.push(gp)
-          else
-            vpc = r['vpcId']
-            @vpc_securityGrps[vpc] = [] if @vpc_securityGrps[vpc] == nil
-            @vpc_secGrps[vpc] = {}      if  @vpc_secGrps[vpc] == nil
-            @vpc_secGrps[vpc][gp]=r
-            @vpc_securityGrps[vpc].push(gp)
-          end
-
+    end
+    load_secGrps_tags
+    if @ec2_main.treeCache.status != "empty" || (vpc_id != nil and vpc_id != "")
+      end_time = Time.new
+      puts "------> Connecting to #{platform} Cloud API took #{(end_time-start_time).round(0)} secs"
+    end
+    @ec2_main.environment.security_group.all.each do |r|
+      if r['groupId'] != nil
+        r['tagSet'] =  @secGrps_tags[r['groupId']]
+      end
+      gp = r[:aws_group_name]
+      if gp != nil and gp != ""
+        if (r['vpcId'] == nil or r['vpcId']=="")
+          @secGrps[gp]=r
+          @securityGrps.push(gp)
+        else
+          vpc = r['vpcId']
+          @vpc_securityGrps[vpc] = [] if @vpc_securityGrps[vpc] == nil
+          @vpc_secGrps[vpc] = {}      if  @vpc_secGrps[vpc] == nil
+          @vpc_secGrps[vpc][gp]=r
+          @vpc_securityGrps[vpc].push(gp)
         end
       end
-      @ec2_main.environment.addresses.all.each do |r|
-        if r[:instance_id] != nil and r[:instance_id] != ""
-          @eip[r[:instance_id]] = r[:public_ip]
-        end
+    end
+    @ec2_main.environment.addresses.all.each do |r|
+      if r[:instance_id] != nil and r[:instance_id] != ""
+        @eip[r[:instance_id]] = r[:public_ip]
       end
-      @securityGrps = @securityGrps.sort_by { |x| x.downcase }
-      i=0
-      @securityGrps.each do |s|
-        @serverList[s] = []
-        i=i+1
-      end
-      @instances = {}
-      @sg_instances = {}
-      @sg_active_instances = {}
-      #@tags_filter= @ec2_main.settings.load_filter()
-      i=0
+    end
+    @securityGrps = @securityGrps.sort_by { |x| x.downcase }
+    i=0
+    @securityGrps.each do |s|
+      @serverList[s] = []
+      i=i+1
+    end
+    @instances = {}
+    @sg_instances = {}
+    @sg_active_instances = {}
+    #@tags_filter= @ec2_main.settings.load_filter()
+    i=0
+    vpc_id = @ec2_main.settings.get("AMAZON_VPC_ID")
+    if vpc_id == nil or vpc_id == ""
       puts "ServerCache.refreshServerTree processing instances"
       @ec2_main.environment.servers.all.each do |r|
         if r['vpcId'] == nil or r['vpcId']==""
@@ -296,11 +310,12 @@ class EC2_ServerCache
         end
         i = i+1
       end
-      if @securityGrps.size>0
-        tree.expandTree(serverBranch)
-      end
-    end_time = Time.new
-    puts "ServerCache.refreshServerTree processed #{@instances.size} instances in #{(end_time-start_time).round(0)} secs"
+      end_time = Time.new
+      puts "------> Processed #{@instances.size} instances in #{(end_time-start_time).round(0)} secs"
+    end
+    if @securityGrps.size>0
+      tree.expandTree(serverBranch)
+    end
   end
 
   def refresh(instance_id)
@@ -398,7 +413,7 @@ class EC2_ServerCache
         end
       end
     else
-      puts "tree item #{treeText} not found - refrshing tree"
+      puts "tree item #{treeText} not found - refreshing tree"
       @ec2_main.treeCache.refresh
     end
   end

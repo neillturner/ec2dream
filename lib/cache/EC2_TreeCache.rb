@@ -62,6 +62,7 @@ class EC2_TreeCache
   def load(env)
     puts "TreeCache.load #{env}"
     @env = env
+    vpc_id = @ec2_main.settings.get("AMAZON_VPC_ID")
     platform = @ec2_main.settings.get("EC2_PLATFORM")
     if @topmost == nil or (@topmost.class  == Fox::FXTreeItem and @topmost.text != "Loading......")
       @status = "loading"
@@ -81,11 +82,20 @@ class EC2_TreeCache
         end
         config["Cloud"][m[0]].each do |t|
           if t[1]["menu"] == nil or  t[1]["menu"] != false
-            if t[0] == "Servers" or t[0] == "Apps"
+            if t[0] == "Servers"
               @serverBranch = @tree.appendItem(parent, t[0], @folder_open, @folder_closed)
               if  @ec2_main.settings.amazon
-                @ec2_main.environment.vpc.describe_vpcs.each do |r|
-                  @vpc_serverBranch[r['vpcId']] = @tree.appendItem(parent, r['vpcId'], @folder_open, @folder_closed)
+                if vpc_id != nil and vpc_id != ""
+                  @vpc_serverBranch[vpc_id] = @tree.appendItem(parent, vpc_id, @folder_open, @folder_closed)
+                else
+                  puts "------> Connecting to #{platform} Cloud API"
+                  start_time = Time.new
+                  data = @ec2_main.environment.vpc.describe_vpcs
+                  end_time = Time.new
+                  puts "------> Connecting to #{platform} Cloud API took #{(end_time-start_time).round(0)} secs"
+                  data.each do |r|
+                    @vpc_serverBranch[r['vpcId']] = @tree.appendItem(parent, r['vpcId'], @folder_open, @folder_closed)
+                  end
                 end
               end
             else
@@ -97,7 +107,7 @@ class EC2_TreeCache
       end
       @ec2_main.serverCache.refreshServerTree(@tree, @serverBranch, @parallel, @light, @nolight, @connect, @disconnect) if @serverBranch != nil
       @vpc_serverBranch.each do |vpcid,branch|
-        @ec2_main.serverCache.refreshVpcServerTree(@tree, branch, @parallel, @light, @nolight, @connect, @disconnect,vpcid)
+        @ec2_main.serverCache.refreshVpcServerTree(@tree, branch, @parallel, @light, @nolight, @connect, @disconnect, vpcid)
       end
       #refresh_launch
       if @ec2_main.environment.connection_failed
@@ -166,7 +176,7 @@ class EC2_TreeCache
         refresh_env
       end
     end
-    puts "TreeCache.refesh Complete"
+    puts "TreeCache.refresh Complete"
     puts ""
   end
 
@@ -259,6 +269,7 @@ class EC2_TreeCache
       puts "Security Group not found in tree"
     end
   end
+
   def status
     @status
   end

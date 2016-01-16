@@ -180,8 +180,7 @@ class EC2_Environment < FXImageFrame
     platform = @ec2_main.settings.get("EC2_PLATFORM")
     puts "environment.connection platform #{platform}"
     conn = $ec2_main.cloud.conn("Compute")
-    puts "environment.connection complete"
-    return conn 
+    return conn
   end
   def connection_failed
     return @ec2_failed
