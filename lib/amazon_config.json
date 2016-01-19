@@ -1,5 +1,57 @@
 {
  "Cloud":{
+    "CloudFormation":{
+       "Templates":{
+          "request":"",
+          "name":"templates",
+          "response": "",
+          "response_code": 200,
+          "action": ["create configuration","delete configuration", "edit configuration, create or update stack"," cfndsl examples ","","validate","view stack events","view resources","edit"],
+          "icon": ["@create","@delete","@edit","@market_icon","@csv","@check","@events","@viewstack","@script_edit"],
+          "tooltip":[" New Configuration "," Delete Configuration ","Edit Configuration, Create or Update Stack"," cfndsl examples "," Csv Data "," Validate Template ","  View Stack Events  ","   View Stack Resources  ","   Edit Template  "],
+          "dialog":["CF_CreateDialog","CF_DeleteDialog","@stack_name = @curr_item;CF_EditDialog","browser('https://github.com/neillturner/cfndsl_examples')","","CF_ValidateDialog","@stack_name = @curr_item;load('Stack Events','CloudFormation')","@stack_name = @curr_item;load('Stack Resources','CloudFormation')","@stack_name = @curr_item;edit(@template_file)"],
+          "dialog_parm": ["","","","","","@template_file","@template_file","",""],
+          "keys": ["stack_name"]
+       },
+       "Stacks":{
+          "request":"describe_stacks",
+          "name":"stacks",
+          "response": "response.body['Stacks']",
+          "response_code": 200,
+          "action": ["create configuration","delete stack", "get template","","","","view stack events","view resources",""],
+          "icon": ["@create","@delete","@edit","","@csv","","@events","@viewstack",""],
+          "tooltip":[" New Configuration "," Delete Stack ","Get Template",""," Csv Data ",""," View Stack Events  ","  View Stack Resources  ",""],
+          "dialog":["CF_CreateDialog","CF_StackDeleteDialog","CF_GetTemplateDialog","","","","@stack_name = @curr_item;load('Stack Events','CloudFormation')","@stack_name = @curr_item;load('Stack Resources','CloudFormation')",""],
+          "dialog_parm": ["","","","","","","","",""],
+          "keys": ["StackName","StackStatus"]
+       },
+       "Stack Events":{
+          "request":"describe_stack_events(@stack_name)",
+          "name":"stack_events",
+          "response": "response.body['StackEvents']",
+          "response_code": 200,
+          "action": ["","delete stack", "","","","","","",""],
+          "icon": ["","@delete","","","@csv","","","",""],
+          "tooltip":[""," Delete Stack ","",""," Csv Data ","","","",""],
+          "dialog":["","CF_StackDeleteDialog","","","","","","",""],
+          "dialog_parm": ["","","","","","","","",""],
+          "menu": true,
+          "keys": ["StackName","LogicalResourceId","ResourceType","Timestamp"]
+       },
+       "Stack Resources":{
+          "request":"describe_stack_resources({'StackName' => @stack_name})",
+          "name":"stack_resources",
+          "response": "response.body['StackResources']",
+          "response_code": 200,
+          "action": ["","delete stack", "","","","","","",""],
+          "icon": ["","@delete","","","@csv","","","",""],
+          "tooltip":[""," Delete Stack ","",""," Csv Data ","","","",""],
+          "dialog":["","CF_StackDeleteDialog","","","","","","",""],
+          "dialog_parm": ["","","","","","","","",""],
+          "menu": true,
+          "keys": ["StackName","LogicalResourceId","ResourceType","Timestamp"]
+       }
+    },
    "Compute":{
     "Test Kitchen":{
           "request":"",
@@ -230,58 +282,6 @@
           "keys": ["server"]
     }
    },
-    "CloudFormation":{
-       "Templates":{
-          "request":"",
-          "name":"templates",
-          "response": "",
-          "response_code": 200,
-          "action": ["create configuration","delete configuration", "edit configuration, create or update stack"," cfndsl examples ","","validate","view stack events","view resources","edit"],
-          "icon": ["@create","@delete","@edit","@market_icon","@csv","@check","@events","@viewstack","@script_edit"],
-          "tooltip":[" New Configuration "," Delete Configuration ","Edit Configuration, Create or Update Stack"," cfndsl examples "," Csv Data "," Validate Template ","  View Stack Events  ","   View Stack Resources  ","   Edit Template  "],
-          "dialog":["CF_CreateDialog","CF_DeleteDialog","@stack_name = @curr_item;CF_EditDialog","browser('https://github.com/neillturner/cfndsl_examples')","","CF_ValidateDialog","@stack_name = @curr_item;load('Stack Events','CloudFormation')","@stack_name = @curr_item;load('Stack Resources','CloudFormation')","@stack_name = @curr_item;edit(@template_file)"],
-          "dialog_parm": ["","","","","","@template_file","@template_file","",""],
-          "keys": ["stack_name"]
-       },
-       "Stacks":{
-          "request":"describe_stacks",
-          "name":"stacks",
-          "response": "response.body['Stacks']",
-          "response_code": 200,
-          "action": ["create configuration","delete stack", "get template","","","","view stack events","view resources",""],
-          "icon": ["@create","@delete","@edit","","@csv","","@events","@viewstack",""],
-          "tooltip":[" New Configuration "," Delete Stack ","Get Template",""," Csv Data ",""," View Stack Events  ","  View Stack Resources  ",""],
-          "dialog":["CF_CreateDialog","CF_StackDeleteDialog","CF_GetTemplateDialog","","","","@stack_name = @curr_item;load('Stack Events','CloudFormation')","@stack_name = @curr_item;load('Stack Resources','CloudFormation')",""],
-          "dialog_parm": ["","","","","","","","",""],
-          "keys": ["StackName","StackStatus"]
-       },
-       "Stack Events":{
-          "request":"describe_stack_events(@stack_name)",
-          "name":"stack_events",
-          "response": "response.body['StackEvents']",
-          "response_code": 200,
-          "action": ["","delete stack", "","","","","","",""],
-          "icon": ["","@delete","","","@csv","","","",""],
-          "tooltip":[""," Delete Stack ","",""," Csv Data ","","","",""],
-          "dialog":["","CF_StackDeleteDialog","","","","","","",""],
-          "dialog_parm": ["","","","","","","","",""],
-          "menu": true,
-          "keys": ["StackName","LogicalResourceId","ResourceType","Timestamp"]
-       },
-       "Stack Resources":{
-          "request":"describe_stack_resources({'StackName' => @stack_name})",
-          "name":"stack_resources",
-          "response": "response.body['StackResources']",
-          "response_code": 200,
-          "action": ["","delete stack", "","","","","","",""],
-          "icon": ["","@delete","","","@csv","","","",""],
-          "tooltip":[""," Delete Stack ","",""," Csv Data ","","","",""],
-          "dialog":["","CF_StackDeleteDialog","","","","","","",""],
-          "dialog_parm": ["","","","","","","","",""],
-          "menu": true,
-          "keys": ["StackName","LogicalResourceId","ResourceType","Timestamp"]
-       }
-    },
    "AutoScaling":{
      "Auto Scaling Groups":{
       "request":"describe_auto_scaling_groups",
@@ -551,22 +551,47 @@
            "dialog_parm": ["","","","","","","","",""],
            "keys": []
        },
+        "Account Summary":{
+           "request": "get_account_summary",
+           "name":"account_summary",
+           "response": "convert_to_array_of_single_hash(response.body,'Summary')",
+           "response_code": 200,
+           "action": ["","", "","","","","","",""],
+           "icon": ["","","","","@csv","","","",""],
+           "tooltip":["","","",""," Csv Data ","","","",""],
+           "dialog":["","","","","","","","",""],
+           "dialog_parm": ["","","","","","","","",""],
+           "keys": []
+       },
         "Groups":{
            "request":"list_groups",
            "name":"groups",
            "response": "response.body['Groups']",
            "response_code": 200,
-           "action": ["","", "","","","","","list group policies",""],
-           "icon": ["","","","","@csv","","","@viewstack",""],
-           "tooltip":["","","",""," Csv Data ","",""," List Group Policies ",""],
-           "dialog":["","","","","","","","@group_name = @curr_item;load('Group Policies','IAM')",""],
+           "action": ["list group policies","", "","","","","","",""],
+           "icon": ["@view","","","","@csv","","","",""],
+           "tooltip":[" List Group Policies ","","",""," Csv Data ","","","",""],
+           "dialog":["@group_name = @curr_item;load('Group Policies','IAM')","","","","","","","",""],
            "dialog_parm": ["","","","","","","","",""],
            "keys": ["GroupName"]
        },
         "Group Policies":{
            "request":"list_group_policies(@group_name)",
-           "name":"group_policy",
+           "name":"group_policies",
            "response": "convert_to_array_of_hashs(response.body['PolicyNames'],'PolicyNames')",
+           "response_code": 200,
+           "action": ["get group policy","", "","","","","","",""],
+           "icon": ["@view","","","","@csv","","","",""],
+           "tooltip":[" Get Group Policy ","","",""," Csv Data ","","","",""],
+           "dialog":["@policy_name = @curr_item;load('Group Policy','IAM')","","","","","","","",""],
+           "dialog_parm": ["","","","","","","","",""],
+           "menu": false,
+           "keys": []
+       },
+        "Group Policy":{
+           "request":"get_group_policy(@policy_name,@group_name)",
+           "name":"group_policy",
+           "response": "convert_to_array_of_hashs(response.body['Policy'],'Policy')",
            "response_code": 200,
            "action": ["","", "","","","","","",""],
            "icon": ["","","","","@csv","","","",""],
@@ -590,15 +615,28 @@
        },
         "Roles":{
            "request":"list_roles",
-           "name":"role",
+           "name":"roles",
            "response": "response.body['Roles']",
            "response_code": 200,
-           "action": ["","", "","","","","","list role policies","list role profiles"],
-           "icon": ["","","","","@csv","","","@viewstack","@view"],
-           "tooltip":["","","",""," Csv Data ","",""," List Role Policies "," List Role Profiles "],
-           "dialog":["","","","","","","","@role_name = @curr_item;load('Role Policies','IAM')","@role_name = @curr_item;load('Role Profiles','IAM')"],
+           "action": ["list role instance profiles","list role policies","list role profiles","","","","","",""],
+           "icon": ["@view","@view","@view","","@csv","","","",""],
+           "tooltip":[" List Role Instance Profiles "," List Role Policies "," List Role Profiles ",""," Csv Data ","","","",""],
+           "dialog":["@role_name = @curr_item;load('Role Instance Profiles','IAM')","@role_name = @curr_item;load('Role Policies','IAM')","@role_name = @curr_item;load('Role Profiles','IAM')","","","","","",""],
            "dialog_parm": ["","","","","","","","",""],
            "keys": ["RoleName"]
+       },
+        "Role Instance Profiles":{
+           "request":"list_instance_profiles_for_role(@role_name)",
+           "name":"instance_profile_for_role",
+           "response": "response.body['InstanceProfiles']",
+           "response_code": 200,
+           "action": ["","", "","","","","","",""],
+           "icon": ["","","","","@csv","","","",""],
+           "tooltip":["","","",""," Csv Data ","","","",""],
+           "dialog":["","","","","","","","",""],
+           "dialog_parm": ["","","","","","","","",""],
+           "menu": false,
+           "keys": []
        },
         "Role Profiles":{
            "request":"list_instance_profiles_for_role(@role_name)",
@@ -625,6 +663,18 @@
            "dialog_parm": ["","","","","","","","",""],
            "menu": false,
            "keys": []
+       },
+        "Policies":{
+           "request":"list_policies",
+           "name":"policies",
+           "response": "response.body['Policies']",
+           "response_code": 200,
+           "action": ["","","","","","","","",""],
+           "icon": ["","","","","@csv","","","",""],
+           "tooltip":["","","",""," Csv Data ","","","",""],
+           "dialog":["","","","","","","","",""],
+           "dialog_parm": ["","","","","","","","",""],
+           "keys": ["PolicyName"]
        },
           "Server Certificates":{
            "request":"list_server_certificates",
@@ -655,14 +705,14 @@
            "name":"user",
            "response": "response.body['Users']",
            "response_code": 200,
-           "action": ["","", "","","","","","list user policies","list user groups"],
-           "icon": ["","","","","@csv","","","@viewstack","@view"],
-           "tooltip":["","","",""," Csv Data ","",""," List User Policies"," List User Groups"],
-           "dialog":["","","","","","","","@user_name = @curr_item;load('User Policies','IAM')","@user_name = @curr_item;load('User Groups','IAM')"],
+           "action": ["policies for user","groups for user", "","","","","","",""],
+           "icon": ["@view","@view","","","@csv","","","",""],
+           "tooltip":[" Policies for User "," Groups for User ","",""," Csv Data ","","","",""],
+           "dialog":["@user_name = @curr_item;load('Policies for User','IAM')","@user_name = @curr_item;load('Groups for User','IAM')","","","","","","",""],
            "dialog_parm": ["","","","","","","","",""],
            "keys": ["UserName"]
        },
-        "User Policies":{
+        "Policies for User":{
            "request":"list_user_policies(@user_name)",
            "name":"user_policy",
            "response": "convert_to_array_of_hashs(response.body['PolicyNames'],'PolicyNames')",
@@ -675,15 +725,15 @@
            "menu": false,
            "keys": []
        },
-        "User Groups":{
+        "Groups for User":{
            "request":"list_groups_for_user(@user_name)",
            "name":"user_group",
            "response": "response.body['GroupsForUser']",
            "response_code": 200,
-           "action": ["","", "","","","","","",""],
-           "icon": ["","","","","@csv","","","",""],
-           "tooltip":["","","",""," Csv Data ","","","",""],
-           "dialog":["","","","","","","","",""],
+           "action": ["list group policies","", "","","","","","",""],
+           "icon": ["@viewstack","","","","@csv","","","",""],
+           "tooltip":[" List Group Policies ","","",""," Csv Data ","","","",""],
+           "dialog":["@group_name = @curr_item;load('Group Policies','IAM')","","","","","","","",""],
            "dialog_parm": ["","","","","","","","",""],
            "menu": false,
            "keys": ["GroupName"]

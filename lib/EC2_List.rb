@@ -143,6 +143,8 @@ class EC2_List
     @cf_parameters = ""
     @stack_name = ""
     @group_name = ""
+    @policy_name = ""
+    @instance_profile_name = ""
     @role_name = ""
     @user_name = ""
     @group_id = ""
@@ -610,6 +612,10 @@ class EC2_List
       x.push({name => e})
     end
     x
+  end
+
+  def convert_to_array_of_single_hash(a,name)
+     [a[name]]
   end
 
   def find_value(name,row)
