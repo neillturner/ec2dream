@@ -230,6 +230,14 @@ class EC2_List
     @puppet.create
     @tunnel = @ec2_main.makeIcon("tunnel.png")
     @tunnel.create
+    @group = @ec2_main.makeIcon("group.png")
+    @group.create
+    @role = @ec2_main.makeIcon("role.png")
+    @role.create
+    @user_red = @ec2_main.makeIcon("user_red.png")
+    @user_red.create
+    @list = @ec2_main.makeIcon("list.png")
+    @list.create
 
     tab1 = FXTabItem.new($ec2_main.tabBook, "  List  ")
     page1 = FXVerticalFrame.new($ec2_main.tabBook, LAYOUT_FILL, :padding => 0)
