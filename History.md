@@ -1,3 +1,9 @@
+### Version 4.0.8 Jan 2016
+Add separate character to cloud formation
+ability to restrict to just one AWS VPC
+improvement to IAM listing
+improvements to messages.
+
 ### Version 4.0.7 Jan 2016
 Add partial azure support
 remove hp cloud support
