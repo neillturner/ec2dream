@@ -363,28 +363,48 @@ class EC2_List
     @csv_button.tipText = " csv data "
     @csv_button.connect(SEL_COMMAND) do |sender, sel, data|
       csv_text = ""
-      @header1.each do |item|
-        t = ""
-        t = item.text if item != nil
-        csv_text = csv_text+",#{t}" if csv_text != ""
-        csv_text = "#{t}" if csv_text == ""
-      end
-      csv_text = csv_text +"\n\n"
+      csv_titles = []
       i=0
       @curr_row = nil
       @table.each_row do |items|
         @curr_row = i if @table.itemSelected?(i,0)
         i=i+1
       end
+      if @curr_row==nil
+        @header1.each do |item|
+          t = ""
+          t = item.text if item != nil
+          csv_text = csv_text+",#{t}" if csv_text != ""
+          csv_text = "#{t}" if csv_text == ""
+        end
+        csv_text = csv_text +"\n\n"
+      else
+        i=0
+        @header1.each do |item|
+          csv_titles[i] = ""
+          if item != nil
+            csv_titles[i] = item.text
+          end
+          i=i+1
+        end
+      end
       i=0
+      j=0
       @table.each_row do |items|
         csv_line = ""
         items.each do |item|
-          if @curr_row==nil or @curr_row==i
+          if @curr_row==nil
             t = ""
             t = item.text if item != nil
             csv_line = csv_line+",#{t}" if csv_line != ""
             csv_line = "#{t}" if csv_line == ""
+          end
+          if @curr_row==i
+            t = ""
+            t = item.text if item != nil
+            csv_line = csv_line+"\n#{csv_titles[j]}  -  #{t}" if csv_line != ""
+            csv_line = "#{csv_titles[j]}  -  #{t}" if csv_line == ""
+            j=j+1
           end
         end
         i=i+1
