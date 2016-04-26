@@ -65,6 +65,8 @@ class Amazon
           @conn[type] = Fog::AWS::IAM.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY') )
         when 'RDS'
           @conn[type] = Fog::AWS::RDS.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :region => region )
+        when 'S3'
+          @conn[type] = Fog::Storage.new(:provider=>'AWS',:aws_access_key_id =>  $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :region => region)
         when 'SES'
           @conn[type] = Fog::AWS::SES.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY') )
         when 'SNS'

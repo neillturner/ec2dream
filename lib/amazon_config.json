@@ -209,19 +209,43 @@
       "dialog_parm": ["","","","","","","","'vpc'",""],
       "keys": ["vpcId"]
     },
-        "DHCP Options":{
-          "request":"describe_dhcp_options",
-          "name":"dhcp_option",
-          "response": "response.body['dhcpOptionsSet']",
-          "response_code": 200,
-          "action": ["","", "","","","","","",""],
-          "icon": ["","","","","@csv","","","@tag_red",""],
-          "tooltip":["","","",""," Csv Data ","","","  Edit Tags  ",""],
-          "dialog":["","","","","","","","EC2_TagsAssignDialog",""],
-          "dialog_parm": ["","","","","","","","'dhcp-options'",""],
-          "keys": ["dhcpOptionsId"]
+   "DHCP Options":{
+       "request":"describe_dhcp_options",
+       "name":"dhcp_option",
+       "response": "response.body['dhcpOptionsSet']",
+       "response_code": 200,
+       "action": ["","", "","","","","","",""],
+       "icon": ["","","","","@csv","","","@tag_red",""],
+       "tooltip":["","","",""," Csv Data ","","","  Edit Tags  ",""],
+       "dialog":["","","","","","","","EC2_TagsAssignDialog",""],
+       "dialog_parm": ["","","","","","","","'dhcp-options'",""],
+       "keys": ["dhcpOptionsId"]
     },
-        "Internet Gateways":{
+   "Network ACLs":{
+       "request":"describe_network_acls",
+       "name":"network_acls",
+       "response": "response.body['networkAclSet']",
+       "response_code": 200,
+       "action": ["","", "","","","","","",""],
+       "icon": ["","","","","@csv","","","",""],
+       "tooltip":["","","",""," Csv Data ","","","",""],
+       "dialog":["","","","","","","","",""],
+       "dialog_parm": ["","","","","","","","'",""],
+       "keys": ["networkAclId"]
+    },
+   "Route Tables":{
+       "request":"describe_route_tables",
+       "name":"route_tables",
+       "response": "response.body['routeTableSet']",
+       "response_code": 200,
+       "action": ["","", "","","","","","",""],
+       "icon": ["","","","","@csv","","","",""],
+       "tooltip":["","","",""," Csv Data ","","","",""],
+       "dialog":["","","","","","","","",""],
+       "dialog_parm": ["","","","","","","","",""],
+       "keys": ["routeTableId"]
+    },
+    "Internet Gateways":{
           "request":"describe_internet_gateways",
           "name":"internet_gateway",
           "response": "response.body['internetGatewaySet']",
@@ -282,6 +306,7 @@
           "keys": ["server"]
     }
    },
+
    "AutoScaling":{
      "Auto Scaling Groups":{
       "request":"describe_auto_scaling_groups",
@@ -345,6 +370,32 @@
       "keys": ["AutoScalingGroupName","StartTime"]
     }
    },
+    "S3":{
+        "Buckets":{
+           "request":"get_service",
+           "name":"buckets",
+           "response": "response.body['Buckets']",
+           "response_code": 200,
+           "action": ["list objects","", "","","","","","",""],
+           "icon": ["@view","","","","@csv","","","",""],
+           "tooltip":["List Objects in Buckets","","",""," Csv Data ","","","",""],
+           "dialog":["@s3_bucket = @curr_item;load('Objects','S3')","","","","","","","",""],
+           "dialog_parm": ["","","","","","","","",""],
+           "keys": ["Name"]
+       },
+       "Objects":{
+           "request":"get_bucket(@s3_bucket)",
+           "name":"objects",
+           "response": "response.body['Contents']",
+           "response_code": 200,
+           "action": ["","", "","","","","","",""],
+           "icon": ["","","","","@csv","","","",""],
+           "tooltip":["","","",""," Csv Data ","","","",""],
+           "dialog":["","","","","","","","",""],
+           "dialog_parm": ["","","","","","","","",""],
+           "keys": ["Key"]
+       }
+    },
     "CDN":{
         "Distributions":{
            "request":"get_distribution_list",
@@ -551,27 +602,28 @@
            "dialog_parm": ["","","","","","","","",""],
            "keys": []
        },
-        "Account Summary":{
-           "request": "get_account_summary",
-           "name":"account_summary",
-           "response": "convert_to_array_of_single_hash(response.body,'Summary')",
+        "Group":{
+           "request":"get_group(@group_name,nil)",
+           "name":"group",
+           "response": "convert_to_array_of_hashs(response.body['Group'])",
            "response_code": 200,
-           "action": ["","", "","","","","","",""],
+           "action": ["","","","","","","","",""],
            "icon": ["","","","","@csv","","","",""],
-           "tooltip":["","","",""," Csv Data ","","","",""],
-           "dialog":["","","","","","","","",""],
+           "tooltip": ["","","",""," Csv Data ","","","",""],
+           "dialog": ["","","","","","","","",""],
            "dialog_parm": ["","","","","","","","",""],
-           "keys": []
+           "menu": false,
+           "keys": ["GroupName"]
        },
         "Groups":{
            "request":"list_groups",
            "name":"groups",
            "response": "response.body['Groups']",
            "response_code": 200,
-           "action": ["list group policies","", "","","","","","",""],
-           "icon": ["@list","","","","@csv","","","",""],
-           "tooltip":[" List Group Policies ","","",""," Csv Data ","","","",""],
-           "dialog":["@group_name = @curr_item;load('Group Policies','IAM')","","","","","","","",""],
+           "action": ["view group","", "","","","","","list group policies",""],
+           "icon": ["@view","","","","@csv","","","@viewstack",""],
+           "tooltip":[" View Group ","","",""," Csv Data ","",""," List Group Policies ",""],
+           "dialog":["@group_name = @curr_item;load('Group','IAM')","","","","","","","@group_name = @curr_item;load('Group Policies','IAM')",""],
            "dialog_parm": ["","","","","","","","",""],
            "keys": ["GroupName"]
        },
@@ -580,18 +632,31 @@
            "name":"group_policies",
            "response": "convert_to_array_of_hashs(response.body['PolicyNames'],'PolicyNames')",
            "response_code": 200,
-           "action": ["get group policy","", "","","","","","",""],
-           "icon": ["@group","","","","@csv","","","",""],
-           "tooltip":[" Get Group Policy ","","",""," Csv Data ","","","",""],
-           "dialog":["@policy_name = @curr_item;load('Group Policy','IAM')","","","","","","","",""],
+           "action": ["","", "","","","","","",""],
+           "icon": ["","","","","@csv","","","",""],
+           "tooltip":["","","",""," Csv Data ","","","",""],
+           "dialog":["","","","","","","","",""],
            "dialog_parm": ["","","","","","","","",""],
            "menu": false,
            "keys": []
        },
         "Group Policy":{
-           "request":"get_group_policy(@policy_name,@group_name)",
+           "request":"get_group_policy(@policy_name, @group_name)",
            "name":"group_policy",
-           "response": "convert_to_array_of_hashs(response.body['Policy'],'Policy')",
+           "response": "",
+           "response_code": 200,
+           "action": ["","", "","","","","","",""],
+           "icon": ["","","","","@csv","","","",""],
+           "tooltip":["","","",""," Csv Data ","","","",""],
+           "dialog":["","","","","","","","",""],
+           "dialog_parm": ["","","","","","","","",""],
+           "menu": false,
+           "keys": []
+       },
+        "Attached Group Policies":{
+           "request":"list_attached_group_policies(@group_name)",
+           "name":"attached_group_policies",
+           "response": "",
            "response_code": 200,
            "action": ["","", "","","","","","",""],
            "icon": ["","","","","@csv","","","",""],
@@ -613,25 +678,38 @@
            "dialog_parm": ["","","","","","","","",""],
            "keys": ["InstanceProfileName"]
        },
+        "Instance Profile":{
+           "request":"get_instance_profile(@instance_profile_name)",
+           "name":"instance_profile",
+           "response": "response.body['InstanceProfile']",
+           "response_code": 200,
+           "action": ["","","","","","","","",""],
+           "icon": ["","","","","@csv","","","",""],
+           "tooltip":["","","",""," Csv Data ","","","",""],
+           "dialog":["","","","","","","","",""],
+           "dialog_parm": ["","","","","","","","",""],
+           "menu": false,
+           "keys": ["InstanceProfileName"]
+       },
         "Roles":{
            "request":"list_roles",
            "name":"roles",
            "response": "response.body['Roles']",
            "response_code": 200,
-           "action": ["list role instance profiles","list role policies","list role profiles","","","","","",""],
-           "icon": ["@view","@list","@viewstack","","@csv","","","",""],
-           "tooltip":[" List Role Instance Profiles "," List Role Policies "," List Role Profiles ",""," Csv Data ","","","",""],
-           "dialog":["@role_name = @curr_item;load('Role Instance Profiles','IAM')","@role_name = @curr_item;load('Role Policies','IAM')","@role_name = @curr_item;load('Role Profiles','IAM')","","","","","",""],
+           "action": ["view role","","","","","","","list role policies","list role profiles"],
+           "icon": ["@view","","","","@csv","","","@viewstack","@view"],
+           "tooltip":[" View Role ","","",""," Csv Data ","",""," List Role Policies "," List Role Profiles "],
+           "dialog":["@role_name = @curr_item;load('Role','IAM')","","","","","","","@role_name = @curr_item;load('Role Policies','IAM')","@role_name = @curr_item;load('Role Profiles','IAM')"],
            "dialog_parm": ["","","","","","","","",""],
            "keys": ["RoleName"]
        },
-        "Role Instance Profiles":{
-           "request":"list_instance_profiles_for_role(@role_name)",
-           "name":"instance_profile_for_role",
-           "response": "response.body['InstanceProfiles']",
+        "Role":{
+           "request":"get_role(@role_name)",
+           "name":"role",
+           "response": "convert_to_array_of_hashs(response.body['Role'])",
            "response_code": 200,
-           "action": ["","", "","","","","","",""],
-           "icon": ["","","","","@csv","","","",""],
+           "action": ["","","","","","","","",""],
+           "icon": ["","","","","@csv","","",""],
            "tooltip":["","","",""," Csv Data ","","","",""],
            "dialog":["","","","","","","","",""],
            "dialog_parm": ["","","","","","","","",""],
@@ -640,10 +718,10 @@
        },
         "Role Profiles":{
            "request":"list_instance_profiles_for_role(@role_name)",
-           "name":"role_profile",
+           "name":"role_profiles",
            "response": "response.body['InstanceProfiles']",
            "response_code": 200,
-           "action": ["","", "","","","","","",""],
+           "action": ["","","","","","","","",""],
            "icon": ["","","","","@csv","","","",""],
            "tooltip":["","","",""," Csv Data ","","","",""],
            "dialog":["","","","","","","","",""],
@@ -653,10 +731,10 @@
        },
         "Role Policies":{
            "request":"list_role_policies(@role_name)",
-           "name":"role_policy",
+           "name":"role_policies",
            "response": "convert_to_array_of_hashs(response.body['PolicyNames'],'PolicyNames')",
            "response_code": 200,
-           "action": ["","", "","","","","","",""],
+           "action": ["","","","","","","","",""],
            "icon": ["","","","","@csv","","","",""],
            "tooltip":["","","",""," Csv Data ","","","",""],
            "dialog":["","","","","","","","",""],
@@ -664,28 +742,42 @@
            "menu": false,
            "keys": []
        },
-        "Policies":{
-           "request":"list_policies",
-           "name":"policies",
-           "response": "response.body['Policies']",
+        "Role Policy":{
+           "request":"get_role_policy(@role_name, @policy_name)",
+           "name":"role_policy",
+           "response": "",
            "response_code": 200,
            "action": ["","","","","","","","",""],
            "icon": ["","","","","@csv","","","",""],
            "tooltip":["","","",""," Csv Data ","","","",""],
            "dialog":["","","","","","","","",""],
            "dialog_parm": ["","","","","","","","",""],
-           "keys": ["PolicyName"]
+           "menu": false,
+           "keys": []
        },
           "Server Certificates":{
            "request":"list_server_certificates",
-           "name":"server_certificate",
+           "name":"server_certificates",
            "response": "response.body['Certificates']",
            "response_code": 200,
-           "action": ["","", "","","","","","",""],
+           "action": ["","","","","","","","",""],
            "icon": ["","","","","@csv","","","",""],
            "tooltip":["","","",""," Csv Data ","","","",""],
            "dialog":["","","","","","","","",""],
            "dialog_parm": ["","","","","","","","",""],
+           "keys": []
+       },
+          "Server Certificate":{
+           "request":"get_server_certificate(@server_certificate_name)",
+           "name":"server_certificate",
+           "response": "",
+           "response_code": 200,
+           "action": ["","","","","","","","",""],
+           "icon": ["","","","","@csv","","","",""],
+           "tooltip":["","","",""," Csv Data ","","","",""],
+           "dialog":["","","","","","","","",""],
+           "dialog_parm": ["","","","","","","","",""],
+           "menu": false,
            "keys": []
        },
         "Signing Certificates":{
@@ -693,7 +785,7 @@
            "name":"signing_certificate",
            "response": "response.body['SigningCertificates']",
            "response_code": 200,
-           "action": ["","", "","","","","","",""],
+           "action": ["","","","","","","","",""],
            "icon": ["","","","","@csv","","","",""],
            "tooltip":["","","",""," Csv Data ","","","",""],
            "dialog":["","","","","","","","",""],
@@ -702,22 +794,48 @@
        },
          "Users":{
            "request":"list_users",
-           "name":"user",
+           "name":"users",
            "response": "response.body['Users']",
            "response_code": 200,
-           "action": ["policies for user","groups for user", "","","","","","",""],
-           "icon": ["@list","@group","","","@csv","","","",""],
-           "tooltip":[" Policies for User "," Groups for User ","",""," Csv Data ","","","",""],
-           "dialog":["@user_name = @curr_item;load('Policies for User','IAM')","@user_name = @curr_item;load('Groups for User','IAM')","","","","","","",""],
+           "action": ["","","","","","","","list user policies","list user groups"],
+           "icon": ["","","","","@csv","","","@viewstack","@view"],
+           "tooltip":["","","",""," Csv Data ","",""," List User Policies"," List User Groups"],
+           "dialog":["","","","","","","","@user_name = @curr_item;load('User Policies','IAM')","@user_name = @curr_item;load('User Groups','IAM')"],
            "dialog_parm": ["","","","","","","","",""],
            "keys": ["UserName"]
        },
-        "Policies for User":{
+         "User":{
+           "request":"get_user(@user_name)",
+           "name":"user",
+           "response": "",
+           "response_code": 200,
+           "action": ["","","","","","","","",""],
+           "icon": ["","","","","@csv","","",""],
+           "tooltip":["","","",""," Csv Data ","","","",""],
+           "dialog":["","","","","","","","",""],
+           "dialog_parm": ["","","","","","","","",""],
+           "menu": false,
+           "keys": ["UserName"]
+       },
+         "Login Profile":{
+           "request":"get_login_profile(@user_name)",
+           "name":"login_profile",
+           "response": "",
+           "response_code": 200,
+           "action": ["","","","","","","","",""],
+           "icon": ["","","","","@csv","","",""],
+           "tooltip":["","","",""," Csv Data ","","","",""],
+           "dialog":["","","","","","","","",""],
+           "dialog_parm": ["","","","","","","","",""],
+           "menu": false,
+           "keys": []
+       },
+        "User Policies":{
            "request":"list_user_policies(@user_name)",
-           "name":"user_policy",
+           "name":"user_policies",
            "response": "convert_to_array_of_hashs(response.body['PolicyNames'],'PolicyNames')",
            "response_code": 200,
-           "action": ["","", "","","","","","",""],
+           "action": ["","","","","","","","",""],
            "icon": ["","","","","@csv","","","",""],
            "tooltip":["","","",""," Csv Data ","","","",""],
            "dialog":["","","","","","","","",""],
@@ -725,18 +843,68 @@
            "menu": false,
            "keys": []
        },
-        "Groups for User":{
+        "User Policy":{
+           "request":"get_user_policy(@policy_name, @user_name)",
+           "name":"user_policy",
+           "response": "",
+           "response_code": 200,
+           "action": ["","","","","","","","",""],
+           "icon": ["","","","","@csv","","","",""],
+           "tooltip":["","","",""," Csv Data ","","","",""],
+           "dialog":["","","","","","","","",""],
+           "dialog_parm": ["","","","","","","","",""],
+           "menu": false,
+           "keys": []
+       },
+        "Attached User Policies":{
+           "request":"list_attached_user_policies(@user_name)",
+           "name":"attached_user_policies",
+           "response": "",
+           "response_code": 200,
+           "action": ["","","","","","","","",""],
+           "icon": ["","","","","@csv","","","",""],
+           "tooltip":["","","",""," Csv Data ","","","",""],
+           "dialog":["","","","","","","","",""],
+           "dialog_parm": ["","","","","","","","",""],
+           "menu": false,
+           "keys": []
+       },
+        "User Groups":{
            "request":"list_groups_for_user(@user_name)",
            "name":"user_group",
            "response": "response.body['GroupsForUser']",
            "response_code": 200,
-           "action": ["list group policies","", "","","","","","",""],
-           "icon": ["@group","","","","@csv","","","",""],
-           "tooltip":[" List Group Policies ","","",""," Csv Data ","","","",""],
-           "dialog":["@group_name = @curr_item;load('Group Policies','IAM')","","","","","","","",""],
+           "action": ["","", "","","","","","",""],
+           "icon": ["","","","","@csv","","","",""],
+           "tooltip":["","","",""," Csv Data ","","","",""],
+           "dialog":["","","","","","","","",""],
            "dialog_parm": ["","","","","","","","",""],
            "menu": false,
            "keys": ["GroupName"]
+       },
+        "MFA Devices":{
+           "request":"list_mfa_devices",
+           "name":"mfa_devices",
+           "response": "response.body['MFADevices']",
+           "response_code": 200,
+           "action": ["","", "","","","","","",""],
+           "icon": ["","","","","@csv","","","",""],
+           "tooltip":["","","",""," Csv Data ","","","",""],
+           "dialog":["","","","","","","","",""],
+           "dialog_parm": ["","","","","","","","",""],
+           "keys": []
+       },
+        "Account Summary":{
+           "request":"get_account_summary",
+           "name":"mfa_devices",
+           "response": "",
+           "response_code": 200,
+           "action": ["","", "","","","","","",""],
+           "icon": ["","","","","@csv","","","",""],
+           "tooltip":["","","",""," Csv Data ","","","",""],
+           "dialog":["","","","","","","","",""],
+           "dialog_parm": ["","","","","","","","",""],
+           "keys": []
        }
     },
     "RDS":{
@@ -788,6 +956,18 @@
            "dialog":["@db_parm_grp = @curr_item;load('DB Parameters','RDS')","","","","","","","",""],
            "dialog_parm": ["","","","","","","","",""],
            "keys": ["DBParameterGroupName"]
+       },
+       "DB Clusters":{
+           "request":"describe_db_clusters",
+           "name":"describe_db_clusters",
+           "response": "response.body['DescribeDBClustersResult']['DBClusters']",
+           "response_code": 200,
+           "action": ["","", "","","","","","",""],
+           "icon": ["","","","","@csv","","","",""],
+           "tooltip":["","","",""," Csv Data ","","","",""],
+           "dialog":["","","","","","","","",""],
+           "dialog_parm": ["","","","","","","","",""],
+           "keys": ["DBClusterIdentifier"]
        },
        "DB Reserved Instances":{
            "request":"describe_db_reserved_instances",

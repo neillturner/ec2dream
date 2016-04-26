@@ -138,6 +138,7 @@ class EC2_List
     @snap_owner = "self"
     @db_parm_grp = ""
     @as_group = ""
+    @s3_bucket = ""
     @application_name = ""
     @template_file = ""
     @cf_parameters = ""
@@ -832,9 +833,9 @@ class EC2_List
           #puts "RESPONSE #{response}"
           #puts "RESPONSE.BODY #{response.body}"
           #puts "RESPONSE.STATUS #{response.status}"
-          if @ec2_main.settings.cloudfoundry
-            @data = response
-          else
+          #if @ec2_main.settings.cloudfoundry
+          #  @data = response
+          #else
             if response.status == @config["response_code"]
               if @type == "Servers" and (@ec2_main.settings.amazon  or @ec2_main.settings.eucalyptus or @ec2_main.settings.cloudstack)
                 response.body['reservationSet'].each do |r|
@@ -854,7 +855,7 @@ class EC2_List
                 @data = eval(@config["response"])
               end
             end
-          end
+          #end
         rescue
           puts "ERROR: #{request} #{$!}"
         end
@@ -866,6 +867,7 @@ class EC2_List
   end
 
   def load_table_with_data
+    clear()
     @data = [] if @data == nil
     if  !@data.empty?  or @data.size>0
       @data_title = []
@@ -946,6 +948,8 @@ class EC2_List
             end
           rescue
             puts "internal error parsing data in ec2_list #{$!}"
+            @table.setTableSize(0,0)
+            return
           end
         end
         r.each do |k, v|
@@ -994,12 +998,15 @@ class EC2_List
               j=j+1
             rescue
               puts "ERROR: processing data for #{k} lists[#{j},#{i}] = #{v}"
+              @table.setTableSize(0,0)
+              return
             end
           end
         end
         i=i+1
       end
       i = lists[0].length
+      puts "Setting table length to #{i}"
       @table.setTableSize(i, table_size)
       set_table_titles(@data[0],@max_data_size)
       set_table_data(lists,table_size)
