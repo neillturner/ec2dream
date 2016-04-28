@@ -30,20 +30,20 @@ Gem::Specification.new do |spec|
   spec.email = 'neillwturner@gmail.com'
   spec.executables = ["ec2dream"]
   spec.homepage = 'http://ec2dream.blogspot.com'
-  spec.required_ruby_version = '>= 2.0'
+  spec.required_ruby_version = '~> 2.0'
   spec.require_path = 'lib'
-  spec.add_dependency('fxruby', '<= 1.6.29')
-#  spec.add_dependency('fxruby', '= 1.6.33')
+#  spec.add_dependency('fxruby', '<= 1.6.29')
+  spec.add_dependency('fxruby', '~> 1.6.33')
   spec.add_dependency('net-ssh', '<= 2.9.2')
   spec.add_dependency('test-kitchen', '~> 1.4')
   spec.add_dependency('rubyzip', '>= 1.0.0')
   spec.add_dependency('zip-zip')
   spec.add_dependency('gchartrb')
-  spec.add_dependency('fog', '>= 1.30.0')
+  spec.add_dependency('fog', '~> 1.38')
   spec.add_dependency('fog-azure')
-  
+
   spec.summary = 'Build and Manage Cloud Servers'
-  spec.description = 'Visual devops tool. Supports chef, puppet, ansible, test-kitchen with Hosted Servers and Clouds including Amazon AWS,  Azure, Google Compute Engines, Softlayer, Openstack'
+  spec.description = 'Visual devops tool. Supports chef, puppet, ansible, salt, test-kitchen with Hosted Servers and Clouds including Amazon AWS, Azure, Google Compute Engines, Softlayer, Openstack'
     candidates = Dir.glob("{lib}/**/*") +  ['History.md', 'README.md', 'ec2dream.ico', 'ec2dream.bmp' , 'ca-bundle.crt', 'ec2dream.gemspec']
     candidates = candidates +  Dir.glob("{chef}/**/*")
     candidates = candidates +  Dir.glob("{launchrdp}/*")
