@@ -1,4 +1,3 @@
-require 'fog'
 require 'fog/azure/compute'
 require 'json'
 

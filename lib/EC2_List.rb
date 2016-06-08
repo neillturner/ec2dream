@@ -1,6 +1,5 @@
 require 'rubygems'
 require 'fox16'
-require 'fog'
 require 'net/http'
 require 'resolv'
 require 'date'
@@ -151,6 +150,7 @@ class EC2_List
     @group_id = ""
     @cdn_distribution = ""
     @curr_association_id = nil
+    @zone_id = ""
     @arrow_refresh = @ec2_main.makeIcon("arrow_redo.png")
     @arrow_refresh.create
     @create = @ec2_main.makeIcon("new.png")

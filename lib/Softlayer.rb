@@ -1,4 +1,4 @@
-require 'fog'
+require 'fog/softlayer'
 require 'json'
 
 class Softlayer

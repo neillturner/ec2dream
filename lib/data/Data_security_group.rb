@@ -2,7 +2,7 @@ require 'rubygems'
 require 'fox16'
 require 'net/http'
 require 'resolv'
-require 'fog'
+
 
 class Data_security_group
 

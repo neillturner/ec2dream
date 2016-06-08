@@ -1,4 +1,4 @@
-require 'fog'
+require 'fog/google'
 require 'json'
 
 class Google_compute

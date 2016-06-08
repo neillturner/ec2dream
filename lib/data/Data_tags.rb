@@ -1,5 +1,4 @@
 require 'rubygems'
-require 'fog'
 
 class Data_tags
 

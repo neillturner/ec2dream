@@ -468,12 +468,25 @@
           "name":"hosted_zones",
           "response": "response.body['HostedZones']",
           "response_code": 200,
+          "action": ["resource_record_sets","", "","","","","","",""],
+          "icon": ["@view","","","","@csv","","","","@funnel"],
+          "tooltip":["Resource Record Sets","","",""," Csv Data ","","","","  Filter by Tags  "],
+          "dialog":["@zone_id = @curr_item;load('Resource Record Sets','DNS')","","","","","","","","EC2_TagsFilterDialog"],
+          "dialog_parm": ["","","","","","","","",""],
+          "keys": ["Id"]
+       },
+       "Resource Record Sets":{
+          "request":"list_resource_record_sets(@zone_id)",
+          "name":"resource_record_sets",
+          "response": "response.body['ResourceRecordSets']",
+          "response_code": 200,
           "action": ["","", "","","","","","",""],
           "icon": ["","","","","@csv","","","","@funnel"],
           "tooltip":["","","",""," Csv Data ","","","","  Filter by Tags  "],
           "dialog":["","","","","","","","","EC2_TagsFilterDialog"],
           "dialog_parm": ["","","","","","","","",""],
-          "keys": ["HostedZone"]
+          "menu": false,
+          "keys": ["Name"]
        }
     },
     "ElasticBeanstalk":{
@@ -1005,6 +1018,18 @@
            "dialog_parm": ["","","","","","","","",""],
            "keys": ["DBSnapshotIdentifier"]
        },
+       "DB Cluster Snapshots":{
+           "request":"describe_db_cluster_snapshots",
+           "name":"db_cluster_snapshot",
+           "response": "response.body['DescribeDBClusterSnapshotsResult']['DBClusterSnapshots']",
+           "response_code": 200,
+           "action": ["","", "","","","","","",""],
+           "icon": ["","","","","@csv","","","",""],
+           "tooltip":["","","",""," Csv Data ","","","",""],
+           "dialog":["","","","","","","","",""],
+           "dialog_parm": ["","","","","","","","",""],
+           "keys": ["'DBClusterIdentifier,DBSnapshotIdentifier"]
+       },
        "DB Subnet Groups":{
            "request":"describe_db_subnet_groups",
            "name":"db_subnet_groups",
@@ -1098,7 +1123,7 @@
         "Queues":{
            "request":"list_queues",
            "name":"queues",
-           "response": "response.body['ListQueuesResult']",
+           "response": "response.body",
            "response_code": 200,
            "action": ["","", "","","","","","",""],
            "icon": ["","","","","@csv","","","",""],

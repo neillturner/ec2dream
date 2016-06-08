@@ -1,7 +1,6 @@
 require 'rubygems'
 require 'net/http'
 require 'resolv'
-require 'fog'
 require 'common/EC2_ResourceTags'
 
 # For non-AWS images support is for either

@@ -1,4 +1,4 @@
-require 'fog'
+require 'fog/aws'
 require 'json'
 
 class Amazon
@@ -71,6 +71,8 @@ class Amazon
           @conn[type] = Fog::AWS::SES.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY') )
         when 'SNS'
           @conn[type] = Fog::AWS::SNS.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY') )
+        when 'SQS'
+          @conn[type] = Fog::AWS::SQS.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY') )
         else
           nil
           return

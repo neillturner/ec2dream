@@ -32,15 +32,17 @@ Gem::Specification.new do |spec|
   spec.homepage = 'http://ec2dream.blogspot.com'
   spec.required_ruby_version = '~> 2.0'
   spec.require_path = 'lib'
-#  spec.add_dependency('fxruby', '<= 1.6.29')
   spec.add_dependency('fxruby', '~> 1.6.33')
   spec.add_dependency('net-ssh', '<= 2.9.2')
   spec.add_dependency('test-kitchen', '~> 1.4')
   spec.add_dependency('rubyzip', '>= 1.0.0')
   spec.add_dependency('zip-zip')
   spec.add_dependency('gchartrb')
-  spec.add_dependency('fog', '~> 1.38')
-  spec.add_dependency('fog-azure')
+  spec.add_dependency('fog-aws', '~> 0.9')
+  spec.add_dependency('fog-azure', '~>  0.0.2')
+  spec.add_dependency('fog-openstack', '~>  0.1.6')
+  spec.add_dependency('fog-google', '~>  0.3.2')
+  spec.add_dependency('fog-softlayer', '~>  0.3.2')
 
   spec.summary = 'Build and Manage Cloud Servers'
   spec.description = 'Visual devops tool. Supports chef, puppet, ansible, salt, test-kitchen with Hosted Servers and Clouds including Amazon AWS, Azure, Google Compute Engines, Softlayer, Openstack'

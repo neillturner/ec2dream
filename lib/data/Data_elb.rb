@@ -1,7 +1,6 @@
 require 'rubygems'
 require 'net/http'
 require 'resolv'
-require 'fog'
 
 class Data_elb
 
