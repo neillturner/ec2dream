@@ -99,6 +99,8 @@ class EC2_Server
     @style.create
     @lightbulb = @ec2_main.makeIcon("lightbulb.png")
     @lightbulb.create
+    @link = @ec2_main.makeIcon("link_break.png")
+    @link.create
 
     tab2 = FXTabItem.new(@ec2_main.tabBook, " Server ")
     @page1 = FXVerticalFrame.new(@ec2_main.tabBook, LAYOUT_FILL, :padding => 0)
@@ -1146,7 +1148,7 @@ class EC2_Server
     @loc_server['ssh_key_label'] = FXLabel.new(@frame5, "SSH key" )
     @loc_server['ssh_key_label'].tipText = "OPTIONAL: SSH Key for SSH access to the server."
     @loc_server['ssh_key'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
-    @loc_server['ssh_key_button'] = FXButton.new(@frame5, "", :opts => BUTTON_TOOLBAR)
+        @loc_server['ssh_key_button'] = FXButton.new(@frame5, "", :opts => BUTTON_TOOLBAR)
     @loc_server['ssh_key_button'].icon = @magnifier
     @loc_server['ssh_key_button'].tipText = "Browse..."
     @loc_server['ssh_key_button'].connect(SEL_COMMAND) do
@@ -1165,7 +1167,8 @@ class EC2_Server
     @loc_server['putty_key_label'] = FXLabel.new(@frame5, "Putty Key" )
     @loc_server['putty_key_label'].tipText = "OPTIONAL: Putty Key for Putty access to the server."
     @loc_server['putty_key'] = FXTextField.new(@frame5, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
-    @loc_server['putty_key_button'] = FXButton.new(@frame5, "", :opts => BUTTON_TOOLBAR)
+    @frame5g = FXHorizontalFrame.new(@frame5,LAYOUT_FILL_X, :padding => 0)
+    @loc_server['putty_key_button'] = FXButton.new(@frame5g, "", :opts => BUTTON_TOOLBAR)
     @loc_server['putty_key_button'].icon = @magnifier
     @loc_server['putty_key_button'].tipText = "Browse..."
     @loc_server['putty_key_button'].connect(SEL_COMMAND) do
@@ -1181,6 +1184,19 @@ class EC2_Server
         @loc_server['putty_key'].text = dialog.filename
       end
     end
+    if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("mingw") != nil
+      @loc_server['PUTTY_GENERATE_BUTTON'] = FXButton.new(@frame5g, "", :opts => BUTTON_TOOLBAR)
+      @loc_server['PUTTY_GENERATE_BUTTON'].icon = @link
+      @loc_server['PUTTY_GENERATE_BUTTON'].tipText = " PuTTYgen Key Generator "
+      @loc_server['PUTTY_GENERATE_BUTTON'].connect(SEL_COMMAND) do
+        dialog = EC2_GenerateKeyDialog.new(@ec2_main,"SSH_PRIVATE_KEY",@loc_server['ssh_key'].text)
+        dialog.execute
+      end
+     # @settings['PUTTY_GENERATE_BUTTON'].connect(SEL_UPDATE) do |sender, sel, data|
+     #   enable_if_env_set(sender)
+     # end
+    end    
+    
     @loc_server['windows_server_label'] = FXLabel.new(@frame5, "Windows Server" )
     @loc_server['windows_server_label'].tipText = "true or false. If true Remote Desktop will be used to access the server."
     @loc_server['windows_server'] = FXComboBox.new(@frame5, 15, :opts => COMBOBOX_STATIC|COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
