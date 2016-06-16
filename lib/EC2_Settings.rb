@@ -127,6 +127,10 @@ class EC2_Settings
     @settings['AMAZON_ACCOUNT_ID_LABEL'].tipText = "AWS: OPTIONAL Your AWS 12 digit Account ID.\nAZURE: Subscription ID\nOPENSTACK: Openstack Project ID."
     @settings['AMAZON_ACCOUNT_ID'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame1, "" )
+    @settings['AMAZON_ROLE_ARN_LABEL'] = FXLabel.new(frame1, "ROLE_ARN" )
+    @settings['AMAZON_ROLE_ARN_LABEL'].tipText = "AWS: OPTIONAL Your AWS Role ARN for temporary security credentials."
+    @settings['AMAZON_ROLE_ARN'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
+    FXLabel.new(frame1, "" )
     @settings['EC2_URL_LABEL'] = FXLabel.new(frame1, "URL" )
     @settings['EC2_URL_LABEL'].tipText = "AWS@ The Endpoint address for your AWS region.\nAZURE: Azure API URL\nOPENSTACK: the URL of the Openstack Identity Server. Should end in /tokens\nGOOGLE: Your Google Project"
     @settings['EC2_URL'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
@@ -408,6 +412,7 @@ class EC2_Settings
       load_panel('EC2_SSH_USER')
       load_panel('EC2_SSH_PRIVATE_KEY')
       load_panel('AMAZON_ACCOUNT_ID')
+      load_panel('AMAZON_ROLE_ARN')
       load_panel('AMAZON_ACCESS_KEY_ID')
       load_panel('AMAZON_SECRET_ACCESS_KEY')
       load_panel('TEST_KITCHEN_PATH')
@@ -446,6 +451,7 @@ class EC2_Settings
         @settings['AMAZON_ACCESS_KEY_ID_LABEL'].text="CLIENT_EMAIL"
         @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].text="KEY_LOCATION"
         @settings['AMAZON_ACCOUNT_ID_LABEL'].text=""
+        @settings['AMAZON_ROLE_ARN_LABEL'].text=""
         @settings['EC2_URL_LABEL'].text="PROJECT"
         @settings['AVAILABILITY_ZONE_LABEL'].text = "ZONE"
         @settings['AMAZON_NICKNAME_TAG_LABEL'].text=""
@@ -454,6 +460,7 @@ class EC2_Settings
         @settings['AMAZON_ACCESS_KEY_ID_LABEL'].text="USER"
         @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].text="API KEY"
         @settings['AMAZON_ACCOUNT_ID_LABEL'].text=""
+        @settings['AMAZON_ROLE_ARN_LABEL'].text=""
         @settings['EC2_URL_LABEL'].text=""
         @settings['AVAILABILITY_ZONE_LABEL'].text = ""
         @settings['AMAZON_NICKNAME_TAG_LABEL'].text=""
@@ -464,6 +471,7 @@ class EC2_Settings
         @settings['AMAZON_ACCESS_KEY_ID_LABEL'].text="PEM KEY PATH"
         @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].text=""
         @settings['AMAZON_ACCOUNT_ID_LABEL'].text="SUBSCRIPTION ID"
+        @settings['AMAZON_ROLE_ARN_LABEL'].text=""
         @settings['EC2_URL_LABEL'].text="API URL"
         @settings['AVAILABILITY_ZONE_LABEL'].text = ""
         @settings['AMAZON_NICKNAME_TAG_LABEL'].text=""
@@ -472,6 +480,7 @@ class EC2_Settings
         @settings['AMAZON_ACCESS_KEY_ID_LABEL'].text="ACCESS_KEY"
         @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].text="SECRET_ACCESS_KEY"
         @settings['AMAZON_ACCOUNT_ID_LABEL'].text="ACCOUNT_ID"
+        @settings['AMAZON_ROLE_ARN_LABEL'].text="ROLE_ARN"
         @settings['EC2_URL_LABEL'].text="URL"
         @settings['AVAILABILITY_ZONE_LABEL'].text = "AVAILABILITY_ZONE"
         @settings['AMAZON_NICKNAME_TAG_LABEL'].text="NICKNAME TAG"
@@ -496,6 +505,7 @@ class EC2_Settings
     clear('EC2_SSH_USER')
     clear('EC2_SSH_PRIVATE_KEY')
     clear('AMAZON_ACCOUNT_ID')
+    clear('AMAZON_ROLE_ARN')
     clear('AMAZON_ACCESS_KEY_ID')
     clear('AMAZON_SECRET_ACCESS_KEY')
     clear('TEST_KITCHEN_PATH')
@@ -644,6 +654,7 @@ class EC2_Settings
     save_setting("EC2_SSH_USER")
     save_setting("EC2_SSH_PRIVATE_KEY")
     save_setting("AMAZON_ACCOUNT_ID")
+    save_setting("AMAZON_ROLE_ARN")
     save_setting("AMAZON_ACCESS_KEY_ID")
     save_setting("AMAZON_SECRET_ACCESS_KEY")
     save_setting("TEST_KITCHEN_PATH")

@@ -7,6 +7,11 @@ class Amazon
     @conn = {}
     data = File.read("#{ENV['EC2DREAM_HOME']}/lib/amazon_config.json")
     @config = JSON.parse(data)
+    @session_token = nil
+    @user_role = nil
+    @access_key_id = $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID')
+    @secret_access_key = $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY')
+    @role_arn = $ec2_main.settings.get('AMAZON_ROLE_ARN')
   end
 
   def api
@@ -40,39 +45,56 @@ class Amazon
         end
       end
       begin
+         if @user_role == nil and @role_arn != nil and @role_arn != ""
+           puts "Assuming Role #{@role_arn}"
+           @conn['STS'] = Fog::AWS::STS.new(:aws_access_key_id => @access_key_id, :aws_secret_access_key => @secret_access_key )
+           response = @conn['STS'].assume_role('admin',@role_arn)
+           if response.status == 200
+             @user_role = response.body
+             #@user_role.each do |k, v|
+             #  puts "*** #{k} #{v}"
+             #end
+             @access_key_id = @user_role['AccessKeyId']
+             @secret_access_key = @user_role['SecretAccessKey']
+             @session_token = @user_role['SessionToken']
+           else
+             puts "ERROR: on sts connection to amazon #{response.status}"
+             puts "check your keys in environment"
+             return
+           end
+        end
         case type
         when 'AutoScaling'
-          @conn[type] = Fog::AWS::AutoScaling.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :region => region )
-        when 'Compute'
-          @conn[type] = Fog::Compute.new(:provider=>'AWS',:aws_access_key_id =>  $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY') , :region => region)
-          #$ec2_main.log.write("conn = Fog::Compute.new(:provider=>'AWS',:aws_access_key_id =>  #{$ec2_main.settings.get('AMAZON_ACCESS_KEY_ID')}, :aws_secret_access_key => #{$ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY')} , :region => #{region})")
-          #@conn[type]
+          @conn[type] = Fog::AWS::AutoScaling.new(:aws_access_key_id => @access_key_id, :aws_secret_access_key => @secret_access_key, :region => region, :aws_session_token => @session_token )
         when 'CDN'
-          @conn[type] = Fog::CDN.new(:provider=>'AWS',:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY') )
-          #@conn[type] = Fog::AWS::CDN.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY') )
+        when 'Compute'
+          @conn[type] = Fog::Compute.new(:provider=>'AWS',:aws_access_key_id =>  @access_key_id, :aws_secret_access_key => @secret_access_key , :region => region, :aws_session_token => @session_token )
+        when 'CDN'
+          @conn[type] = Fog::CDN.new(:provider=>'AWS',:aws_access_key_id => @access_key_id, :aws_secret_access_key => @secret_access_key, :aws_session_token => @session_token )
+          #@conn[type] = Fog::AWS::CDN.new(:aws_access_key_id => @access_key_id, :aws_secret_access_key => @secret_access_key )
         when 'CloudFormation'
-          @conn[type] = Fog::AWS::CloudFormation.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :region => region )
+          @conn[type] = Fog::AWS::CloudFormation.new(:aws_access_key_id => @access_key_id, :aws_secret_access_key => @secret_access_key, :region => region, :aws_session_token => @session_token )
         when 'CloudWatch'
-          @conn[type] = Fog::AWS::CloudWatch.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :region => region )
+          @conn[type] = Fog::AWS::CloudWatch.new(:aws_access_key_id => @access_key_id, :aws_secret_access_key => @secret_access_key, :region => region, :aws_session_token => @session_token )
         when 'DNS'
-          @conn[type] = Fog::DNS.new(:provider=>'AWS',:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY') )
-          #@conn[type] = Fog::AWS::DNS.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY') )
+          @conn[type] = Fog::DNS.new(:provider=>'AWS',:aws_access_key_id => @access_key_id, :aws_secret_access_key => @secret_access_key, :aws_session_token => @session_token )
+          #@conn[type] = Fog::AWS::DNS.new(:aws_access_key_id => @access_key_id, :aws_secret_access_key => @secret_access_key, :aws_session_token => @session_token )
         when 'ElasticBeanstalk'
-          @conn[type] = Fog::AWS::ElasticBeanstalk.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :region => region )
+          @conn[type] = Fog::AWS::ElasticBeanstalk.new(:aws_access_key_id => @access_key_id, :aws_secret_access_key => @secret_access_key, :region => region, :aws_session_token => @session_token )
         when 'ELB'
-          @conn[type] = Fog::AWS::ELB.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :region => region )
+          @conn[type] = Fog::AWS::ELB.new(:aws_access_key_id => @access_key_id, :aws_secret_access_key => @secret_access_key, :region => region, :aws_session_token => @session_token )
         when 'IAM'
-          @conn[type] = Fog::AWS::IAM.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY') )
+          @conn[type] = Fog::AWS::IAM.new(:aws_access_key_id => @access_key_id, :aws_secret_access_key => @secret_access_key, :aws_session_token => @session_token )
         when 'RDS'
-          @conn[type] = Fog::AWS::RDS.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :region => region )
+          @conn[type] = Fog::AWS::RDS.new(:aws_access_key_id => @access_key_id, :aws_secret_access_key => @secret_access_key, :region => region, :aws_session_token => @session_token )
         when 'S3'
-          @conn[type] = Fog::Storage.new(:provider=>'AWS',:aws_access_key_id =>  $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY'), :region => region)
+          @conn[type] = Fog::Storage.new(:provider=>'AWS',:aws_access_key_id =>  @access_key_id, :aws_secret_access_key => @secret_access_key, :region => region, :aws_session_token => @session_token)
         when 'SES'
-          @conn[type] = Fog::AWS::SES.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY') )
+          @conn[type] = Fog::AWS::SES.new(:aws_access_key_id => @access_key_id, :aws_secret_access_key => @secret_access_key, :aws_session_token => @session_token )
         when 'SNS'
-          @conn[type] = Fog::AWS::SNS.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY') )
+          @conn[type] = Fog::AWS::SNS.new(:aws_access_key_id => @access_key_id, :aws_secret_access_key => @secret_access_key, :aws_session_token => @session_token )
         when 'SQS'
-          @conn[type] = Fog::AWS::SQS.new(:aws_access_key_id => $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID'), :aws_secret_access_key => $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY') )
+          @conn[type] = Fog::AWS::SQS.new(:aws_access_key_id => @access_key_id, :aws_secret_access_key => @secret_access_key, :aws_session_token => @session_token )
         else
           nil
           return
