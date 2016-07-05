@@ -47,6 +47,8 @@ class Amazon
       begin
          if @user_role == nil and @role_arn != nil and @role_arn != ""
            puts "Assuming Role #{@role_arn}"
+           @access_key_id = $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID')
+           @secret_access_key = $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY')
            @conn['STS'] = Fog::AWS::STS.new(:aws_access_key_id => @access_key_id, :aws_secret_access_key => @secret_access_key )
            response = @conn['STS'].assume_role('admin',@role_arn)
            if response.status == 200
@@ -111,6 +113,8 @@ class Amazon
   end
 
   def reset_connection
+    puts "Amazon.reset_connection"
+    @user_role = nil
     @conn = {}
   end
 end

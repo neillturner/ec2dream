@@ -157,6 +157,7 @@ class EC2_TreeCache
 
   def refresh
     puts "TreeCache.refesh"
+    $ec2_main.cloud.reset_connection if @ec2_main.settings.amazon and $ec2_main.settings.get('AMAZON_ROLE_ARN') != nil and $ec2_main.settings.get('AMAZON_ROLE_ARN') != ""
     if @topmost == nil or (@topmost.class  == Fox::FXTreeItem and  @topmost.text != "Loading......")
       if @ec2_main.settings.amazon or @ec2_main.settings.openstack or @ec2_main.settings.cloudfoundry or @ec2_main.settings.cloudstack or @ec2_main.settings.eucalyptus or @ec2_main.settings.google
         @serverBranch.each do |a|
