@@ -49,6 +49,8 @@ class Amazon
            puts "Assuming Role #{@role_arn}"
            @access_key_id = $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID')
            @secret_access_key = $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY')
+           @role_arn = $ec2_main.settings.get('AMAZON_ROLE_ARN')
+           @session_token = nil
            @conn['STS'] = Fog::AWS::STS.new(:aws_access_key_id => @access_key_id, :aws_secret_access_key => @secret_access_key )
            response = @conn['STS'].assume_role('admin',@role_arn)
            if response.status == 200
