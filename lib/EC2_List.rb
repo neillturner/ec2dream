@@ -151,6 +151,10 @@ class EC2_List
     @cdn_distribution = ""
     @curr_association_id = nil
     @zone_id = ""
+    @elb_name = ""
+    @db_instance = ""
+    @metric_name = ""
+    @environment_name = ""
     @arrow_refresh = @ec2_main.makeIcon("arrow_redo.png")
     @arrow_refresh.create
     @create = @ec2_main.makeIcon("new.png")
@@ -853,9 +857,6 @@ class EC2_List
           #puts "RESPONSE #{response}"
           #puts "RESPONSE.BODY #{response.body}"
           #puts "RESPONSE.STATUS #{response.status}"
-          #if @ec2_main.settings.cloudfoundry
-          #  @data = response
-          #else
             if response.status == @config["response_code"]
               if @type == "Servers" and (@ec2_main.settings.amazon  or @ec2_main.settings.eucalyptus or @ec2_main.settings.cloudstack)
                 response.body['reservationSet'].each do |r|
@@ -871,11 +872,13 @@ class EC2_List
                 d.each do |v|
                   @data.push(v["keypair"])
                 end
+              elsif (@type == "Load Balancer Attributes" or @type == 'Environment Resources') and @ec2_main.settings.amazon
+                @data = []
+                @data[0] = eval(@config["response"])
               else
                 @data = eval(@config["response"])
               end
             end
-          #end
         rescue
           puts "ERROR: #{request} #{$!}"
         end
@@ -1026,7 +1029,7 @@ class EC2_List
         i=i+1
       end
       i = lists[0].length
-      puts "Setting table length to #{i}"
+      #puts "Setting table length to #{i}"
       @table.setTableSize(i, table_size)
       set_table_titles(@data[0],@max_data_size)
       set_table_data(lists,table_size)
