@@ -1195,8 +1195,8 @@ class EC2_Server
      # @settings['PUTTY_GENERATE_BUTTON'].connect(SEL_UPDATE) do |sender, sel, data|
      #   enable_if_env_set(sender)
      # end
-    end    
-    
+    end
+
     @loc_server['windows_server_label'] = FXLabel.new(@frame5, "Windows Server" )
     @loc_server['windows_server_label'].tipText = "true or false. If true Remote Desktop will be used to access the server."
     @loc_server['windows_server'] = FXComboBox.new(@frame5, 15, :opts => COMBOBOX_STATIC|COMBOBOX_NO_REPLACE|LAYOUT_LEFT)
@@ -1749,6 +1749,9 @@ class EC2_Server
 
   def run_remote_desktop
     server = currentServer
+    instance_id = @server['Instance_ID'].text
+    r = {}
+    r = @bastion[instance_id] if @bastion[instance_id] != nil
     if @type == "ops"
       user = @ec2_main.launch.ops_get("SSH_User")
       user = @ec2_main.settings.get('EC2_SSH_USER') if user == nil or user == ''
@@ -1765,7 +1768,7 @@ class EC2_Server
       local_port = @server['Local_Port'].text
     end
     if pw != nil and pw != ""
-      remote_desktop(server, pw, user, "3389", local_port)
+      remote_desktop(server, pw, user, "3389", local_port, r['bastion_host'], r['bastion_port'],r['bastion_user'], r['bastion_password'])
     else
       error_message("Error","No Admin Password")
     end

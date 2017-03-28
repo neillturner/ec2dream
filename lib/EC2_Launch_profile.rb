@@ -125,6 +125,7 @@ class EC2_Launch_profile < FXImageFrame
     @properties['Bastion_User'] =  @bastion['bastion_user']
     @properties['Bastion_Ssh_Key'] = @bastion['bastion_ssh_key']
     @properties['Bastion_Putty_Key'] = @bastion['bastion_putty_key']
+    @properties['Bastion_Password'] =  @bastion['bastion_password']
   end
 
 end

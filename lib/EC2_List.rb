@@ -441,8 +441,6 @@ class EC2_List
     end
 
     @attributes_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
-    @view = $ec2_main.makeIcon('application_view_icons.png')
-    @view.create
     @attributes_button.icon = @view
     @attributes_button.connect(SEL_COMMAND) do |sender, sel, data|
       call_dialog(6)
@@ -952,6 +950,10 @@ class EC2_List
                   end
                 end
               elsif rk.kind_of?(Hash)
+                if k == 'tagSet' and !rk.has_key?('Name')
+                  item = "Name=#{rk['Name']}"
+                  rk.delete('Name')
+                end
                 rk.each do |y,z|
                   if item == ""
                     item = "#{y}=#{z}"
@@ -999,6 +1001,10 @@ class EC2_List
                   end
                 end
               elsif v.kind_of?(Hash)
+                if k == 'tagSet' and !v.has_key?('Name')
+                  item = "Name=#{v['Name']}"
+                  v.delete('Name')
+                end
                 v.each do |y,z|
                   if item == ""
                     item = "#{y}=#{z}"

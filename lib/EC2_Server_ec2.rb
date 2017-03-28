@@ -175,6 +175,7 @@ class EC2_Server
       r['bastion_host'] = @ec2_main.settings.get('BASTION_HOST')
       r['bastion_port'] = @ec2_main.settings.get('BASTION_PORT')
       r['bastion_user'] = @ec2_main.settings.get('BASTION_USER')
+      r['bastion_password'] = @ec2_main.settings.get('BASTION_PASSWORD')
       r['bastion_ssh_key'] = @ec2_main.settings.get('BASTION_SSH_KEY')
       r['bastion_putty_key'] = @ec2_main.settings.get('BASTION_PUTTY_KEY')
       p = @ec2_main.launch.get('Bastion_Host')
@@ -184,6 +185,9 @@ class EC2_Server
       r['bastion_port'] = p if p != nil and p != ""
       p = @ec2_main.launch.get('Bastion_User')
       r['bastion_user'] = p if p != nil and p != ""
+
+      p = @ec2_main.launch.get('Bastion_Password')
+      r['bastion_password'] = p if p != nil and p != ""
 
       p = @ec2_main.launch.get('Bastion_Ssh_Key')
       r['bastion_ssh_key'] = p if p != nil and p != ""

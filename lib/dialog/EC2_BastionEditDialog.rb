@@ -13,7 +13,7 @@ class EC2_BastionEditDialog < FXDialogBox
     @parm = {}
     @magnifier = @ec2_main.makeIcon("magnifier.png")
     @magnifier.create
-    super(@ec2_main, "Configure Bastion Host", :opts => DECOR_ALL, :width => 450, :height => 225)
+    super(@ec2_main, "Configure Bastion Host", :opts => DECOR_ALL, :width => 450, :height => 260)
     frame1 = FXMatrix.new(self, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
     FXLabel.new(frame1, "Bastion Host" )
     bastion_host = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
@@ -23,7 +23,10 @@ class EC2_BastionEditDialog < FXDialogBox
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "Bastion User" )
     bastion_user = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
-    FXLabel.new(frame1, "" )    
+    FXLabel.new(frame1, "" )
+    FXLabel.new(frame1, "Bastion Password" )
+    bastion_user = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "Bastion SSH key" )
     bastion_ssh_key = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     bastion_ssh_key_button = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
@@ -53,7 +56,7 @@ class EC2_BastionEditDialog < FXDialogBox
       if dialog.execute != 0
         bastion_putty_key.text = dialog.filename
       end
-    end    
+    end
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "" )
@@ -62,7 +65,7 @@ class EC2_BastionEditDialog < FXDialogBox
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "" )
-    FXLabel.new(frame1, "" )    
+    FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "" )
     create = FXButton.new(frame1, "   &Save   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     FXLabel.new(frame1, "" )
@@ -70,17 +73,19 @@ class EC2_BastionEditDialog < FXDialogBox
       @parm['bastion_host']=bastion_host.text
       @parm['bastion_port']=bastion_port.text
       @parm['bastion_user']=bastion_user.text
+      @parm['bastion_password']=bastion_password.text
       @parm['bastion_ssh_key']=bastion_ssh_key.text
-      @parm['bastion_putty_key']=bastion_putty_key.text    
+      @parm['bastion_putty_key']=bastion_putty_key.text
       @saved = true
       self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
     end
-    bastion_host.text = parm['bastion_host'] if parm['bastion_host'] != nil 
+    bastion_host.text = parm['bastion_host'] if parm['bastion_host'] != nil
     bastion_port.text = parm['bastion_port'] if parm['bastion_port'] != nil
     bastion_user.text = parm['bastion_user'] if parm['bastion_user'] != nil
+    bastion_password.text = parm['bastion_user'] if parm['bastion_password'] != nil
     bastion_ssh_key.text = parm['bastion_ssh_key'] if parm['bastion_ssh_key'] != nil
     bastion_putty_key.text = parm['bastion_putty_key'] if parm['bastion_putty_key'] != nil
-  end 
+  end
   def saved
     @saved
   end
@@ -90,5 +95,5 @@ class EC2_BastionEditDialog < FXDialogBox
   end
   def selected
     @parm
-  end  
+  end
 end

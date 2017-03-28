@@ -233,6 +233,7 @@ class EC2_Settings
       r['bastion_host'] = @properties['BASTION_HOST']
       r['bastion_port'] = @properties['BASTION_PORT']
       r['bastion_user'] = @properties['BASTION_USER']
+      r['bastion_password'] = @properties['BASTION_PASSWORD']
       r['bastion_ssh_key'] = @properties['BASTION_SSH_KEY']
       r['bastion_putty_key'] = @properties['BASTION_PUTTY_KEY']
       dialog = EC2_BastionEditDialog.new(@ec2_main,r)
@@ -243,6 +244,7 @@ class EC2_Settings
           @properties['BASTION_HOST']=r['bastion_host']
           @properties['BASTION_PORT']=r['bastion_port']
           @properties['BASTION_USER']=r['bastion_user']
+          @properties['BASTION_PASSWORD']=r['bastion_password']
           @properties['BASTION_SSH_KEY']=r['bastion_ssh_key']
           @properties['BASTION_PUTTY_KEY']=r['bastion_putty_key']
           save
