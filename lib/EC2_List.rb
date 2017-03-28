@@ -142,6 +142,7 @@ class EC2_List
     @template_file = ""
     @cf_parameters = ""
     @stack_name = ""
+    @change_set_name = ""
     @group_name = ""
     @policy_name = ""
     @instance_profile_name = ""
@@ -401,12 +402,14 @@ class EC2_List
           if @curr_row==nil
             t = ""
             t = item.text if item != nil
+            t = t.tr(",","\n")
             csv_line = csv_line+",#{t}" if csv_line != ""
             csv_line = "#{t}" if csv_line == ""
           end
           if @curr_row==i
             t = ""
             t = item.text if item != nil
+            t = t.tr(",","\n")
             csv_line = csv_line+"\n#{csv_titles[j]}  -  #{t}" if csv_line != ""
             csv_line = "#{csv_titles[j]}  -  #{t}" if csv_line == ""
             j=j+1
@@ -441,6 +444,8 @@ class EC2_List
     end
 
     @attributes_button = FXButton.new(page1a, " ",:opts => BUTTON_NORMAL|LAYOUT_LEFT)
+    @view = $ec2_main.makeIcon('application_view_icons.png')
+    @view.create
     @attributes_button.icon = @view
     @attributes_button.connect(SEL_COMMAND) do |sender, sel, data|
       call_dialog(6)

@@ -5,6 +5,8 @@ require 'common/EC2_Properties'
 require 'common/error_message'
 require 'common/edit'
 require 'dialog/CF_ValidateDialog'
+require 'dialog/CF_ViewChangeSetDialog'
+
 
 include Fox
 
@@ -18,12 +20,16 @@ class CF_EditDialog < FXDialogBox
     @magnifier.create
     @script_edit = @ec2_main.makeIcon("script_edit.png")
     @script_edit.create
-    super(@ec2_main, "Create or Update Stack", :opts => DECOR_ALL, :width => 700, :height => 400)
+    super(@ec2_main, "Update Stack using Change Set", :opts => DECOR_ALL, :width => 600, :height => 350)
     page1 = FXVerticalFrame.new(self, LAYOUT_FILL, :padding => 0)
     frame1 = FXMatrix.new(page1, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
     stack_name_label = FXLabel.new(frame1, "Stack Name" )
     stack_name_label.tipText = "REQUIRED: The name that is associated with the cloudformation stack.\n The name must be unique in the region in which you are creating the stack.\n It can contain only alphanumeric characters (case sensitive) and hyphens.\n It must start with an alphabetic character and cannot be longer than 255 characters."
     stack_name = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
+    FXLabel.new(frame1, "" )
+    change_set_name_label = FXLabel.new(frame1, "ChangeSet Name" )
+    change_set_name_label.tipText = "REQUIRED: The change set name to create or execute.\n A change set name can contain only alphanumeric, case sensitive characters and hyphens.\n It must start with an alphabetic character and cannot exceed 128 characters."
+    change_set_name = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
     FXLabel.new(frame1, "" )
     cfndsl_file_label = FXLabel.new(frame1, "cfndsl File" )
     cfndsl_file_label.tipText = "OPTIONAL: The name of the cfndsl ruby file.\n This allows you to write in ruby and generate the cloudformation JSON template by pressing the cfndsl button."
@@ -102,57 +108,17 @@ class CF_EditDialog < FXDialogBox
     timeout_in_minutes_label.tipText = "OPTIONAL: The amount of time in minutes that can pass before the stack status becomes CREATE_FAILED. \nif DisableRollback is not set or is set to false, the stack will be rolled back."
     timeout_in_minutes = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
     FXLabel.new(frame1, "" )
-    policy_file_label = FXLabel.new(frame1, "Stack Policy File" )
-    policy_file_label.tipText = "OPTIONAL: The name of the file containing the stack policy."
-    frame1c = FXHorizontalFrame.new(frame1,LAYOUT_FILL_X, :padding => 0)
-    policy_file = FXTextField.new(frame1c, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
-    policy_file_button = FXButton.new(frame1c, "", :opts => BUTTON_TOOLBAR)
-    policy_file_button.icon = @magnifier
-    policy_file_button.tipText = "Browse..."
-    policy_file_button.connect(SEL_COMMAND) do
-      dialog = FXFileDialog.new(frame1c, "Select Stack Policy file")
-      dialog.patternList = [
-        "Policy Files (*.*)"
-      ]
-      dialog.selectMode = SELECTFILE_EXISTING
-      if dialog.execute != 0
-        policy_file.text = dialog.filename
-      end
-    end
-    FXLabel.new(frame1, "" )
-    policy_during_update_file_label = FXLabel.new(frame1, "Policy During Update File" )
-    policy_during_update_file_label.tipText = "OPTIONAL: The name of the file to temporary overriding stack policy during update stack."
-    frame1d = FXHorizontalFrame.new(frame1,LAYOUT_FILL_X, :padding => 0)
-    policy_during_update_file = FXTextField.new(frame1d, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
-    policy_during_update_file_button = FXButton.new(frame1d, "", :opts => BUTTON_TOOLBAR)
-    policy_during_update_file_button.icon = @magnifier
-    policy_during_update_file_button.tipText = "Browse..."
-    policy_during_update_file_button.connect(SEL_COMMAND) do
-      dialog = FXFileDialog.new(frame1d, "Select Stack Policy During Update file")
-      dialog.patternList = [
-        "Policy Files (*.*)"
-      ]
-      dialog.selectMode = SELECTFILE_EXISTING
-      if dialog.execute != 0
-        policy_during_update_file.text = dialog.filename
-      end
-    end
-    FXLabel.new(frame1, "" )
-    change_set_name_label = FXLabel.new(frame1, "Change Set Name" )
-    change_set_name_label.tipText = "REQUIRED FOR CREATE CHANGE SET: The name of the change set."
-    change_set_name = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_LEFT)
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "" )
-    FXLabel.new(frame1, "" )
-    frame2 = FXHorizontalFrame.new(page1,LAYOUT_FILL, :padding => 0)
+    frame2 = FXHorizontalFrame.new(page1,LAYOUT_LEFT, hSpacing: 20) # :padding => 0)
     save = FXButton.new(frame2, "   &Save   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     save.connect(SEL_COMMAND) do |sender, sel, data|
       if stack_name.text == nil or stack_name.text == ""
         error_message("Error","Stack Name not specified")
       else
-        save_stack(stack_name.text,cfndsl_file.text,cfndsl_parameters.text,pretty_print_json,template_file.text,parameters.text,parameter_separator.text,disable_rollback.text,timeout_in_minutes.text, policy_file.text, policy_during_update_file.text, change_set_name.text)
+        save_stack(stack_name.text,change_set_name.text,cfndsl_file.text,cfndsl_parameters.text,pretty_print_json,template_file.text,parameters.text,parameter_separator.text,disable_rollback.text,timeout_in_minutes.text)
       end
     end
     cfndsl = FXButton.new(frame2, "   &cfndsl   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
@@ -162,7 +128,7 @@ class CF_EditDialog < FXDialogBox
       elsif cfndsl_file.text == nil or cfndsl_file.text == ""
         error_message("Error","cfndsl File not specified")
       else
-        save_stack(stack_name.text,cfndsl_file.text,cfndsl_parameters.text,pretty_print_json,template_file.text,parameters.text,parameter_separator.text,disable_rollback.text,timeout_in_minutes.text, policy_file.text, policy_during_update_file.text, change_set_name.text)
+        save_stack(stack_name.text,change_set_name.text,cfndsl_file.text,cfndsl_parameters.text,pretty_print_json,template_file.text,parameters.text,parameter_separator.text,disable_rollback.text,timeout_in_minutes.text)
         if @saved == true
           cfndsl_run(cfndsl_file.text,cfndsl_parameters.text,template_file.text,pretty_print_json)
         end
@@ -173,7 +139,7 @@ class CF_EditDialog < FXDialogBox
       if stack_name.text == nil or stack_name.text == ""
         error_message("Error","Stack Name not specified")
       else
-        save_stack(stack_name.text,cfndsl_file.text,cfndsl_parameters.text,pretty_print_json,template_file.text,parameters.text,parameter_separator.text,disable_rollback.text,timeout_in_minutes.text, policy_file.text, policy_during_update_file.text, change_set_name.text)
+        save_stack(stack_name.text,change_set_name.text,cfndsl_file.text,cfndsl_parameters.text,pretty_print_json,template_file.text,parameters.text,parameter_separator.text,disable_rollback.text,timeout_in_minutes.text)
         if @saved == true
           dialog = CF_ValidateDialog.new(@ec2_main,stack_name.text,template_file.text)
         end
@@ -184,7 +150,7 @@ class CF_EditDialog < FXDialogBox
       if stack_name.text == nil or stack_name.text == ""
         error_message("Error","Stack Name not specified")
       else
-        save_stack(stack_name.text,cfndsl_file.text,cfndsl_parameters.text,pretty_print_json,template_file.text,parameters.text,parameter_separator.text,disable_rollback.text,timeout_in_minutes.text, policy_file.text, policy_during_update_file.text, change_set_name.text)
+        save_stack(stack_name.text,change_set_name.text,cfndsl_file.text,cfndsl_parameters.text,pretty_print_json,template_file.text,parameters.text,parameter_separator.text,disable_rollback.text,timeout_in_minutes.text)
         if @saved == true
           answer = FXMessageBox.question(@ec2_main,MBOX_YES_NO,"Confirm Stack Create","Confirm Create of Stack #{stack_name}")
           if answer == MBOX_CLICKED_YES
@@ -205,10 +171,6 @@ class CF_EditDialog < FXDialogBox
                 puts "ERROR: bad parameters on Create stack ignored"
               end
             end
-            if policy_file.text != nil and policy_file.text != ""
-              doc = File.open(policy_file.text, 'rb') { |file| file.read }
-              options['StackPolicyBody'] = doc
-            end
             if disable_rollback.text != nil and disable_rollback.text != ""
               options['DisableRollback'] =  true if (disable_rollback.text).downcase == "true"
               options['DisableRollback'] =  false if (disable_rollback.text).downcase == "false"
@@ -216,6 +178,7 @@ class CF_EditDialog < FXDialogBox
             if timeout_in_minutes.text != nil and timeout_in_minutes.text != ""
               options['TimeoutInMinutes'] = (timeout_in_minutes.text).to_i
             end
+            options['Capabilities'] = ['CAPABILITY_IAM']
             cf = @ec2_main.environment.cf_connection
             if cf != nil
               begin
@@ -237,7 +200,7 @@ class CF_EditDialog < FXDialogBox
       if stack_name.text == nil or stack_name.text == ""
         error_message("Error","Stack Name not specified")
       else
-        save_stack(stack_name.text,cfndsl_file.text,cfndsl_parameters.text,pretty_print_json,template_file.text,parameters.text,parameter_separator.text,disable_rollback.text,timeout_in_minutes.text, policy_file.text, policy_during_update_file.text, change_set_name.text)
+        save_stack(stack_name.text,change_set_name.text,cfndsl_file.text,cfndsl_parameters.text,pretty_print_json,template_file.text,parameters.text,parameter_separator.text,disable_rollback.text,timeout_in_minutes.text)
         if @saved == true
           answer = FXMessageBox.question(@ec2_main,MBOX_YES_NO,"Confirm Stack Update","Confirm Update of Stack #{stack_name}")
           if answer == MBOX_CLICKED_YES
@@ -258,10 +221,6 @@ class CF_EditDialog < FXDialogBox
                 puts "ERROR: bad parameters on Create stack ignored"
               end
             end
-            if policy_file.text != nil and policy_file.text != ""
-              doc = File.open(policy_file.text, 'rb') { |file| file.read }
-              options['StackPolicyBody'] = doc
-            end
             if disable_rollback.text != nil and disable_rollback.text != ""
               options['DisableRollback'] =  true if (disable_rollback.text).downcase == "true"
               options['DisableRollback'] =  false if (disable_rollback.text).downcase == "false"
@@ -269,6 +228,7 @@ class CF_EditDialog < FXDialogBox
             if timeout_in_minutes.text != nil and timeout_in_minutes.text != ""
               options['TimeoutInMinutes'] = (timeout_in_minutes.text).to_i
             end
+            options['Capabilities'] = ['CAPABILITY_IAM']
             cf = @ec2_main.environment.cf_connection
             if cf != nil
               begin
@@ -284,7 +244,131 @@ class CF_EditDialog < FXDialogBox
         end
       end
     end
-    exit = FXButton.new(frame2, "   &Exit   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
+    frame3 = FXHorizontalFrame.new(page1,LAYOUT_LEFT, hSpacing: 20) # :padding => 0)
+    create_changeset = FXButton.new(frame3, " &Create Change Set ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
+    create_changeset.connect(SEL_COMMAND) do |sender, sel, data|
+      if stack_name.text == nil or stack_name.text == ""
+        error_message("Error","Stack Name not specified")
+      elsif change_set_name.text == nil or change_set_name.text == ""
+        error_message("Error","Change Set Name not specified")
+      else
+        save_stack(stack_name.text,change_set_name.text,cfndsl_file.text,cfndsl_parameters.text,pretty_print_json,template_file.text,parameters.text,parameter_separator.text,disable_rollback.text,timeout_in_minutes.text)
+        if @saved == true
+          answer = FXMessageBox.question(@ec2_main,MBOX_YES_NO,"Confirm Create ChangeSet","Confirm Create ChangeSet #{change_set_name}")
+          if answer == MBOX_CLICKED_YES
+            doc = File.open(template_file.text, 'rb') { |file| file.read }
+            options = {}
+            options['TemplateBody'] = doc
+            if parameters.text != nil and parameters.text != ""
+              begin
+                h = {}
+                split_char = ','
+                split_char = parameter_separator.text if parameter_separator.text != nil and parameter_separator.text != ""
+                (parameters.text).split(split_char).each do |x|
+                  k,v = x.split('=')
+                  h[k] = v
+                end
+                options['Parameters'] = h
+              rescue
+                puts "ERROR: bad parameters on Create Change Set stack ignored"
+              end
+            end
+            if disable_rollback.text != nil and disable_rollback.text != ""
+              options['DisableRollback'] =  true if (disable_rollback.text).downcase == "true"
+              options['DisableRollback'] =  false if (disable_rollback.text).downcase == "false"
+            end
+            if timeout_in_minutes.text != nil and timeout_in_minutes.text != ""
+              options['TimeoutInMinutes'] = (timeout_in_minutes.text).to_i
+            end
+            options['ChangeSetName']= change_set_name.text
+            cf = @ec2_main.environment.cf_connection
+            if cf != nil
+              begin
+                puts "Create ChangeSet for Stack #{stack_name.text} change_set_name #{options['ChangeSetName']} parameters #{options['Parameters']} disable_rollback #{options['DisableRollback']} timeout_in_minutes #{options['TimeoutInMinutes']}"
+                response = cf.create_change_set(stack_name.text, options)
+                @saved = true
+                puts "Change Set #{response.body['Id']} Created"
+              rescue
+                error_message("Create Change Set failed",$!)
+              end
+            end
+          end
+        end
+      end
+    end
+    view = FXButton.new(frame3, " &View Change Set ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
+    view.connect(SEL_COMMAND) do |sender, sel, data|
+      if stack_name.text == nil or stack_name.text == ""
+        error_message("Error","Stack Name not specified")
+      elsif change_set_name.text == nil or change_set_name.text == ""
+        error_message("Error","Change Set Name not specified")
+      else
+        save_stack(stack_name.text,change_set_name.text,cfndsl_file.text,cfndsl_parameters.text,pretty_print_json,template_file.text,parameters.text,parameter_separator.text,disable_rollback.text,timeout_in_minutes.text)
+        if @saved == true
+          #dialog = CF_ValidateDialog.new(@ec2_main,stack_name.text,template_file.text)
+          dialog = CF_ViewChangeSetDialog.new(@ec2_main,stack_name.text, change_set_name.text)
+          dialog.execute
+        end
+      end
+    end
+    execute = FXButton.new(frame3, " &Execute Change Set ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
+    execute.connect(SEL_COMMAND) do |sender, sel, data|
+      if stack_name.text == nil or stack_name.text == ""
+        error_message("Error","Stack Name not specified")
+      elsif change_set_name.text == nil or change_set_name.text == ""
+        error_message("Error","Change Set Name not specified")
+      else
+        save_stack(stack_name.text,change_set_name.text,cfndsl_file.text,cfndsl_parameters.text,pretty_print_json,template_file.text,parameters.text,parameter_separator.text,disable_rollback.text,timeout_in_minutes.text)
+        if @saved == true
+          answer = FXMessageBox.question(@ec2_main,MBOX_YES_NO,"Confirm Execute Change Set","Confirm Execute Change Set #{change_set_name}")
+          if answer == MBOX_CLICKED_YES
+            options = {}
+            options['StackName'] = stack_name.text
+            cf = @ec2_main.environment.cf_connection
+            if cf != nil
+              begin
+                puts "Execute Change Set for change_set_name #{change_set_name.text} stack_name #{options['StackName']}"
+                response = cf.execute_change_set(change_set_name.text, options)
+                @saved = true
+                @ec2_main.list.load('Stack Events','CloudFormation')
+                self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+              rescue
+                error_message("Execute Change Set failed",$!)
+              end
+            end
+          end
+        end
+      end
+    end
+    delete = FXButton.new(frame3, " &Delete Change Set ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
+    delete.connect(SEL_COMMAND) do |sender, sel, data|
+      if stack_name.text == nil or stack_name.text == ""
+        error_message("Error","Stack Name not specified")
+      elsif change_set_name.text == nil or change_set_name.text == ""
+        error_message("Error","Change Set Name not specified")
+      else
+        save_stack(stack_name.text,change_set_name.text,cfndsl_file.text,cfndsl_parameters.text,pretty_print_json,template_file.text,parameters.text,parameter_separator.text,disable_rollback.text,timeout_in_minutes.text)
+        if @saved == true
+          answer = FXMessageBox.question(@ec2_main,MBOX_YES_NO,"Confirm Delete Change Set","Confirm Delete Change Set #{change_set_name}")
+          if answer == MBOX_CLICKED_YES
+            options = {}
+            options['StackName'] = stack_name.text
+            cf = @ec2_main.environment.cf_connection
+            if cf != nil
+              begin
+                puts "Delete Change Set for change_set_name #{change_set_name.text} stack_name #{options['StackName']}"
+                response = cf.delete_change_set(change_set_name.text, options)
+                @saved = true
+                self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
+              rescue
+                error_message("Delete Change Set failed",$!)
+              end
+            end
+          end
+        end
+      end
+    end
+    exit = FXButton.new(frame3, " &Exit ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
     exit.connect(SEL_COMMAND) do |sender, sel, data|
       self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
     end
@@ -293,6 +377,7 @@ class CF_EditDialog < FXDialogBox
       r = get_stack(curr_item)
       if r['stack_name'] != nil and r['stack_name'] != ""
         stack_name.text = r['stack_name']
+        change_set_name.text = r['change_set_name']
         cfndsl_file.text = r['cfndsl_file']
         cfndsl_parameters.text = r['cfndsl_parameters']
         if r['pretty_print_json'] == 'false'
@@ -313,21 +398,6 @@ class CF_EditDialog < FXDialogBox
         else
           timeout_in_minutes.text = ""
         end
-        if r['policy_file'] != nil and r['policy_file'] != ""
-          policy_files.text = r['policy_file']
-        else
-          policy_file.text = ""
-        end
-        if r['policy_during_update_file'] != nil and r['policy_during_update_file'] != ""
-          policy_during_update_file.text = r['policy_during_update_file']
-        else
-          policy_during_update_file.text = ""
-        end
-        if r['change_set_name'] != nil and r['change_set_name'] != ""
-          change_set_name.text = r['change_set_name']
-        else
-          change_set_name.text = ""
-        end
       end
     end
   end
@@ -342,13 +412,14 @@ class CF_EditDialog < FXDialogBox
     return properties
   end
 
-  def save_stack(stack_name,cfndsl_file,cfndsl_parameters,pretty_print_json,template_file,parameters,parameter_separator,disable_rollback,timeout_in_minutes, policy_file, policy_during_update_file, change_set_name)
+  def save_stack(stack_name,change_set_name,cfndsl_file,cfndsl_parameters,pretty_print_json,template_file,parameters,parameter_separator,disable_rollback,timeout_in_minutes)
     folder = "cf_templates"
     loc = EC2_Properties.new
     if loc != nil
       begin
         properties = {}
         properties['stack_name']=stack_name
+        properties['change_set_name']=change_set_name
         properties['cfndsl_file']=cfndsl_file
         properties['cfndsl_parameters']=cfndsl_parameters
         if pretty_print_json.itemCurrent?(1)
@@ -364,15 +435,6 @@ class CF_EditDialog < FXDialogBox
         end
         if timeout_in_minutes != nil and timeout_in_minutes != ""
           properties['timeout_in_minutes'] = timeout_in_minutes
-        end
-        if policy_file != nil and policy_file != ""
-          properties['policy_file'] = policy_file
-        end
-        if  policy_during_update_file != nil and  policy_during_update_file != ""
-          properties[' policy_during_update_file'] =  policy_during_update_file
-        end
-        if change_set_name != nil and change_set_name != ""
-          properties['change_set_name'] = change_set_names
         end
         @saved = loc.save(folder, stack_name, properties)
         if @saved == false

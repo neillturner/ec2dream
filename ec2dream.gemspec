@@ -49,6 +49,7 @@ Gem::Specification.new do |spec|
     candidates = Dir.glob("{lib}/**/*") +  ['History.md', 'README.md', 'ec2dream.ico', 'ec2dream.bmp' , 'ca-bundle.crt', 'ec2dream.gemspec']
     candidates = candidates +  Dir.glob("{chef}/**/*")
     candidates = candidates +  Dir.glob("{launchrdp}/*")
+    candidates = candidates +  Dir.glob("{wfreerdp}/*")
     candidates = candidates +  Dir.glob("{putty}/*")
     candidates = candidates +  Dir.glob("{google}/*")
     candidates = candidates +  Dir.glob("{tar}/*")

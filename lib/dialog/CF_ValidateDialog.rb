@@ -14,6 +14,7 @@ class CF_ValidateDialog < FXDialogBox
     if cf != nil
       begin
         response = cf.validate_template(options)
+        puts "CF_ValidateDialog cf_connection status #{response.status}"
         if response.status == 200
           FXMessageBox.warning(@ec2_main,MBOX_OK,"Template validated successfully","Template validated successfully.")
         else
@@ -22,6 +23,8 @@ class CF_ValidateDialog < FXDialogBox
       rescue
         error_message("Template Validation Error",$!)
       end
+    else 
+      puts "ERROR: CF_ValidateDialog cf_connection is null"
     end
   end
   def success
