@@ -377,20 +377,19 @@ class EC2_List
         i=i+1
       end
       if @curr_row==nil
-        @header1.each do |item|
+        i=0
+        @table.each_column do |items|
           t = ""
-          t = item.text if item != nil
+          t = @table.getColumnText(i)
+          i=i+1
           csv_text = csv_text+",#{t}" if csv_text != ""
           csv_text = "#{t}" if csv_text == ""
         end
         csv_text = csv_text +"\n\n"
       else
         i=0
-        @header1.each do |item|
-          csv_titles[i] = ""
-          if item != nil
-            csv_titles[i] = item.text
-          end
+        @table.each_column do |items|
+          csv_titles[i] = @table.getColumnText(i)
           i=i+1
         end
       end
