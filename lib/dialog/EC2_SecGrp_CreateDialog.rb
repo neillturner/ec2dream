@@ -19,7 +19,7 @@ class EC2_SecGrp_CreateDialog < FXDialogBox
     @ec2_platform = @ec2_main.settings.get('EC2_PLATFORM')
     @magnifier = @ec2_main.makeIcon("magnifier.png")
     @magnifier.create
-    super(owner, "Create Security Group", :opts => DECOR_ALL, :width => 500, :height => 175) 
+    super(owner, "Create Security Group", :opts => DECOR_ALL, :width => 500, :height => 175)
     page1 = FXVerticalFrame.new(self, LAYOUT_FILL, :padding => 0)
     frame1 = FXMatrix.new(page1, 3, :opts => MATRIX_BY_COLUMNS|LAYOUT_FILL)
     FXLabel.new(frame1, "Security Group Type" )
@@ -38,7 +38,7 @@ class EC2_SecGrp_CreateDialog < FXDialogBox
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "" )
-    FXLabel.new(frame1, "" ) 
+    FXLabel.new(frame1, "" )
 
     FXLabel.new(frame1, "Security Group Name" )
     @sec_grp = FXTextField.new(frame1, 30, nil, 0, :opts => FRAME_SUNKEN)
@@ -57,11 +57,11 @@ class EC2_SecGrp_CreateDialog < FXDialogBox
       dialog.execute
       if dialog.selected != nil and dialog.selected != ""
         @vpc_id.text = dialog.selected
-      end	
-    end	
+      end
+    end
     @vpc_id_button.connect(SEL_UPDATE) do |sender, sel, data|
       sender.enabled = true
-    end	
+    end
     FXLabel.new(frame1, "" )
     frame2 = FXHorizontalFrame.new(page1,LAYOUT_FILL, :padding => 0)
     create = FXButton.new(frame2, "   &Create   ", nil, self, ID_ACCEPT, FRAME_RAISED|LAYOUT_LEFT|LAYOUT_CENTER_X)
@@ -69,13 +69,13 @@ class EC2_SecGrp_CreateDialog < FXDialogBox
       create_secgrp(@sec_grp.text, @type, @sec_desc.text, @vpc_id.text)
       if @created == true
         self.handle(sender, MKUINT(ID_ACCEPT, SEL_COMMAND), nil)
-      end  
+      end
     end
-  end 
+  end
   def create_secgrp(sg, type, desc, vpc_id)
     if desc == nil or desc == ""
       desc = sg
-    end  
+    end
     if sg == nil or sg == ""
       error_message("Error","Security Group not specified")
       return
@@ -88,13 +88,13 @@ class EC2_SecGrp_CreateDialog < FXDialogBox
     puts "creating security group #{sg}"
     vpc_id = nil if vpc_id != nil and vpc_id == ""
     vpc_id = nil if !@ec2_main.settings.amazon
-    r = @ec2_main.environment.security_group.create(sg,desc,vpc_id)
-    if r != nil 
-      begin
+    begin
+      r = @ec2_main.environment.security_group.create(sg,desc,vpc_id)
+      if r != nil
         if type == "windows"
-          if r['groupId'] != nil 
+          if r['groupId'] != nil
             @ec2_main.environment.security_group.create_security_group_rule( r['groupId'], 'tcp', 3389, 3389,  '0.0.0.0/0', r['groupId'], sg)
-          else 
+          else
             @ec2_main.environment.security_group.create_security_group_rule(r["id"], 'tcp', 3389, 3389,  '0.0.0.0/0', nil, sg)
           end
         else
@@ -102,18 +102,18 @@ class EC2_SecGrp_CreateDialog < FXDialogBox
             @ec2_main.environment.security_group.create_security_group_rule(sg, 'tcp', 22, 22,  '0.0.0.0/0', r['groupId'], sg)
           else
             @ec2_main.environment.security_group.create_security_group_rule(r["id"], 'tcp', 22, 22,  '0.0.0.0/0', nil, sg)
-          end   
+          end
         end
-      rescue 
-        error_message("Create Security Group failed",$!)
-        return
       end
-    end   
+    rescue
+      error_message("Create Security Group failed",$!)
+      return
+    end
     if r != nil
-      @created = true 
+      @created = true
       @ec2_main.treeCache.refresh
     else
-      error_message("Error","Security Group Creation failed")                
+      error_message("Error","Security Group Creation failed")
     end
   end
   def saved
@@ -125,14 +125,14 @@ class EC2_SecGrp_CreateDialog < FXDialogBox
   def success
     @created
   end
-  def type 
+  def type
     @type
-  end 
-  def sec_grp 
+  end
+  def sec_grp
     @sec_grp.text
-  end 
-  def vpc 
+  end
+  def vpc
     @vpc_id.text
-  end 
+  end
 
 end

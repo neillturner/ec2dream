@@ -142,9 +142,9 @@ class Data_security_group
   #  ec2.authorize_security_group_IP_ingress('my_awesome_group', 80, 82, 'udp', '192.168.1.0/8') #=> true
   #  ec2.authorize_security_group_IP_ingress('my_awesome_group', -1, -1, 'icmp') #=> true
   #
-  def create_security_group_rule(parent_group_id, ip_protocol, from_port, to_port, cidr, group_id=nil, group_name=nil, group_auth=nil, group_auth_id=nil )
+  def create_security_group_rule(parent_group_id, ip_protocol, from_port, to_port, cidr, group_id=nil, group_name=nil, group_auth=nil, group_auth_id=nil, type='ingress' )
 
-    puts "Data_security_group.create_security_group_rule( #{parent_group_id}, #{ip_protocol}, #{from_port}, #{to_port}, #{cidr}, #{group_id}, #{group_name}, #{group_auth}, #{group_auth_id})"
+    puts "Data_security_group.create_security_group_rule( #{parent_group_id}, #{ip_protocol}, #{from_port}, #{to_port}, #{cidr}, #{group_id}, #{group_name}, #{group_auth}, #{group_auth_id}, #{type})"
     # group_id field not necessary
     data = nil
     conn = @ec2_main.environment.connection
@@ -177,7 +177,11 @@ class Data_security_group
           options['ToPort']=to_port.to_i
           options['CidrIp']=cidr  if cidr!=nil and cidr!=""
         end
-        data = conn.authorize_security_group_ingress(group_name, options)
+        if type=='ingress'
+          data = conn.authorize_security_group_ingress(group_name, options)
+        else
+          data = conn.authorize_security_group_egress(group_name, options)
+        end
       else
         data = conn.authorize_security_group_IP_ingress(group_name, from_port, to_port, ip_protocol, cidr)
       end
@@ -221,7 +225,7 @@ class Data_security_group
   #
   #  ec2.revoke_security_group_IP_ingress('my_awesome_group', 80, 82, 'udp', '192.168.1.0/8') #=> true
   #
-  def delete_security_group_rule(sec_group, protocol, from_port, to_port, ip_address, rule_id=nil, group_auth=nil, group_id=nil, group_auth_id=nil)
+  def delete_security_group_rule(sec_group, protocol, from_port, to_port, ip_address, rule_id=nil, group_auth=nil, group_id=nil, group_auth_id=nil, type='ingress' )
     data = nil
     conn = @ec2_main.environment.connection
     if conn != nil
@@ -241,9 +245,19 @@ class Data_security_group
           options['GroupId']= group_id
           sec_group = nil
         end
-        data = conn.revoke_security_group_ingress(sec_group, options)
+        puts "*** sec_group #{sec_group} options #{options}"
+        puts "*** type #{type}"
+        if type == 'ingress'
+           data = conn.revoke_security_group_ingress(sec_group, options)
+        else
+           data = conn.revoke_security_group_egress(sec_group, options)
+        end
       else
-        data = conn.revoke_security_group_IP_ingress(sec_group, from_port, to_port, protocol, ip_address)
+        if type == 'ingress'
+          data = conn.revoke_security_group_IP_ingress(sec_group, from_port, to_port, protocol, ip_address)
+        else
+          data = conn.revoke_security_group_IP_egress(sec_group, from_port, to_port, protocol, ip_address)
+        end
       end
     else
       raise "Connection Error"

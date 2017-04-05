@@ -16,6 +16,7 @@ class EC2_SecGrp
     @ec2_main = owner
     @secgrp_loaded = false
     @type = ""
+    @curr_table = 'ingress'
     @curr_item = ""
     @curr_item_1 = ""
     @curr_item_2 = ""
@@ -137,7 +138,7 @@ class EC2_SecGrp
           if  @ec2_main.settings.openstack
             rule_id = @rule_ids[@curr_row]
           end
-          dialog = EC2_SecGrp_RevokeDialog.new(@ec2_main,@secgrp['Security_Group'],@curr_item, @curr_item_1, @curr_item_2, @curr_item_3, rule_id, @secgrp['group_id'], @sec_group_ids[@curr_item_3]  )
+          dialog = EC2_SecGrp_RevokeDialog.new(@ec2_main,@secgrp['Security_Group'],@curr_item, @curr_item_1, @curr_item_2, @curr_item_3, rule_id, @secgrp['group_id'], @sec_group_ids[@curr_item_3], @curr_table  )
           if dialog.deleted
             @ec2_main.serverCache.refresh_secGrps(@secgrp['Security_Group'],@secgrp['vpc_id'])
             load(@secgrp['Security_Group'],@secgrp['vpc_id'])
@@ -185,6 +186,7 @@ class EC2_SecGrp
     # Make header control
     @body1 = @table.columnHeader
     @table.connect(SEL_COMMAND) do |sender, sel, which|
+      @curr_table = 'ingress'
       @curr_item = @table.getItemText(which.row,0).to_s
       @curr_item_1 = @table.getItemText(which.row,1).to_s
       @curr_item_2 = @table.getItemText(which.row,2).to_s
@@ -196,6 +198,24 @@ class EC2_SecGrp
       @curr_row = which.row
       @table.selectRow(which.row)
     end
+    @table2 = FXTable.new(contents, :opts => LAYOUT_FILL|TABLE_COL_SIZABLE|TABLE_ROW_SIZABLE|TABLE_READONLY  )
+    @table2.rowHeaderWidth = 0
+    # Make header control
+    @body1 = @table2.columnHeader
+    @table2.connect(SEL_COMMAND) do |sender, sel, which|
+      @curr_table = 'egress'
+      @curr_item = @table2.getItemText(which.row,0).to_s
+      @curr_item_1 = @table2.getItemText(which.row,1).to_s
+      @curr_item_2 = @table2.getItemText(which.row,2).to_s
+      if @type == "ec2"
+        @curr_item_3 = @table2.getItemText(which.row,3).to_s
+      else
+        @curr_item_3 = ""
+      end
+      @curr_row = which.row
+      @table2.selectRow(which.row)
+    end
+
   end
 
   def secgrpPanel(item)
@@ -206,7 +226,7 @@ class EC2_SecGrp
   def load(sg,vpc=nil)
     puts "SecGrp.load #{sg} #{vpc}"
     @type = "ec2"
-    if  @ec2_main.settings.openstack or   @ec2_main.settings.google
+    if  @ec2_main.settings.openstack or @ec2_main.settings.google
       load_ops(sg)
     else
       @secgrp['Security_Group'] = sg
@@ -234,20 +254,6 @@ class EC2_SecGrp
           @secgrp_tags = nil
           @secgrp_tags_text =""
         end
-        #data = @ec2_main.environment.tags.all(x[:group_id])
-        #ta = {}
-        #if data != nil
-        #   data.each do |aws_tag|
-        #      ta[aws_tag['key']] = aws_tag['value']
-        #    end
-        #end
-        #if ta.size>0
-        #   @secgrp_tags = EC2_ResourceTags.new(@ec2_main,ta,nil)
-        #   @secgrp_tags_text = @secgrp_tags.show
-        #else
-        #   @secgrp_tags = nil
-        #   @secgrp_tags_text =""
-        #end
         @secgrp['Description'] = x[:aws_description]
         @top.setItemText(1, 1, x[:aws_description])
         @top.setItemJustify(1, 1, FXTableItem::LEFT)
@@ -362,6 +368,68 @@ class EC2_SecGrp
           @table.setItemText(i, 3, lists_3[i])
           @table.setItemJustify(i, 3, FXTableItem::RIGHT)
         end
+        j = 0
+        y = x['ipPermissionsEgress']
+        if y != nil
+          lists_0 = []
+          lists_1 = []
+          lists_2 = []
+          lists_3 = []
+          acct_no = @ec2_main.settings.get('AMAZON_ACCOUNT_ID')
+          y.each do |p|
+            p['groups'].each do |item|
+              gp_key = ""
+              if item['groupName'] != nil
+                gp_key = item['groupName']
+                gp_key = "#{item['userId']}:#{gp_key}" if item['userId'].to_s != acct_no
+              end
+              if item['groupName'] == nil and item['groupId'] != nil and @secgrp['vpc_id'] != nil and @secgrp['vpc_id'] != ""
+                @ec2_main.environment.security_group.all({'group-id' => item['groupId'], 'vpc-id' => @secgrp['vpc_id']}).each do |r|
+                  gp_key = r['groupName']
+                  gp_key = "#{item['userId']}:#{gp_key}" if item['userId'].to_s != acct_no
+                  @sec_group_ids[gp_key] = item['groupId']
+                end
+              elsif gp_key == ""
+                puts "ERROR: Group name found for group permission #{item['groupId']}"
+              end
+              lists_0[j] = p['ipProtocol']
+              lists_1[j] = p['fromPort'].to_s
+              lists_2[j] = p['toPort'].to_s
+              lists_3[j] = gp_key
+              j=j+1
+            end
+            p['ipRanges'].each do |item|
+              lists_0[j] = p['ipProtocol']
+              lists_1[j] = p['fromPort'].to_s
+              lists_2[j] = p['toPort'].to_s
+              lists_3[j] = item['cidrIp']
+              j=j+1
+            end
+          end
+        end
+        i = lists_0.length
+        @table2.clearItems
+        @table2.setTableSize(i, 4)
+        @table2.setColumnText(0,"Protocol")
+        @table2.setColumnWidth(0,100)
+        @table2.setColumnText(1,"From Port")
+        @table2.setColumnWidth(1,100)
+        @table2.setColumnText(2,"To Port")
+        @table2.setColumnWidth(2,100)
+        @table2.setColumnText(3,"Source (IP or Group)")
+        @table2.setColumnWidth(3,200)
+        while i>0
+          i = i-1
+          @table2.setItemText(i, 0, lists_0[i])
+          @table2.setItemJustify(i, 0, FXTableItem::LEFT)
+          @table2.setItemText(i, 1, lists_1[i])
+          @table2.setItemJustify(i, 1, FXTableItem::RIGHT)
+          @table2.setItemText(i, 2, lists_2[i])
+          @table2.setItemJustify(i, 2, FXTableItem::RIGHT)
+          @table2.setItemText(i, 3, lists_3[i])
+          @table2.setItemJustify(i, 3, FXTableItem::RIGHT)
+        end
+        @curr_table = 'ingress'
         @curr_item = ""
         @curr_item_1 = ""
         @curr_item_2 = ""
@@ -369,7 +437,6 @@ class EC2_SecGrp
         @secgrp_loaded = true
         @ec2_main.app.forceRefresh
       end
-
     end
   end
 
@@ -480,6 +547,7 @@ class EC2_SecGrp
     @secgrp['vpc_id'] = ""
     @top.clearItems
     @table.clearItems
+    @table2.clearItems
     @secgrp_loaded = false
     @ec2_main.app.forceRefresh
   end
