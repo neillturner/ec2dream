@@ -463,8 +463,8 @@ class EC2_Server
     FXLabel.new(@frame1, "Private DSN" )
     @server['Private_DSN'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
     FXLabel.new(@frame1, "" )
-    @server['Public_IP_label'] = FXLabel.new(@frame1, "Elastic IP" )
-    @server['Public_IP_label'].tipText = "Elastic IP is used before private IP as address for ssh.\nClear the Elastic IP to ssh to server via Private IP."
+    @server['Public_IP_label'] = FXLabel.new(@frame1, "Public IP" )
+    @server['Public_IP_label'].tipText = "Public IP is used before private IP as address for ssh.\nClear the Public IP to ssh to server via Private IP."
     @frame1ip = FXHorizontalFrame.new(@frame1,LAYOUT_FILL_X, :padding => 0)
     @server['Public_IP'] = FXTextField.new(@frame1ip, 25, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(@frame1ip, "Private IP" )
@@ -491,7 +491,7 @@ class EC2_Server
     #FXLabel.new(@frame1, "Launch Time" )
     #@server['Launch_Time'] = FXTextField.new(@frame1, 60, nil, 0, :opts => TEXTFIELD_READONLY)
     #FXLabel.new(@frame1, "" )
-    if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("mingw") == nil
+    #if RUBY_PLATFORM.index("mswin") == nil and RUBY_PLATFORM.index("mingw") == nil
       @server['EC2_SSH_Private_Key_label'] = FXLabel.new(@frame1, "EC2 SSH Private Key" )
       @server['EC2_SSH_Private_Key_label'].tipText = "OPTIONAL: SSH Key for SSH access to the server.\nDEFAULT: defaults to value specified in Environment tab."
       @server['EC2_SSH_Private_Key'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
@@ -522,7 +522,7 @@ class EC2_Server
           end
         end
       end
-    else
+    if RUBY_PLATFORM.index("mswin") != nil or RUBY_PLATFORM.index("mingw") != nil
       @server['Putty_Private_Key_label'] = FXLabel.new(@frame1, "Putty Private Key" )
       @server['Putty_Private_Key_label'].tipText = "OPTIONAL: Putty Key for Putty access to the server.\nDEFAULT: defaults to value specified in Environment tab."
       @server['Putty_Private_Key'] = FXTextField.new(@frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
@@ -1897,8 +1897,10 @@ class EC2_Server
 
   def currentServer
     if @type == "ec2"
-      if @server['Public_DSN'].text != nil and @server['Public_DSN'].text != ""
-        return @server['Public_DSN'].text
+      #if @server['Public_DSN'].text != nil and @server['Public_DSN'].text != ""
+      #  return @server['Public_DSN'].text
+      if @server['Public_IP'].text != nil and @server['Public_IP'].text != ""
+        return @server['Public_IP'].text        
       else
         return @server['Private_IP'].text
       end

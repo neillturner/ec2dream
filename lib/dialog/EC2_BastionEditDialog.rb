@@ -25,7 +25,7 @@ class EC2_BastionEditDialog < FXDialogBox
     bastion_user = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "Bastion Password" )
-    bastion_user = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
+    bastion_password = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "Bastion SSH key" )
     bastion_ssh_key = FXTextField.new(frame1, 40, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_RIGHT)
@@ -82,7 +82,7 @@ class EC2_BastionEditDialog < FXDialogBox
     bastion_host.text = parm['bastion_host'] if parm['bastion_host'] != nil
     bastion_port.text = parm['bastion_port'] if parm['bastion_port'] != nil
     bastion_user.text = parm['bastion_user'] if parm['bastion_user'] != nil
-    bastion_password.text = parm['bastion_user'] if parm['bastion_password'] != nil
+    bastion_password.text = parm['bastion_password'] if parm['bastion_password'] != nil
     bastion_ssh_key.text = parm['bastion_ssh_key'] if parm['bastion_ssh_key'] != nil
     bastion_putty_key.text = parm['bastion_putty_key'] if parm['bastion_putty_key'] != nil
   end
