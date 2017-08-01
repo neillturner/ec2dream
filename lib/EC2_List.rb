@@ -844,6 +844,21 @@ class EC2_List
         end
       end
     else
+     if @ec2_main.settings.amazon and @config["sdk"] == "awssdk"
+      conn = $ec2_main.cloud.awssdk_conn(connection)
+      request = @config["request"]
+      if conn != nil
+         begin
+          cmd = "conn.#{request}"
+          puts "AWSSDK CMD #{cmd}"
+          response = eval(cmd)
+          puts "AWSSDK RESPONSE #{response}"
+          @data = eval(@config["response"])
+         rescue
+          puts "ERROR: #{request} #{$!}"
+        end         
+      end
+     else     
       conn = $ec2_main.cloud.conn(connection)
       request = @config["request"]
       if conn != nil
@@ -885,6 +900,7 @@ class EC2_List
           puts "ERROR: #{request} #{$!}"
         end
       end
+     end       
     end
     load_table_with_data()
     end

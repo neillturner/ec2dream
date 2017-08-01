@@ -38,6 +38,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency('rubyzip', '>= 1.0.0')
   spec.add_dependency('zip-zip')
   spec.add_dependency('gchartrb')
+  spec.add_dependency('aws-sdk', '>= 2.10.15')
   spec.add_dependency('fog-aws', '>= 0.10.0')
   spec.add_dependency('fog-azure', '~>  0.0.2')
   spec.add_dependency('fog-openstack', '~>  0.1.8')

@@ -1,10 +1,13 @@
 require 'fog/aws'
 require 'json'
+require 'aws-sdk'
+Aws.use_bundled_cert!
 
 class Amazon
 
   def initialize()
     @conn = {}
+    @aws_conn = {}
     data = File.read("#{ENV['EC2DREAM_HOME']}/lib/amazon_config.json")
     @config = JSON.parse(data)
     @session_token = nil
@@ -25,6 +28,198 @@ class Amazon
   def config
     @config
   end
+  
+  def awssdk_conn(type)
+    if @aws_conn[type] == nil
+      start_time = Time.new
+      ec2_url = $ec2_main.settings.get('EC2_URL')
+      region = "us-east-1"
+      if ec2_url != nil and ec2_url.length>0
+        sa = (ec2_url).split"."
+        if sa.size>1
+          region = (sa[1])
+          if region == "ec2"
+            region = sa[0][8..-1]
+          end
+        end
+        if region == "amazonaws"
+          region = "us-east-1"
+        end
+      end
+      ENV['AWS_REGION'] = region
+      begin
+        case type
+        when 'APIGateway'
+          @aws_conn[type] = Aws::APIGateway::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'AppStream'
+          @aws_conn[type] = Aws::AppStream::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'ApplicationAutoScaling'
+          @aws_conn[type] = Aws::ApplicationAutoScaling::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'ApplicationDiscoveryService'
+          @aws_conn[type] = Aws::ApplicationDiscoveryService::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'Athena'
+          @aws_conn[type] = Aws::Athena::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'AutoScaling'
+          @aws_conn[type] = Aws::AutoScaling::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'Batch'
+          @aws_conn[type] = Aws::Batch::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'Budgets'
+          @aws_conn[type] = Aws::Budgets::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'CloudDirectory'
+          @aws_conn[type] = Aws::CloudDirectory::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'CloudFormation'
+          @aws_conn[type] = Aws::CloudFormation::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'CloudFront'
+          @aws_conn[type] = Aws::CloudFront::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'CloudHSM'
+          @aws_conn[type] = Aws::CloudHSM::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'CloudSearch'
+          @aws_conn[type] = Aws::CloudSearch::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'CloudSearchDomain'
+          @aws_conn[type] = Aws::CloudSearchDomain::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'CloudTrail'
+          @aws_conn[type] = Aws::CloudTrail::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'CloudWatch'
+          @aws_conn[type] = Aws::CloudWatch::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'CloudWatchEvents'
+          @aws_conn[type] = Aws::CloudWatchEvents::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'CloudWatchLogs'
+          @aws_conn[type] = Aws::CloudWatchLogs::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'CodeBuild'
+          @aws_conn[type] = Aws::CodeBuild::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'CodeCommit'
+          @aws_conn[type] = Aws::CodeCommit::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'CodeDeploy'
+          @aws_conn[type] = Aws::CodeDeploy::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'CodePipeline'
+          @aws_conn[type] = Aws::CodePipeline::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'CodeStar'
+          @aws_conn[type] = Aws::CodeStar::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'CognitoIdentity'
+          @aws_conn[type] = Aws::CognitoIdentity::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'CognitoIdentityProvider'
+          @aws_conn[type] = Aws::CognitoIdentityProvider::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'ConfigService'
+          @aws_conn[type] = Aws::ConfigService::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'DataPipeline'
+          @aws_conn[type] = Aws::DataPipeline::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'DatabaseMigrationService'
+          @aws_conn[type] = Aws::DatabaseMigrationService::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'DirectConnect'
+          @aws_conn[type] = Aws::DirectConnect::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'DirectoryService'
+          @aws_conn[type] = Aws::DirectoryService::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'DynamoDB'
+          @aws_conn[type] = Aws::DynamoDB::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'EC2'
+          @aws_conn[type] = Aws::EC2::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'ECR'
+          @aws_conn[type] = Aws::ECR::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'ECS'
+          @aws_conn[type] = Aws::ECS::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'EFS'
+          @aws_conn[type] = Aws::EFS::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'EMR'
+          @aws_conn[type] = Aws::EMR::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'ElastiCache'
+          @aws_conn[type] = Aws::ElastiCache::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'ElasticBeanstalk'
+          @aws_conn[type] = Aws::ElasticBeanstalk::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'ElasticLoadBalancing'
+          @aws_conn[type] = Aws::ElasticLoadBalancing::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'ElasticLoadBalancingV2'
+          @aws_conn[type] = Aws::ElasticLoadBalancingV2::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'ElasticTranscoder'
+          @aws_conn[type] = Aws::ElasticTranscoder::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'ElasticsearchService'
+          @aws_conn[type] = Aws::ElasticsearchService::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'Firehose'
+          @aws_conn[type] = Aws::Firehose::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'Glacier'
+          @aws_conn[type] = Aws::Glacier::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'IAM'
+          @aws_conn[type] = Aws::IAM::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'ImportExport'
+          @aws_conn[type] = Aws::ImportExport::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'KMS'
+          @aws_conn[type] = Aws::KMS::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'Kinesis'
+          @aws_conn[type] = Aws::Kinesis::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'KinesisAnalytics'
+          @aws_conn[type] = Aws::KinesisAnalytics::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'Lambda'
+          @aws_conn[type] = Aws::Lambda::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'OpsWorks'
+          @aws_conn[type] = Aws::OpsWorks::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'Organizations'
+          @aws_conn[type] = Aws::Organizations::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'RDS'
+          @aws_conn[type] = Aws::RDS::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+         when 'Redshift'
+          @aws_conn[type] = Aws::Redshift::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'Rekognition'
+          @aws_conn[type] = Aws::Rekognition::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'ResourceGroupsTaggingAPI'
+          @aws_conn[type] = Aws::ResourceGroupsTaggingAPI::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'Route53'
+          @aws_conn[type] = Aws::Route53::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'Route53Domains'
+          @aws_conn[type] = Aws::Route53Domains::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'S3'
+          @aws_conn[type] = Aws::S3::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'SES'
+          @aws_conn[type] = Aws::SES::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'SMS'
+          @aws_conn[type] = Aws::SMS::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'SNS'
+          @aws_conn[type] = Aws::SNS::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'SQS'
+          @aws_conn[type] = Aws::SQS::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'SSM'
+          @aws_conn[type] = Aws::SSM::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'STS'
+          @aws_conn[type] = Aws::STS::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'SWF'
+          @aws_conn[type] = Aws::SWF::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'ServiceCatalog'
+          @aws_conn[type] = Aws::ServiceCatalog::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'Shield'
+          @aws_conn[type] = Aws::Shield::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'SimpleDB'
+          @aws_conn[type] = Aws::SimpleDB::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'Snowball'
+          @aws_conn[type] = Aws::Snowball::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'States'
+          @aws_conn[type] = Aws::States::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'StorageGateway'
+          @aws_conn[type] = Aws::StorageGateway::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'Support'
+          @aws_conn[type] = Aws::Support::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'WAF'
+          @aws_conn[type] = Aws::WAF::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'WAFRegional'
+          @aws_conn[type] = Aws::WAFRegional::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'WorkDocs'
+          @aws_conn[type] = Aws::WorkDocs::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'WorkSpaces'
+          @aws_conn[type] = Aws::WorkSpaces::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        when 'XRay'
+          @aws_conn[type] = Aws::XRay::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
+        else
+          nil
+          return
+        end
+      rescue
+        reset_connection
+        puts "AWSSDK ERROR: on #{type} connection to amazon #{$!}"
+        puts "check your keys in environment"
+      end
+
+    else
+      @aws_conn[type]
+    end
+  end
+  
 
   def conn(type)
     #Fog.mock!
@@ -118,6 +313,7 @@ class Amazon
     puts "Amazon.reset_connection"
     @user_role = nil
     @conn = {}
+    @aws_conn = {}
   end
 end
 

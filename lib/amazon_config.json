@@ -716,6 +716,34 @@
              "keys": []
        }
     },
+    "Lambda":{
+        "Functions":{
+           "sdk":"awssdk",
+           "request":"list_functions",
+           "name":"functions",
+           "response": "(response.to_h)[:functions]",
+           "response_code": 200,
+           "action": ["","", "","","","","","",""],
+           "icon": ["","","","","@csv","","","",""],
+           "tooltip":["","","",""," Csv Data ","","","",""],
+           "dialog":["","","","","","","","",""],
+           "dialog_parm": ["","","","","","","","",""],
+           "keys": []
+       },
+        "Event Source Mappings":{
+           "sdk":"awssdk",
+           "request": "list_event_source_mappings",
+           "name":"event_source_mappings",
+           "response": "(response.to_h)[:event_source_mappings]",
+           "response_code": 200,
+           "action": ["","", "","","","","","",""],
+           "icon": ["","","","","@csv","","","",""],
+           "tooltip":["","","",""," Csv Data ","","","",""],
+           "dialog":["","","","","","","","",""],
+           "dialog_parm": ["","","","","","","","",""],
+           "keys": []
+       }
+    },        
      "IAM":{
         "Access Keys":{
            "request":"list_access_keys",
