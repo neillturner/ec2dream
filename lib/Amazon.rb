@@ -127,7 +127,7 @@ class Amazon
           @aws_conn[type] = Aws::ElasticBeanstalk::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
         when 'ElasticLoadBalancing'
           @aws_conn[type] = Aws::ElasticLoadBalancing::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
-        when 'ElasticLoadBalancingV2'
+        when 'ALB'
           @aws_conn[type] = Aws::ElasticLoadBalancingV2::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
         when 'ElasticTranscoder'
           @aws_conn[type] = Aws::ElasticTranscoder::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)

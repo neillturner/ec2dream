@@ -244,6 +244,8 @@ class EC2_List
     @user_red.create
     @list = @ec2_main.makeIcon("list.png")
     @list.create
+    @map = @ec2_main.makeIcon("map.png")
+    @map.create
 
     tab1 = FXTabItem.new($ec2_main.tabBook, "  List  ")
     page1 = FXVerticalFrame.new($ec2_main.tabBook, LAYOUT_FILL, :padding => 0)
