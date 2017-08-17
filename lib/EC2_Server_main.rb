@@ -608,10 +608,10 @@ class EC2_Server
               error_message("Error - Unable to get Windows password", $!)
             end
           else
-            error_message("Error","EC2 SSH Private Key Specified in launch profile does not exist")
+            error_message("Error","EC2 SSH Private Key Specified in server profile does not exist")
           end
         else
-          error_message("Error","No EC2 SSH Private Key Specified in launch profile")
+          error_message("Error","No EC2 SSH Private Key Specified in server profile")
         end
       else
         error_message("Error","Server not running. Press refresh")
@@ -1797,7 +1797,10 @@ class EC2_Server
       else
         pk = @ec2_main.launch.get('EC2_SSH_Private_Key')
         if pk == nil or pk == ""
-          pk = @ec2_main.settings.get('EC2_SSH_PRIVATE_KEY')
+          kp = @ec2_main.settings.get('AMAZON_KEYPAIR')
+          if kp == nil or kp == "" or kp == @server['Key_Name'].text
+             pk = @ec2_main.settings.get('EC2_SSH_PRIVATE_KEY')
+          end
         end
       end
     elsif @type == "ops"

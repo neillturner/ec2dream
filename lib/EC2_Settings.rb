@@ -221,7 +221,11 @@ class EC2_Settings
         end
       end
     end
+    @settings['AMAZON_KEYPAIR_LABEL'] = FXLabel.new(frame1, "KEYPAIR" )
+    @settings['AMAZON_KEYPAIR_LABEL'].tipText = "AWS: OPTIONAL Your AWS Keypair name for the ssh private key."
+    @settings['AMAZON_KEYPAIR'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame1, "" )
+    FXLabel.new(frame1, "" )    
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "" )
@@ -415,6 +419,7 @@ class EC2_Settings
       load_panel('EC2_SSH_PRIVATE_KEY')
       load_panel('AMAZON_ACCOUNT_ID')
       load_panel('AMAZON_ROLE_ARN')
+      load_panel('AMAZON_KEYPAIR')
       load_panel('AMAZON_ACCESS_KEY_ID')
       load_panel('AMAZON_SECRET_ACCESS_KEY')
       load_panel('TEST_KITCHEN_PATH')
@@ -454,6 +459,7 @@ class EC2_Settings
         @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].text="KEY_LOCATION"
         @settings['AMAZON_ACCOUNT_ID_LABEL'].text=""
         @settings['AMAZON_ROLE_ARN_LABEL'].text=""
+        @settings['AMAZON_KEYPAIR_LABEL'].text=""
         @settings['EC2_URL_LABEL'].text="PROJECT"
         @settings['AVAILABILITY_ZONE_LABEL'].text = "ZONE"
         @settings['AMAZON_NICKNAME_TAG_LABEL'].text=""
@@ -463,6 +469,7 @@ class EC2_Settings
         @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].text="API KEY"
         @settings['AMAZON_ACCOUNT_ID_LABEL'].text=""
         @settings['AMAZON_ROLE_ARN_LABEL'].text=""
+        @settings['AMAZON_KEYPAIR_LABEL'].text=""
         @settings['EC2_URL_LABEL'].text=""
         @settings['AVAILABILITY_ZONE_LABEL'].text = ""
         @settings['AMAZON_NICKNAME_TAG_LABEL'].text=""
@@ -474,6 +481,7 @@ class EC2_Settings
         @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].text=""
         @settings['AMAZON_ACCOUNT_ID_LABEL'].text="SUBSCRIPTION ID"
         @settings['AMAZON_ROLE_ARN_LABEL'].text=""
+        @settings['AMAZON_KEYPAIR_LABEL'].text=""
         @settings['EC2_URL_LABEL'].text="API URL"
         @settings['AVAILABILITY_ZONE_LABEL'].text = ""
         @settings['AMAZON_NICKNAME_TAG_LABEL'].text=""
@@ -483,6 +491,7 @@ class EC2_Settings
         @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].text="SECRET_ACCESS_KEY"
         @settings['AMAZON_ACCOUNT_ID_LABEL'].text="ACCOUNT_ID"
         @settings['AMAZON_ROLE_ARN_LABEL'].text="ROLE_ARN"
+        @settings['AMAZON_KEYPAIR_LABEL'].text="KEYPAIR"
         @settings['EC2_URL_LABEL'].text="URL"
         @settings['AVAILABILITY_ZONE_LABEL'].text = "AVAILABILITY_ZONE"
         @settings['AMAZON_NICKNAME_TAG_LABEL'].text="NICKNAME TAG"
@@ -508,6 +517,7 @@ class EC2_Settings
     clear('EC2_SSH_PRIVATE_KEY')
     clear('AMAZON_ACCOUNT_ID')
     clear('AMAZON_ROLE_ARN')
+    clear('AMAZON_KEYPAIR')
     clear('AMAZON_ACCESS_KEY_ID')
     clear('AMAZON_SECRET_ACCESS_KEY')
     clear('TEST_KITCHEN_PATH')
@@ -657,6 +667,7 @@ class EC2_Settings
     save_setting("EC2_SSH_PRIVATE_KEY")
     save_setting("AMAZON_ACCOUNT_ID")
     save_setting("AMAZON_ROLE_ARN")
+    save_setting("AMAZON_KEYPAIR")
     save_setting("AMAZON_ACCESS_KEY_ID")
     save_setting("AMAZON_SECRET_ACCESS_KEY")
     save_setting("TEST_KITCHEN_PATH")
