@@ -34,14 +34,14 @@ Gem::Specification.new do |spec|
   spec.require_path = 'lib'
   spec.add_dependency('fxruby', '~> 1.6.33')
   if RUBY_VERSION >= '2.0'
-    s.add_dependency 'net-ssh', '>= 3'
+    spec.add_dependency 'net-ssh', '>= 3'
   else
-    s.add_dependency 'net-ssh', '~> 2.9'
+    spec.add_dependency 'net-ssh', '~> 2.9'
   end
   if RUBY_VERSION < '2.3'
-    s.add_dependency 'test-kitchen', '<= 1.16.0', '>= 1.4'
+    spec.add_dependency 'test-kitchen', '<= 1.16.0', '>= 1.4'
   else
-    s.add_dependency 'test-kitchen', '>= 1.17.0'
+    spec.add_dependency 'test-kitchen', '>= 1.17.0'
   end
   spec.add_dependency('rubyzip', '>= 1.0.0')
   spec.add_dependency('zip-zip')
