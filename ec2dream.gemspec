@@ -46,13 +46,12 @@ Gem::Specification.new do |spec|
   spec.add_dependency('rubyzip', '>= 1.0.0')
   spec.add_dependency('zip-zip')
   spec.add_dependency('gchartrb')
-  spec.add_dependency('aws-sdk', '>= 2.10.15')
-  spec.add_dependency('fog-aws', '>= 0.10.0')
-  spec.add_dependency('fog-azure', '~>  0.0.2')
-  spec.add_dependency('fog-openstack', '~>  0.1.8')
-  spec.add_dependency('fog-google', '~>  0.3.2')
-  spec.add_dependency('fog-softlayer', '~>  1.1.3')
-
+  spec.add_dependency('aws-sdk','~> 2.10.38')
+  spec.add_dependency('fog-aws')
+  spec.add_dependency('fog-azure')
+  spec.add_dependency('fog-openstack')
+  spec.add_dependency('fog-google')
+  spec.add_dependency('fog-softlayer')
   spec.summary = 'Build and Manage Cloud Servers'
   spec.description = 'Visual devops tool. Supports chef, puppet, ansible, salt, test-kitchen with Hosted Servers and Clouds including Amazon AWS, Azure, Google Compute Engines, Softlayer, Openstack'
     candidates = Dir.glob("{lib}/**/*") +  ['History.md', 'README.md', 'ec2dream.ico', 'ec2dream.bmp' , 'ca-bundle.crt', 'ec2dream.gemspec']
