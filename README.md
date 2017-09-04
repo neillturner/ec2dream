@@ -6,14 +6,14 @@ For installation see http://ec2dream.blogspot.co.uk/search/label/EC2Dream%20Inst
 
 
 EC2Dream is a graphic user interface that provides a 'single pane of glass' to do agile devops primarily on cloud servers using:
-*     Amazon AWS (and Cloud Formation)
-*     Azure
-*     Local and Hosted Servers
-*     Google Compute Engine
-*     IBM Softlayer
-*     Openstack Clouds
-*     Vagrant.
-*     Test Kitchen (Chef, Puppet, Ansible, Salt).
+*   Amazon AWS (and Cloud Formation)
+*   Azure
+*   Local and Hosted Servers
+*   Google Compute Engine
+*   IBM Softlayer
+*   Openstack Clouds
+*   Vagrant.
+*   Test Kitchen (Chef, Puppet, Ansible, Salt).
 
 All using the one client graphical interface and running on Windows, Linux or Mac OSX clients.
 (It is written in Ruby using the FXRuby graphics library and Fog cloud services library).
