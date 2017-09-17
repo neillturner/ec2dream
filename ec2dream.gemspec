@@ -34,11 +34,10 @@ Gem::Specification.new do |spec|
   spec.require_path = 'lib'
   spec.add_dependency('fxruby', '~> 1.6.33')
   spec.add_dependency 'net-ssh', '>= 3'
-  spec.add_dependency 'test-kitchen', '~> 1.4'
+#  spec.add_dependency 'test-kitchen', '~> 1.4'
   spec.add_dependency('rubyzip', '>= 1.0.0')
   spec.add_dependency('zip-zip')
   spec.add_dependency('gchartrb')
-  spec.add_dependency('aws-sdk','~> 2.10.38')
   spec.add_dependency('fog-aws')
   spec.add_dependency('fog-azure')
   spec.add_dependency('fog-openstack')

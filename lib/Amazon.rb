@@ -1,7 +1,5 @@
 require 'fog/aws'
 require 'json'
-require 'aws-sdk'
-Aws.use_bundled_cert!
 
 class Amazon
 
@@ -28,8 +26,15 @@ class Amazon
   def config
     @config
   end
-  
+
   def awssdk_conn(type)
+    begin
+      require 'aws-sdk'
+    rescue LoadError
+      puts "ERROR: Install rubygem aws-sdk #{$!}"
+      return
+    end
+    Aws.use_bundled_cert!
     if @aws_conn[type] == nil
       start_time = Time.new
       ec2_url = $ec2_main.settings.get('EC2_URL')
@@ -219,7 +224,7 @@ class Amazon
       @aws_conn[type]
     end
   end
-  
+
 
   def conn(type)
     #Fog.mock!
