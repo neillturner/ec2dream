@@ -53,6 +53,7 @@ class Amazon
       end
       ENV['AWS_REGION'] = region
       begin
+       if @access_key_id != nil and @access_key_id != ""
         case type
         when 'APIGateway'
           @aws_conn[type] = Aws::APIGateway::Client.new(access_key_id: @access_key_id, secret_access_key: @secret_access_key)
@@ -214,6 +215,169 @@ class Amazon
           nil
           return
         end
+       else
+        case type
+        when 'APIGateway'
+          @aws_conn[type] = Aws::APIGateway::Client.new()
+        when 'AppStream'
+          @aws_conn[type] = Aws::AppStream::Client.new()
+        when 'ApplicationAutoScaling'
+          @aws_conn[type] = Aws::ApplicationAutoScaling::Client.new()
+        when 'ApplicationDiscoveryService'
+          @aws_conn[type] = Aws::ApplicationDiscoveryService::Client.new()
+        when 'Athena'
+          @aws_conn[type] = Aws::Athena::Client.new()
+        when 'AutoScaling'
+          @aws_conn[type] = Aws::AutoScaling::Client.new()
+        when 'Batch'
+          @aws_conn[type] = Aws::Batch::Client.new()
+        when 'Budgets'
+          @aws_conn[type] = Aws::Budgets::Client.new()
+        when 'CloudDirectory'
+          @aws_conn[type] = Aws::CloudDirectory::Client.new()
+        when 'CloudFormation'
+          @aws_conn[type] = Aws::CloudFormation::Client.new()
+        when 'CloudFront'
+          @aws_conn[type] = Aws::CloudFront::Client.new()
+        when 'CloudHSM'
+          @aws_conn[type] = Aws::CloudHSM::Client.new()
+        when 'CloudSearch'
+          @aws_conn[type] = Aws::CloudSearch::Client.new()
+        when 'CloudSearchDomain'
+          @aws_conn[type] = Aws::CloudSearchDomain::Client.new()
+        when 'CloudTrail'
+          @aws_conn[type] = Aws::CloudTrail::Client.new()
+        when 'CloudWatch'
+          @aws_conn[type] = Aws::CloudWatch::Client.new()
+        when 'CloudWatchEvents'
+          @aws_conn[type] = Aws::CloudWatchEvents::Client.new()
+        when 'CloudWatchLogs'
+          @aws_conn[type] = Aws::CloudWatchLogs::Client.new()
+        when 'CodeBuild'
+          @aws_conn[type] = Aws::CodeBuild::Client.new()
+        when 'CodeCommit'
+          @aws_conn[type] = Aws::CodeCommit::Client.new()
+        when 'CodeDeploy'
+          @aws_conn[type] = Aws::CodeDeploy::Client.new()
+        when 'CodePipeline'
+          @aws_conn[type] = Aws::CodePipeline::Client.new()
+        when 'CodeStar'
+          @aws_conn[type] = Aws::CodeStar::Client.new()
+        when 'CognitoIdentity'
+          @aws_conn[type] = Aws::CognitoIdentity::Client.new()
+        when 'CognitoIdentityProvider'
+          @aws_conn[type] = Aws::CognitoIdentityProvider::Client.new()
+        when 'ConfigService'
+          @aws_conn[type] = Aws::ConfigService::Client.new()
+        when 'DataPipeline'
+          @aws_conn[type] = Aws::DataPipeline::Client.new()
+        when 'DatabaseMigrationService'
+          @aws_conn[type] = Aws::DatabaseMigrationService::Client.new()
+        when 'DirectConnect'
+          @aws_conn[type] = Aws::DirectConnect::Client.new()
+        when 'DirectoryService'
+          @aws_conn[type] = Aws::DirectoryService::Client.new()
+        when 'DynamoDB'
+          @aws_conn[type] = Aws::DynamoDB::Client.new()
+        when 'EC2'
+          @aws_conn[type] = Aws::EC2::Client.new()
+        when 'ECR'
+          @aws_conn[type] = Aws::ECR::Client.new()
+        when 'ECS'
+          @aws_conn[type] = Aws::ECS::Client.new()
+        when 'EFS'
+          @aws_conn[type] = Aws::EFS::Client.new()
+        when 'EMR'
+          @aws_conn[type] = Aws::EMR::Client.new()
+        when 'ElastiCache'
+          @aws_conn[type] = Aws::ElastiCache::Client.new()
+        when 'ElasticBeanstalk'
+          @aws_conn[type] = Aws::ElasticBeanstalk::Client.new()
+        when 'ElasticLoadBalancing'
+          @aws_conn[type] = Aws::ElasticLoadBalancing::Client.new()
+        when 'ALB'
+          @aws_conn[type] = Aws::ElasticLoadBalancingV2::Client.new()
+        when 'ElasticTranscoder'
+          @aws_conn[type] = Aws::ElasticTranscoder::Client.new()
+        when 'ElasticsearchService'
+          @aws_conn[type] = Aws::ElasticsearchService::Client.new()
+        when 'Firehose'
+          @aws_conn[type] = Aws::Firehose::Client.new()
+        when 'Glacier'
+          @aws_conn[type] = Aws::Glacier::Client.new()
+        when 'IAM'
+          @aws_conn[type] = Aws::IAM::Client.new()
+        when 'ImportExport'
+          @aws_conn[type] = Aws::ImportExport::Client.new()
+        when 'KMS'
+          @aws_conn[type] = Aws::KMS::Client.new()
+        when 'Kinesis'
+          @aws_conn[type] = Aws::Kinesis::Client.new()
+        when 'KinesisAnalytics'
+          @aws_conn[type] = Aws::KinesisAnalytics::Client.new()
+        when 'Lambda'
+          @aws_conn[type] = Aws::Lambda::Client.new()
+        when 'OpsWorks'
+          @aws_conn[type] = Aws::OpsWorks::Client.new()
+        when 'Organizations'
+          @aws_conn[type] = Aws::Organizations::Client.new()
+        when 'RDS'
+          @aws_conn[type] = Aws::RDS::Client.new()
+         when 'Redshift'
+          @aws_conn[type] = Aws::Redshift::Client.new()
+        when 'Rekognition'
+          @aws_conn[type] = Aws::Rekognition::Client.new()
+        when 'ResourceGroupsTaggingAPI'
+          @aws_conn[type] = Aws::ResourceGroupsTaggingAPI::Client.new()
+        when 'Route53'
+          @aws_conn[type] = Aws::Route53::Client.new()
+        when 'Route53Domains'
+          @aws_conn[type] = Aws::Route53Domains::Client.new()
+        when 'S3'
+          @aws_conn[type] = Aws::S3::Client.new()
+        when 'SES'
+          @aws_conn[type] = Aws::SES::Client.new()
+        when 'SMS'
+          @aws_conn[type] = Aws::SMS::Client.new()
+        when 'SNS'
+          @aws_conn[type] = Aws::SNS::Client.new()
+        when 'SQS'
+          @aws_conn[type] = Aws::SQS::Client.new()
+        when 'SSM'
+          @aws_conn[type] = Aws::SSM::Client.new()
+        when 'STS'
+          @aws_conn[type] = Aws::STS::Client.new()
+        when 'SWF'
+          @aws_conn[type] = Aws::SWF::Client.new()
+        when 'ServiceCatalog'
+          @aws_conn[type] = Aws::ServiceCatalog::Client.new()
+        when 'Shield'
+          @aws_conn[type] = Aws::Shield::Client.new()
+        when 'SimpleDB'
+          @aws_conn[type] = Aws::SimpleDB::Client.new()
+        when 'Snowball'
+          @aws_conn[type] = Aws::Snowball::Client.new()
+        when 'States'
+          @aws_conn[type] = Aws::States::Client.new()
+        when 'StorageGateway'
+          @aws_conn[type] = Aws::StorageGateway::Client.new()
+        when 'Support'
+          @aws_conn[type] = Aws::Support::Client.new()
+        when 'WAF'
+          @aws_conn[type] = Aws::WAF::Client.new()
+        when 'WAFRegional'
+          @aws_conn[type] = Aws::WAFRegional::Client.new()
+        when 'WorkDocs'
+          @aws_conn[type] = Aws::WorkDocs::Client.new()
+        when 'WorkSpaces'
+          @aws_conn[type] = Aws::WorkSpaces::Client.new()
+        when 'XRay'
+          @aws_conn[type] = Aws::XRay::Client.new()
+        else
+          nil
+          return
+        end
+       end
       rescue
         reset_connection
         puts "AWSSDK ERROR: on #{type} connection to amazon #{$!}"
@@ -245,28 +409,31 @@ class Amazon
         end
       end
       begin
-         if @user_role == nil and @role_arn != nil and @role_arn != ""
-           puts "Assuming Role #{@role_arn}"
-           @access_key_id = $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID')
-           @secret_access_key = $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY')
-           @role_arn = $ec2_main.settings.get('AMAZON_ROLE_ARN')
-           @session_token = nil
-           @conn['STS'] = Fog::AWS::STS.new(:aws_access_key_id => @access_key_id, :aws_secret_access_key => @secret_access_key )
-           response = @conn['STS'].assume_role('admin',@role_arn)
-           if response.status == 200
-             @user_role = response.body
-             #@user_role.each do |k, v|
-             #  puts "*** #{k} #{v}"
-             #end
-             @access_key_id = @user_role['AccessKeyId']
-             @secret_access_key = @user_role['SecretAccessKey']
-             @session_token = @user_role['SessionToken']
-           else
-             puts "ERROR: on sts connection to amazon #{response.status}"
-             puts "check your keys in environment"
-             return
-           end
-        end
+        # remove assume role support in favour of using fog credentials.
+        #if @user_role == nil and @role_arn != nil and @role_arn != ""
+        #  puts "Assuming Role #{@role_arn}"
+        #  @access_key_id = $ec2_main.settings.get('AMAZON_ACCESS_KEY_ID')
+        #  @secret_access_key = $ec2_main.settings.get('AMAZON_SECRET_ACCESS_KEY')
+        #  @role_arn = $ec2_main.settings.get('AMAZON_ROLE_ARN')
+        #  @session_token = nil
+        #  @conn['STS'] = Fog::AWS::STS.new(:aws_access_key_id => @access_key_id, :aws_secret_access_key => @secret_access_key, :region => 'eu-west-1' )
+        #  response = @conn['STS'].assume_role('admin',@role_arn)
+        #  if response.status == 200
+        #    @user_role = response.body
+        #    #@user_role.each do |k, v|
+        #    #  puts "*** #{k} #{v}"
+        #    #end
+        #    @access_key_id = @user_role['AccessKeyId']
+        #    @secret_access_key = @user_role['SecretAccessKey']
+        #    @session_token = @user_role['SessionToken']
+        #  else
+        #    puts "*** here ***"
+        #    puts "ERROR: on sts connection to amazon #{response.status}"
+        #    puts "check your keys in environment"
+        #    return
+        #  end
+        #end
+       if @access_key_id != nil and @access_key_id != ""
         case type
         when 'AutoScaling'
           @conn[type] = Fog::AWS::AutoScaling.new(:aws_access_key_id => @access_key_id, :aws_secret_access_key => @secret_access_key, :region => region, :aws_session_token => @session_token )
@@ -303,6 +470,43 @@ class Amazon
           nil
           return
         end
+       else
+        Fog.credential = @role_arn if @role_arn != nil or @role_arn != ""
+        case type
+        when 'AutoScaling'
+          @conn[type] = Fog::AWS::AutoScaling.new(:region => region)
+        when 'CDN'
+        when 'Compute'
+          @conn[type] = Fog::Compute.new(:provider=>'AWS', :region => region)
+        when 'CDN'
+          @conn[type] = Fog::CDN.new(:provider=>'AWS' )
+        when 'CloudFormation'
+          @conn[type] = Fog::AWS::CloudFormation.new(:region => region )
+        when 'CloudWatch'
+          @conn[type] = Fog::AWS::CloudWatch.new( :region => region)
+        when 'DNS'
+          @conn[type] = Fog::DNS.new(:provider=>'AWS',)
+        when 'ElasticBeanstalk'
+          @conn[type] = Fog::AWS::ElasticBeanstalk.new(:region => region)
+        when 'ELB'
+          @conn[type] = Fog::AWS::ELB.new(:region => region)
+        when 'IAM'
+          @conn[type] = Fog::AWS::IAM.new()
+        when 'RDS'
+          @conn[type] = Fog::AWS::RDS.new(:region => region )
+        when 'S3'
+          @conn[type] = Fog::Storage.new(:provider=>'AWS',:region => region)
+        when 'SES'
+          @conn[type] = Fog::AWS::SES.new()
+        when 'SNS'
+          @conn[type] = Fog::AWS::SNS.new()
+        when 'SQS'
+          @conn[type] = Fog::AWS::SQS.new()
+        else
+          nil
+          return
+        end
+       end
       rescue
         reset_connection
         puts "ERROR: on #{type} connection to amazon #{$!}"

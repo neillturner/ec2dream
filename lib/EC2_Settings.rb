@@ -127,12 +127,12 @@ class EC2_Settings
     @settings['AMAZON_ACCOUNT_ID_LABEL'].tipText = "AWS: OPTIONAL Your AWS 12 digit Account ID.\nAZURE: Subscription ID\nOPENSTACK: Openstack Project ID."
     @settings['AMAZON_ACCOUNT_ID'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame1, "" )
-    @settings['AMAZON_ROLE_ARN_LABEL'] = FXLabel.new(frame1, "ROLE_ARN" )
-    @settings['AMAZON_ROLE_ARN_LABEL'].tipText = "AWS: OPTIONAL Your AWS Role ARN for temporary security credentials."
+    @settings['AMAZON_ROLE_ARN_LABEL'] = FXLabel.new(frame1, "FOG_CREDENTIAL" )
+    @settings['AMAZON_ROLE_ARN_LABEL'].tipText = "AWS: OPTIONAL the credential to use in the ~/.fog file. Useful to use for generated temporary security credentials."
     @settings['AMAZON_ROLE_ARN'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame1, "" )
     @settings['EC2_URL_LABEL'] = FXLabel.new(frame1, "URL" )
-    @settings['EC2_URL_LABEL'].tipText = "AWS@ The Endpoint address for your AWS region.\nAZURE: Azure API URL\nOPENSTACK: the URL of the Openstack Identity Server. Should end in /tokens\nGOOGLE: Your Google Project"
+    @settings['EC2_URL_LABEL'].tipText = "AWS: The Endpoint address for your AWS region.\nAZURE: Azure API URL\nOPENSTACK: the URL of the Openstack Identity Server. Should end in /tokens\nGOOGLE: Your Google Project"
     @settings['EC2_URL'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     @settings['EC2_URL_BUTTON'] = FXButton.new(frame1, "", :opts => BUTTON_TOOLBAR)
     @settings['EC2_URL_BUTTON'].icon = @magnifier
@@ -225,7 +225,7 @@ class EC2_Settings
     @settings['AMAZON_KEYPAIR_LABEL'].tipText = "AWS: OPTIONAL Your AWS Keypair name for the ssh private key."
     @settings['AMAZON_KEYPAIR'] = FXTextField.new(frame1, 60, nil, 0, :opts => FRAME_SUNKEN|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN)
     FXLabel.new(frame1, "" )
-    FXLabel.new(frame1, "" )    
+    FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "" )
     FXLabel.new(frame1, "" )
@@ -490,7 +490,7 @@ class EC2_Settings
         @settings['AMAZON_ACCESS_KEY_ID_LABEL'].text="ACCESS_KEY"
         @settings['AMAZON_SECRET_ACCESS_KEY_LABEL'].text="SECRET_ACCESS_KEY"
         @settings['AMAZON_ACCOUNT_ID_LABEL'].text="ACCOUNT_ID"
-        @settings['AMAZON_ROLE_ARN_LABEL'].text="ROLE_ARN"
+        @settings['AMAZON_ROLE_ARN_LABEL'].text="FOG_CREDENTIAL"
         @settings['AMAZON_KEYPAIR_LABEL'].text="KEYPAIR"
         @settings['EC2_URL_LABEL'].text="URL"
         @settings['AVAILABILITY_ZONE_LABEL'].text = "AVAILABILITY_ZONE"
