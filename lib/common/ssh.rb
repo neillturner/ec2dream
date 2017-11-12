@@ -7,7 +7,8 @@ def ssh(server, address, user, private_key, putty_key, password, local_port=nil,
   if user == nil or user == ""
     user = "root"
   end
-  if RUBY_PLATFORM.index("mswin") != nil  or RUBY_PLATFORM.index("mingw") != nil
+  if (RUBY_PLATFORM.index("mswin") != nil  or RUBY_PLATFORM.index("mingw") != nil)
+   if  putty_key != nil and putty_key != ""
     if local_port != nil and local_port != ""
       puts "WARNING: accessing server maybe via ssh tunnel"
       s = "localhost"
@@ -27,6 +28,18 @@ def ssh(server, address, user, private_key, putty_key, password, local_port=nil,
     end
     puts c
     system(c)
+   else
+    if address_port != nil and address_port != ""
+      c = "cmd.exe /c \@start \"\" \"ssh\" -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o LogLevel=VERBOSE -i "+"'"+private_key+"'"+" -p #{address_port} #{user}@#{s}"
+    elsif local_port != nil and local_port != ""
+      puts "WARNING: accessing server via ssh tunnel"
+      c = "cmd.exe /c \@start \"\" \"ssh\" -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o LogLevel=VERBOSE -i "+"'"+private_key+"'"+" -p #{local_port} #{user}@localhost"
+    else
+      c = "cmd.exe /c \@start \"\" \"ssh\" -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o LogLevel=VERBOSE -i "+"'"+private_key+"'"+" #{user}@#{s}"
+    end
+    puts c
+    system(c)
+   end
   else
     # TO DO add localhost for non-windows platforms.
     te = "xterm"

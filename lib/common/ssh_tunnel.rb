@@ -24,17 +24,29 @@ def ssh_tunnel(server, address, user, private_key, putty_key, password, address_
   end
   if RUBY_PLATFORM.index("mswin") != nil  or RUBY_PLATFORM.index("mingw") != nil
     puts "WARNING: Starting ssh tunnel"
-    if putty_key  != nil and putty_key != ""
-      c = "cmd.exe /c \@start \"ssh tunnel port #{local_port}\" /b \""+ENV['EC2DREAM_HOME']+"/putty/putty.exe\" -ssh #{bastion_host} -i "+"\""+bastion_putty_key+"\""+" -l #{bastion_user} -L #{local_port}:#{s}:#{address_port}"
+    if  bastion_putty_key != nil and bastion_putty_key != ""
+     c = "cmd.exe /c \@start \"ssh tunnel port #{local_port}\" /b \""+ENV['EC2DREAM_HOME']+"/putty/putty.exe\" -ssh #{bastion_host} -i "+"\""+bastion_putty_key+"\""+" -l #{bastion_user} -L #{local_port}:#{s}:#{address_port}"
+     if bastion_port != nil and bastion_port != ""
+       c = "#{c} -P #{bastion_port}"
+     end
+     puts c
+     system(c)
+    elsif bastion_private_key != nil and bastion_private_key != nil
+     c = "cmd.exe /c \@start \"ssh tunnel port #{local_port}\" \"ssh\" -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o LogLevel=VERBOSE -i "+"'"+bastion_private_key+"'"+" -p #{local_port} #{user}@localhost"
+     if bastion_port != nil and bastion_port != ""
+       c = "#{c} -P #{bastion_port}"
+     end
+     puts c
+     system(c)
     else
-      puts "WARNING: no Putty Private Key specified"
-      c = "cmd.exe /c \@start \"ssh tunnel port #{local_port}\" /b \""+ENV['EC2DREAM_HOME']+"/putty/putty.exe\" -ssh #{bastion_host} -pw "+"\""+bastion_password+"\""+" -l #{bastion_user} -L #{local_port}:#{s}:#{address_port}"
+     puts "WARNING: no Private Key specified"
+     c = "cmd.exe /c \@start \"ssh tunnel port #{local_port}\" /b \""+ENV['EC2DREAM_HOME']+"/putty/putty.exe\" -ssh #{bastion_host} -pw "+"\""+bastion_password+"\""+" -l #{bastion_user} -L #{local_port}:#{s}:#{address_port}"
+     if bastion_port != nil and bastion_port != ""
+       c = "#{c} -P #{bastion_port}"
+     end
+     puts c
+     system(c)
     end
-    if bastion_port != nil and bastion_port != ""
-      c = "#{c} -P #{bastion_port}"
-    end
-    puts c
-    system(c)
   else
     te = "xterm"
     if $ec2_main.settings.get_system('TERMINAL_EMULATOR') != nil and $ec2_main.settings.get_system('TERMINAL_EMULATOR') != ""
